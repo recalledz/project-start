@@ -373,6 +373,16 @@ function animateCardHit(card) {
   w.addEventListener("animationend", () => w.classList.remove("hit-animate"), { once: true });
 }
 
+function showDamageFloat(card, amount) {
+  const w = card.wrapperElement;
+  if (!w) return;
+  const dmg = document.createElement("div");
+  dmg.classList.add("damage-float");
+  dmg.textContent = `-${amount}`;
+  w.appendChild(dmg);
+  dmg.addEventListener("animationend", () => dmg.remove(), { once: true });
+}
+
 
 
 //=========stage functions===========
@@ -559,6 +569,7 @@ function cDealerDamage(damageAmount = null, ability = null, source = "dealer") {
   updateDeckDisplay()
   if (card.wrapperElement) {
     animateCardHit(card)
+    showDamageFloat(card, dDamage)
   }
   // if it’s dead, remove it
   if (card.currentHp === 0) {

@@ -465,6 +465,7 @@ body {
 }
 
 .card-wrapper {
+  position: relative;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 .card-wrapper:hover {
@@ -616,5 +617,22 @@ body {
   border-radius: 8px;
   border: 2px solid grey;
   object-fit: cover;
+}
+
+.damage-float {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, 0);
+  color: red;
+  font-weight: bold;
+  pointer-events: none;
+  text-shadow: 0 0 2px #000;
+  animation: damage-float 0.8s ease-out forwards;
+}
+
+@keyframes damage-float {
+  from { opacity: 1; transform: translate(-50%, 0); }
+  to { opacity: 0; transform: translate(-50%, -20px); }
 }
 
