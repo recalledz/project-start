@@ -3,18 +3,49 @@
 let initialized = false;
 let app = null;
 
+async function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    const el = document.createElement("script");
+    el.src = src;
+    el.onload = resolve;
+    el.onerror = reject;
+    document.head.appendChild(el);
+  });
+}
+
+async function ensurePixiAvailable() {
+  if (typeof PIXI !== "undefined" && PIXI?.filters?.GlowFilter) return;
+
+  const localPixi = [
+    "./pixi.min.js",
+    "./pixi-filters.min.js"
+  ];
+  const cdnPixi = [
+    "https://cdn.jsdelivr.net/npm/pixi.js@6.5.8/dist/browser/pixi.min.js",
+    "https://cdn.jsdelivr.net/npm/pixi-filters@4.2.2/dist/pixi-filters.min.js"
+  ];
+
+  for (let i = 0; i < localPixi.length; i++) {
+    try {
+      await loadScript(localPixi[i]);
+    } catch {
+      await loadScript(cdnPixi[i]);
+    }
+  }
+}
+
 
 export async function initStarChart(containerId = "star-chart-container") {
   if (initialized) return;
-  // Guard against running in a non-browser environment or without PIXI loaded
 
-  if (
-    typeof window === "undefined" ||
-    typeof document === "undefined" ||
-    typeof PIXI === "undefined" ||
-    !PIXI.filters ||
-    !PIXI.filters.GlowFilter
-  ) {
+  if (typeof window === "undefined" || typeof document === "undefined") {
+    console.warn("Not running in browser; skipping star chart initialization.");
+    return;
+  }
+
+  await ensurePixiAvailable();
+
+  if (typeof PIXI === "undefined" || !PIXI.filters || !PIXI.filters.GlowFilter) {
     console.warn("Pixi.js unavailable; skipping star chart initialization.");
     return;
   }
