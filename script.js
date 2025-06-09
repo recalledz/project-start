@@ -5,6 +5,14 @@ import { Boss, BossTemplates } from "./boss.js";
 import { AbilityRegistry } from "./dealerabilities.js";
 import { AllJokerTemplates } from "./jokerTemplates.js";
 import { initStarChart } from "./starChart.js";
+import { JSDOM } from "jsdom";
+
+if (typeof window === "undefined" || typeof document === "undefined") {
+    const dom = new JSDOM("<!doctype html><html><body></body></html>");
+    globalThis.window = dom.window;
+    globalThis.document = dom.window.document;
+    globalThis.performance = dom.window.performance;
+}
 
 
 let drawnCards = [];
