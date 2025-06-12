@@ -244,12 +244,33 @@ body {
 .dealerContainer > .dealerLifeDisplay {
   justify-self: center;
 }
+#stageHud {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  color: #d4af37;
+  z-index: 1000;
+}
+
+#stageHud #stage,
+#stageHud #kills {
+  font-size: 0.8rem;
+  margin-bottom: 2px;
+}
+
 #stage {
   justify-self: left;
-  font-size: 20px;
-  color: #2c252b;
-  text-shadow: 0 0 5px black;
-  margin-bottom: 5px
+  font-size: inherit;
+  color: inherit;
+  text-shadow: none;
+  margin: 0;
+}
+
+#kills {
+  color: inherit;
 }
 
 #statsSummary {
