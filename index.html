@@ -35,9 +35,10 @@
     </div>
 
     <!---tabs container--->
-    <div class=tabsContainer>
+    <div class="tabsContainer">
       <button class="mainTabButton">main</button>
       <button class="deckTabButton">deck</button>
+      <button class="upgradesTabButton">upgrades</button>
       <button class="starChartTabButton">star chart</button>
       <button class="playerStatsTabButton">stats</button>
       <button class="worldTabButton">worlds</button>
@@ -93,17 +94,6 @@
             </div>
           </div>
         </div>
-        <div class="vignette upgrades">
-          <button class="vignette-toggle">Upgrades</button>
-          <div class="casino-section vignette-content">
-            <div class="upgrade-list">
-              <div class="upgrade-item">
-                <span>Test Upgrade</span>
-                <button>Buy</button>
-              </div>
-            </div>
-          </div>
-        </div>
         <div class="vignette log">
           <button class="vignette-toggle">Log</button>
           <div class="casino-section vignette-content" id="log-panel">
@@ -153,6 +143,25 @@
         <div class="vignette-content">
           <div class="jokerContainer"></div>
         </div>
+      </div>
+    </div>
+    <div class="upgradesTab">
+      <div id="upgradePowerDisplay">Upgrade Power: 0</div>
+      <div class="bar-upgrades">
+        <div class="bar-upgrade" data-key="damage">
+          <div class="bar-label">Damage Lv. <span class="level">0</span> (<span class="mult">×1.0</span>)</div>
+          <div class="bar"><div class="fill"></div></div>
+          <button class="invest">Invest</button>
+        </div>
+        <div class="bar-upgrade" data-key="maxHp">
+          <div class="bar-label">Max HP Lv. <span class="level">0</span> (<span class="mult">×1.0</span>)</div>
+          <div class="bar"><div class="fill"></div></div>
+          <button class="invest">Invest</button>
+        </div>
+      </div>
+      <div class="card-upgrades">
+        <h4>Card Upgrades</h4>
+        <div class="card-upgrade-slots"></div>
       </div>
     </div>
     <div class="starChartTab">

@@ -32,6 +32,7 @@ const cardBackImages = {
 // resources and progress trackers
 let cash = 0;
 let cardPoints = 0;
+let upgradePower = 0;
 let currentEnemy = null;
 
 // Persistent player stats affecting combat and rewards
@@ -54,7 +55,9 @@ const stats = {
   playerShield: 0,
   abilityCooldownReduction: 0,
   jokerCooldownReduction: 0,
-  redrawCooldownReduction: 0
+  redrawCooldownReduction: 0,
+  barMaxHpMultiplier: 1,
+  barDamageMultiplier: 1
 };
 
 const systems = {
@@ -235,6 +238,77 @@ const upgrades = {
   }
 };
 
+// New bar-based upgrade system
+const barUpgrades = {
+  damage: {
+    level: 0,
+    points: 0,
+    multiplier: 1,
+    cost: 1
+  },
+  maxHp: {
+    level: 0,
+    points: 0,
+    multiplier: 1,
+    cost: 1
+  }
+};
+
+const cardUpgradePool = {
+  healOnRedraw: { rarity: 'common', level: 0 },
+  hpPerKill: { rarity: 'common', level: 0 },
+  attackSpeedReduction: { rarity: 'uncommon', level: 0 },
+  redrawCooldownReduction: { rarity: 'rare', level: 0 },
+  extraCardSlot: { rarity: 'super-rare', level: 0 }
+};
+
+let activeCardUpgradeSlots = [];
+
+function generateCardUpgradeSlots() {
+  const options = Object.keys(cardUpgradePool);
+  const picks = [];
+  while (options.length > 0 && picks.length < 2) {
+    const idx = Math.floor(Math.random() * options.length);
+    picks.push(options.splice(idx, 1)[0]);
+  }
+  activeCardUpgradeSlots = picks;
+}
+
+function renderCardUpgradeSlots() {
+  const container = document.querySelector('.card-upgrade-slots');
+  if (!container) return;
+  container.innerHTML = '';
+  activeCardUpgradeSlots.forEach(key => {
+    const info = cardUpgradePool[key];
+    const div = document.createElement('div');
+    div.textContent = `${key} Lv.${info.level}`;
+    container.appendChild(div);
+  });
+}
+
+function applyCardUpgrade(key) {
+  const up = cardUpgradePool[key];
+  if (!up) return;
+  up.level += 1;
+  switch (key) {
+    case 'healOnRedraw':
+    case 'hpPerKill':
+      stats.hpPerKill += 1;
+      break;
+    case 'attackSpeedReduction':
+      stats.attackSpeed = Math.max(500, stats.attackSpeed - 100);
+      break;
+    case 'redrawCooldownReduction':
+      stats.redrawCooldownReduction += 0.05;
+      break;
+    case 'extraCardSlot':
+      stats.cardSlots += 1;
+      break;
+  }
+  renderCardUpgradeSlots();
+  renderPlayerStats(stats);
+}
+
 // Utility to colorize the enemy icon based on stage level
 function getDealerIconStyle(stage) {
   const capped = Math.max(1, Math.min(10, stage));
@@ -301,11 +375,13 @@ let lastWorldPct = 0;
 
 const mainTabButton = document.getElementsByClassName("mainTabButton")[0];
 const deckTabButton = document.getElementsByClassName("deckTabButton")[0];
+const upgradesTabButton = document.getElementsByClassName("upgradesTabButton")[0];
 const starChartTabButton = document.getElementsByClassName("starChartTabButton")[0];
 const playerStatsTabButton = document.getElementsByClassName("playerStatsTabButton")[0];
 const worldTabButton = document.getElementsByClassName("worldTabButton")[0];
 const mainTab = document.querySelector(".mainTab");
 const deckTab = document.querySelector(".deckTab");
+const upgradesTab = document.querySelector(".upgradesTab");
 const starChartTab = document.querySelector(".starChartTab");
 const playerStatsTab = document.querySelector(".playerStatsTab");
 const worldsTab = document.querySelector(".worldsTab");
@@ -314,6 +390,7 @@ const tooltip = document.getElementById("tooltip");
 function hideTab() {
   mainTab.style.display = "none";
   deckTab.style.display = "none";
+  if (upgradesTab) upgradesTab.style.display = "none";
   if (starChartTab) starChartTab.style.display = "none";
   if (playerStatsTab) playerStatsTab.style.display = "none";
   if (worldsTab) worldsTab.style.display = "none";
@@ -332,6 +409,13 @@ mainTabButton.addEventListener("click", () => {
 deckTabButton.addEventListener("click", () => {
   showTab(deckTab);
 });
+
+if (upgradesTabButton) {
+  upgradesTabButton.addEventListener("click", () => {
+    renderBarUpgrades();
+    showTab(upgradesTab);
+  });
+}
 
 if (starChartTabButton) {
   starChartTabButton.addEventListener("click", () => {
@@ -361,6 +445,15 @@ function initVignetteToggles() {
       const v = btn.parentElement;
       v.classList.toggle("open");
     });
+  });
+}
+
+function initBarUpgradeEvents() {
+  document.querySelectorAll('.bar-upgrade .invest').forEach(btn => {
+    const wrapper = btn.closest('.bar-upgrade');
+    if (!wrapper) return;
+    const key = wrapper.dataset.key;
+    btn.addEventListener('click', () => investBarUpgrade(key));
   });
 }
 
@@ -443,6 +536,49 @@ function purchaseUpgrade(key) {
   }
   renderUpgrades();
   updateDrawButton();
+  renderPlayerStats(stats);
+}
+
+function applyBarEffects() {
+  stats.barDamageMultiplier = barUpgrades.damage.multiplier;
+  stats.barMaxHpMultiplier = barUpgrades.maxHp.multiplier;
+  stats.damageMultiplier =
+    stats.upgradeDamageMultiplier * stats.barDamageMultiplier;
+}
+
+function renderBarUpgrades() {
+  const container = document.querySelector('.bar-upgrades');
+  if (!container) return;
+  container.querySelectorAll('.bar-upgrade').forEach(el => {
+    const key = el.dataset.key;
+    const data = barUpgrades[key];
+    if (!data) return;
+    el.querySelector('.level').textContent = data.level;
+    el.querySelector('.mult').textContent = `×${data.multiplier.toFixed(1)}`;
+    const threshold = 10 + data.level * 10;
+    const pct = Math.min(1, data.points / threshold) * 100;
+    el.querySelector('.fill').style.width = pct + '%';
+    const btn = el.querySelector('.invest');
+    if (btn) btn.disabled = upgradePower < data.cost;
+  });
+  const powerDisplay = document.getElementById('upgradePowerDisplay');
+  if (powerDisplay) powerDisplay.textContent = `Upgrade Power: ${upgradePower}`;
+}
+
+function investBarUpgrade(key) {
+  const data = barUpgrades[key];
+  if (!data || upgradePower < data.cost) return;
+  upgradePower -= data.cost;
+  data.points += 1;
+  const threshold = 10 + data.level * 10;
+  if (data.points >= threshold) {
+    data.points -= threshold;
+    data.level += 1;
+    data.multiplier = 1 + 9 * (1 - Math.exp(-data.level / 50));
+  }
+  data.cost += 1;
+  applyBarEffects();
+  renderBarUpgrades();
   renderPlayerStats(stats);
 }
 //=========card tab==========
@@ -541,8 +677,13 @@ document.addEventListener("DOMContentLoaded", () => {
   // now the DOM is in, and lucide.js has run, so window.lucide is defined
   renderDealerCard();
   initVignetteToggles();
+  initBarUpgradeEvents();
   Object.values(upgrades).forEach(u => u.effect(stats));
   renderUpgrades();
+  renderBarUpgrades();
+  generateCardUpgradeSlots();
+  renderCardUpgradeSlots();
+  applyBarEffects();
   renderJokers();
   renderPlayerAttackBar();
   requestAnimationFrame(gameLoop);
@@ -1039,6 +1180,9 @@ function onBossDefeat(boss) {
 
   playerStats.totalBossKills += 1;
   renderGlobalStats();
+
+  generateCardUpgradeSlots();
+  renderCardUpgradeSlots();
 
   healCardsOnKill();
   nextWorld();
@@ -1719,7 +1863,10 @@ return cash;
 function updatePlayerStats() {
 // Reset base stats
 stats.pDamage = 0;
-stats.damageMultiplier = stats.upgradeDamageMultiplier;
+stats.barDamageMultiplier = barUpgrades.damage.multiplier;
+stats.barMaxHpMultiplier = barUpgrades.maxHp.multiplier;
+stats.damageMultiplier =
+  stats.upgradeDamageMultiplier * stats.barDamageMultiplier;
 stats.pRegen = 0;
 stats.cashMulti = 1;
 stats.points = 0;
@@ -1776,6 +1923,8 @@ stats,
 stageData,
 cash,
 cardPoints,
+  upgradePower,
+  barUpgrades,
 deck: deckData,
   upgrades: upgradeLevels,
   unlockedJokers: unlockedJokers.map(j => j.id),
@@ -1801,6 +1950,12 @@ try {
 const state = JSON.parse(json);
 cash = state.cash || 0;
 cardPoints = state.cardPoints || 0;
+upgradePower = state.upgradePower || 0;
+if (state.barUpgrades) {
+  Object.entries(state.barUpgrades).forEach(([k, v]) => {
+    if (barUpgrades[k]) Object.assign(barUpgrades[k], v);
+  });
+}
 Object.assign(stats, state.stats || {});
 systems.manaUnlocked = (state.stats && state.stats.maxMana > 0);
 Object.assign(stageData, state.stageData || {});
@@ -1855,12 +2010,16 @@ if (j) unlockedJokers.push(j);
 Object.values(upgrades).forEach(u => u.effect(stats));
 
 cashDisplay.textContent = `Cash: $${cash}`;
-cardPointsDisplay.textContent = `Card Points: ${cardPoints}`;
+  cardPointsDisplay.textContent = `Card Points: ${cardPoints}`;
 
-renderUpgrades();
-renderJokers();
-updateUpgradeButtons();
-renderPlayerStats(stats);
+  renderUpgrades();
+  renderBarUpgrades();
+  generateCardUpgradeSlots();
+  renderCardUpgradeSlots();
+  renderJokers();
+  updateUpgradeButtons();
+  applyBarEffects();
+  renderPlayerStats(stats);
   renderStageInfo();
   renderGlobalStats();
   renderWorldsMenu();
@@ -2049,13 +2208,18 @@ currentEnemy.onDefeat?.();
 logEnemy: () => console.log(currentEnemy),
 advanceStage: () => nextStage(),
 
-giveCash: () => {
-const amount =
-parseInt(document.getElementById("debugCash").value) || 0;
-cash += amount;
-cashDisplay.textContent = `Cash: $${cash}`;
-updateUpgradeButtons();
-},
+  giveCash: () => {
+    const amount =
+      parseInt(document.getElementById("debugCash").value) || 0;
+    cash += amount;
+    cashDisplay.textContent = `Cash: $${cash}`;
+    updateUpgradeButtons();
+  },
+  giveUpgradePower: amount => {
+    upgradePower += amount || 1;
+    renderBarUpgrades();
+  },
+  drawUpgradeCard: key => applyCardUpgrade(key),
 
 setStageWorld: () => {
 const stage = parseInt(document.getElementById("debugStage").value);

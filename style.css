@@ -986,3 +986,57 @@ body {
     font-size: 12px;
     margin-left: 4px;
 }
+
+/* Upgrades tab */
+.upgradesTab {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background-color: #7a6699;
+    padding: 5px;
+}
+
+.bar-upgrade {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-bottom: 6px;
+}
+
+.bar-upgrade .bar {
+    position: relative;
+    width: 100%;
+    height: 12px;
+    background: #222;
+    border: 1px solid #555;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.bar-upgrade .fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 0;
+    background: linear-gradient(90deg, #4caf50, #81c784);
+}
+
+.bar-upgrade .invest {
+    width: 60px;
+    font-size: 0.6rem;
+    padding: 2px;
+}
+
+.card-upgrade-slots {
+    display: flex;
+    gap: 6px;
+}
+
+.card-upgrade-slots div {
+    padding: 4px;
+    border: 1px solid #333;
+    background: #ccc;
+    font-size: 0.6rem;
+    border-radius: 4px;
+}
