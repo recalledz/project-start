@@ -38,6 +38,7 @@ let currentEnemy = null;
 // Persistent player stats affecting combat and rewards
 const stats = {
   points: 0,
+  upgradePower: 0,
   pDamage: 0,
   pRegen: 0,
   cashMulti: 1,
@@ -61,6 +62,15 @@ const stats = {
 const systems = {
   manaUnlocked: false
 };
+
+const barUpgrades = {
+  damage: { level: 0, progress: 0, multiplier: 1 },
+  maxHp: { level: 0, progress: 0, multiplier: 1 }
+};
+
+function computeBarMultiplier(level) {
+  return 1 + (level / (level + 20)) * 9;
+}
 
 // Data for the current stage and world progression
 let stageData = {
@@ -301,11 +311,13 @@ const deckTabButton = document.getElementsByClassName("deckTabButton")[0];
 const starChartTabButton = document.getElementsByClassName("starChartTabButton")[0];
 const playerStatsTabButton = document.getElementsByClassName("playerStatsTabButton")[0];
 const worldTabButton = document.getElementsByClassName("worldTabButton")[0];
+const upgradesTabButton = document.getElementsByClassName("upgradesTabButton")[0];
 const mainTab = document.querySelector(".mainTab");
 const deckTab = document.querySelector(".deckTab");
 const starChartTab = document.querySelector(".starChartTab");
 const playerStatsTab = document.querySelector(".playerStatsTab");
 const worldsTab = document.querySelector(".worldsTab");
+const upgradesTab = document.querySelector(".upgradesTab");
 const tooltip = document.getElementById("tooltip");
 
 function hideTab() {
@@ -314,6 +326,7 @@ function hideTab() {
   if (starChartTab) starChartTab.style.display = "none";
   if (playerStatsTab) playerStatsTab.style.display = "none";
   if (worldsTab) worldsTab.style.display = "none";
+  if (upgradesTab) upgradesTab.style.display = "none";
 }
 
 function showTab(tab) {
@@ -346,6 +359,12 @@ if (worldTabButton) {
   worldTabButton.addEventListener("click", () => {
     renderWorldsMenu();
     showTab(worldsTab);
+  });
+}
+if (upgradesTabButton) {
+  upgradesTabButton.addEventListener("click", () => {
+    renderBarUpgrades();
+    showTab(upgradesTab);
   });
 }
 
@@ -442,6 +461,68 @@ function purchaseUpgrade(key) {
   renderUpgrades();
   updateDrawButton();
   renderPlayerStats(stats);
+}
+
+function updateUpgradePowerDisplay() {
+  const el = document.getElementById('upgradePowerDisplay');
+  if (el) el.textContent = `Upgrade Power: ${Math.floor(stats.upgradePower)}`;
+}
+
+function updateBarUI(key) {
+  const bar = barUpgrades[key];
+  const wrapper = document.querySelector(`.bar-upgrade[data-key="${key}"]`);
+  if (!wrapper) return;
+  const fill = wrapper.querySelector('.bar-fill');
+  const info = wrapper.querySelector('.bar-info');
+  const req = 10 + bar.level * 5;
+  if (fill) fill.style.width = `${(bar.progress / req) * 100}%`;
+  if (info) info.textContent = `Lv. ${bar.level} ×${bar.multiplier.toFixed(2)}`;
+}
+
+function investBarUpgrade(key) {
+  const bar = barUpgrades[key];
+  const cost = 1 + Math.floor(bar.level * 0.5);
+  if (stats.upgradePower < cost) return;
+  stats.upgradePower -= cost;
+  bar.progress += 1;
+  const req = 10 + bar.level * 5;
+  if (bar.progress >= req) {
+    bar.progress -= req;
+    bar.level += 1;
+  }
+  bar.multiplier = computeBarMultiplier(bar.level);
+  updateBarUI(key);
+  updateUpgradePowerDisplay();
+  updatePlayerStats();
+}
+
+function renderBarUpgrades() {
+  const container = document.querySelector('.bar-upgrades');
+  if (!container) return;
+  container.innerHTML = '';
+  Object.entries(barUpgrades).forEach(([key, bar]) => {
+    const row = document.createElement('div');
+    row.classList.add('bar-upgrade');
+    row.dataset.key = key;
+    const label = document.createElement('div');
+    label.classList.add('bar-label');
+    label.textContent = key === 'damage' ? 'Damage' : 'Max HP';
+    const barEl = document.createElement('div');
+    barEl.classList.add('bar');
+    const fill = document.createElement('div');
+    fill.classList.add('bar-fill');
+    barEl.appendChild(fill);
+    const info = document.createElement('div');
+    info.classList.add('bar-info');
+    const btn = document.createElement('button');
+    btn.classList.add('bar-invest-btn');
+    btn.textContent = 'Invest';
+    btn.addEventListener('click', () => investBarUpgrade(key));
+    row.append(label, barEl, info, btn);
+    container.appendChild(row);
+    updateBarUI(key);
+  });
+  updateUpgradePowerDisplay();
 }
 //=========card tab==========
 
@@ -541,6 +622,8 @@ document.addEventListener("DOMContentLoaded", () => {
   initVignetteToggles();
   Object.values(upgrades).forEach(u => u.effect(stats));
   renderUpgrades();
+  renderBarUpgrades();
+  updateUpgradePowerDisplay();
   renderJokers();
   renderPlayerAttackBar();
   requestAnimationFrame(gameLoop);
@@ -1022,6 +1105,8 @@ function onDealerDefeat() {
   cardXp(stageData.stage ** 1.5 * stageData.world);
   cashOut();
   healCardsOnKill();
+  stats.upgradePower += 1;
+  updateUpgradePowerDisplay();
   stageData.kills += 1;
   playerStats.stageKills[stageData.stage] = stageData.kills;
   killsDisplay.textContent = `Kills: ${stageData.kills}`;
@@ -1051,6 +1136,8 @@ function onBossDefeat(boss) {
   renderGlobalStats();
 
   healCardsOnKill();
+  stats.upgradePower += 5;
+  updateUpgradePowerDisplay();
   nextWorld();
   renderWorldsMenu();
   fightBossBtn.style.display = "none";
@@ -1742,9 +1829,10 @@ return cash;
 
 // Recalculate combat stats based on cards currently drawn
 function updatePlayerStats() {
-// Reset base stats
-stats.pDamage = 0;
-stats.damageMultiplier = stats.upgradeDamageMultiplier;
+  // Reset base stats
+  stats.pDamage = 0;
+  stats.damageMultiplier =
+    stats.upgradeDamageMultiplier * barUpgrades.damage.multiplier;
 stats.pRegen = 0;
 stats.cashMulti = 1;
 stats.points = 0;
@@ -1796,17 +1884,18 @@ const upgradeUnlocked = Object.fromEntries(
 Object.entries(upgrades).map(([k, u]) => [k, u.unlocked])
 );
 
-const state = {
-stats,
-stageData,
-cash,
-cardPoints,
-deck: deckData,
-  upgrades: upgradeLevels,
-  unlockedJokers: unlockedJokers.map(j => j.id),
-  playerStats,
-  worldProgress
-};
+  const state = {
+    stats,
+    stageData,
+    cash,
+    cardPoints,
+    deck: deckData,
+    upgrades: upgradeLevels,
+    unlockedJokers: unlockedJokers.map(j => j.id),
+    playerStats,
+    worldProgress,
+    barUpgrades
+  };
 
 try {
 localStorage.setItem("gameSave", JSON.stringify(state));
@@ -1830,12 +1919,18 @@ Object.assign(stats, state.stats || {});
 systems.manaUnlocked = (state.stats && state.stats.maxMana > 0);
 Object.assign(stageData, state.stageData || {});
 Object.assign(playerStats, state.playerStats || {});
-if (state.worldProgress) {
-  Object.entries(state.worldProgress).forEach(([id, data]) => {
-    if (!worldProgress[id]) worldProgress[id] = data;
-    else Object.assign(worldProgress[id], data);
-  });
-}
+  if (state.worldProgress) {
+    Object.entries(state.worldProgress).forEach(([id, data]) => {
+      if (!worldProgress[id]) worldProgress[id] = data;
+      else Object.assign(worldProgress[id], data);
+    });
+  }
+
+  if (state.barUpgrades) {
+    Object.entries(state.barUpgrades).forEach(([k, v]) => {
+      if (barUpgrades[k]) Object.assign(barUpgrades[k], v);
+    });
+  }
 
 if (state.upgrades) {
 Object.entries(state.upgrades).forEach(([k, lvl]) => {
@@ -1882,8 +1977,10 @@ Object.values(upgrades).forEach(u => u.effect(stats));
 cashDisplay.textContent = `Cash: $${cash}`;
 cardPointsDisplay.textContent = `Card Points: ${cardPoints}`;
 
-renderUpgrades();
-renderJokers();
+  renderUpgrades();
+  renderBarUpgrades();
+  updateUpgradePowerDisplay();
+  renderJokers();
 updateUpgradeButtons();
   renderPlayerStats(stats);
   renderStageInfo();
