@@ -1868,10 +1868,18 @@ deck = [...pDeck];
 
 unlockedJokers.length = 0;
 if (Array.isArray(state.unlockedJokers)) {
-state.unlockedJokers.forEach(id => {
-const j = AllJokerTemplates.find(t => t.id === id);
-if (j) unlockedJokers.push(j);
-});
+  state.unlockedJokers.forEach(id => {
+    const j = AllJokerTemplates.find(t => t.id === id);
+    if (j) unlockedJokers.push(j);
+  });
+}
+
+// ensure mana system initializes if the healing joker was saved
+if (
+  !systems.manaUnlocked &&
+  unlockedJokers.find(j => j.id === "joker_heal")
+) {
+  unlockManaSystem();
 }
 
 Object.values(upgrades).forEach(u => u.effect(stats));
