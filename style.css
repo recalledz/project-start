@@ -135,12 +135,11 @@ body {
 
 .gameColumn {
     display: grid;
-    grid-template-columns: 20px 1fr;
     grid-template-rows: auto 1fr auto;
     grid-template-areas:
-        ". buttons"
-        "mana hand"
-        "mana jokers";
+        "buttons"
+        "hand"
+        "jokers";
     overflow-y: auto;
     gap: 10px;
     position: relative;
@@ -157,10 +156,6 @@ body {
 } /* or add a .jokerContainer alias */
 .jokerContainer {
     grid-area: jokers;
-}
-
-.manaBar {
-    grid-area: mana;
 }
 
 .manaBar {
@@ -194,20 +189,6 @@ body {
     color: #fff;
     font-size: 0.7rem;
     white-space: nowrap;
-}
-
-.manaBar {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.manaBarInner {
-    position: relative;
-    width: 20px;
-    height: 100%;
-    background: black;
-    border: 1px solid #333;
 }
 
 
