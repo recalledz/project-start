@@ -204,13 +204,23 @@ Implement jobs, traits, and reincarnation mechanics
 
 Built in collaboration with ChatGPT & Codex.
 
-🧪 Testing
+📦 Installation
 
-Automated tests run with **Mocha** and **Chai** directly in Node.js. A GitHub Actions workflow triggers `npm test` on each push.
-Install dependencies and execute the test suite with:
+Install Node.js and fetch the project's dependencies:
 
 ```bash
 npm install
+```
+
+> **Note**: This step requires network access to download packages. If Puppeteer's
+> bundled browser fails to download, set `PUPPETEER_SKIP_DOWNLOAD=1` before
+> running `npm install`.
+
+🧪 Testing
+
+Automated tests run with **Mocha** and **Chai** directly in Node.js. A GitHub Actions workflow triggers `npm test` on each push. Ensure all dependencies are installed (see **Installation**) before running:
+
+```bash
 npm test
 ```
 
