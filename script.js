@@ -286,6 +286,24 @@ function setActiveTabButton(btn) {
   });
 }
 
+function applyWorldTheme() {
+  if (mainTab) {
+    mainTab.classList.toggle("world-2-theme", stageData.world === 2);
+  }
+}
+
+function selectWorld(id) {
+  const w = parseInt(id);
+  if (!isNaN(w)) {
+    stageData.world = w;
+    stageData.stage = 1;
+    applyWorldTheme();
+    renderStageInfo();
+    respawnDealerStage();
+    showTab(mainTab);
+  }
+}
+
 function hideTab() {
   if (mainTab) mainTab.style.display = "none";
   if (deckTab) deckTab.style.display = "none";
@@ -1106,6 +1124,11 @@ function renderWorldsMenu() {
     const entry = document.createElement("div");
     entry.classList.add("world-entry");
     entry.innerHTML = `<div>World ${id}</div>`;
+    entry.addEventListener("click", e => {
+      if (e.target.tagName !== "BUTTON") {
+        selectWorld(id);
+      }
+    });
     const progressText = document.createElement("span");
     progressText.classList.add("world-progress-text");
     progressText.dataset.world = id;
@@ -1187,6 +1210,7 @@ function nextWorld() {
   stageData.world += 1;
   stageData.stage = 1;
   stageData.kills = playerStats.stageKills[stageData.stage] || 0;
+  applyWorldTheme();
   resetStageCashStats();
   worldProgressTimer = 0;
   worldProgressRateTracker.reset(computeWorldProgress(stageData.world) * 100);
@@ -2131,6 +2155,8 @@ updateUpgradeButtons();
   updateUpgradePowerCost();
   renderPurchasedUpgrades();
   updateActiveEffects();
+  applyWorldTheme();
+
   updateWorldTabNotification();
 
 addLog("Game loaded!",

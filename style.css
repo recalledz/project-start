@@ -56,6 +56,10 @@ body {
     text-shadow: 0 0 6px #000;
     box-shadow: 0 0 8px rgba(212, 175, 55, 0.5);
     transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
 }
 .tabsContainer button:hover {
     box-shadow: 0 0 12px rgba(212, 175, 55, 0.8);
@@ -121,6 +125,10 @@ body {
     padding: 8px;
     height: 100vh;
     gap: 10px;
+}
+
+.mainTab.world-2-theme {
+    background: radial-gradient(circle, #3b1a1a 0%, #1a0000 100%);
 }
 
 .dealerContainer {
