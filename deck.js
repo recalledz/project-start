@@ -3,6 +3,8 @@
 
 export const deckMastery = {};
 
+import { formatNumber } from './utils/numberFormat.js';
+
 // Required levels to reach each mastery tier
 export const masteryRequirements = [
   10000,
@@ -67,9 +69,13 @@ export function renderDeckList(container) {
 
     const reqSpan = document.createElement('span');
     reqSpan.classList.add('deck-req');
-    reqSpan.textContent = req;
+    reqSpan.textContent = formatNumber(req);
 
-    row.append(name, art, bar, reqSpan);
+    const bottom = document.createElement('div');
+    bottom.classList.add('deck-bottom-row');
+    bottom.append(art, bar, reqSpan);
+
+    row.append(name, bottom);
     row.addEventListener('click', () => {
       selectedDeck = id;
       const event = new CustomEvent('deck-selected', { detail: { id } });

@@ -851,9 +851,23 @@ body {
 
 .deck-row {
     display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    height: auto;
+    padding: 4px;
+}
+
+.deck-row.casino-section {
+    border: none;
+    box-shadow: none;
+}
+
+.deck-bottom-row {
+    display: flex;
     align-items: center;
     gap: 4px;
-    height: 30px;
+    width: 100%;
 }
 
 .deck-art {

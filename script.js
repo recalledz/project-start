@@ -22,6 +22,7 @@ import {
 } from "./starChart.js"; // optional star chart tab
 import { Jobs, assignJob, getAvailableJobs } from "./classes.js"; // job definitions
 import RateTracker from "./utils/rateTracker.js";
+import { formatNumber } from "./utils/numberFormat.js";
 import {
   rollNewCardUpgrades,
   applyCardUpgrade,
@@ -535,7 +536,7 @@ function purchaseUpgrade(key) {
   const cost = up.costFormula(up.level + 1);
   if (cash < cost) return;
   cash -= cost;
-  cashDisplay.textContent = `Cash: $${cash}`;
+  cashDisplay.textContent = `Cash: $${formatNumber(cash)}`;
   cashRateTracker.record(cash);
   up.level += 1;
   up.effect({ stats, pDeck, stageData, systems });
@@ -547,7 +548,7 @@ function purchaseUpgrade(key) {
 function purchaseCardUpgrade(id, cost) {
   if (cash < cost) return;
   cash -= cost;
-  cashDisplay.textContent = `Cash: $${cash}`;
+  cashDisplay.textContent = `Cash: $${formatNumber(cash)}`;
   cashRateTracker.record(cash);
   deck.push(createUpgradeCard(id));
   removeActiveUpgrade(id);
@@ -592,12 +593,12 @@ function updateActiveEffects() {
 
 function updateUpgradePowerDisplay() {
   const el = document.getElementById('upgradePowerDisplay');
-  if (el) el.textContent = `Upgrade Power: ${Math.floor(stats.upgradePower)}`;
+  if (el) el.textContent = `Upgrade Power: ${formatNumber(Math.floor(stats.upgradePower))}`;
 }
 
 function updateUpgradePowerCost() {
   const btn = document.getElementById('buyUpgradePowerBtn');
-  if (btn) btn.textContent = `Buy Upgrade Point ($${upgradePowerCost()})`;
+  if (btn) btn.textContent = `Buy Upgrade Point ($${formatNumber(upgradePowerCost())})`;
 }
 
 function updateBarUI(key) {
@@ -702,7 +703,7 @@ function renderTabCard(card) {
   cardPane.innerHTML = `
   <div class="card-value" style="color: ${card.color}">${card.value}</div>
   <div class="card-suit" style="color: ${card.color}">${card.symbol}</div>
-  <div class="card-hp">HP: ${Math.round(card.currentHp)}/${Math.round(card.maxHp)}</div>
+  <div class="card-hp">HP: ${formatNumber(Math.round(card.currentHp))}/${formatNumber(Math.round(card.maxHp))}</div>
   `;
 
   // 3) XP bar
@@ -728,8 +729,8 @@ function renderTabCard(card) {
     tooltip.innerHTML = `
     <strong>${card.value}${card.symbol}</strong><br>
     Level: ${card.currentLevel}<br>
-    XP: ${card.XpCurrent}/${card.XpReq}<br>
-    Damage: ${card.damage}<br>
+    XP: ${formatNumber(card.XpCurrent)}/${formatNumber(card.XpReq)}<br>
+    Damage: ${formatNumber(card.damage)}<br>
     `;
     tooltip.style.display = "block";
   });
@@ -765,16 +766,16 @@ function updateDeckDisplay() {
     // 2) XP/Level/Damage label for deck tab
     card.deckXpLabel.textContent =
     `LV: ${card.currentLevel} ` +
-    `XP: ${card.XpCurrent}/${Math.floor(card.XpReq)}`;
+    `XP: ${formatNumber(card.XpCurrent)}/${formatNumber(Math.floor(card.XpReq))}`;
 
     // 3) Update HP in deck tab
     if (card.deckHpDisplay) {
-      card.deckHpDisplay.textContent = `HP: ${Math.round(card.currentHp)}/${Math.round(card.maxHp)}`;
+      card.deckHpDisplay.textContent = `HP: ${formatNumber(Math.round(card.currentHp))}/${formatNumber(Math.round(card.maxHp))}`;
     }
 
     // 4) If this card is currently on the field, update its HP too
     if (card.hpDisplay) {
-      card.hpDisplay.textContent = `HP: ${Math.round(card.currentHp)}/${Math.round(card.maxHp)}`;
+      card.hpDisplay.textContent = `HP: ${formatNumber(Math.round(card.currentHp))}/${formatNumber(Math.round(card.maxHp))}`;
     }
   });
   renderJobAssignments();
@@ -791,7 +792,7 @@ function updateMasteryBars() {
     const reqSpan = row.querySelector('.deck-req');
     if (fill) fill.style.width = `${Math.min(1, pct) * 100}%`;
     if (name) name.textContent = `${deckConfigs[id].name} Lv ${level}`;
-    if (reqSpan) reqSpan.textContent = req;
+    if (reqSpan) reqSpan.textContent = formatNumber(req);
   });
 }
 
@@ -904,7 +905,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const cost = upgradePowerCost();
       if (cash < cost) return;
       cash -= cost;
-      cashDisplay.textContent = `Cash: $${cash}`;
+      cashDisplay.textContent = `Cash: $${formatNumber(cash)}`;
       cashRateTracker.record(cash);
       stats.upgradePower += 1;
       upgradePowerPurchased += 1;
@@ -957,7 +958,7 @@ function renderStageInfo() {
   const stageDisplay = document.getElementById("stage");
   stageData.kills = playerStats.stageKills[stageData.stage] || stageData.kills || 0;
   stageDisplay.textContent = `Stage ${stageData.stage} World ${stageData.world}`;
-  killsDisplay.textContent = `Kills: ${stageData.kills}`;
+  killsDisplay.textContent = `Kills: ${formatNumber(stageData.kills)}`;
 }
 
 function renderPlayerStats(stats) {
@@ -966,10 +967,10 @@ function renderPlayerStats(stats) {
   const hpPerKillDisplay = document.getElementById("hpPerKillDisplay");
   const attackSpeedDisplay = document.getElementById("attackSpeedDisplay");
 
-  damageDisplay.textContent = `Damage: ${Math.floor(stats.pDamage)}`;
-  cashMultiDisplay.textContent = `Cash Multi: ${Math.floor(stats.cashMulti)}`;
-  pointsDisplay.textContent = `Points: ${stats.points}`;
-  cardPointsDisplay.textContent = `Card Points: ${cardPoints}`;
+  damageDisplay.textContent = `Damage: ${formatNumber(Math.floor(stats.pDamage))}`;
+  cashMultiDisplay.textContent = `Cash Multi: ${formatNumber(Math.floor(stats.cashMulti))}`;
+  pointsDisplay.textContent = `Points: ${formatNumber(stats.points)}`;
+  cardPointsDisplay.textContent = `Card Points: ${formatNumber(cardPoints)}`;
   attackSpeedDisplay.textContent = `Attack Speed: ${Math.floor(stats.attackSpeed / 1000)}s`;
   if (manaRegenDisplay) {
     manaRegenDisplay.textContent = `Mana Regen: ${stats.manaRegen.toFixed(2)}/s`;
@@ -981,7 +982,7 @@ function renderPlayerStats(stats) {
 
   // Update HP per kill display
   if (hpPerKillDisplay) {
-    hpPerKillDisplay.textContent = `HP per Kill: ${stats.hpPerKill}`;
+    hpPerKillDisplay.textContent = `HP per Kill: ${formatNumber(stats.hpPerKill)}`;
   }
 }
 
@@ -994,7 +995,7 @@ function renderGlobalStats() {
   basics.innerHTML = `
   <div>Times Prestiged: ${playerStats.timesPrestiged}</div>
   <div>Decks Unlocked: ${playerStats.decksUnlocked}</div>
-  <div>Total Boss Kills: ${playerStats.totalBossKills}</div>
+  <div>Total Boss Kills: ${formatNumber(playerStats.totalBossKills)}</div>
   `;
   container.appendChild(basics);
 
@@ -1003,7 +1004,7 @@ function renderGlobalStats() {
   .sort((a, b) => parseInt(a[0]) - parseInt(b[0]))
   .forEach(([stage, kills]) => {
     const row = document.createElement("div");
-    row.textContent = `Stage ${stage} Kills: ${kills}`;
+    row.textContent = `Stage ${stage} Kills: ${formatNumber(kills)}`;
     list.appendChild(row);
   });
   container.appendChild(list);
@@ -1066,7 +1067,7 @@ function renderDealerCard() {
     <i data-lucide="${currentEnemy.icon}" class="dCard__icon" style="color:${iconColor}"></i>
     <span class="dCard__text">
     ${currentEnemy.name}<br>
-    Damage: ${minDamage} - ${maxDamage}
+    Damage: ${formatNumber(minDamage)} - ${formatNumber(maxDamage)}
     </span>
     `;
 
@@ -1098,7 +1099,7 @@ function renderDealerCard() {
     <i data-lucide="skull" class="dCard__icon" style="stroke:${color}; filter: drop-shadow(0 0 ${blur}px ${color});"></i>
     <span class="dCard__text">
     ${currentEnemy.name}<br>
-    Damage: ${Math.floor(minDamage)} - ${Math.floor(maxDamage)}
+    Damage: ${formatNumber(Math.floor(minDamage))} - ${formatNumber(Math.floor(maxDamage))}
     </span>
     `;
 
@@ -1314,7 +1315,7 @@ function nextStage() {
   stageData.stage += 1;
   stageData.kills = playerStats.stageKills[stageData.stage] || 0;
   resetStageCashStats();
-  killsDisplay.textContent = `Kills: ${stageData.kills}`;
+  killsDisplay.textContent = `Kills: ${formatNumber(stageData.kills)}`;
   renderGlobalStats();
   nextStageChecker();
   renderStageInfo();
@@ -1337,7 +1338,7 @@ function nextWorld() {
   if (worldProgressPerSecDisplay) {
     worldProgressPerSecDisplay.textContent = "Avg World Progress/sec: 0%";
   }
-  killsDisplay.textContent = `Kills: ${stageData.kills}`;
+  killsDisplay.textContent = `Kills: ${formatNumber(stageData.kills)}`;
   renderGlobalStats();
   nextStageChecker();
   renderStageInfo();
@@ -1359,7 +1360,7 @@ function goToWorld(id) {
   if (worldProgressPerSecDisplay) {
     worldProgressPerSecDisplay.textContent = "Avg World Progress/sec: 0%";
   }
-  killsDisplay.textContent = `Kills: ${stageData.kills}`;
+  killsDisplay.textContent = `Kills: ${formatNumber(stageData.kills)}`;
   renderGlobalStats();
   nextStageChecker();
   renderStageInfo();
@@ -1447,7 +1448,7 @@ function onDealerDefeat() {
   healCardsOnKill();
   stageData.kills += 1;
   playerStats.stageKills[stageData.stage] = stageData.kills;
-  killsDisplay.textContent = `Kills: ${stageData.kills}`;
+  killsDisplay.textContent = `Kills: ${formatNumber(stageData.kills)}`;
   renderGlobalStats();
   recordWorldKill(stageData.world, stageData.stage);
   dealerDeathAnimation();
@@ -1516,7 +1517,7 @@ function onBossDefeat(boss) {
 
 // Update text and bar UI for the current enemy's health
 function updateDealerLifeDisplay() {
-  dealerLifeDisplay.textContent = `Life: ${currentEnemy.currentHp}/${currentEnemy.maxHp}`;
+  dealerLifeDisplay.textContent = `Life: ${formatNumber(currentEnemy.currentHp)}/${formatNumber(currentEnemy.maxHp)}`;
   renderDealerLifeBar(dealerLifeDisplay, currentEnemy);
   renderDealerLifeBarFill(currentEnemy);
 }
@@ -1561,7 +1562,7 @@ function cDealerDamage(damageAmount = null, ability = null, source = "dealer") {
   );
 
   // update its specific HP display
-  card.hpDisplay.textContent = `HP: ${Math.round(card.currentHp)}/${Math.round(card.maxHp)}`;
+  card.hpDisplay.textContent = `HP: ${formatNumber(Math.round(card.currentHp))}/${formatNumber(Math.round(card.maxHp))}`;
   updateDeckDisplay();
   if (card.wrapperElement) {
     animateCardHit(card);
@@ -1673,7 +1674,7 @@ function updateDrawButton() {
 function updateHandDisplay() {
   drawnCards.forEach(card => {
     if (!card || !card.hpDisplay) return; // Skip if card or elements are missing
-    card.hpDisplay.textContent = `HP: ${Math.round(card.currentHp)}/${Math.round(card.maxHp)}`;
+    card.hpDisplay.textContent = `HP: ${formatNumber(Math.round(card.currentHp))}/${formatNumber(Math.round(card.maxHp))}`;
     card.xpLabel.textContent = `LV: ${card.currentLevel}`;
     card.xpBarFill.style.width = `${(card.XpCurrent / card.XpReq) * 100}%`;
   });
@@ -1703,7 +1704,7 @@ function heartHeal() {
       animateCardHeal(target);
     }
   });
-  target.hpDisplay.textContent = `HP: ${Math.round(target.currentHp)}/${Math.round(target.maxHp)}`;
+  target.hpDisplay.textContent = `HP: ${formatNumber(Math.round(target.currentHp))}/${formatNumber(Math.round(target.maxHp))}`;
 }
 
 // Visual pulse when a card gains health
@@ -1855,7 +1856,7 @@ function useJoker(joker) {
         const before = card.currentHp;
         card.currentHp = Math.round(Math.min(card.maxHp, card.currentHp + healAmt));
         if (card.currentHp > before) {
-          card.hpDisplay.textContent = `HP: ${Math.round(card.currentHp)}/${Math.round(card.maxHp)}`;
+          card.hpDisplay.textContent = `HP: ${formatNumber(Math.round(card.currentHp))}/${formatNumber(Math.round(card.maxHp))}`;
           animateCardHeal(card);
         }
       });
@@ -1954,7 +1955,7 @@ function respawnPlayer() {
   deckTabContainer.innerHTML = "";
   deck.forEach(card => renderTabCard(card));
 
-  cashDisplay.textContent = `Cash: $${cash}`;
+  cashDisplay.textContent = `Cash: $${formatNumber(cash)}`;
   cashRateTracker.reset(cash);
   updateUpgradeButtons();
   renderStageInfo();
@@ -1964,7 +1965,7 @@ function respawnPlayer() {
   updatePlayerStats(stats);
   // reset baseline so new kills don't award previous points again
   lastCashOutPoints = stats.points;
-  killsDisplay.textContent = `Kills: ${stageData.kills}`;
+  killsDisplay.textContent = `Kills: ${formatNumber(stageData.kills)}`;
   renderGlobalStats();
   renderWorldsMenu();
 }
@@ -2032,9 +2033,9 @@ stageData.dealerLifeCurrent = currentEnemy.currentHp;
 if (currentEnemy.isDefeated()) {
 currentEnemy.onDefeat?.();
 } else {
-  dealerLifeDisplay.textContent = `Life: ${Math.floor(
+  dealerLifeDisplay.textContent = `Life: ${formatNumber(Math.floor(
     currentEnemy.currentHp
-  )}/${currentEnemy.maxHp}`;
+  ))}/${formatNumber(currentEnemy.maxHp)}`;
   renderDealerLifeBarFill(currentEnemy);
   }
 }
@@ -2052,14 +2053,14 @@ currentEnemy.onDefeat?.();
     nextStageChecker();
     dealerDeathAnimation();
   } else {
-    dealerLifeDisplay.textContent = `Life: ${Math.floor(currentEnemy.currentHp)}/${currentEnemy.maxHp}`;
+    dealerLifeDisplay.textContent = `Life: ${formatNumber(Math.floor(currentEnemy.currentHp))}/${formatNumber(currentEnemy.maxHp)}`;
     dealerLifeBar();
   }
 } else {
   // Handle regular enemy damage
   if (stageData.dealerLifeCurrent - stats.pDamage <= 0) {
     stageData.kills += 1;
-    killsDisplay.textContent = `Kills: ${stageData.kills}`;
+    killsDisplay.textContent = `Kills: ${formatNumber(stageData.kills)}`;
     respawnDealer();
     dealerLifeBar();
     cardXp(stageData.stage ** 1.2);
@@ -2068,7 +2069,7 @@ currentEnemy.onDefeat?.();
     dealerDeathAnimation();
   } else {
     stageData.dealerLifeCurrent = stageData.dealerLifeCurrent - stats.pDamage;
-    dealerLifeDisplay.textContent = `Life: ${Math.floor(stageData.dealerLifeCurrent)}/${stageData.dealerLifeMax}`;
+    dealerLifeDisplay.textContent = `Life: ${formatNumber(Math.floor(stageData.dealerLifeCurrent))}/${formatNumber(stageData.dealerLifeMax)}`;
     dealerLifeBar();
   }
 }*/
@@ -2084,7 +2085,7 @@ function cashOut() {
   if (reward <= 0) return cash;
 
   cash += reward;
-  cashDisplay.textContent = `Cash: $${cash}`;
+  cashDisplay.textContent = `Cash: $${formatNumber(cash)}`;
   cashRateTracker.record(cash);
   updateUpgradeButtons();
   return cash;
@@ -2250,8 +2251,8 @@ if (
 
 Object.values(upgrades).forEach(u => u.effect({ stats, pDeck, stageData, systems }));
 
-cashDisplay.textContent = `Cash: $${cash}`;
-cardPointsDisplay.textContent = `Card Points: ${cardPoints}`;
+cashDisplay.textContent = `Cash: $${formatNumber(cash)}`;
+cardPointsDisplay.textContent = `Card Points: ${formatNumber(cardPoints)}`;
 
   renderUpgrades();
   renderBarUpgrades();
@@ -2434,7 +2435,7 @@ giveCash: () => {
 const amount =
 parseInt(document.getElementById("debugCash").value) || 0;
 cash += amount;
-cashDisplay.textContent = `Cash: $${cash}`;
+  cashDisplay.textContent = `Cash: $${formatNumber(cash)}`;
 cashRateTracker.record(cash);
 updateUpgradeButtons();
 },
