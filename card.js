@@ -87,6 +87,15 @@ export class Card {
   isDefeated() {
     return this.currentHp <= 0;
   }
+
+  /**
+   * Recalculate this card's max and current HP based on level and multipliers.
+   * @param {object} stats - Player stats providing heartHpMultiplier.
+   * @param {object} barUpgrades - Bar data providing maxHp multiplier.
+   */
+  recalcHp(stats = {}, barUpgrades = {}) {
+    recalcCardHp(this, stats, barUpgrades);
+  }
 }
 
 export function shuffleArray(array) {
@@ -105,6 +114,22 @@ export function generateDeck() {
   }
   shuffleArray(deck);
   return deck;
+}
+
+export function recalcCardHp(card, stats = {}, barUpgrades = {}) {
+  const baseMul = 1 + (card.value - 1) / 12;
+  const baseHp = 5 * baseMul + 5 * (card.currentLevel - 1) + card.baseHpBoost;
+  const suitMult =
+    card.suit === 'Hearts' ? stats.heartHpMultiplier || 1 : 1;
+  const maxHpMult = barUpgrades.maxHp?.multiplier || 1;
+  const hp = Math.round(baseHp * maxHpMult * suitMult);
+  const ratio = card.maxHp > 0 ? card.currentHp / card.maxHp : 1;
+  card.maxHp = hp;
+  card.currentHp = Math.round(Math.min(hp, ratio * hp));
+}
+
+export function updateAllCardHp(deck, stats = {}, barUpgrades = {}) {
+  deck.forEach(c => recalcCardHp(c, stats, barUpgrades));
 }
 
 export default generateDeck;

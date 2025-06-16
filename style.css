@@ -822,6 +822,21 @@ body {
     border: 2px solid grey;
 }
 
+.deckJobsContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.job-entry {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 4px;
+    border-radius: 4px;
+}
+
 /* Star chart tab */
 .starChartTab {
     width: 100%;

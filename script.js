@@ -1,7 +1,9 @@
 // Core modules that power the card game
 import generateDeck, {
   shuffleArray,
-  Card
+  Card,
+  recalcCardHp,
+  updateAllCardHp
 } from "./card.js"; // card utilities
 import addLog from "./log.js"; // helper for appending to the event log
 import Enemy from "./enemy.js"; // base enemy class
@@ -18,6 +20,7 @@ import {
 import {
   initStarChart
 } from "./starChart.js"; // optional star chart tab
+import { Jobs, assignJob, getAvailableJobs } from "./classes.js"; // job definitions
 import RateTracker from "./utils/rateTracker.js";
 import {
   rollNewCardUpgrades,
@@ -46,6 +49,17 @@ import {
   renderDealerLifeBarFill
 } from "./rendering.js";
 import { drawCard, redrawHand } from "./cardManagement.js";
+import {
+  deckMastery,
+  deckConfigs,
+  selectedDeck,
+  addDeckMasteryProgress,
+  renderDeckList,
+  renderDeckCards,
+  renderJokerView,
+  renderJobsList,
+  showJobs
+} from "./deck.js";
 
 
 // --- Game State ---
@@ -109,20 +123,7 @@ const barUpgrades = {
   maxHp: { level: 0, progress: 0, points: 0, multiplier: 1 }
 };
 
-// Recompute a card's HP using all current multipliers
-function recalcCardHp(card) {
-  const baseMul = 1 + (card.value - 1) / 12;
-  const baseHp = 5 * baseMul + 5 * (card.currentLevel - 1) + card.baseHpBoost;
-  const suitMult = card.suit === 'Hearts' ? stats.heartHpMultiplier : 1;
-  const hp = Math.round(baseHp * barUpgrades.maxHp.multiplier * suitMult);
-  const ratio = card.maxHp > 0 ? card.currentHp / card.maxHp : 1;
-  card.maxHp = hp;
-  card.currentHp = Math.round(Math.min(hp, ratio * hp));
-}
-
-function updateAllCardHp() {
-  pDeck.forEach(recalcCardHp);
-}
+// Card HP adjustments moved to card.js utilities
 
 function computeBarMultiplier(level) {
   return 1 + (level / (level + 20)) * 9;
@@ -194,6 +195,9 @@ function getDealerIconStyle(stage) {
 let pDeck = generateDeck();
 let deck = [...pDeck];
 
+// Helper bound functions for card utilities
+const recalcAllCardHp = () => updateAllCardHp(pDeck, stats, barUpgrades);
+
 function getCardState() {
   return {
     deck,
@@ -209,7 +213,7 @@ function getCardState() {
     cash,
     renderPurchasedUpgrades,
     updateActiveEffects,
-    updateAllCardHp,
+    updateAllCardHp: recalcAllCardHp,
     pDeck,
     shuffleArray,
     updateDrawButton,
@@ -233,6 +237,7 @@ const killsDisplay = document.getElementById("kills");
 const cashPerSecDisplay = document.getElementById("cashPerSecDisplay");
 const worldProgressPerSecDisplay = document.getElementById("worldProgressPerSecDisplay");
 const deckTabContainer = document.getElementsByClassName("deckTabContainer")[0];
+const deckJobsContainer = document.getElementsByClassName("deckJobsContainer")[0];
 const dCardContainer = document.getElementsByClassName("dCardContainer")[0];
 const jokerContainers = document.querySelectorAll(".jokerContainer");
 const manaBar = document.getElementById("manaBar");
@@ -391,6 +396,7 @@ function initTabs() {
       setActiveTabButton(playerStatsTabButton);
     });
   }
+
 
   if (worldTabButton) {
     worldTabButton.addEventListener("click", () => {
@@ -614,7 +620,7 @@ function tickBarProgress(delta) {
       bar.level += 1;
       bar.multiplier = computeBarMultiplier(bar.level);
       if (key === 'maxHp') {
-        updateAllCardHp();
+        recalcAllCardHp();
       }
       updatePlayerStats();
     }
@@ -750,6 +756,7 @@ function updateDeckDisplay() {
       card.hpDisplay.textContent = `HP: ${Math.round(card.currentHp)}/${Math.round(card.maxHp)}`;
     }
   });
+  renderJobAssignments();
 }
 
 
@@ -779,6 +786,7 @@ document.addEventListener("DOMContentLoaded", () => {
   renderStageInfo();
   nextStageChecker();
   renderWorldsMenu();
+  renderJobAssignments();
   rollNewCardUpgrades();
   renderCardUpgrades(document.querySelector('.card-upgrade-list'), {
     stats,
@@ -1185,6 +1193,44 @@ function updateWorldTabNotification() {
   const newWorldAvailable = highestUnlocked > stageData.world;
   const shouldGlow = rewardAvailable || newWorldAvailable;
   worldTabButton.classList.toggle("glow-notify", shouldGlow);
+}
+
+// Show cards eligible for job assignment in the Deck tab
+function renderJobAssignments() {
+  const container = deckJobsContainer;
+  if (!container) return;
+  container.innerHTML = '';
+  pDeck.forEach(card => {
+    if (card.currentLevel >= 20 && !card.job) {
+      const row = document.createElement('div');
+      row.classList.add('job-entry');
+      row.textContent = `${card.value}${card.symbol} (Lv. ${card.currentLevel})`;
+
+      const select = document.createElement('select');
+      getAvailableJobs(card).forEach(id => {
+        const j = Jobs[id];
+        const opt = document.createElement('option');
+        opt.value = id;
+        opt.textContent = j.name;
+        select.appendChild(opt);
+      });
+
+      const btn = document.createElement('button');
+      btn.textContent = 'Assign';
+      btn.addEventListener('click', () => {
+        const id = select.value;
+        if (assignJob(card, id)) {
+          renderJobAssignments();
+        }
+      });
+
+      row.append(' ', select, btn);
+      container.appendChild(row);
+    }
+  });
+  if (!container.firstChild) {
+    container.textContent = 'No eligible cards.';
+  }
 }
 
 // ===== Stage and world management =====
@@ -1981,7 +2027,7 @@ function updatePlayerStats() {
 
   for (const card of drawnCards) {
     if (!card) continue;
-    recalcCardHp(card);
+    recalcCardHp(card, stats, barUpgrades);
 
     if (card.suit === "Spades")
       stats.damageMultiplier += 0.1 * card.currentLevel;
