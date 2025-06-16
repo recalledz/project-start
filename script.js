@@ -54,6 +54,7 @@ import {
   deckConfigs,
   selectedDeck,
   addDeckMasteryProgress,
+  getDeckMasteryInfo,
   renderDeckList,
   renderDeckCards,
   renderJokerView,
@@ -194,6 +195,7 @@ function getDealerIconStyle(stage) {
 
 let pDeck = generateDeck();
 let deck = [...pDeck];
+deckConfigs.basic.cards = pDeck;
 
 // Helper bound functions for card utilities
 const recalcAllCardHp = () => updateAllCardHp(pDeck, stats, barUpgrades);
@@ -236,8 +238,10 @@ document.getElementsByClassName("dealerLifeDisplay")[0];
 const killsDisplay = document.getElementById("kills");
 const cashPerSecDisplay = document.getElementById("cashPerSecDisplay");
 const worldProgressPerSecDisplay = document.getElementById("worldProgressPerSecDisplay");
-const deckTabContainer = document.getElementsByClassName("deckTabContainer")[0];
-const deckJobsContainer = document.getElementsByClassName("deckJobsContainer")[0];
+const deckListContainer = document.querySelector('.deckListContainer');
+const deckTabContainer = document.querySelector('.deckTabContainer');
+const jokerViewContainer = document.querySelector('.jokerViewContainer');
+const deckJobsContainer = document.querySelector('.deckJobsContainer');
 const dCardContainer = document.getElementsByClassName("dCardContainer")[0];
 const jokerContainers = document.querySelectorAll(".jokerContainer");
 const manaBar = document.getElementById("manaBar");
@@ -284,6 +288,9 @@ let cardUpgradesPanel;
 let purchasedUpgradeList;
 let activeEffectsContainer;
 let tooltip;
+let deckViewBtn;
+let jokerViewBtn;
+let jobsViewBtn;
 
 function setActiveTabButton(btn) {
   document.querySelectorAll('.tabsContainer button').forEach(b => {
@@ -369,6 +376,9 @@ function initTabs() {
   purchasedUpgradeList = document.querySelector('.purchased-upgrade-list');
   activeEffectsContainer = document.querySelector('.active-effects');
   tooltip = document.getElementById('tooltip');
+  deckViewBtn = document.querySelector('.deckViewBtn');
+  jokerViewBtn = document.querySelector('.jokerViewBtn');
+  jobsViewBtn = document.querySelector('.jobsViewBtn');
   if (mainTabButton)
     mainTabButton.addEventListener("click", () => {
       showTab(mainTab);
@@ -405,6 +415,17 @@ function initTabs() {
       setActiveTabButton(worldTabButton);
     });
   }
+
+  if (deckViewBtn) deckViewBtn.addEventListener('click', showDeckListView);
+  if (jokerViewBtn) jokerViewBtn.addEventListener('click', showJokerView);
+  if (jobsViewBtn) jobsViewBtn.addEventListener('click', () => {
+    showJobsView();
+    renderJobAssignments();
+  });
+  if (deckListContainer)
+    deckListContainer.addEventListener('deck-selected', e => {
+      showDeckCardsView(e.detail.id);
+    });
 
   if (upgradesTabButton) {
     upgradesTabButton.addEventListener("click", () => {
@@ -757,6 +778,58 @@ function updateDeckDisplay() {
     }
   });
   renderJobAssignments();
+  updateMasteryBars();
+}
+
+function updateMasteryBars() {
+  if (!deckListContainer) return;
+  deckListContainer.querySelectorAll('.deck-row').forEach(row => {
+    const id = row.dataset.deckId;
+    const { level, pct, req } = getDeckMasteryInfo(id);
+    const fill = row.querySelector('.deckMasteryFill');
+    const name = row.querySelector('.deck-level');
+    const reqSpan = row.querySelector('.deck-req');
+    if (fill) fill.style.width = `${Math.min(1, pct) * 100}%`;
+    if (name) name.textContent = `${deckConfigs[id].name} Lv ${level}`;
+    if (reqSpan) reqSpan.textContent = req;
+  });
+}
+
+function hideDeckViews() {
+  if (deckListContainer) deckListContainer.style.display = 'none';
+  if (deckTabContainer) deckTabContainer.style.display = 'none';
+  if (jokerViewContainer) jokerViewContainer.style.display = 'none';
+  if (deckJobsContainer) deckJobsContainer.style.display = 'none';
+}
+
+function showDeckListView() {
+  hideDeckViews();
+  if (deckListContainer) {
+    renderDeckList(deckListContainer);
+    deckListContainer.style.display = 'flex';
+  }
+}
+
+function showDeckCardsView(id) {
+  hideDeckViews();
+  if (!deckTabContainer) return;
+  deckTabContainer.innerHTML = '';
+  const cards = deckConfigs[id]?.cards || [];
+  cards.forEach(c => renderTabCard(c));
+  deckTabContainer.style.display = 'flex';
+}
+
+function showJokerView() {
+  hideDeckViews();
+  if (jokerViewContainer) {
+    renderJokerView(jokerViewContainer);
+    jokerViewContainer.style.display = 'flex';
+  }
+}
+
+function showJobsView() {
+  hideDeckViews();
+  if (deckJobsContainer) deckJobsContainer.style.display = 'flex';
 }
 
 
@@ -766,6 +839,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initTabs();
   loadGame();
   initVignetteToggles();
+  showDeckListView();
   Object.values(upgrades).forEach(u => u.effect({ stats, pDeck, stageData, systems }));
   renderUpgrades();
   renderBarUpgrades();
@@ -1564,6 +1638,7 @@ function cardXp(xpAmount) {
     if (leveled) {
       cardPoints += 1;
       animateCardLevelUp(card);
+      addDeckMasteryProgress(selectedDeck, 1);
       addLog(
         `${card.value}${card.symbol} leveled up to level ${card.currentLevel}!`,
         "level"

@@ -134,25 +134,16 @@
     <!-- close mainTab -->
     <!--------------deck tab----------------->
     <div class="deckTab">
-      <div class="vignette open">
-        <button class="vignette-toggle">Basic Deck</button>
-        <div class="vignette-content">
-          <div class="deckTabContainer">
-            <!-- <div id="deckDisplay"> Deck: 0</div> -->
-          </div>
-        </div>
+      <div class="deckSidePanel casino-section">
+        <button class="deckViewBtn">Decks</button>
+        <button class="jokerViewBtn">Jokers</button>
+        <button class="jobsViewBtn">Jobs</button>
       </div>
-      <div class="vignette">
-        <button class="vignette-toggle">Jokers</button>
-        <div class="vignette-content">
-          <div class="jokerContainer"></div>
-        </div>
-      </div>
-      <div class="vignette">
-        <button class="vignette-toggle">Jobs</button>
-        <div class="vignette-content">
-          <div class="deckJobsContainer"></div>
-        </div>
+      <div class="deckMainContainer casino-section">
+        <div class="deckListContainer"></div>
+        <div class="deckTabContainer" style="display:none;"></div>
+        <div class="jokerViewContainer" style="display:none;"></div>
+        <div class="deckJobsContainer" style="display:none;"></div>
       </div>
     </div>
     <div class="upgradesTab casino-section">

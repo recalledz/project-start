@@ -3,6 +3,15 @@
 
 export const deckMastery = {};
 
+// Required levels to reach each mastery tier
+export const masteryRequirements = [
+  10000,
+  100000,
+  1000000,
+  10000000,
+  100000000
+];
+
 export const deckConfigs = {
   basic: {
     id: 'basic',
@@ -18,17 +27,55 @@ export function addDeckMasteryProgress(deckId, amount = 1) {
   deckMastery[deckId] = (deckMastery[deckId] || 0) + amount;
 }
 
+export function getDeckMasteryInfo(deckId) {
+  const progress = deckMastery[deckId] || 0;
+  let level = 0;
+  let prev = 0;
+  let req = masteryRequirements[0];
+  while (level < masteryRequirements.length && progress >= req) {
+    level++;
+    prev = req;
+    req = masteryRequirements[level] || req;
+  }
+  const pct = req > prev ? (progress - prev) / (req - prev) : 1;
+  return { level, progress, pct, req };
+}
+
 export function renderDeckList(container) {
   if (!container) return;
   container.innerHTML = '';
   Object.entries(deckConfigs).forEach(([id, cfg]) => {
-    const btn = document.createElement('button');
-    btn.textContent = `${cfg.name} (${deckMastery[id] || 0})`;
-    btn.addEventListener('click', () => {
+    const row = document.createElement('div');
+    row.classList.add('deck-row', 'casino-section');
+    row.dataset.deckId = id;
+
+    const name = document.createElement('span');
+    const { level, pct, req } = getDeckMasteryInfo(id);
+    name.classList.add('deck-level');
+    name.textContent = `${cfg.name} Lv ${level}`;
+
+    const art = document.createElement('img');
+    art.src = 'img/basic deck.png';
+    art.classList.add('deck-art');
+
+    const bar = document.createElement('div');
+    bar.classList.add('deckMasteryBar');
+    const fill = document.createElement('div');
+    fill.classList.add('deckMasteryFill');
+    fill.style.width = `${Math.min(1, pct) * 100}%`;
+    bar.appendChild(fill);
+
+    const reqSpan = document.createElement('span');
+    reqSpan.classList.add('deck-req');
+    reqSpan.textContent = req;
+
+    row.append(name, art, bar, reqSpan);
+    row.addEventListener('click', () => {
       selectedDeck = id;
-      renderDeckCards(container);
+      const event = new CustomEvent('deck-selected', { detail: { id } });
+      container.dispatchEvent(event);
     });
-    container.appendChild(btn);
+    container.appendChild(row);
   });
 }
 

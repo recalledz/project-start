@@ -810,10 +810,25 @@ body {
 /*============= deck tab panel============== */
 .deckTab {
     display: flex;
-    flex-direction: column;
     gap: 10px;
     background-color: #67a16c;
     padding: 5px;
+    height: 100vh;
+}
+
+.deckSidePanel {
+    flex: 1 1 33%;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.deckMainContainer {
+    flex: 1 1 67%;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
 }
 
 .deckTabContainer {
@@ -826,6 +841,49 @@ body {
     display: flex;
     flex-direction: column;
     gap: 4px;
+}
+
+.deckListContainer, .deckTabContainer, .jokerViewContainer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.deck-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    height: 30px;
+}
+
+.deck-art {
+    width: 24px;
+    height: 32px;
+    object-fit: contain;
+}
+
+.deckMasteryBar {
+    position: relative;
+    flex: 1;
+    height: 8px;
+    background: rgba(0, 0, 0, 0.8);
+    border: 1px solid #d4af37;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.deckMasteryFill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 0;
+    background: #d4af37;
+}
+
+.deck-req {
+    font-size: 0.7rem;
+    white-space: nowrap;
 }
 
 .job-entry {
