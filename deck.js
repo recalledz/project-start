@@ -7,7 +7,8 @@ import { formatNumber } from './utils/numberFormat.js';
 
 // Required levels to reach each mastery tier
 export const masteryRequirements = [
-  10000,
+  // first tier is intentionally low for testing purposes
+  10,
   100000,
   1000000,
   10000000,

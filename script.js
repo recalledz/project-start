@@ -804,7 +804,7 @@ function updateMasteryBars() {
 }
 
 function hideDeckViews() {
-  if (deckListContainer) deckListContainer.style.display = 'none';
+  // keep the deck list visible so mastery progress remains on screen
   if (deckTabContainer) deckTabContainer.style.display = 'none';
   if (jokerViewContainer) jokerViewContainer.style.display = 'none';
   if (deckJobsContainer) deckJobsContainer.style.display = 'none';
