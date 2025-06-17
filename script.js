@@ -20,7 +20,7 @@ import {
 import {
   initStarChart
 } from "./starChart.js"; // optional star chart tab
-import { Jobs, assignJob, getAvailableJobs } from "./classes.js"; // job definitions
+import { Jobs, assignJob, getAvailableJobs, renderJobAssignments, renderJobCarousel } from "./jobs.js"; // job definitions
 import RateTracker from "./utils/rateTracker.js";
 import { formatNumber } from "./utils/numberFormat.js";
 import {
@@ -243,6 +243,7 @@ const deckListContainer = document.querySelector('.deckListContainer');
 const deckTabContainer = document.querySelector('.deckTabContainer');
 const jokerViewContainer = document.querySelector('.jokerViewContainer');
 const deckJobsContainer = document.querySelector('.deckJobsContainer');
+const jobCarouselContainer = document.querySelector('.jobCarouselContainer');
 const dCardContainer = document.getElementsByClassName("dCardContainer")[0];
 const jokerContainers = document.querySelectorAll(".jokerContainer");
 const manaBar = document.getElementById("manaBar");
@@ -292,6 +293,7 @@ let tooltip;
 let deckViewBtn;
 let jokerViewBtn;
 let jobsViewBtn;
+let jobsCarouselBtn;
 
 function setActiveTabButton(btn) {
   document.querySelectorAll('.tabsContainer button').forEach(b => {
@@ -380,6 +382,7 @@ function initTabs() {
   deckViewBtn = document.querySelector('.deckViewBtn');
   jokerViewBtn = document.querySelector('.jokerViewBtn');
   jobsViewBtn = document.querySelector('.jobsViewBtn');
+  jobsCarouselBtn = document.querySelector('.jobsCarouselBtn');
   if (mainTabButton)
     mainTabButton.addEventListener("click", () => {
       showTab(mainTab);
@@ -421,7 +424,11 @@ function initTabs() {
   if (jokerViewBtn) jokerViewBtn.addEventListener('click', showJokerView);
   if (jobsViewBtn) jobsViewBtn.addEventListener('click', () => {
     showJobsView();
-    renderJobAssignments();
+    renderJobAssignments(deckJobsContainer, pDeck);
+  });
+  if (jobsCarouselBtn) jobsCarouselBtn.addEventListener('click', () => {
+    showJobCarouselView();
+    renderJobCarousel(jobCarouselContainer);
   });
   if (deckListContainer)
     deckListContainer.addEventListener('deck-selected', e => {
@@ -778,7 +785,7 @@ function updateDeckDisplay() {
       card.hpDisplay.textContent = `HP: ${formatNumber(Math.round(card.currentHp))}/${formatNumber(Math.round(card.maxHp))}`;
     }
   });
-  renderJobAssignments();
+  renderJobAssignments(deckJobsContainer, pDeck);
   updateMasteryBars();
 }
 
@@ -801,6 +808,7 @@ function hideDeckViews() {
   if (deckTabContainer) deckTabContainer.style.display = 'none';
   if (jokerViewContainer) jokerViewContainer.style.display = 'none';
   if (deckJobsContainer) deckJobsContainer.style.display = 'none';
+  if (jobCarouselContainer) jobCarouselContainer.style.display = 'none';
 }
 
 function showDeckListView() {
@@ -833,6 +841,11 @@ function showJobsView() {
   if (deckJobsContainer) deckJobsContainer.style.display = 'flex';
 }
 
+function showJobCarouselView() {
+  hideDeckViews();
+  if (jobCarouselContainer) jobCarouselContainer.style.display = 'flex';
+}
+
 
 //========render functions==========
 document.addEventListener("DOMContentLoaded", () => {
@@ -861,7 +874,7 @@ document.addEventListener("DOMContentLoaded", () => {
   renderStageInfo();
   nextStageChecker();
   renderWorldsMenu();
-  renderJobAssignments();
+  renderJobAssignments(deckJobsContainer, pDeck);
   rollNewCardUpgrades();
   renderCardUpgrades(document.querySelector('.card-upgrade-list'), {
     stats,
@@ -1271,42 +1284,6 @@ function updateWorldTabNotification() {
 }
 
 // Show cards eligible for job assignment in the Deck tab
-function renderJobAssignments() {
-  const container = deckJobsContainer;
-  if (!container) return;
-  container.innerHTML = '';
-  pDeck.forEach(card => {
-    if (card.currentLevel >= 20 && !card.job) {
-      const row = document.createElement('div');
-      row.classList.add('job-entry');
-      row.textContent = `${card.value}${card.symbol} (Lv. ${card.currentLevel})`;
-
-      const select = document.createElement('select');
-      getAvailableJobs(card).forEach(id => {
-        const j = Jobs[id];
-        const opt = document.createElement('option');
-        opt.value = id;
-        opt.textContent = j.name;
-        select.appendChild(opt);
-      });
-
-      const btn = document.createElement('button');
-      btn.textContent = 'Assign';
-      btn.addEventListener('click', () => {
-        const id = select.value;
-        if (assignJob(card, id)) {
-          renderJobAssignments();
-        }
-      });
-
-      row.append(' ', select, btn);
-      container.appendChild(row);
-    }
-  });
-  if (!container.firstChild) {
-    container.textContent = 'No eligible cards.';
-  }
-}
 
 // ===== Stage and world management =====
 // Advance to the next stage after defeating enough enemies

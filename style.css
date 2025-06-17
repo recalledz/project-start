@@ -841,12 +841,14 @@ body {
     display: flex;
     flex-direction: column;
     gap: 4px;
+    width: 100%;
 }
 
 .deckListContainer, .deckTabContainer, .jokerViewContainer {
     display: flex;
     flex-wrap: wrap;
     gap: 4px;
+    width: 100%;
 }
 
 .deck-row {
@@ -856,6 +858,7 @@ body {
     gap: 2px;
     height: auto;
     padding: 4px;
+    width: 100%;
 }
 
 .deck-row.casino-section {
@@ -1326,4 +1329,55 @@ body {
 
 .card-wrapper.purchasing {
     animation: purchase-fade 0.3s forwards;
+}
+.jobCarouselContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+}
+
+.job-carousel-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.job-carousel {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.job-card {
+    width: 100px;
+    height: 140px;
+    border-radius: 8px;
+    padding: 4px;
+    background: rgba(0,0,0,0.4);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.job-card.focused {
+    transform: scale(1.2);
+    box-shadow: 0 0 8px 2px gold;
+}
+
+.job-card.locked {
+    filter: grayscale(1);
+    opacity: 0.5;
+}
+
+.job-card .lucide {
+    width: 32px;
+    height: 32px;
+}
+
+.job-info {
+    text-align: center;
 }
