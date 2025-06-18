@@ -24,7 +24,7 @@ import { initPlayerLife, refreshPlayerLife } from "./playerLife.js";
 import { Jobs, assignJob, getAvailableJobs, renderJobAssignments, renderJobCarousel } from "./jobs.js"; // job definitions
 import RateTracker from "./utils/rateTracker.js";
 import { formatNumber } from "./utils/numberFormat.js";
-import { initCore, refreshCore } from './core.js';
+import { initCore, refreshCore, addCoreXP } from './core.js';
 import {
   rollNewCardUpgrades,
   applyCardUpgrade,
@@ -902,6 +902,10 @@ document.addEventListener("DOMContentLoaded", () => {
   initVignetteToggles();
   initPlayerLife({ getGameCash: () => cash, spendGameCash: spendCash });
   initCore();
+  window.addEventListener('core-mind-upgrade', () => {
+    stats.maxMana += 10;
+    updateManaBar();
+  });
   showDeckListView();
   Object.values(upgrades).forEach(u => u.effect({ stats, pDeck, stageData, systems }));
   renderUpgrades();
@@ -2411,6 +2415,7 @@ stats.maxMana,
 stats.mana + (stats.manaRegen * deltaTime) / 1000
 );
 updateManaBar();
+ addCoreXP('mental', (stats.manaRegen * deltaTime) / 1000);
 }
 
   // passive progress for bar upgrades
