@@ -3,6 +3,7 @@ export const coreState = {
   mind: { level: 1, xp: 0, maxXP: 1000 },
   body: { level: 1, xp: 0, maxXP: 10 },
   soul: { level: 1, xp: 0, maxXP: 10 },
+  meditationProgress: 0,
   meditating: false
 };
 
@@ -11,6 +12,7 @@ let meditateBtn;
 let levelDisplay;
 let progressText;
 let soulTimer;
+let meditationTimer;
 
 export function initCore() {
   container = document.getElementById('coreTabContent');
@@ -33,6 +35,7 @@ const bodyPath = `M200 140
         <clipPath id="soulClip"><circle cx="280" cy="220" r="20" /></clipPath>
       </defs>
       <path d="${bodyPath}" fill="rgba(0,0,0,0.3)" stroke="#888" stroke-width="2" />
+      <circle id="coreHalo" cx="200" cy="180" r="70" fill="none" stroke="gold" stroke-width="4" opacity="0" />
       <rect id="bodyFill" x="170" y="240" width="60" height="0" fill="rgba(255,255,255,0.4)" clip-path="url(#bodyShapeClip)" />
       <circle cx="200" cy="60" r="20" fill="rgba(100,150,255,0.3)" />
       <rect id="mindFill" x="180" y="80" width="40" height="0" fill="rgba(100,150,255,0.6)" clip-path="url(#mindClip)" />
@@ -73,13 +76,17 @@ export function addCoreXP(type, amt = 1) {
     type === 'physical' ? coreState.body :
     type === 'soul' ? coreState.soul : null;
   if (!orb) return;
+  const maxLevel = coreState.coreLevel * 5;
+  if (orb.level >= maxLevel) return;
   orb.xp = Math.min(orb.maxXP, orb.xp + amt);
   renderCore();
 }
 
 function onMindOrbClick() {
-  if (coreState.mind.xp < coreState.mind.maxXP) return;
-  coreState.mind.level += 1;
+  const orb = coreState.mind;
+  const maxLevel = coreState.coreLevel * 5;
+  if (orb.xp < orb.maxXP || orb.level >= maxLevel) return;
+  orb.level += 1;
   coreState.mind.xp = 0;
   coreState.mind.maxXP = Math.floor(coreState.mind.maxXP * 1.5);
   window.dispatchEvent(new CustomEvent('core-mind-upgrade'));
@@ -87,22 +94,38 @@ function onMindOrbClick() {
 }
 
 function startMeditation() {
+  if (coreState.meditationProgress >= 100) {
+    breakthrough();
+    return;
+  }
   if (coreState.meditating) return;
   coreState.meditating = true;
+  meditateBtn.textContent = 'Meditating...';
   meditateBtn.disabled = true;
-  let progress = 0;
-  const timer = setInterval(() => {
-    progress += 0.05;
-    if (progress >= 1) {
-      clearInterval(timer);
-      coreState.coreLevel += 1;
-      coreState.mind.xp = 0;
-      coreState.body.xp = 0;
-      coreState.soul.xp = 0;
+  meditationTimer = setInterval(() => {
+    coreState.meditationProgress = Math.min(100, coreState.meditationProgress + 1);
+    renderCore();
+    if (coreState.meditationProgress >= 100) {
+      clearInterval(meditationTimer);
       coreState.meditating = false;
-      renderCore();
+      meditateBtn.textContent = 'Breakthrough';
+      meditateBtn.disabled = false;
     }
   }, 100);
+}
+
+function breakthrough() {
+  if (meditationTimer) {
+    clearInterval(meditationTimer);
+    coreState.meditating = false;
+  }
+  coreState.coreLevel += 1;
+  coreState.meditationProgress = 0;
+  coreState.mind.xp = 0;
+  coreState.body.xp = 0;
+  coreState.soul.xp = 0;
+  meditateBtn.textContent = 'Meditate Core';
+  renderCore();
 }
 
 function renderCore() {
@@ -111,9 +134,7 @@ function renderCore() {
   const bodyFill = Math.min(1, coreState.body.xp / coreState.body.maxXP);
   const soulFill = Math.min(1, coreState.soul.xp / coreState.soul.maxXP);
 
-  const totalXP = coreState.mind.xp + coreState.body.xp + coreState.soul.xp;
-  const totalMax = coreState.mind.maxXP + coreState.body.maxXP + coreState.soul.maxXP;
-  const coreFill = Math.min(1, totalXP / totalMax);
+  const coreFill = Math.min(1, coreState.meditationProgress / 100);
 
   const updateRect = (id, cx, cy, r, fill) => {
     const rect = container.querySelector(id);
@@ -127,7 +148,7 @@ function renderCore() {
   updateRect('#mindFill', 200, 60, 20, mindFill);
   updateRect('#bodyOrbFill', 120, 220, 20, bodyFill);
   updateRect('#soulFill', 280, 220, 20, soulFill);
-  updateRect('#bodyFill', 200, 180, 30, coreFill);
+  updateRect('#bodyFill', 200, 180, 60, coreFill);
 
   const mindOrb = container.querySelector('#mindOrb');
   if (mindOrb) mindOrb.setAttribute('stroke', mindFill >= 1 ? '#ffffaa' : '#88aaff');
@@ -143,10 +164,20 @@ function renderCore() {
   const soulText = container.querySelector('#soulText');
   if (soulText) soulText.textContent = `${Math.floor(coreState.soul.xp)}/${coreState.soul.maxXP}`;
   const progressText = container.querySelector('#coreProgressText');
-  if (progressText) progressText.textContent = `${Math.floor(totalXP)}/${totalMax}`;
+  if (progressText) progressText.textContent = `${Math.floor(coreState.meditationProgress)}/100`;
   levelDisplay.textContent = `Core Level: ${coreState.coreLevel}`;
-  const ready = mindFill >= 1 && bodyFill >= 1 && soulFill >= 1 && !coreState.meditating;
-  meditateBtn.disabled = !ready;
+  const ready = mindFill >= 1 && bodyFill >= 1 && soulFill >= 1 && !coreState.meditating && coreState.meditationProgress === 0;
+
+  if (coreState.meditationProgress >= 100) {
+    meditateBtn.textContent = 'Breakthrough';
+    meditateBtn.disabled = false;
+  } else {
+    meditateBtn.textContent = coreState.meditating ? 'Meditating...' : 'Meditate Core';
+    meditateBtn.disabled = !ready;
+  }
+
+  const halo = container.querySelector('#coreHalo');
+  if (halo) halo.setAttribute('opacity', coreState.meditationProgress >= 100 ? '1' : '0');
 }
 
 export function refreshCore() {
