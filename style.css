@@ -1535,3 +1535,9 @@ body {
 .core-level-text {
     margin-top: 4px;
 }
+
+.orb-text {
+    font-size: 0.8rem;
+    fill: #d4af37;
+    pointer-events: none;
+}

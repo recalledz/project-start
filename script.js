@@ -1728,9 +1728,12 @@ function heartHeal() {
 
   drawnCards.forEach(card => {
     if (card.suit === "Hearts") {
+      const before = target.currentHp;
       target.currentHp = Math.round(
         Math.min(target.currentHp + card.currentLevel, target.maxHp)
       );
+      const gained = target.currentHp - before;
+      if (gained > 0) addCoreXP('physical', gained);
       animateCardHeal(target);
     }
   });
@@ -1805,7 +1808,10 @@ function animateCardDeath(card, callback) {
 function healCardsOnKill() {
   drawnCards.forEach(card => {
     if (!card) return;
+    const before = card.currentHp;
     card.healFromKill();
+    const gained = card.currentHp - before;
+    if (gained > 0) addCoreXP('physical', gained);
   });
   updateHandDisplay();
   updateDeckDisplay();
@@ -1885,7 +1891,9 @@ function useJoker(joker) {
         if (!card) return;
         const before = card.currentHp;
         card.currentHp = Math.round(Math.min(card.maxHp, card.currentHp + healAmt));
-        if (card.currentHp > before) {
+        const gained = card.currentHp - before;
+        if (gained > 0) {
+          addCoreXP('physical', gained);
           card.hpDisplay.textContent = `HP: ${formatNumber(Math.round(card.currentHp))}/${formatNumber(Math.round(card.maxHp))}`;
           animateCardHeal(card);
         }
@@ -2488,6 +2496,11 @@ if (!isNaN(mult)) {
 stats.damageMultiplier = mult;
 renderPlayerStats(stats);
 }
+},
+addManaRegen: () => {
+const amt = parseFloat(document.getElementById("debugManaRegen").value) || 0;
+stats.manaRegen += amt;
+renderPlayerStats(stats);
 },
 toggleFastMode: () => {
 timeScale = timeScale === 1 ? FAST_MODE_SCALE: 1;
