@@ -20,9 +20,11 @@ import {
 import {
   initStarChart
 } from "./starChart.js"; // optional star chart tab
+import { initPlayerLife, refreshPlayerLife } from "./playerLife.js";
 import { Jobs, assignJob, getAvailableJobs, renderJobAssignments, renderJobCarousel } from "./jobs.js"; // job definitions
 import RateTracker from "./utils/rateTracker.js";
 import { formatNumber } from "./utils/numberFormat.js";
+import { initCore, refreshCore } from './core.js';
 import {
   rollNewCardUpgrades,
   applyCardUpgrade,
@@ -79,6 +81,15 @@ let cardPoints = 0;
 // Track how many card points have already been converted to cash
 let lastCashOutPoints = 0;
 let currentEnemy = null;
+
+function spendCash(amount) {
+  const amt = Math.min(amount, cash);
+  cash -= amt;
+  if (cashDisplay) cashDisplay.textContent = `Cash: $${formatNumber(cash)}`;
+  cashRateTracker.record(cash);
+  updateUpgradeButtons();
+  return amt;
+}
 
 // track how many upgrade power points have been bought total
 let upgradePowerPurchased = 0;
@@ -277,12 +288,14 @@ let starChartTabButton;
 let playerStatsTabButton;
 let worldTabButton;
 let upgradesTabButton;
+let playerTabButton;
 let mainTab;
 let deckTab;
 let starChartTab;
 let playerStatsTab;
 let worldsTab;
 let upgradesTab;
+let playerTab;
 let barSubTabButton;
 let cardSubTabButton;
 let barUpgradesPanel;
@@ -292,6 +305,10 @@ let activeEffectsContainer;
 let tooltip;
 let deckViewBtn;
 let jokerViewBtn;
+let playerLifeSubTabButton;
+let playerCoreSubTabButton;
+let playerLifePanel;
+let playerCorePanel;
 let jobsViewBtn;
 let jobsCarouselBtn;
 
@@ -326,6 +343,7 @@ function hideTab() {
   if (playerStatsTab) playerStatsTab.style.display = "none";
   if (worldsTab) worldsTab.style.display = "none";
   if (upgradesTab) upgradesTab.style.display = "none";
+  if (playerTab) playerTab.style.display = "none";
 }
 
 function showTab(tab) {
@@ -366,12 +384,14 @@ function initTabs() {
   playerStatsTabButton = document.querySelector('.playerStatsTabButton');
   worldTabButton = document.querySelector('.worldTabButton');
   upgradesTabButton = document.querySelector('.upgradesTabButton');
+  playerTabButton = document.querySelector('.playerTabButton');
   mainTab = document.querySelector('.mainTab');
   deckTab = document.querySelector('.deckTab');
   starChartTab = document.querySelector('.starChartTab');
   playerStatsTab = document.querySelector('.playerStatsTab');
   worldsTab = document.querySelector('.worldsTab');
   upgradesTab = document.querySelector('.upgradesTab');
+  playerTab = document.querySelector('.playerTab');
   barSubTabButton = document.querySelector('.barSubTabButton');
   cardSubTabButton = document.querySelector('.cardSubTabButton');
   barUpgradesPanel = document.querySelector('.bar-upgrades-panel');
@@ -383,6 +403,10 @@ function initTabs() {
   jokerViewBtn = document.querySelector('.jokerViewBtn');
   jobsViewBtn = document.querySelector('.jobsViewBtn');
   jobsCarouselBtn = document.querySelector('.jobsCarouselBtn');
+  playerLifeSubTabButton = document.querySelector(".playerLifeSubTabButton");
+  playerCoreSubTabButton = document.querySelector(".playerCoreSubTabButton");
+  playerLifePanel = document.querySelector(".player-life-panel");
+  playerCorePanel = document.querySelector(".player-core-panel");
   if (mainTabButton)
     mainTabButton.addEventListener("click", () => {
       showTab(mainTab);
@@ -420,6 +444,15 @@ function initTabs() {
     });
   }
 
+  if (playerTabButton) {
+    playerTabButton.addEventListener('click', () => {
+      refreshPlayerLife();
+      refreshCore();
+      showTab(playerTab);
+      setActiveTabButton(playerTabButton);
+    });
+  }
+
   if (deckViewBtn) deckViewBtn.addEventListener('click', showDeckListView);
   if (jokerViewBtn) jokerViewBtn.addEventListener('click', showJokerView);
   if (jobsViewBtn) jobsViewBtn.addEventListener('click', () => {
@@ -447,6 +480,20 @@ function initTabs() {
     barSubTabButton.addEventListener("click", showBarUpgradesPanel);
   if (cardSubTabButton)
     cardSubTabButton.addEventListener("click", showCardUpgradesPanel);
+  if (playerLifeSubTabButton)
+    playerLifeSubTabButton.addEventListener("click", () => {
+      if (playerLifePanel) playerLifePanel.style.display = "flex";
+      if (playerCorePanel) playerCorePanel.style.display = "none";
+      playerLifeSubTabButton.classList.add("active");
+      if (playerCoreSubTabButton) playerCoreSubTabButton.classList.remove("active");
+    });
+  if (playerCoreSubTabButton)
+    playerCoreSubTabButton.addEventListener("click", () => {
+      if (playerLifePanel) playerLifePanel.style.display = "none";
+      if (playerCorePanel) playerCorePanel.style.display = "flex";
+      playerCoreSubTabButton.classList.add("active");
+      if (playerLifeSubTabButton) playerLifeSubTabButton.classList.remove("active");
+    });
 
   showTab(mainTab); // Start with main tab visible
   setActiveTabButton(mainTabButton);
@@ -853,6 +900,8 @@ document.addEventListener("DOMContentLoaded", () => {
   initTabs();
   loadGame();
   initVignetteToggles();
+  initPlayerLife({ getGameCash: () => cash, spendGameCash: spendCash });
+  initCore();
   showDeckListView();
   Object.values(upgrades).forEach(u => u.effect({ stats, pDeck, stageData, systems }));
   renderUpgrades();

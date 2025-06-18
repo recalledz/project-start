@@ -43,6 +43,7 @@
       <button class="playerStatsTabButton">stats</button>
       <button class="upgradesTabButton">upgrades</button>
       <button class="worldTabButton">worlds</button>
+      <button class="playerTabButton">player</button>
     </div>
 
     <!--------------main tab panel----------------->
@@ -179,6 +180,19 @@
     <div class="worldsTab">
       <span id="worldProgressPerSecDisplay">Avg World Progress/sec: 0%</span>
       <div class="worldsContainer casino-section"></div>
+    </div>
+    <div class="playerTab">
+      <div class="player-subtabs">
+        <button class="playerLifeSubTabButton active">Life</button>
+        <button class="playerCoreSubTabButton">Core</button>
+      </div>
+      <div class="player-life-panel">
+        <div class="player-actions"></div>
+        <div class="player-resources casino-section"></div>
+      </div>
+      <div class="player-core-panel" style="display:none;">
+        <div id="coreTabContent" class="casino-section"></div>
+      </div>
     </div>
     <div id="tooltip"></div>
     <script type="module" src="script.js"></script>

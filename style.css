@@ -1390,3 +1390,130 @@ body {
 .job-info {
     text-align: center;
 }
+
+/* Player life tab */
+.playerTab {
+    display: flex;
+    gap: 10px;
+    background-color: #556b7a;
+    padding: 5px;
+    height: 100vh;
+}
+
+.player-actions {
+    flex: 1 1 70%;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.player-actions button {
+    padding: 6px;
+    border: 2px solid #d4af37;
+    background: rgba(0, 0, 0, 0.4);
+    color: #d4af37;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.8rem;
+}
+
+.player-resources {
+    flex: 0 0 180px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 0.8rem;
+}
+
+.player-resources .resource-entry {
+    display: flex;
+    justify-content: space-between;
+}
+
+/* life cards */
+.life-card {
+    border: 2px solid #d4af37;
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.4);
+    color: #d4af37;
+    padding: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.life-card.fade-in {
+    animation: life-fade-in 0.4s ease-out;
+}
+
+.life-card.active {
+    animation: glow-pulse 1s infinite alternate;
+}
+
+.life-card-title {
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.life-card-desc {
+    font-size: 0.8rem;
+}
+
+.life-card-action {
+    text-align: center;
+}
+
+.life-card-progress {
+    font-size: 0.7rem;
+    text-align: center;
+}
+
+.life-card-timer {
+    margin-bottom: 4px;
+}
+
+@keyframes life-fade-in {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.player-subtabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 6px;
+}
+.player-subtabs button {
+    flex: 1;
+    background: rgba(0, 0, 0, 0.4);
+    color: #d4af37;
+    border: 2px solid #d4af37;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+.player-subtabs button.active {
+    background: #d4af37;
+    color: #220000;
+}
+.player-life-panel {
+    display: flex;
+    gap: 10px;
+    flex: 1;
+}
+.player-core-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    flex: 1;
+}
+#coreTabContent svg {
+    max-width: 300px;
+}
+.core-level-text {
+    margin-top: 4px;
+}

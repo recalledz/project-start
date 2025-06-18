@@ -23,6 +23,7 @@
 
 ## 🚧 Upcoming Goals
 - Fix dev tools: spawn boss does not update stage stats properly
+- Add Alternate Progression System (Player Life Tab)
 
 ## fixes
 
@@ -167,10 +168,101 @@
 * **Ghost Step** *(New)*: While above 80% evasion, dodge incoming abilities entirely.
 * **Divine Sacrifice** *(New)*: Every 5th ability heals allies and purges one debuff but costs 2x mana.
 
-> *Suggestion: Aim for some keystones that synergize across trees (e.g., Mind + Dex) to reward hybrid builds.*
+ > *Suggestion: Aim for some keystones that synergize across trees (e.g., Mind + Dex) to reward hybrid builds.*
 
 
----
+ ### Task: Implement Core Mechanic and Visual SVG in Player Tab
+
+ #### Overview:
+ Introduce a new subtab under the "Player" tab called **"Core"**, which displays a meditative progression system. This mechanic uses a **central human silhouette** surrounded by three orbs representing **Mind**, **Body**, and **Soul**. These orbs fill based on task activity, and once all are filled, the player can trigger a **Core Meditation** to level up their Core.
+
+ ---
+
+ #### Subtasks:
+
+ ##### 1. Add Core Subtab to Player Tab
+ - Add a subtab labeled `"Core"` next to the current Player subtab.
+ - On tab load, render the Core SVG diagram (details below).
+ - Include a display of current Core Level (`Core Level: X`) underneath.
+
+ ##### 2. Insert SVG-Based Diagram
+ Embed the following SVG layout into the Core subtab’s container (`#coreTabContent` or similar):
+
+ ```html
+ <svg id="coreDiagram" viewBox="0 0 400 400" width="100%" height="100%">
+   <path d="M200 140
+            C185 140, 180 120, 200 120
+            C220 120, 215 140, 200 140
+            M190 140
+            C170 160, 170 190, 185 200
+            C170 210, 170 240, 200 240
+            C230 240, 230 210, 215 200
+            C230 190, 230 160, 210 140
+            Z"
+         fill="rgba(0,0,0,0.5)" stroke="#888" stroke-width="2" />
+
+   <circle id="mindOrb" cx="200" cy="60" r="20" fill="rgba(100,150,255,0.6)" stroke="#88aaff" stroke-width="2" />
+   <circle id="bodyOrb" cx="120" cy="220" r="20" fill="rgba(255,100,100,0.6)" stroke="#ff8888" stroke-width="2" />
+   <circle id="soulOrb" cx="280" cy="220" r="20" fill="rgba(180,100,255,0.6)" stroke="#cc88ff" stroke-width="2" />
+
+   <text x="200" y="270" text-anchor="middle" font-size="14" fill="#fff">Core Level: 1</text>
+ </svg>
+ ```
+
+ ##### 3. Core Progression System
+
+ * **Orbs**:
+
+   * Mind: fills with XP from *mental tasks* (e.g. Meditate, Read)
+   * Body: fills with XP from *physical tasks* (e.g. Clean Room)
+   * Soul: placeholder for future reflection tasks (e.g. Journal)
+ * Each orb has its **own level** and % fill.
+ * When all orbs reach 100%, enable a `"Meditate Core"` button in center.
+
+   * Clicking it initiates a **slow Core Level-up** process.
+   * Core Level tracks and will later influence card stats (not needed yet).
+
+ ##### 4. Task Restrictions
+
+ * Add `taskType` tags to tasks: `"mental"` or `"physical"`.
+ * Player may:
+
+   * Run **only 1 physical task at a time**
+   * Run **up to X mental tasks**, where X = current Mind level (starts at 2)
+ * Prevent additional tasks beyond current allowance.
+
+ ##### 5. Adjust Task Card Size
+
+ * Shrink existing task card layout to be more compact (card-sized).
+ * Display cards vertically with spacing, retaining header, description, and button.
+ * Maintain consistent visual language with other card UI in the game.
+
+ ---
+
+ #### Stretch Goals (Optional):
+
+ * Animate orb glow as fill increases.
+ * Add progress bars around orbs.
+ * Allow tooltip on each orb to show XP/Level breakdown.
+
+ ---
+
+ #### File Targets:
+
+ * Modify: `/script.js`, `/style.css`, `/index.html` as needed
+ * Possibly create: `/ui/core.js` or `coreUI.js` for modular logic
+
+ ---
+
+ #### Visual Style Reference:
+
+ * Silhouette should resemble seated meditation figure, Xinhua-style
+ * Orbs should softly glow based on level
+ * Overall aesthetic should feel dreamlike, mystical, and serene
+
+ ---
+
+ ---
 
 ## 🔄 Migration Status
 - Codebase successfully committed to GitHub
