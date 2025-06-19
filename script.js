@@ -127,7 +127,10 @@ const stats = {
   redrawCooldownReduction: 0,
   hpMultiplier: 1,
   extraDamageMultiplier: 1,
-  drawPoints: 0
+  drawPoints: 0,
+  drawPointsMult: 1,
+  damageBuffMultiplier: 1,
+  damageBuffExpiration: 0
 };
 
 const systems = {
@@ -259,6 +262,7 @@ const jokerViewContainer = document.querySelector('.jokerViewContainer');
 const deckJobsContainer = document.querySelector('.deckJobsContainer');
 const jobCarouselContainer = document.querySelector('.jobCarouselContainer');
 const dCardContainer = document.getElementsByClassName("dCardContainer")[0];
+const dealerContainer = document.querySelector('.dealerContainer');
 const jokerContainers = document.querySelectorAll(".jokerContainer");
 const manaBar = document.getElementById("manaBar");
 const manaFill = document.getElementById("manaFill");
@@ -305,9 +309,9 @@ let jokerViewBtn;
 let deckUpgradesViewBtn;
 let deckUpgradesContainer;
 let redrawCostDisplay;
-let playerLifeSubTabButton;
+let playerSkillsSubTabButton;
 let playerCoreSubTabButton;
-let playerLifePanel;
+let playerSkillsPanel;
 let playerCorePanel;
 let jobsViewBtn;
 let jobsCarouselBtn;
@@ -380,9 +384,9 @@ function initTabs() {
   redrawCostDisplay = document.getElementById('redrawCostDisplay');
   jobsViewBtn = document.querySelector('.jobsViewBtn');
   jobsCarouselBtn = document.querySelector('.jobsCarouselBtn');
-  playerLifeSubTabButton = document.querySelector(".playerLifeSubTabButton");
+  playerSkillsSubTabButton = document.querySelector(".playerSkillsSubTabButton");
   playerCoreSubTabButton = document.querySelector(".playerCoreSubTabButton");
-  playerLifePanel = document.querySelector(".player-life-panel");
+  playerSkillsPanel = document.querySelector(".player-skills-panel");
   playerCorePanel = document.querySelector(".player-core-panel");
   if (mainTabButton)
     mainTabButton.addEventListener("click", () => {
@@ -394,6 +398,7 @@ function initTabs() {
     deckTabButton.addEventListener("click", () => {
       showTab(deckTab);
       setActiveTabButton(deckTabButton);
+      showDeckListView();
     });
 
   if (starChartTabButton) {
@@ -453,19 +458,19 @@ function initTabs() {
         deckUpgradesContainer.style.display = 'flex';
       }
     });
-  if (playerLifeSubTabButton)
-    playerLifeSubTabButton.addEventListener("click", () => {
-      if (playerLifePanel) playerLifePanel.style.display = "flex";
+  if (playerSkillsSubTabButton)
+    playerSkillsSubTabButton.addEventListener("click", () => {
+      if (playerSkillsPanel) playerSkillsPanel.style.display = "flex";
       if (playerCorePanel) playerCorePanel.style.display = "none";
-      playerLifeSubTabButton.classList.add("active");
+      playerSkillsSubTabButton.classList.add("active");
       if (playerCoreSubTabButton) playerCoreSubTabButton.classList.remove("active");
     });
   if (playerCoreSubTabButton)
     playerCoreSubTabButton.addEventListener("click", () => {
-      if (playerLifePanel) playerLifePanel.style.display = "none";
+      if (playerSkillsPanel) playerSkillsPanel.style.display = "none";
       if (playerCorePanel) playerCorePanel.style.display = "flex";
       playerCoreSubTabButton.classList.add("active");
-      if (playerLifeSubTabButton) playerLifeSubTabButton.classList.remove("active");
+      if (playerSkillsSubTabButton) playerSkillsSubTabButton.classList.remove("active");
     });
 
   showTab(mainTab); // Start with main tab visible
@@ -616,6 +621,12 @@ function updateActiveEffects() {
       activeEffectsContainer.appendChild(div);
     }
   });
+  if (stats.damageBuffMultiplier > 1 && stats.damageBuffExpiration) {
+    const remain = Math.max(0, Math.ceil((stats.damageBuffExpiration - Date.now()) / 1000));
+    const div = document.createElement('div');
+    div.textContent = `Damage Buff x${stats.damageBuffMultiplier.toFixed(1)} (${remain}s)`;
+    activeEffectsContainer.appendChild(div);
+  }
 }
 
 function updateUpgradePowerDisplay() {
@@ -775,27 +786,41 @@ function renderTabCard(card) {
   });
 }
 
-for (let i = 0; i < deck.length; i++) {
-  renderTabCard(deck[i]);
+function renderMiniCard(card) {
+  const wrapper = document.createElement('div');
+  wrapper.classList.add('mini-card-wrapper');
+
+  const cardPane = document.createElement('div');
+  cardPane.classList.add('mini-card');
+  cardPane.innerHTML = `
+    <div class="card-value" style="color: ${card.color}">${card.value}</div>
+    <div class="card-suit" style="color: ${card.color}">${card.symbol}</div>
+    <div class="mini-card-level">Lv ${card.currentLevel}</div>
+  `;
+
+  card.deckLevelDisplay = cardPane.querySelector('.mini-card-level');
+  wrapper.appendChild(cardPane);
+  deckTabContainer.appendChild(wrapper);
 }
 
 // Synchronize XP bars and HP values for cards shown in the Deck tab
 function updateDeckDisplay() {
   // Update ALL cards in the original deck, including those that have been drawn
   pDeck.forEach(card => {
-    // Skip if card doesn't have deck tab elements
-    if (!card.deckXpBarFill || !card.deckXpLabel) return;
+    // Mini card level label
+    if (card.deckLevelDisplay) {
+      card.deckLevelDisplay.textContent = `Lv ${card.currentLevel}`;
+    }
 
-    // 1) XP bar for deck tab
-    const pct = (card.XpCurrent / card.XpReq) * 100;
-    card.deckXpBarFill.style.width = `${Math.min(pct, 100)}%`;
+    // Full deck card elements
+    if (card.deckXpBarFill && card.deckXpLabel) {
+      const pct = (card.XpCurrent / card.XpReq) * 100;
+      card.deckXpBarFill.style.width = `${Math.min(pct, 100)}%`;
+      card.deckXpLabel.textContent =
+        `LV: ${card.currentLevel} ` +
+        `XP: ${formatNumber(card.XpCurrent)}/${formatNumber(Math.floor(card.XpReq))}`;
+    }
 
-    // 2) XP/Level/Damage label for deck tab
-    card.deckXpLabel.textContent =
-    `LV: ${card.currentLevel} ` +
-    `XP: ${formatNumber(card.XpCurrent)}/${formatNumber(Math.floor(card.XpReq))}`;
-
-    // 3) Update HP in deck tab
     if (card.deckHpDisplay) {
       card.deckHpDisplay.textContent = `HP: ${formatNumber(Math.round(card.currentHp))}/${formatNumber(Math.round(card.maxHp))}`;
     }
@@ -824,7 +849,7 @@ function updateMasteryBars() {
 }
 
 function hideDeckViews() {
-  // keep the deck list visible so mastery progress remains on screen
+  if (deckListContainer) deckListContainer.style.display = 'none';
   if (deckTabContainer) deckTabContainer.style.display = 'none';
   if (jokerViewContainer) jokerViewContainer.style.display = 'none';
   if (deckJobsContainer) deckJobsContainer.style.display = 'none';
@@ -845,7 +870,7 @@ function showDeckCardsView(id) {
   if (!deckTabContainer) return;
   deckTabContainer.innerHTML = '';
   const cards = deckConfigs[id]?.cards || [];
-  cards.forEach(c => renderTabCard(c));
+  cards.forEach(c => renderMiniCard(c));
   deckTabContainer.style.display = 'flex';
 }
 
@@ -1693,13 +1718,14 @@ function heartHeal() {
 
 let gamePaused = false;
 let upgradeSelectionOpen = false;
+let upgradeOverlay = null;
 let redrawCost = 10;
 
 function handleRedraw() {
   if (cash < redrawCost) return;
   spendCash(redrawCost);
-  stats.drawPoints = (stats.drawPoints || 0) + 1;
-  redrawCost = Math.floor(redrawCost * 1.2 + 1);
+  stats.drawPoints = (stats.drawPoints || 0) + stats.drawPointsMult;
+  redrawCost = redrawCost * 2;
   redrawHand(getCardState());
   updateRedrawButton();
   renderPlayerStats(stats);
@@ -1711,6 +1737,9 @@ function openCardUpgradeSelection() {
   upgradeSelectionOpen = true;
   gamePaused = true;
   dCardContainer.innerHTML = '';
+  upgradeOverlay = document.createElement('div');
+  upgradeOverlay.classList.add('upgrade-selection-overlay');
+  dealerContainer.appendChild(upgradeOverlay);
   const ids = rollNewCardUpgrades(3);
   ids.forEach(id => {
     const def = cardUpgradeDefinitions[id];
@@ -1725,7 +1754,7 @@ function openCardUpgradeSelection() {
       purchaseCardUpgrade(id, cost);
       closeCardUpgradeSelection();
     });
-    dCardContainer.appendChild(wrap);
+    upgradeOverlay.appendChild(wrap);
   });
   lucide.createIcons();
 }
@@ -1734,6 +1763,10 @@ function closeCardUpgradeSelection() {
   if (!upgradeSelectionOpen) return;
   upgradeSelectionOpen = false;
   dCardContainer.innerHTML = '';
+  if (upgradeOverlay) {
+    upgradeOverlay.remove();
+    upgradeOverlay = null;
+  }
   renderDealerCard();
   gamePaused = false;
 }
@@ -1992,7 +2025,6 @@ function respawnPlayer() {
   handContainer.innerHTML = "";
   discardContainer.innerHTML = "";
   deckTabContainer.innerHTML = "";
-  deck.forEach(card => renderTabCard(card));
 
   cashDisplay.textContent = `Cash: $${formatNumber(cash)}`;
   cashRateTracker.reset(cash);
@@ -2140,6 +2172,10 @@ function updatePlayerStats() {
   stats.cashMulti = 1;
   stats.points = 0;
 
+  if (stats.damageBuffExpiration && Date.now() > stats.damageBuffExpiration) {
+    stats.damageBuffMultiplier = 1;
+  }
+
   for (const card of drawnCards) {
     if (!card) continue;
     recalcCardHp(card, stats, barUpgrades);
@@ -2155,7 +2191,7 @@ stats.pDamage += card.damage;
 stats.points += card.value;
 }
 
-stats.pDamage *= stats.damageMultiplier;
+stats.pDamage *= stats.damageMultiplier * stats.damageBuffMultiplier;
 renderPlayerStats(stats);
 }
 

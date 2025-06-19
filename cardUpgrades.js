@@ -57,6 +57,33 @@ export const cardUpgradeDefinitions = {
       stats.extraDamageMultiplier = (stats.extraDamageMultiplier || 1) * 1.1;
     }
   },
+  drawPointsIncrease: {
+    id: 'drawPointsIncrease',
+    name: 'Draw Points +10%',
+    rarity: 'common',
+    effect: ({ stats }) => {
+      stats.drawPointsMult = (stats.drawPointsMult || 1) * 1.1;
+    }
+  },
+  damageBuff30s: {
+    id: 'damageBuff30s',
+    name: 'Damage Buff 30s',
+    rarity: 'uncommon',
+    noLevel: true,
+    effect: ({ stats, updateActiveEffects }) => {
+      const now = Date.now();
+      const expiry = now + 30000;
+      stats.damageBuffMultiplier = 1.3;
+      stats.damageBuffExpiration = Math.max(stats.damageBuffExpiration || 0, expiry);
+      updateActiveEffects?.();
+      setTimeout(() => {
+        if (Date.now() >= stats.damageBuffExpiration) {
+          stats.damageBuffMultiplier = 1;
+          updateActiveEffects?.();
+        }
+      }, expiry - now);
+    }
+  },
   // Prestige unlocked upgrades
   maxMana: {
     id: 'maxMana',
@@ -230,7 +257,9 @@ export const unlockedCardUpgrades = [
   'hpPerKill',
   'attackSpeedReduction',
   'redrawCooldownReduction',
-  'extraCardSlot'
+  'extraCardSlot',
+  'drawPointsIncrease',
+  'damageBuff30s'
 ];
 
 export const upgradeLevels = {};
@@ -289,9 +318,12 @@ export function addActiveUpgradeCardsToDeck(deck) {
 }
 
 export function applyCardUpgrade(id, context) {
-  if (!upgradeLevels[id]) upgradeLevels[id] = 0;
-  upgradeLevels[id] += 1;
   const def = cardUpgradeDefinitions[id];
+  if (!def) return;
+  if (!def.noLevel) {
+    if (!upgradeLevels[id]) upgradeLevels[id] = 0;
+    upgradeLevels[id] += 1;
+  }
   def.effect(context);
 }
 

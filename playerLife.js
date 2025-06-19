@@ -1,10 +1,14 @@
-import { addCoreXP, getMindLevel } from "./core.js";
+import { addCoreXP } from "./core.js";
 export const lifeResources = {
-  focus: 0,
-  cleanliness: 0,
+  inspiration: 0,
   knowledge: 0,
-  mentalHealth: 0,
-  preparedness: 0,
+  endurance: 0,
+  ore: 0,
+  food: 0,
+  mana: 0,
+  influence: 0,
+  components: 0,
+  discovery: 0,
   cash: 0
 };
 
@@ -12,84 +16,63 @@ const RESOURCE_CAP = 100;
 const CASH_CAP = 9999;
 
 const skills = {
+  mentalAcuity: { xp: 0 },
+  literacy: { xp: 0 },
+  combatFitness: { xp: 0 },
+  strength: { xp: 0 },
+  dexterity: { xp: 0 },
   focus: { xp: 0 },
-  cleanliness: { xp: 0 },
-  knowledge: { xp: 0 },
-  mentalHealth: { xp: 0 },
-  preparedness: { xp: 0 }
+  charisma: { xp: 0 },
+  craftsmanship: { xp: 0 },
+  perception: { xp: 0 }
 };
 
 const ACTION_DURATION = 10; // seconds per resource tick
 const actions = [
-  {
-    id: 'meditate',
-    taskType: "mental",
-    label: 'Meditate',
-    skill: 'focus',
-    resource: 'focus',
-    xpGain: 1,
-    resGain: 1,
-    duration: ACTION_DURATION,
-    unlockSkill: null,
-    unlockXp: 0
-  },
-  {
-    id: 'cleanRoom',
-    taskType: "physical",
-    label: 'Clean Room',
-    skill: 'cleanliness',
-    resource: 'cleanliness',
-    xpGain: 1,
-    resGain: 1,
-    duration: ACTION_DURATION,
-    unlockSkill: 'focus',
-    unlockXp: 5
-  },
-  {
-    id: 'readBook',
-    taskType: "mental",
-    label: 'Read Book',
-    skill: 'knowledge',
-    resource: 'knowledge',
-    xpGain: 1,
-    resGain: 1,
-    duration: ACTION_DURATION,
-    unlockSkill: 'cleanliness',
-    unlockXp: 5
-  },
-  {
-    id: 'writeJournal',
-    taskType: "soul",
-    label: 'Write Journal',
-    skill: 'mentalHealth',
-    resource: 'mentalHealth',
-    xpGain: 1,
-    resGain: 1,
-    duration: ACTION_DURATION,
-    unlockSkill: 'knowledge',
-    unlockXp: 5
-  },
-  {
-    id: 'jobSearch',
-    taskType: "physical",
-    label: 'Job Search',
-    skill: 'preparedness',
-    resource: 'preparedness',
-    xpGain: 1,
-    resGain: 1,
-    duration: ACTION_DURATION,
-    unlockSkill: 'mentalHealth',
-    unlockXp: 5
-  }
+  { id: 'ponder', taskType: 'mental', label: 'Ponder', skill: 'mentalAcuity', resource: 'inspiration', xpGain: 1, resGain: 1, duration: ACTION_DURATION },
+  { id: 'read', taskType: 'mental', label: 'Read', skill: 'literacy', resource: 'knowledge', xpGain: 1, resGain: 1, duration: ACTION_DURATION, unlockSkill: 'mentalAcuity', unlockXp: 5 },
+  { id: 'train', taskType: 'physical', label: 'Train', skill: 'combatFitness', resource: 'endurance', xpGain: 1, resGain: 1, duration: ACTION_DURATION, unlockSkill: 'literacy', unlockXp: 5 },
+  { id: 'mine', taskType: 'physical', label: 'Mine', skill: 'strength', resource: 'ore', xpGain: 1, resGain: 1, duration: ACTION_DURATION, unlockSkill: 'combatFitness', unlockXp: 5 },
+  { id: 'farm', taskType: 'physical', label: 'Farm', skill: 'dexterity', resource: 'food', xpGain: 1, resGain: 1, duration: ACTION_DURATION, unlockSkill: 'strength', unlockXp: 5 },
+  { id: 'meditate', taskType: 'mental', label: 'Meditate', skill: 'focus', resource: 'mana', xpGain: 1, resGain: 1, duration: ACTION_DURATION, unlockSkill: 'literacy', unlockXp: 10 },
+  { id: 'socialize', taskType: 'mental', label: 'Socialize', skill: 'charisma', resource: 'influence', xpGain: 1, resGain: 1, duration: ACTION_DURATION, unlockSkill: 'combatFitness', unlockXp: 10 },
+  { id: 'craft', taskType: 'physical', label: 'Craft', skill: 'craftsmanship', resource: 'components', xpGain: 1, resGain: 1, duration: ACTION_DURATION, unlockResource: 'ore', unlockResourceAmt: 100 },
+  { id: 'explore', taskType: 'physical', label: 'Explore', skill: 'perception', resource: 'discovery', xpGain: 1, resGain: 1, duration: ACTION_DURATION, unlockSkill: 'charisma', unlockXp: 10 }
 ];
 
 let getGameCash = () => 0;
 let spendGameCash = () => 0;
 let actionsContainer;
 let resourcesContainer;
+let activityDisplay;
 const unlockedActions = new Set();
 const actionStates = {};
 let tickTimer;
+
+function renderSkillsList(container) {
+  if (!container) return;
+  container.innerHTML = '';
+  Object.entries(skills).forEach(([key, data]) => {
+    const level = Math.floor(data.xp / 10) + 1;
+    const progress = data.xp % 10;
+    const row = document.createElement('div');
+    row.classList.add('skill-entry');
+    const name = key.replace(/([A-Z])/g, ' $1');
+    row.textContent = `${name.charAt(0).toUpperCase()+name.slice(1)}: Lv ${level} (${progress}/10)`;
+    container.appendChild(row);
+  });
+}
+
+function renderActivity() {
+  if (!activityDisplay) return;
+  const active = Object.keys(actionStates).find(id => actionStates[id].active);
+  if (active) {
+    const a = actions.find(act => act.id === active);
+    activityDisplay.textContent = a ? `${a.label}...` : '';
+  } else {
+    activityDisplay.textContent = '';
+  }
+}
 
 function addResource(key, amt) {
   const cap = key === 'cash' ? CASH_CAP : RESOURCE_CAP;
@@ -99,20 +82,18 @@ function addResource(key, amt) {
 function startAction(action) {
   const state = actionStates[action.id] || { active: false, elapsed: 0 };
   if (state.active) return;
-  const activeIds = Object.keys(actionStates).filter(id => actionStates[id].active);
-  const activePhysical = activeIds.filter(id => (actions.find(a => a.id === id) || {}).taskType === "physical").length;
-  const activeMental = activeIds.filter(id => (actions.find(a => a.id === id) || {}).taskType === "mental").length;
-  if (action.taskType === "physical" && activePhysical >= 1) return;
-  if (action.taskType === "mental" && activeMental >= getMindLevel()) return;
+  Object.values(actionStates).forEach(s => (s.active = false));
   state.active = true;
   state.elapsed = 0;
   actionStates[action.id] = state;
   renderActions();
+  renderActivity();
 }
 function cancelAction(id) {
   const state = actionStates[id];
   if (state) state.active = false;
   renderActions();
+  renderActivity();
 }
 
 function tickActions(delta) {
@@ -135,6 +116,7 @@ function tickActions(delta) {
     checkUnlocks();
   }
   renderActions();
+  renderActivity();
 }
 
 function checkUnlocks() {
@@ -149,8 +131,11 @@ function checkUnlocks() {
 }
 
 function isActionUnlocked(action) {
+  if (action.unlockResource) {
+    if (lifeResources[action.unlockResource] < (action.unlockResourceAmt || 0)) return false;
+  }
   if (!action.unlockSkill) return true;
-  return skills[action.unlockSkill].xp >= action.unlockXp;
+  return skills[action.unlockSkill].xp >= (action.unlockXp || 0);
 }
 
 function renderActions() {
@@ -159,65 +144,26 @@ function renderActions() {
   actions.forEach(act => {
     if (!isActionUnlocked(act)) return;
     const state = actionStates[act.id] || { active: false, elapsed: 0 };
-    if (!unlockedActions.has(act.id)) {
-      unlockedActions.add(act.id);
-      state.fadeIn = true;
-    }
     actionStates[act.id] = state;
-
-    const card = document.createElement('div');
-    card.classList.add('life-card');
-    if (state.fadeIn) {
-      card.classList.add('fade-in');
-      state.fadeIn = false;
-    }
-    if (state.active) card.classList.add('active');
-
-    const header = document.createElement('div');
-    header.classList.add('life-card-title');
-    header.textContent = act.label;
-
-    const desc = document.createElement('div');
-    desc.classList.add('life-card-desc');
-    desc.textContent = `+${act.resGain} ${act.resource} every ${act.duration}s`;
-
-    const actionBar = document.createElement('div');
-    actionBar.classList.add('life-card-action');
-    if (state.active) {
-      const timer = document.createElement('div');
-      timer.classList.add('life-card-timer');
-      timer.textContent = `${Math.ceil(act.duration - state.elapsed)}s`; 
-      const cancelBtn = document.createElement('button');
-      cancelBtn.textContent = 'Cancel';
-      cancelBtn.addEventListener('click', () => cancelAction(act.id));
-      actionBar.append(timer, cancelBtn);
-    } else {
-      const startBtn = document.createElement('button');
-      startBtn.textContent = 'Start';
-      startBtn.addEventListener('click', () => startAction(act));
-      actionBar.appendChild(startBtn);
-    }
-
-    const xp = skills[act.skill].xp;
-    const level = Math.floor(xp / 10) + 1;
-    const progress = xp % 10;
-    const progressEl = document.createElement('div');
-    progressEl.classList.add('life-card-progress');
-    progressEl.textContent = `Level ${level} - XP: ${progress}/10`;
-
-    card.append(header, desc, actionBar, progressEl);
-    actionsContainer.appendChild(card);
+    const btn = document.createElement('button');
+    btn.textContent = act.label;
+    if (state.active) btn.classList.add('active');
+    btn.addEventListener('click', () => {
+      if (state.active) cancelAction(act.id); else startAction(act);
+    });
+    actionsContainer.appendChild(btn);
   });
   const transfer = document.createElement('button');
   transfer.textContent = 'Transfer Cash';
   transfer.addEventListener('click', transferCashFromGame);
   actionsContainer.appendChild(transfer);
+  renderActivity();
 }
 
 function renderResources() {
   if (!resourcesContainer) return;
   resourcesContainer.innerHTML = '';
-  ['focus','cleanliness','knowledge','mentalHealth','preparedness','cash']
+  ['inspiration','knowledge','endurance','ore','food','mana','influence','components','discovery','cash']
     .forEach(k => {
       const row = document.createElement('div');
       row.classList.add('resource-entry');
@@ -237,8 +183,10 @@ export function transferCashFromGame() {
 export function initPlayerLife(opts = {}) {
   getGameCash = opts.getGameCash || getGameCash;
   spendGameCash = opts.spendGameCash || spendGameCash;
-  actionsContainer = document.querySelector('.player-actions');
-  resourcesContainer = document.querySelector('.player-resources');
+  actionsContainer = document.querySelector('.core-actions');
+  resourcesContainer = document.querySelector('.core-resources');
+  activityDisplay = document.getElementById('coreActivityText');
+  renderSkillsList(document.querySelector('.skills-list'));
   renderActions();
   renderResources();
   if (!tickTimer) {
@@ -249,4 +197,7 @@ export function initPlayerLife(opts = {}) {
 export function refreshPlayerLife() {
   renderActions();
   renderResources();
+  renderSkillsList(document.querySelector('.skills-list'));
 }
+
+export { renderSkillsList };

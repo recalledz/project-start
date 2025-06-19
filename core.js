@@ -27,6 +27,10 @@ const bodyPath = `M200 140
                C230 190, 230 160, 210 140
                Z`;
   container.innerHTML = `
+    <div class="core-button-wrapper">
+      <button id="meditateCoreBtn" disabled>Meditate Core</button>
+      <div id="coreLevelText" class="core-level-text"></div>
+    </div>
     <svg id="coreDiagram" viewBox="0 0 400 400" width="100%" height="100%">
       <defs>
         <clipPath id="bodyShapeClip"><path d="${bodyPath}" /></clipPath>
@@ -51,8 +55,6 @@ const bodyPath = `M200 140
       <text id="soulText" x="280" y="255" text-anchor="middle" class="orb-text"></text>
       <text id="coreProgressText" x="200" y="260" text-anchor="middle" class="orb-text"></text>
     </svg>
-    <button id="meditateCoreBtn" disabled>Meditate Core</button>
-    <div id="coreLevelText" class="core-level-text"></div>
   `;
   meditateBtn = container.querySelector("#meditateCoreBtn");
   levelDisplay = container.querySelector('#coreLevelText');

@@ -175,15 +175,19 @@
     <div class="playerTab">
       <div class="playerSidePanel casino-section">
         <button class="playerCoreSubTabButton">Core</button>
-        <button class="playerLifeSubTabButton active">Life</button>
+        <button class="playerSkillsSubTabButton active">Skills</button>
       </div>
       <div class="playerMainContainer">
-        <div class="player-life-panel">
-          <div class="player-actions"></div>
-          <div class="player-resources casino-section"></div>
+        <div class="player-skills-panel">
+          <div class="skills-list casino-section"></div>
         </div>
         <div class="player-core-panel" style="display:none;">
-          <div id="coreTabContent"></div>
+          <div class="core-main">
+            <div id="coreTabContent"></div>
+            <div id="coreActivityText" class="core-activity-text"></div>
+            <div class="core-actions"></div>
+          </div>
+          <div class="core-resources casino-section"></div>
         </div>
       </div>
     </div>
