@@ -40,6 +40,23 @@ export const cardUpgradeDefinitions = {
       stats.cardSlots += 1;
     }
   },
+  hpMultiplier: {
+    id: 'hpMultiplier',
+    name: 'HP Multiplier x1.1',
+    rarity: 'common',
+    effect: ({ stats, updateAllCardHp }) => {
+      stats.hpMultiplier = (stats.hpMultiplier || 1) * 1.1;
+      if (typeof updateAllCardHp === 'function') updateAllCardHp();
+    }
+  },
+  damageMultiplier: {
+    id: 'damageMultiplier',
+    name: 'Damage Multiplier x1.1',
+    rarity: 'common',
+    effect: ({ stats }) => {
+      stats.extraDamageMultiplier = (stats.extraDamageMultiplier || 1) * 1.1;
+    }
+  },
   // Prestige unlocked upgrades
   maxMana: {
     id: 'maxMana',
@@ -255,13 +272,14 @@ export function createUpgradeCard(id) {
   return { upgradeId: id };
 }
 
-export function getCardUpgradeCost(id, stats) {
+export function getCardUpgradeCost(id, stats = {}, stageData = {}) {
   const def = cardUpgradeDefinitions[id];
   if (!def) return 0;
   const rarityMult = rarityCostMultiplier[def.rarity] || 1;
-  const handPoints = stats.points || 30;
-  const payout = Math.floor(handPoints * (1 + Math.sqrt(9)) * (stats.cashMulti || 1));
-  return Math.floor(payout * 100 * rarityMult);
+  const kills = Math.floor(Math.random() * 6) + 10; // 10-15 kills
+  const points = stats.points || 30;
+  const baseReward = Math.floor(points * (1 + Math.sqrt(stageData.stage || 1)));
+  return Math.floor(baseReward * kills * rarityMult);
 }
 
 export function addActiveUpgradeCardsToDeck(deck) {
@@ -279,13 +297,13 @@ export function applyCardUpgrade(id, context) {
 
 export function renderCardUpgrades(container, options = {}) {
   if (!container) return;
-  const { stats = {}, cash = 0, onPurchase = null } = options;
+  const { stats = {}, stageData = {}, cash = 0, onPurchase = null } = options;
   container.innerHTML = '';
   const ids = new Set([...activeCardUpgrades, ...Object.keys(upgradeLevels)]);
   ids.forEach(id => {
     const def = cardUpgradeDefinitions[id];
     const level = upgradeLevels[id] || 0;
-    const cost = getCardUpgradeCost(id, stats);
+    const cost = getCardUpgradeCost(id, stats, stageData);
     const wrapper = document.createElement('div');
     wrapper.classList.add('card-wrapper');
     wrapper.dataset.id = id;

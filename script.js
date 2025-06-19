@@ -124,7 +124,10 @@ const stats = {
   playerShield: 0,
   abilityCooldownReduction: 0,
   jokerCooldownReduction: 0,
-  redrawCooldownReduction: 0
+  redrawCooldownReduction: 0,
+  hpMultiplier: 1,
+  extraDamageMultiplier: 1,
+  drawPoints: 0
 };
 
 const systems = {
@@ -288,6 +291,7 @@ let starChartTabButton;
 let playerStatsTabButton;
 let worldTabButton;
 let upgradesTabButton;
+let cardUpgradesTabButton;
 let playerTabButton;
 let mainTab;
 let deckTab;
@@ -295,6 +299,7 @@ let starChartTab;
 let playerStatsTab;
 let worldsTab;
 let upgradesTab;
+let cardUpgradesTab;
 let playerTab;
 let barSubTabButton;
 let cardSubTabButton;
@@ -343,6 +348,7 @@ function hideTab() {
   if (playerStatsTab) playerStatsTab.style.display = "none";
   if (worldsTab) worldsTab.style.display = "none";
   if (upgradesTab) upgradesTab.style.display = "none";
+  if (cardUpgradesTab) cardUpgradesTab.style.display = "none";
   if (playerTab) playerTab.style.display = "none";
 }
 
@@ -368,6 +374,7 @@ function showCardUpgradesPanel() {
   if (cardUpgradesPanel) cardUpgradesPanel.style.display = "block";
   renderCardUpgrades(document.querySelector('.card-upgrade-list'), {
     stats,
+    stageData,
     cash,
     onPurchase: purchaseCardUpgrade
   });
@@ -384,6 +391,7 @@ function initTabs() {
   playerStatsTabButton = document.querySelector('.playerStatsTabButton');
   worldTabButton = document.querySelector('.worldTabButton');
   upgradesTabButton = document.querySelector('.upgradesTabButton');
+  cardUpgradesTabButton = document.querySelector('.cardUpgradesTabButton');
   playerTabButton = document.querySelector('.playerTabButton');
   mainTab = document.querySelector('.mainTab');
   deckTab = document.querySelector('.deckTab');
@@ -391,6 +399,7 @@ function initTabs() {
   playerStatsTab = document.querySelector('.playerStatsTab');
   worldsTab = document.querySelector('.worldsTab');
   upgradesTab = document.querySelector('.upgradesTab');
+  cardUpgradesTab = document.querySelector('.cardUpgradesTab');
   playerTab = document.querySelector('.playerTab');
   barSubTabButton = document.querySelector('.barSubTabButton');
   cardSubTabButton = document.querySelector('.cardSubTabButton');
@@ -473,6 +482,21 @@ function initTabs() {
       showTab(upgradesTab);
       showBarUpgradesPanel();
       setActiveTabButton(upgradesTabButton);
+    });
+  }
+
+  if (cardUpgradesTabButton) {
+    cardUpgradesTabButton.addEventListener('click', () => {
+      showTab(cardUpgradesTab);
+      renderCardUpgrades(document.querySelector('.card-upgrade-list'), {
+        stats,
+        stageData,
+        cash,
+        onPurchase: purchaseCardUpgrade
+      });
+      renderPurchasedUpgrades();
+      updateActiveEffects();
+      setActiveTabButton(cardUpgradesTabButton);
     });
   }
 
@@ -604,28 +628,30 @@ function purchaseCardUpgrade(id, cost) {
   cash -= cost;
   cashDisplay.textContent = `Cash: $${formatNumber(cash)}`;
   cashRateTracker.record(cash);
-  deck.push(createUpgradeCard(id));
+  applyCardUpgrade(id, { stats, pDeck, updateAllCardHp: recalcAllCardHp });
   removeActiveUpgrade(id);
   renderCardUpgrades(document.querySelector('.card-upgrade-list'), {
     stats,
+    stageData,
     cash,
     onPurchase: purchaseCardUpgrade
   });
   renderPurchasedUpgrades();
   updateUpgradeButtons();
+  updatePlayerStats(stats);
 }
 
 function renderPurchasedUpgrades() {
   if (!purchasedUpgradeList) return;
   purchasedUpgradeList.innerHTML = '';
-  deck.forEach(c => {
-    if (!c.upgradeId) return;
+  Object.entries(cardUpgradeLevels).forEach(([id, lvl]) => {
+    if (lvl <= 0) return;
+    const def = cardUpgradeDefinitions[id];
     const wrap = document.createElement('div');
     wrap.classList.add('card-wrapper');
     const cardEl = document.createElement('div');
     cardEl.classList.add('card', 'upgrade-card');
-    const def = cardUpgradeDefinitions[c.upgradeId];
-    cardEl.innerHTML = `<div class="card-suit"><i data-lucide="sword"></i></div><div class="card-desc">${def.name}</div>`;
+    cardEl.innerHTML = `<div class="card-suit"><i data-lucide="sword"></i></div><div class="card-desc">${def.name} (Lv. ${lvl})</div>`;
     wrap.appendChild(cardEl);
     purchasedUpgradeList.appendChild(wrap);
   });
@@ -914,6 +940,7 @@ document.addEventListener("DOMContentLoaded", () => {
   updateUpgradePowerCost();
   renderCardUpgrades(document.querySelector('.card-upgrade-list'), {
     stats,
+    stageData,
     cash,
     onPurchase: purchaseCardUpgrade
   });
@@ -931,6 +958,7 @@ document.addEventListener("DOMContentLoaded", () => {
   rollNewCardUpgrades();
   renderCardUpgrades(document.querySelector('.card-upgrade-list'), {
     stats,
+    stageData,
     cash,
     onPurchase: purchaseCardUpgrade
   });
@@ -940,7 +968,7 @@ document.addEventListener("DOMContentLoaded", () => {
   checkUpgradeUnlocks();
 
   btn.addEventListener("click", () => drawCard(getCardState()));
-  redrawBtn.addEventListener("click", () => redrawHand(getCardState()));
+  redrawBtn.addEventListener("click", handleRedraw);
   nextStageBtn.addEventListener("click", nextStage);
   fightBossBtn.addEventListener("click", () => {
     fightBossBtn.style.display = "none";
@@ -1037,6 +1065,8 @@ function renderPlayerStats(stats) {
   cashMultiDisplay.textContent = `Cash Multi: ${formatNumber(Math.floor(stats.cashMulti))}`;
   pointsDisplay.textContent = `Points: ${formatNumber(stats.points)}`;
   cardPointsDisplay.textContent = `Card Points: ${formatNumber(cardPoints)}`;
+  const dpDisp = document.getElementById('drawPointsDisplay');
+  if (dpDisp) dpDisp.textContent = `DP: ${formatNumber(stats.drawPoints)}`;
   attackSpeedDisplay.textContent = `Attack Speed: ${Math.floor(stats.attackSpeed / 1000)}s`;
   if (manaRegenDisplay) {
     manaRegenDisplay.textContent = `Mana Regen: ${stats.manaRegen.toFixed(2)}/s`;
@@ -1361,6 +1391,8 @@ function nextWorld() {
   stageData.world += 1;
   stageData.stage = 1;
   stageData.kills = playerStats.stageKills[stageData.stage] || 0;
+  redrawCost = 10;
+  updateRedrawButton();
   applyWorldTheme();
   resetStageCashStats();
   worldProgressTimer = 0;
@@ -1384,6 +1416,8 @@ function goToWorld(id) {
   stageData.world = parseInt(id);
   stageData.stage = 1;
   stageData.kills = playerStats.stageKills[stageData.stage] || 0;
+  redrawCost = 10;
+  updateRedrawButton();
   resetStageCashStats();
   worldProgressTimer = 0;
   worldProgressRateTracker.reset(computeWorldProgress(stageData.world) * 100);
@@ -1510,6 +1544,7 @@ function onBossDefeat(boss) {
   rollNewCardUpgrades();
   renderCardUpgrades(document.querySelector('.card-upgrade-list'), {
     stats,
+    stageData,
     cash,
     onPurchase: purchaseCardUpgrade
   });
@@ -1700,6 +1735,12 @@ function updateDrawButton() {
   }
 }
 
+function updateRedrawButton() {
+  if (!redrawBtn) return;
+  redrawBtn.textContent = `🔄 ($${redrawCost})`;
+  redrawBtn.disabled = cash < redrawCost;
+}
+
 // Refresh the cards currently shown in the player's hand
 function updateHandDisplay() {
   drawnCards.forEach(card => {
@@ -1738,6 +1779,53 @@ function heartHeal() {
     }
   });
   target.hpDisplay.textContent = `HP: ${formatNumber(Math.round(target.currentHp))}/${formatNumber(Math.round(target.maxHp))}`;
+}
+
+let gamePaused = false;
+let upgradeSelectionOpen = false;
+let redrawCost = 10;
+
+function handleRedraw() {
+  if (cash < redrawCost) return;
+  spendCash(redrawCost);
+  stats.drawPoints = (stats.drawPoints || 0) + 1;
+  redrawCost = Math.floor(redrawCost * 1.2 + 1);
+  redrawHand(getCardState());
+  updateRedrawButton();
+  renderPlayerStats(stats);
+  openCardUpgradeSelection();
+}
+
+function openCardUpgradeSelection() {
+  if (upgradeSelectionOpen) return;
+  upgradeSelectionOpen = true;
+  gamePaused = true;
+  dCardContainer.innerHTML = '';
+  const ids = rollNewCardUpgrades(3);
+  ids.forEach(id => {
+    const def = cardUpgradeDefinitions[id];
+    const cost = getCardUpgradeCost(id, { points: stats.points }, stageData);
+    const wrap = document.createElement('div');
+    wrap.classList.add('card-wrapper');
+    const card = document.createElement('div');
+    card.classList.add('card', 'upgrade-card');
+    card.innerHTML = `<div class="card-suit"><i data-lucide="sword"></i></div><div class="card-desc">${def.name} - $${cost}</div>`;
+    wrap.appendChild(card);
+    wrap.addEventListener('click', () => {
+      purchaseCardUpgrade(id, cost);
+      closeCardUpgradeSelection();
+    });
+    dCardContainer.appendChild(wrap);
+  });
+  lucide.createIcons();
+}
+
+function closeCardUpgradeSelection() {
+  if (!upgradeSelectionOpen) return;
+  upgradeSelectionOpen = false;
+  dCardContainer.innerHTML = '';
+  renderDealerCard();
+  gamePaused = false;
 }
 
 // Visual pulse when a card gains health
@@ -1979,10 +2067,13 @@ function respawnPlayer() {
   deck = [...pDeck];
   drawnCards = [];
   discardPile = [];
+  redrawCost = 10;
+  updateRedrawButton();
 
   rollNewCardUpgrades();
   renderCardUpgrades(document.querySelector('.card-upgrade-list'), {
     stats,
+    stageData,
     cash,
     onPurchase: purchaseCardUpgrade
   });
@@ -2134,7 +2225,7 @@ function updatePlayerStats() {
   // Reset base stats
   stats.pDamage = 0;
   stats.damageMultiplier =
-    stats.upgradeDamageMultiplier * barUpgrades.damage.multiplier;
+    stats.upgradeDamageMultiplier * barUpgrades.damage.multiplier * stats.extraDamageMultiplier;
   stats.pRegen = 0;
   stats.cashMulti = 1;
   stats.points = 0;
@@ -2194,6 +2285,8 @@ Object.entries(upgrades).map(([k, u]) => [k, u.unlocked])
     upgradePowerPurchased,
     lastCashOutPoints,
     cardPoints,
+    redrawCost,
+    drawPoints: stats.drawPoints,
     deck: deckData,
     upgrades: upgradeLevels,
     unlockedJokers: unlockedJokers.map(j => j.id),
@@ -2220,6 +2313,8 @@ try {
 const state = JSON.parse(json);
   cash = state.cash || 0;
   cardPoints = state.cardPoints || 0;
+  redrawCost = state.redrawCost || 10;
+  stats.drawPoints = state.drawPoints || 0;
   upgradePowerPurchased = state.upgradePowerPurchased || 0;
   lastCashOutPoints = state.lastCashOutPoints || 0;
   Object.assign(stats, state.stats || {});
@@ -2316,6 +2411,7 @@ updateUpgradeButtons();
   renderPurchasedUpgrades();
   updateActiveEffects();
   applyWorldTheme();
+  updateRedrawButton();
 
   updateWorldTabNotification();
 
@@ -2386,6 +2482,7 @@ overlay.style.setProperty("--cooldown", ratio);
 }
 
   updateDrawButton();
+  updateRedrawButton();
   updatePlayerStats(stats);
   cashTimer += deltaTime;
   worldProgressTimer += deltaTime;

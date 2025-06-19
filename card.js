@@ -122,7 +122,8 @@ export function recalcCardHp(card, stats = {}, barUpgrades = {}) {
   const suitMult =
     card.suit === 'Hearts' ? stats.heartHpMultiplier || 1 : 1;
   const maxHpMult = barUpgrades.maxHp?.multiplier || 1;
-  const hp = Math.round(baseHp * maxHpMult * suitMult);
+  const globalMult = stats.hpMultiplier || 1;
+  const hp = Math.round(baseHp * maxHpMult * suitMult * globalMult);
   const ratio = card.maxHp > 0 ? card.currentHp / card.maxHp : 1;
   card.maxHp = hp;
   card.currentHp = Math.round(Math.min(hp, ratio * hp));

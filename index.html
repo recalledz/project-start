@@ -46,6 +46,7 @@
       <button class="starChartTabButton">star chart</button>
       <button class="playerStatsTabButton">stats</button>
       <button class="upgradesTabButton">upgrades</button>
+      <button class="cardUpgradesTabButton">card upgrades</button>
       <button class="worldTabButton">worlds</button>
       <button class="playerTabButton">player</button>
     </div>
@@ -84,6 +85,9 @@
               </div>
               <div id="cardPointsDisplay">
                 Card Points: 0
+              </div>
+              <div id="drawPointsDisplay">
+                DP: 0
               </div>
               <div id="hpPerKillDisplay">
                 HP per Kill: 1
@@ -156,7 +160,7 @@
     <div class="upgradesTab casino-section">
       <div class="upgrade-subtabs">
         <button class="barSubTabButton">Bar Upgrades</button>
-        <button class="cardSubTabButton">Card Upgrades</button>
+        <button class="cardSubTabButton" style="display:none;">Card Upgrades</button>
       </div>
       <div class="bar-upgrades-panel">
         <div class="bar-upgrades-container casino-section">
@@ -165,14 +169,14 @@
           <div class="bar-upgrades"></div>
         </div>
       </div>
-      <div class="card-upgrades-panel">
-        <div class="card-upgrades-container casino-section">
-          <h3>Available Upgrades</h3>
-          <div class="card-upgrade-list"></div>
-          <h3>Purchased Upgrades</h3>
-          <div class="purchased-upgrade-list"></div>
-          <div class="active-effects casino-section"></div>
-        </div>
+    </div>
+    <div class="cardUpgradesTab">
+      <div class="card-upgrades-container casino-section">
+        <h3>Available Upgrades</h3>
+        <div class="card-upgrade-list"></div>
+        <h3>Purchased Upgrades</h3>
+        <div class="purchased-upgrade-list"></div>
+        <div class="active-effects casino-section"></div>
       </div>
     </div>
     <div class="starChartTab">
