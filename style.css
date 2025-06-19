@@ -11,6 +11,8 @@ body {
     font-family: Trebuchet MS;
     padding: 5px;
     color: #fff;
+    height: 100vh;
+    overflow: hidden;
 }
 
 #debugPanel {
@@ -1628,11 +1630,12 @@ body {
     width: 0;
     background: #d4af37;
 }
+/* player-core-panel modifications */
 .player-core-panel {
     display: flex;
     flex-direction: row;
     align-items: flex-start;
-    justify-content: center;
+    justify-content: flex-start;
     gap: 10px;
     flex: 1;
 }
@@ -1643,6 +1646,7 @@ body {
     justify-content: center;
     gap: 6px;
     position: relative;
+    width: 100%;
 }
 #coreTabContent svg {
     max-width: 360px;
@@ -1657,6 +1661,7 @@ body {
     flex-direction: column;
     align-items: center;
     gap: 6px;
+    flex: 1;
 }
 
 .core-actions {
@@ -1691,7 +1696,7 @@ body {
     flex-direction: column;
     gap: 4px;
     font-size: 0.8rem;
-    margin-left: auto;
+    margin-left: 0;
 }
 .core-resources .resource-entry {
     display: flex;
