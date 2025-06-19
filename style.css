@@ -274,6 +274,7 @@ body {
 
 /* dealer container */
 .dealerContainer {
+    position: relative;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -346,13 +347,20 @@ body {
 
 /* Card container */
 .dCardContainer {
-    margin-top: 5px;
+    position: absolute;
+    inset: 0;
     display: flex;
     justify-content: center;
-    gap: 10px;
-    flex-grow: 1;
     align-items: center;
+    gap: 10px;
     width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 5;
+}
+.dCardContainer .card-wrapper {
+    pointer-events: auto;
+    box-shadow: 0 0 10px rgba(0,0,0,0.6);
 }
 
 /* Dealer card base */
@@ -569,6 +577,13 @@ body {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 128, 0, 0.6);
     background: linear-gradient(135deg, #fafafa, #f0f0f0);
+}
+
+.redraw-cost {
+    font-size: 0.8rem;
+    color: #fff;
+    width: 100%;
+    text-align: center;
 }
 
 /* hand container */
@@ -1421,9 +1436,9 @@ body {
 
 .player-actions button {
     padding: 6px;
-    border: 2px solid #d4af37;
-    background: rgba(0, 0, 0, 0.4);
-    color: #d4af37;
+    border: 2px solid #b76eff;
+    background: rgba(70, 0, 100, 0.4);
+    color: #e0d0ff;
     border-radius: 6px;
     cursor: pointer;
     font-size: 0.8rem;
@@ -1499,16 +1514,16 @@ body {
 }
 .player-subtabs button {
     width: 100%;
-    background: rgba(0, 0, 0, 0.4);
-    color: #d4af37;
-    border: 2px solid #d4af37;
+    background: rgba(70, 0, 100, 0.4);
+    color: #e0d0ff;
+    border: 2px solid #b76eff;
     padding: 6px 10px;
     border-radius: 6px;
     font-size: 0.8rem;
     font-weight: bold;
 }
 .player-subtabs button.active {
-    background: #d4af37;
+    background: #b76eff;
     color: #220000;
 }
 .player-life-panel {
@@ -1520,6 +1535,7 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     gap: 6px;
     flex: 1;
 }
@@ -1527,10 +1543,12 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     gap: 6px;
 }
 #coreTabContent svg {
-    max-width: 300px;
+    max-width: 360px;
+    transform: scale(1.2);
 }
 .core-level-text {
     margin-top: 4px;

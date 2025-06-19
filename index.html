@@ -45,8 +45,7 @@
       <button class="deckTabButton">deck</button>
       <button class="starChartTabButton">star chart</button>
       <button class="playerStatsTabButton">stats</button>
-      <button class="upgradesTabButton">upgrades</button>
-      <button class="cardUpgradesTabButton">card upgrades</button>
+      <!-- upgrades tabs removed -->
       <button class="worldTabButton">worlds</button>
       <button class="playerTabButton">player</button>
     </div>
@@ -119,6 +118,7 @@
           </div>
           <button id="clickalipse" title="Draw">🃏</button>
           <button id="redrawBtn" title="Re-draw">🔄</button>
+          <div id="redrawCostDisplay" class="redraw-cost"></div>
           <button id="nextStageBtn" disabled title="Next Stage">🚀</button>
           <button id="fightBossBtn" style="display:none;" title="Fight Boss">👑</button>
         </div>
@@ -148,6 +148,7 @@
         <button class="jokerViewBtn">Jokers</button>
         <button class="jobsViewBtn">Card Jobs</button>
         <button class="jobsCarouselBtn">Jobs</button>
+        <button class="deckUpgradesViewBtn">Upgrades</button>
       </div>
       <div class="deckMainContainer casino-section">
         <div class="deckListContainer"></div>
@@ -155,28 +156,10 @@
         <div class="jokerViewContainer" style="display:none;"></div>
         <div class="deckJobsContainer" style="display:none;"></div>
         <div class="jobCarouselContainer" style="display:none;"></div>
-      </div>
-    </div>
-    <div class="upgradesTab casino-section">
-      <div class="upgrade-subtabs">
-        <button class="barSubTabButton">Bar Upgrades</button>
-        <button class="cardSubTabButton" style="display:none;">Card Upgrades</button>
-      </div>
-      <div class="bar-upgrades-panel">
-        <div class="bar-upgrades-container casino-section">
-          <div id="upgradePowerDisplay">Upgrade Power: 0</div>
-          <button id="buyUpgradePowerBtn">Buy Upgrade Point ($50)</button>
-          <div class="bar-upgrades"></div>
+        <div class="deckUpgradesContainer" style="display:none;">
+          <h3>Purchased Upgrades</h3>
+          <div class="purchased-upgrade-list"></div>
         </div>
-      </div>
-    </div>
-    <div class="cardUpgradesTab">
-      <div class="card-upgrades-container casino-section">
-        <h3>Available Upgrades</h3>
-        <div class="card-upgrade-list"></div>
-        <h3>Purchased Upgrades</h3>
-        <div class="purchased-upgrade-list"></div>
-        <div class="active-effects casino-section"></div>
       </div>
     </div>
     <div class="starChartTab">
@@ -191,8 +174,8 @@
     </div>
     <div class="playerTab">
       <div class="playerSidePanel casino-section">
-        <button class="playerLifeSubTabButton active">Life</button>
         <button class="playerCoreSubTabButton">Core</button>
+        <button class="playerLifeSubTabButton active">Life</button>
       </div>
       <div class="playerMainContainer">
         <div class="player-life-panel">

@@ -290,26 +290,21 @@ let deckTabButton;
 let starChartTabButton;
 let playerStatsTabButton;
 let worldTabButton;
-let upgradesTabButton;
-let cardUpgradesTabButton;
 let playerTabButton;
 let mainTab;
 let deckTab;
 let starChartTab;
 let playerStatsTab;
 let worldsTab;
-let upgradesTab;
-let cardUpgradesTab;
 let playerTab;
-let barSubTabButton;
-let cardSubTabButton;
-let barUpgradesPanel;
-let cardUpgradesPanel;
 let purchasedUpgradeList;
 let activeEffectsContainer;
 let tooltip;
 let deckViewBtn;
 let jokerViewBtn;
+let deckUpgradesViewBtn;
+let deckUpgradesContainer;
+let redrawCostDisplay;
 let playerLifeSubTabButton;
 let playerCoreSubTabButton;
 let playerLifePanel;
@@ -347,8 +342,6 @@ function hideTab() {
   if (starChartTab) starChartTab.style.display = "none";
   if (playerStatsTab) playerStatsTab.style.display = "none";
   if (worldsTab) worldsTab.style.display = "none";
-  if (upgradesTab) upgradesTab.style.display = "none";
-  if (cardUpgradesTab) cardUpgradesTab.style.display = "none";
   if (playerTab) playerTab.style.display = "none";
 }
 
@@ -358,29 +351,9 @@ function showTab(tab) {
   if (tab) tab.style.display = "";
 }
 
-function hideUpgradePanels() {
-  if (barUpgradesPanel) barUpgradesPanel.style.display = "none";
-  if (cardUpgradesPanel) cardUpgradesPanel.style.display = "none";
-}
-
-function showBarUpgradesPanel() {
-  hideUpgradePanels();
-  if (barUpgradesPanel) barUpgradesPanel.style.display = "block";
-  renderBarUpgrades();
-}
-
-function showCardUpgradesPanel() {
-  hideUpgradePanels();
-  if (cardUpgradesPanel) cardUpgradesPanel.style.display = "block";
-  renderCardUpgrades(document.querySelector('.card-upgrade-list'), {
-    stats,
-    stageData,
-    cash,
-    onPurchase: purchaseCardUpgrade
-  });
-  renderPurchasedUpgrades();
-  updateActiveEffects();
-}
+function hideUpgradePanels() {}
+function showBarUpgradesPanel() {}
+function showCardUpgradesPanel() {}
 
 function initTabs() {
   if (typeof document === 'undefined') return;
@@ -390,26 +363,21 @@ function initTabs() {
   starChartTabButton = document.querySelector('.starChartTabButton');
   playerStatsTabButton = document.querySelector('.playerStatsTabButton');
   worldTabButton = document.querySelector('.worldTabButton');
-  upgradesTabButton = document.querySelector('.upgradesTabButton');
-  cardUpgradesTabButton = document.querySelector('.cardUpgradesTabButton');
   playerTabButton = document.querySelector('.playerTabButton');
   mainTab = document.querySelector('.mainTab');
   deckTab = document.querySelector('.deckTab');
   starChartTab = document.querySelector('.starChartTab');
   playerStatsTab = document.querySelector('.playerStatsTab');
   worldsTab = document.querySelector('.worldsTab');
-  upgradesTab = document.querySelector('.upgradesTab');
-  cardUpgradesTab = document.querySelector('.cardUpgradesTab');
   playerTab = document.querySelector('.playerTab');
-  barSubTabButton = document.querySelector('.barSubTabButton');
-  cardSubTabButton = document.querySelector('.cardSubTabButton');
-  barUpgradesPanel = document.querySelector('.bar-upgrades-panel');
-  cardUpgradesPanel = document.querySelector('.card-upgrades-panel');
   purchasedUpgradeList = document.querySelector('.purchased-upgrade-list');
   activeEffectsContainer = document.querySelector('.active-effects');
   tooltip = document.getElementById('tooltip');
   deckViewBtn = document.querySelector('.deckViewBtn');
   jokerViewBtn = document.querySelector('.jokerViewBtn');
+  deckUpgradesViewBtn = document.querySelector('.deckUpgradesViewBtn');
+  deckUpgradesContainer = document.querySelector('.deckUpgradesContainer');
+  redrawCostDisplay = document.getElementById('redrawCostDisplay');
   jobsViewBtn = document.querySelector('.jobsViewBtn');
   jobsCarouselBtn = document.querySelector('.jobsCarouselBtn');
   playerLifeSubTabButton = document.querySelector(".playerLifeSubTabButton");
@@ -477,33 +445,14 @@ function initTabs() {
       showDeckCardsView(e.detail.id);
     });
 
-  if (upgradesTabButton) {
-    upgradesTabButton.addEventListener("click", () => {
-      showTab(upgradesTab);
-      showBarUpgradesPanel();
-      setActiveTabButton(upgradesTabButton);
+  if (deckUpgradesViewBtn)
+    deckUpgradesViewBtn.addEventListener('click', () => {
+      hideDeckViews();
+      if (deckUpgradesContainer) {
+        renderPurchasedUpgrades();
+        deckUpgradesContainer.style.display = 'flex';
+      }
     });
-  }
-
-  if (cardUpgradesTabButton) {
-    cardUpgradesTabButton.addEventListener('click', () => {
-      showTab(cardUpgradesTab);
-      renderCardUpgrades(document.querySelector('.card-upgrade-list'), {
-        stats,
-        stageData,
-        cash,
-        onPurchase: purchaseCardUpgrade
-      });
-      renderPurchasedUpgrades();
-      updateActiveEffects();
-      setActiveTabButton(cardUpgradesTabButton);
-    });
-  }
-
-  if (barSubTabButton)
-    barSubTabButton.addEventListener("click", showBarUpgradesPanel);
-  if (cardSubTabButton)
-    cardSubTabButton.addEventListener("click", showCardUpgradesPanel);
   if (playerLifeSubTabButton)
     playerLifeSubTabButton.addEventListener("click", () => {
       if (playerLifePanel) playerLifePanel.style.display = "flex";
@@ -604,7 +553,6 @@ function checkUpgradeUnlocks() {
     }
   });
   if (changed) {
-    renderUpgrades();
     updateUpgradeButtons();
   }
 }
@@ -618,7 +566,6 @@ function purchaseUpgrade(key) {
   cashRateTracker.record(cash);
   up.level += 1;
   up.effect({ stats, pDeck, stageData, systems });
-  renderUpgrades();
   updateDrawButton();
   renderPlayerStats(stats);
 }
@@ -882,6 +829,7 @@ function hideDeckViews() {
   if (jokerViewContainer) jokerViewContainer.style.display = 'none';
   if (deckJobsContainer) deckJobsContainer.style.display = 'none';
   if (jobCarouselContainer) jobCarouselContainer.style.display = 'none';
+  if (deckUpgradesContainer) deckUpgradesContainer.style.display = 'none';
 }
 
 function showDeckListView() {
@@ -934,18 +882,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   showDeckListView();
   Object.values(upgrades).forEach(u => u.effect({ stats, pDeck, stageData, systems }));
-  renderUpgrades();
-  renderBarUpgrades();
-  updateUpgradePowerDisplay();
-  updateUpgradePowerCost();
-  renderCardUpgrades(document.querySelector('.card-upgrade-list'), {
-    stats,
-    stageData,
-    cash,
-    onPurchase: purchaseCardUpgrade
-  });
   renderPurchasedUpgrades();
-  updateActiveEffects();
   // Start or resume the game after loading
   spawnPlayer();
   respawnDealerStage();
@@ -956,14 +893,7 @@ document.addEventListener("DOMContentLoaded", () => {
   renderWorldsMenu();
   renderJobAssignments(deckJobsContainer, pDeck);
   rollNewCardUpgrades();
-  renderCardUpgrades(document.querySelector('.card-upgrade-list'), {
-    stats,
-    stageData,
-    cash,
-    onPurchase: purchaseCardUpgrade
-  });
   renderPurchasedUpgrades();
-  updateActiveEffects();
   shuffleArray(deck);
   checkUpgradeUnlocks();
 
@@ -993,20 +923,6 @@ document.addEventListener("DOMContentLoaded", () => {
     enemyAttackFill = renderEnemyAttackBar();
     dealerDeathAnimation();
   });
-  const buyBtn = document.getElementById('buyUpgradePowerBtn');
-  if (buyBtn) {
-    buyBtn.addEventListener('click', () => {
-      const cost = upgradePowerCost();
-      if (cash < cost) return;
-      cash -= cost;
-      cashDisplay.textContent = `Cash: $${formatNumber(cash)}`;
-      cashRateTracker.record(cash);
-      stats.upgradePower += 1;
-      upgradePowerPurchased += 1;
-      updateUpgradePowerDisplay();
-      updateUpgradePowerCost();
-    });
-  }
   renderJokers();
   const buttons = document.querySelector('.buttonsContainer');
   playerAttackFill = renderPlayerAttackBar(buttons);
@@ -1540,16 +1456,8 @@ function onBossDefeat(boss) {
 
   healCardsOnKill();
   stats.upgradePower += 5;
-  updateUpgradePowerDisplay();
   rollNewCardUpgrades();
-  renderCardUpgrades(document.querySelector('.card-upgrade-list'), {
-    stats,
-    stageData,
-    cash,
-    onPurchase: purchaseCardUpgrade
-  });
   renderPurchasedUpgrades();
-  updateActiveEffects();
   shuffleArray(deck);
   // Unlock the next world but require the player to travel manually
   updateWorldTabNotification();
@@ -1737,7 +1645,9 @@ function updateDrawButton() {
 
 function updateRedrawButton() {
   if (!redrawBtn) return;
-  redrawBtn.textContent = `🔄 ($${redrawCost})`;
+  redrawBtn.textContent = `🔄`;
+  if (redrawCostDisplay)
+    redrawCostDisplay.textContent = `Cost: $${redrawCost}`;
   redrawBtn.disabled = cash < redrawCost;
 }
 
@@ -2387,9 +2297,6 @@ Object.values(upgrades).forEach(u => u.effect({ stats, pDeck, stageData, systems
 cashDisplay.textContent = `Cash: $${formatNumber(cash)}`;
 cardPointsDisplay.textContent = `Card Points: ${formatNumber(cardPoints)}`;
 
-  renderUpgrades();
-  renderBarUpgrades();
-  updateUpgradePowerDisplay();
   renderJokers();
 updateUpgradeButtons();
   renderPlayerStats(stats);
@@ -2409,7 +2316,6 @@ updateUpgradeButtons();
   checkUpgradeUnlocks();
   updateUpgradePowerCost();
   renderPurchasedUpgrades();
-  updateActiveEffects();
   applyWorldTheme();
   updateRedrawButton();
 
