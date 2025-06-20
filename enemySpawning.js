@@ -58,3 +58,17 @@ export function spawnBoss(stageData, enemyAttackProgress, onAttack, onDefeat) {
   boss.attackTimer = boss.attackInterval * enemyAttackProgress;
   return boss;
 }
+
+export function spawnSpeaker(stageData, enemyAttackProgress, onAttack, onDefeat) {
+  const stage = stageData.stage;
+  const world = stageData.world;
+  const enemy = new Enemy(stage, world, {
+    name: "The Speaker",
+    maxHp: calculateEnemyHp(stage, world) * 3,
+    onAttack,
+    onDefeat
+  });
+  enemy.attackTimer = enemy.attackInterval * enemyAttackProgress;
+  enemy.isSpeaker = true;
+  return enemy;
+}

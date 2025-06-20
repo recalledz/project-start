@@ -11,6 +11,8 @@ body {
     font-family: Trebuchet MS;
     padding: 5px;
     color: #fff;
+    height: 100vh;
+    overflow: hidden;
 }
 
 #debugPanel {
@@ -70,6 +72,36 @@ body {
     color: #220000;
     box-shadow: inset 0 0 8px #fff8c6, 0 0 12px #d4af37;
 }
+.imaginary-subtabs {
+    display: flex;
+    gap: 12px;
+    padding: 10px;
+
+}
+.imaginary-subtabs button {
+    background: rgba(0,0,0,0.4);
+    color: #d4af37;
+    border: 3px solid #d4af37;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-weight: bold;
+    text-shadow: 0 0 6px #000;
+    box-shadow: 0 0 8px rgba(212,175,55,0.5);
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+}
+.imaginary-subtabs button:hover {
+    box-shadow: 0 0 12px rgba(212,175,55,0.8);
+    color: #fff4b3;
+}
+.imaginary-subtabs button.active {
+    background: #d4af37;
+    color: #220000;
+    box-shadow: inset 0 0 8px #fff8c6, 0 0 12px #d4af37;
+}
 
 /* tabs container */
 /*.tabsContainer {
@@ -113,22 +145,36 @@ body {
     white-space: nowrap;
 }
 .mainTab {
-    display: grid;
-    /* keep dealer area row fixed */
-    grid-template-rows: 30% auto auto 1fr;
-    grid-template-columns: 1fr 20%;
-    grid-template-areas:
-        "dealer sidePanel"
-        "gameColumn sidePanel"
-        "gameColumn sidePanel"
-        "gameColumn discard";
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
     padding: 8px;
-    height: 100vh;
     gap: 10px;
+    overflow-y: auto;
 }
 
 .mainTab.world-2-theme {
     background: radial-gradient(circle, #3b1a1a 0%, #1a0000 100%);
+}
+
+.cardSubTab {
+    flex: 1 1 auto;
+    display: grid;
+    grid-template-rows: auto 1fr;
+    grid-template-columns: 1fr 20%;
+    grid-template-areas:
+        "dealer sidePanel"
+        "gameColumn sidePanel";
+    gap: 10px;
+}
+
+.worldsTab {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    overflow-y: auto;
+    padding: 8px;
 }
 
 .dealerContainer {
@@ -280,7 +326,7 @@ body {
     justify-content: flex-start;
     align-items: center;
     gap: 4px;
-    height: 100%;
+    height: auto;
 }
 
 .dealerContainer > .dealerLifeDisplay {
@@ -593,7 +639,7 @@ body {
 .redraw-cost {
     font-size: 0.8rem;
     color: #fff;
-    width: 100%;
+    width: auto;
     text-align: center;
 }
 
@@ -1341,13 +1387,37 @@ body {
         gap: 8px;
     }
 }
+.speaker-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 5001;
+}
+.speaker-overlay .speaker-quote {
+    font-size: 1.6rem;
+    color: #ddd;
+    font-style: italic;
+    text-shadow: 0 0 8px #fff;
+    animation: fogFade 3s ease-in-out;
+}
+@keyframes fogFade {
+    from { opacity: 0; filter: blur(4px); }
+    50% { opacity: 1; filter: blur(0); }
+    to { opacity: 0; filter: blur(4px); }
+}
 
 /* worlds menu */
 .worldsTab {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    background-color: #556b7a;
+    background: transparent;
     padding: 5px;
 }
 .world-entry {
@@ -1398,6 +1468,31 @@ body {
 
 .glow-notify {
     animation: glow-pulse 1s infinite alternate;
+}
+
+/* Distinct look for the Worlds menu container */
+.worldsContainer.casino-section {
+    background: radial-gradient(circle, #033b23 0%, #01170d 100%);
+    box-shadow: 0 0 12px #d4af37;
+}
+
+/* Styled buttons inside the Worlds menu */
+.world-entry button {
+    background: rgba(0, 0, 0, 0.6);
+    color: #d4af37;
+    border: 2px solid #d4af37;
+    border-radius: 6px;
+    padding: 4px 8px;
+    margin-left: 4px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    box-shadow: 0 0 6px rgba(212, 175, 55, 0.4);
+    transition: box-shadow 0.2s;
+}
+
+.world-entry button:hover {
+    box-shadow: 0 0 8px rgba(212, 175, 55, 0.8);
+    color: #fff4b3;
 }
 
 @keyframes purchase-fade {
@@ -1548,18 +1643,15 @@ body {
 }
 .player-subtabs button {
     width: 100%;
-    background: linear-gradient(60deg, #b76eff, #4b0082, #b76eff);
-    background-size: 200% 100%;
-    color: #e0d0ff;
     border: 2px solid #b76eff;
     padding: 6px 10px;
     border-radius: 6px;
     font-size: 0.8rem;
     font-weight: bold;
     text-shadow: 0 0 6px #000;
-    box-shadow: 0 0 8px rgba(183, 110, 255, 0.5);
     transition: all 0.2s;
-    animation: galactic-bg 6s linear infinite;
+    color: #e0d0ff;
+    background: #4b0082;
 }
 .player-subtabs button.active {
     background: #b76eff;
@@ -1570,6 +1662,29 @@ body {
     box-shadow: 0 0 12px rgba(183, 110, 255, 0.8);
     color: #fff4b3;
 }
+
+.playerCoreSubTabButton {
+    background: linear-gradient(60deg, #b76eff, #4b0082, #b76eff);
+    background-size: 200% 100%;
+    box-shadow: 0 0 8px rgba(183, 110, 255, 0.5);
+    animation: galactic-bg 6s linear infinite;
+}
+.playerCoreSubTabButton.active {
+    background: #b76eff;
+}
+
+.playerSkillsSubTabButton {
+    background: linear-gradient(60deg, #a86b32, #5c3317, #a86b32);
+    background-size: 200% 100%;
+    border-color: #a86b32;
+    box-shadow: 0 0 8px rgba(168, 107, 50, 0.5);
+    color: #fff8e1;
+}
+.playerSkillsSubTabButton.active {
+    background: #a86b32;
+    box-shadow: inset 0 0 8px #fff8c6, 0 0 12px #a86b32;
+    color: #220000;
+}
 .player-skills-panel {
     display: flex;
     flex-direction: column;
@@ -1579,20 +1694,41 @@ body {
 
 .skills-list {
     display: flex;
-    flex-direction: column;
-    gap: 4px;
+    flex-wrap: wrap;
+    gap: 8px;
     font-size: 0.8rem;
 }
 
 .skill-entry {
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
+    flex: 0 0 calc(33.333% - 8px);
 }
+
+.skill-progress {
+    width: 100%;
+    height: 6px;
+    background: #090b09;
+    border: 1px solid grey;
+    border-radius: 4px;
+    position: relative;
+    overflow: hidden;
+}
+
+.skill-progress-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 0;
+    background: #d4af37;
+}
+/* player-core-panel modifications */
 .player-core-panel {
     display: flex;
     flex-direction: row;
     align-items: flex-start;
-    justify-content: center;
+    justify-content: flex-start;
     gap: 10px;
     flex: 1;
 }
@@ -1603,10 +1739,11 @@ body {
     justify-content: center;
     gap: 6px;
     position: relative;
+    width: 100%;
 }
 #coreTabContent svg {
-    max-width: 360px;
-    transform: scale(1.2);
+    max-width: 280px;
+    transform: scale(1);
 }
 .core-level-text {
     margin-top: 4px;
@@ -1617,6 +1754,7 @@ body {
     flex-direction: column;
     align-items: center;
     gap: 6px;
+    flex: 1;
 }
 
 .core-actions {
@@ -1628,8 +1766,7 @@ body {
 .core-actions button {
     padding: 6px;
     border: 2px solid #b76eff;
-    background: linear-gradient(60deg, #b76eff, #4b0082, #b76eff);
-    background-size: 200% 100%;
+    background: #4b0082;
     color: #e0d0ff;
     border-radius: 6px;
     cursor: pointer;
@@ -1637,7 +1774,6 @@ body {
     text-shadow: 0 0 6px #000;
     box-shadow: 0 0 8px rgba(183, 110, 255, 0.5);
     transition: all 0.2s;
-    animation: galactic-bg 6s linear infinite;
 }
 .core-actions button:hover {
     box-shadow: 0 0 12px rgba(183, 110, 255, 0.8);
@@ -1653,6 +1789,7 @@ body {
     flex-direction: column;
     gap: 4px;
     font-size: 0.8rem;
+    margin-left: 0;
 }
 .core-resources .resource-entry {
     display: flex;
@@ -1661,18 +1798,41 @@ body {
 
 .core-activity-text {
     font-size: 0.9rem;
-    height: 1rem;
+    font-family: "Trebuchet MS", sans-serif;
+    height: auto;
+    text-align: center;
+    margin-top: 4px;
+}
+
+
+.stamina-bar {
+    width: 15%;
+    height: 8px;
+    background: #222;
+    border: 1px solid #555;
+    margin: 2px auto 0;
+}
+
+.stamina-fill {
+    height: 100%;
+    background: #ffeb3b;
+    width: 100%;
+    transition: width 0.3s ease;
+}
+
+.stamina-text {
+    text-align: center;
+    font-size: 0.8rem;
+    font-family: "Trebuchet MS", sans-serif;
+    margin-bottom: 4px;
 }
 
 .core-button-wrapper {
-    position: absolute;
-    top: 40px;
-    left: 50%;
-    transform: translateX(-50%);
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 4px;
+    gap: 6px;
+    margin-bottom: 10px;
 }
 
 #meditateCoreBtn {

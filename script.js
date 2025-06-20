@@ -24,7 +24,7 @@ import { initPlayerLife, refreshPlayerLife } from "./playerLife.js";
 import { Jobs, assignJob, getAvailableJobs, renderJobAssignments, renderJobCarousel } from "./jobs.js"; // job definitions
 import RateTracker from "./utils/rateTracker.js";
 import { formatNumber } from "./utils/numberFormat.js";
-import { initCore, refreshCore, addCoreXP } from './core.js';
+import { initCore, refreshCore } from './core.js';
 import {
   rollNewCardUpgrades,
   applyCardUpgrade,
@@ -164,6 +164,8 @@ let stageData = {
   attackspeed: 10000 //10 sec at start
 };
 
+let speakerEncounterPending = false;
+
 // Weight a kill's contribution toward world completion based on the stage
 // Lower stages contribute less while stages beyond 10 scale slowly upward
 function stageWeight(stage) {
@@ -183,11 +185,23 @@ Object.keys(BossTemplates).forEach(id => {
   };
 });
 
+function checkSpeakerEncounter() {
+  if (playerStats.speakerEncounters === 0 && stageData.stage >= 5 && !playerStats.hasDied) {
+    speakerEncounterPending = true;
+  } else if (playerStats.speakerEncounters === 1 && worldProgress[stageData.world].bossDefeated) {
+    speakerEncounterPending = true;
+  } else if (playerStats.speakerEncounters === 2 && playerStats.hasDied) {
+    speakerEncounterPending = true;
+  }
+}
+
 const playerStats = {
   timesPrestiged: 0,
   decksUnlocked: 1,
   totalBossKills: 0,
-  stageKills: {}
+  stageKills: {},
+  speakerEncounters: 0,
+  hasDied: false
 };
 
 // Debug time scaling
@@ -293,9 +307,11 @@ let mainTabButton;
 let deckTabButton;
 let starChartTabButton;
 let playerStatsTabButton;
-let worldTabButton;
+let worldSubTabButton;
+let cardSubTabButton;
 let playerTabButton;
 let mainTab;
+let cardSubTab;
 let deckTab;
 let starChartTab;
 let playerStatsTab;
@@ -366,9 +382,11 @@ function initTabs() {
   deckTabButton = document.querySelector('.deckTabButton');
   starChartTabButton = document.querySelector('.starChartTabButton');
   playerStatsTabButton = document.querySelector('.playerStatsTabButton');
-  worldTabButton = document.querySelector('.worldTabButton');
+  cardSubTabButton = document.querySelector('.cardSubTabButton');
+  worldSubTabButton = document.querySelector('.worldSubTabButton');
   playerTabButton = document.querySelector('.playerTabButton');
   mainTab = document.querySelector('.mainTab');
+  cardSubTab = document.querySelector('.cardSubTab');
   deckTab = document.querySelector('.deckTab');
   starChartTab = document.querySelector('.starChartTab');
   playerStatsTab = document.querySelector('.playerStatsTab');
@@ -418,11 +436,21 @@ function initTabs() {
   }
 
 
-  if (worldTabButton) {
-    worldTabButton.addEventListener("click", () => {
+  if (worldSubTabButton) {
+    worldSubTabButton.addEventListener("click", () => {
       renderWorldsMenu();
-      showTab(worldsTab);
-      setActiveTabButton(worldTabButton);
+      if (cardSubTab) cardSubTab.style.display = "none";
+      if (worldsTab) worldsTab.style.display = "";
+      worldSubTabButton.classList.add("active");
+      if (cardSubTabButton) cardSubTabButton.classList.remove("active");
+    });
+  }
+  if (cardSubTabButton) {
+    cardSubTabButton.addEventListener("click", () => {
+      if (worldsTab) worldsTab.style.display = "none";
+      if (cardSubTab) cardSubTab.style.display = "";
+      cardSubTabButton.classList.add("active");
+      if (worldSubTabButton) worldSubTabButton.classList.remove("active");
     });
   }
 
@@ -1294,7 +1322,7 @@ function renderWorldsMenu() {
 
 // Highlight the Worlds tab when rewards can be claimed or a new world is unlocked
 function updateWorldTabNotification() {
-  if (!worldTabButton) return;
+  if (!worldSubTabButton) return;
   let highestUnlocked = 0;
   let rewardAvailable = false;
   Object.entries(worldProgress).forEach(([id, data]) => {
@@ -1304,7 +1332,7 @@ function updateWorldTabNotification() {
   });
   const newWorldAvailable = highestUnlocked > stageData.world;
   const shouldGlow = rewardAvailable || newWorldAvailable;
-  worldTabButton.classList.toggle("glow-notify", shouldGlow);
+  worldSubTabButton.classList.toggle("glow-notify", shouldGlow);
 }
 
 // Show cards eligible for job assignment in the Deck tab
@@ -1321,6 +1349,7 @@ function nextStage() {
   nextStageChecker();
   renderStageInfo();
   checkUpgradeUnlocks();
+  checkSpeakerEncounter();
   // start the next stage without double-counting points
   lastCashOutPoints = stats.points;
   respawnDealerStage();
@@ -1416,7 +1445,19 @@ function removeDealerLifeBar() {
 // After a kill, decide whether to spawn a dealer or a boss
 function respawnDealerStage() {
   removeDealerLifeBar();
-  if (stageData.stage === 10) {
+  if (speakerEncounterPending) {
+    speakerEncounterPending = false;
+    currentEnemy = spawnSpeaker(
+      stageData,
+      enemyAttackProgress,
+      e => {
+        const { minDamage, maxDamage } = calculateEnemyBasicDamage(stageData.stage, stageData.world);
+        const dmg = (Math.floor(Math.random() * (maxDamage - minDamage + 1)) + minDamage) * 3;
+        cDealerDamage(dmg, null, e.name);
+      },
+      onSpeakerDefeat
+    );
+  } else if (stageData.stage === 10) {
     currentEnemy = spawnBoss(
       stageData,
       enemyAttackProgress,
@@ -1463,6 +1504,27 @@ function onDealerDefeat() {
   });
 } // need to define xp formula
 
+function onSpeakerDefeat() {
+  playerStats.speakerEncounters += 1;
+  const idx = playerStats.speakerEncounters;
+  if (idx === 1) {
+    showSpeakerQuote("Sometimes it’s safer to hide in a nightmare... but are we ever truly free from the dream?");
+  } else if (idx === 2) {
+    showSpeakerQuote("Words don’t just describe. They make.");
+  } else if (idx === 3) {
+    showSpeakerQuote("The soul is the only prison you’ve never tried to break.");
+    if (playerTabButton) playerTabButton.style.display = "inline-block";
+    if (mainTabButton) mainTabButton.disabled = true;
+    showTab(playerTab);
+    setActiveTabButton(playerTabButton);
+  }
+  dealerDeathAnimation();
+  dealerBarDeathAnimation(() => {
+    nextStageChecker();
+    respawnDealerStage();
+  });
+}
+
 // Called when the player defeats a boss enemy
 function onBossDefeat(boss) {
   // capture remaining attack progress before resetting
@@ -1484,6 +1546,7 @@ function onBossDefeat(boss) {
   rollNewCardUpgrades();
   renderPurchasedUpgrades();
   shuffleArray(deck);
+  checkSpeakerEncounter();
   // Unlock the next world but require the player to travel manually
   updateWorldTabNotification();
   renderWorldsMenu();
@@ -1704,12 +1767,9 @@ function heartHeal() {
 
   drawnCards.forEach(card => {
     if (card.suit === "Hearts") {
-      const before = target.currentHp;
       target.currentHp = Math.round(
         Math.min(target.currentHp + card.currentLevel, target.maxHp)
       );
-      const gained = target.currentHp - before;
-      if (gained > 0) addCoreXP('physical', gained);
       animateCardHeal(target);
     }
   });
@@ -1839,10 +1899,7 @@ function animateCardDeath(card, callback) {
 function healCardsOnKill() {
   drawnCards.forEach(card => {
     if (!card) return;
-    const before = card.currentHp;
     card.healFromKill();
-    const gained = card.currentHp - before;
-    if (gained > 0) addCoreXP('physical', gained);
   });
   updateHandDisplay();
   updateDeckDisplay();
@@ -1920,14 +1977,9 @@ function useJoker(joker) {
       const healAmt = joker.getScaledPower();
       drawnCards.forEach(card => {
         if (!card) return;
-        const before = card.currentHp;
         card.currentHp = Math.round(Math.min(card.maxHp, card.currentHp + healAmt));
-        const gained = card.currentHp - before;
-        if (gained > 0) {
-          addCoreXP('physical', gained);
-          card.hpDisplay.textContent = `HP: ${formatNumber(Math.round(card.currentHp))}/${formatNumber(Math.round(card.maxHp))}`;
-          animateCardHeal(card);
-        }
+        card.hpDisplay.textContent = `HP: ${formatNumber(Math.round(card.currentHp))}/${formatNumber(Math.round(card.maxHp))}`;
+        animateCardHeal(card);
       });
       addLog(`Healed ${healAmt} HP`,
         "heal");
@@ -2004,6 +2056,7 @@ function spawnPlayer() {
 
 function respawnPlayer() {
   enemyAttackProgress = 0;
+  playerStats.hasDied = false;
   cash = 0;
   cashRateTracker.reset(cash);
 
@@ -2039,6 +2092,7 @@ function respawnPlayer() {
   killsDisplay.textContent = `Kills: ${formatNumber(stageData.kills)}`;
   renderGlobalStats();
   renderWorldsMenu();
+  checkSpeakerEncounter();
 }
 
 let restartOverlay = null;
@@ -2046,6 +2100,7 @@ let restartTimer = null;
 
 function showRestartScreen() {
 if (restartOverlay) return;
+playerStats.hasDied = true;
 restartOverlay = document.createElement("div");
 restartOverlay.classList.add("restart-overlay");
 
@@ -2078,6 +2133,26 @@ if (restartTimer) {
 clearTimeout(restartTimer);
 restartTimer = null;
 }
+}
+
+let speakerOverlay = null;
+function showSpeakerQuote(text) {
+  if (speakerOverlay) return;
+  speakerOverlay = document.createElement("div");
+  speakerOverlay.classList.add("speaker-overlay");
+  const msg = document.createElement("div");
+  msg.classList.add("speaker-quote");
+  msg.textContent = text;
+  speakerOverlay.appendChild(msg);
+  document.body.appendChild(speakerOverlay);
+  setTimeout(hideSpeakerQuote, 4000);
+}
+
+function hideSpeakerQuote() {
+  if (speakerOverlay) {
+    speakerOverlay.remove();
+    speakerOverlay = null;
+  }
 }
 
 // Fully wipe saved data and reload the page
@@ -2461,8 +2536,7 @@ stats.mana = Math.min(
 stats.maxMana,
 stats.mana + (stats.manaRegen * deltaTime) / 1000
 );
-updateManaBar();
- addCoreXP('mental', (stats.manaRegen * deltaTime) / 1000);
+ updateManaBar();
 }
 
   // passive progress for bar upgrades

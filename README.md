@@ -33,6 +33,8 @@ Auto-Attack: Activate automated attacks with adjustable speeds, influenced by ca
 
 Prestige System: Reset progress for long-term benefits, including deck reshuffling, HP refill, and stage resets.
 
+Core Meditation: Mind, Body and Soul orbs fill from Life tab activities. They no longer gain XP from mana, healing or defeats during combat.
+
 
 Resource Management:
 

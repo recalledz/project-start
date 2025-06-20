@@ -1,4 +1,3 @@
-import { addCoreXP } from "./core.js";
 
 export function drawCard(state) {
   const {
@@ -63,10 +62,7 @@ export function redrawHand(state) {
   shuffleArray(deck);
   if (stats.healOnRedraw > 0) {
     pDeck.forEach(c => {
-      const before = c.currentHp;
       c.currentHp = Math.min(c.maxHp, c.currentHp + stats.healOnRedraw);
-      const gained = c.currentHp - before;
-      if (gained > 0) addCoreXP('physical', gained);
     });
   }
   while (drawnCards.length < stats.cardSlots && deck.length > 0) {

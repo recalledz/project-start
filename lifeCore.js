@@ -1,0 +1,121 @@
+export class Resource {
+  constructor(name) {
+    this.name = name;
+    this.amount = 0;
+    this.total = 0;
+  }
+  add(val) {
+    this.amount += val;
+    this.total += val;
+  }
+}
+
+export class Skill {
+  constructor(name, displayName) {
+    this.name = name;
+    this.displayName = displayName;
+    this.level = 0;
+    this.xp = 0;
+    this.threshold = 10;
+  }
+  addXP(val) {
+    this.xp += val;
+    if (this.xp >= this.threshold) {
+      this.xp -= this.threshold;
+      this.level += 1;
+      this.threshold = Math.floor(this.threshold * 1.5);
+      if (this.onLevel) this.onLevel(this.level);
+    }
+  }
+}
+
+export class Activity {
+  constructor(
+    id,
+    {
+      label,
+      skill,
+      resource,
+      rate = 0,
+      xpRate = null,
+      tags = [],
+      stamina = 0,
+      unlock = () => true,
+      description = '',
+      flavor = ''
+    }
+  ) {
+    this.id = id;
+    this.label = label || id;
+    this.skill = skill;
+    this.resource = resource;
+    this.rate = rate;
+    this.xpRate = xpRate === null ? rate : xpRate;
+    this.tags = tags;
+    this.stamina = stamina; // negative to consume, positive to restore
+    this.unlock = unlock;
+    this.description = description;
+    this.flavor = flavor;
+  }
+}
+
+export class LifeGame {
+  constructor() {
+    this.skills = {
+      mentalAcuity: new Skill('mentalAcuity', 'Mental Acuity'),
+      literacy: new Skill('literacy', 'Literacy'),
+      physicalCondition: new Skill('physicalCondition', 'Physical Condition'),
+      mining: new Skill('mining', 'Mining'),
+      craftsmanship: new Skill('craftsmanship', 'Craftsmanship')
+    };
+    this.resources = {
+      thought: new Resource('thought'),
+      knowledge: new Resource('knowledge'),
+      discovery: new Resource('discovery'),
+      copper: new Resource('copper'),
+      components: new Resource('components'),
+      stamina: new Resource('stamina')
+    };
+    this.staminaMax = 10;
+    this.resources.stamina.amount = this.staminaMax;
+    this.activities = {};
+    this.current = null;
+  }
+
+  addActivity(act) {
+    this.activities[act.id] = act;
+  }
+
+  start(id) {
+    if (!this.activities[id] || !this.activities[id].unlock(this)) return;
+    this.current = id;
+  }
+
+  stop() {
+    this.current = null;
+  }
+
+  tick(delta = 1, addCoreXP = () => {}) {
+    const act = this.activities[this.current];
+    if (!act) return;
+    if (act.stamina < 0 && this.resources.stamina.amount <= 0) {
+      this.stop();
+      if (this.activities.ponder) this.start('ponder');
+      return;
+    }
+
+    if (act.stamina !== 0) {
+      this.resources.stamina.amount = Math.max(0, Math.min(this.staminaMax, this.resources.stamina.amount + act.stamina * delta));
+      if (act.stamina < 0 && this.resources.stamina.amount <= 0) {
+        this.stop();
+        if (this.activities.ponder) this.start('ponder');
+        return;
+      }
+    }
+    if (act.resource) this.resources[act.resource].add(act.rate * delta);
+    if (act.skill) this.skills[act.skill].addXP(act.xpRate * delta);
+    if (act.tags.includes('mental')) addCoreXP('mental', 0.1 * delta);
+    if (act.tags.includes('body')) addCoreXP('physical', 0.1 * delta);
+    if (act.tags.includes('will')) addCoreXP('will', 0.1 * delta);
+  }
+}

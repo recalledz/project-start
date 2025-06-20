@@ -1,197 +1,245 @@
-import { addCoreXP } from "./core.js";
-export const lifeResources = {
-  inspiration: 0,
-  knowledge: 0,
-  endurance: 0,
-  ore: 0,
-  food: 0,
-  mana: 0,
-  influence: 0,
-  components: 0,
-  discovery: 0,
-  cash: 0
-};
+import { LifeGame, Activity } from './lifeCore.js';
+import { addCoreXP } from './core.js';
 
-const RESOURCE_CAP = 100;
-const CASH_CAP = 9999;
-
-const skills = {
-  mentalAcuity: { xp: 0 },
-  literacy: { xp: 0 },
-  combatFitness: { xp: 0 },
-  strength: { xp: 0 },
-  dexterity: { xp: 0 },
-  focus: { xp: 0 },
-  charisma: { xp: 0 },
-  craftsmanship: { xp: 0 },
-  perception: { xp: 0 }
-};
-
-const ACTION_DURATION = 10; // seconds per resource tick
-const actions = [
-  { id: 'ponder', taskType: 'mental', label: 'Ponder', skill: 'mentalAcuity', resource: 'inspiration', xpGain: 1, resGain: 1, duration: ACTION_DURATION },
-  { id: 'read', taskType: 'mental', label: 'Read', skill: 'literacy', resource: 'knowledge', xpGain: 1, resGain: 1, duration: ACTION_DURATION, unlockSkill: 'mentalAcuity', unlockXp: 5 },
-  { id: 'train', taskType: 'physical', label: 'Train', skill: 'combatFitness', resource: 'endurance', xpGain: 1, resGain: 1, duration: ACTION_DURATION, unlockSkill: 'literacy', unlockXp: 5 },
-  { id: 'mine', taskType: 'physical', label: 'Mine', skill: 'strength', resource: 'ore', xpGain: 1, resGain: 1, duration: ACTION_DURATION, unlockSkill: 'combatFitness', unlockXp: 5 },
-  { id: 'farm', taskType: 'physical', label: 'Farm', skill: 'dexterity', resource: 'food', xpGain: 1, resGain: 1, duration: ACTION_DURATION, unlockSkill: 'strength', unlockXp: 5 },
-  { id: 'meditate', taskType: 'mental', label: 'Meditate', skill: 'focus', resource: 'mana', xpGain: 1, resGain: 1, duration: ACTION_DURATION, unlockSkill: 'literacy', unlockXp: 10 },
-  { id: 'socialize', taskType: 'mental', label: 'Socialize', skill: 'charisma', resource: 'influence', xpGain: 1, resGain: 1, duration: ACTION_DURATION, unlockSkill: 'combatFitness', unlockXp: 10 },
-  { id: 'craft', taskType: 'physical', label: 'Craft', skill: 'craftsmanship', resource: 'components', xpGain: 1, resGain: 1, duration: ACTION_DURATION, unlockResource: 'ore', unlockResourceAmt: 100 },
-  { id: 'explore', taskType: 'physical', label: 'Explore', skill: 'perception', resource: 'discovery', xpGain: 1, resGain: 1, duration: ACTION_DURATION, unlockSkill: 'charisma', unlockXp: 10 }
-];
-
-let getGameCash = () => 0;
-let spendGameCash = () => 0;
+let game;
 let actionsContainer;
 let resourcesContainer;
 let activityDisplay;
-const unlockedActions = new Set();
-const actionStates = {};
+let staminaFill;
+let staminaText;
 let tickTimer;
+
+const skillInfo = {
+  mentalAcuity: {
+    effect:
+      'Activities with the "mental" tag generate 2% more per level of Mental Acuity',
+    flavor: 'Focus sharpens the mind.'
+  },
+  literacy: {
+    effect:
+      'Each level grants +1 reading mastery, +2% knowledge generation and +3% all skill XP gain',
+    flavor: 'Words reveal worlds.'
+  },
+  physicalCondition: {
+    effect: 'Improves your stamina and unlocks strenuous tasks as you train',
+    flavor: 'A sound body fuels a sound mind.'
+  },
+  mining: {
+    effect: 'Higher levels yield more copper when mining',
+    flavor: 'Chipping away at the earth.'
+  },
+  craftsmanship: {
+    effect:
+      'Each level grants +1 crafting mastery, +5% component gain and -1% crafting cost',
+    flavor: 'Skill transforms raw materials.'
+  }
+};
+
+const activityInfo = {
+  ponder: {
+    effect: '+1 thought/sec, +1 stamina/sec, +Mental Acuity XP',
+    flavor: 'Let your mind wander.',
+    tags: ['mind']
+  },
+  walk: {
+    effect: '+1 discovery/sec, -3 stamina/sec, +Physical Condition XP',
+    flavor: 'A brisk stroll invigorates the body.',
+    tags: ['physical', 'body']
+  },
+  read: {
+    effect: '+0.2 knowledge/sec, -1 stamina/sec, +Literacy XP 0.1/sec',
+    flavor: 'Lose yourself in stories.',
+    tags: ['mental']
+  }
+};
+
+function initActivities() {
+  game.addActivity(new Activity('ponder', {
+    label: 'Ponder',
+    skill: 'mentalAcuity',
+    resource: 'thought',
+    rate: 1,
+    tags: ['mental'],
+    stamina: 1,
+    description: activityInfo.ponder.effect,
+    flavor: activityInfo.ponder.flavor
+  }));
+  game.addActivity(new Activity('walk', {
+    label: 'Walk',
+    skill: 'physicalCondition',
+    resource: 'discovery',
+    rate: 1,
+    xpRate: 0.01,
+    tags: ['physical', 'body'],
+    stamina: -3,
+    description: activityInfo.walk.effect,
+    flavor: activityInfo.walk.flavor
+  }));
+  game.addActivity(new Activity('read', {
+    label: 'Read',
+    skill: 'literacy',
+    resource: 'knowledge',
+    rate: 0.2,
+    xpRate: 0.1,
+    tags: ['mental'],
+    stamina: -1,
+    unlock: g => g.skills.mentalAcuity.level >= 1,
+    description: activityInfo.read.effect,
+    flavor: activityInfo.read.flavor
+  }));
+}
+
+function renderActions() {
+  if (!actionsContainer) return;
+  actionsContainer.innerHTML = '';
+  Object.values(game.activities).forEach(act => {
+    if (!act.unlock(game)) return;
+    const btn = document.createElement('button');
+    btn.textContent = act.label;
+    if (game.current === act.id) btn.classList.add('active');
+    btn.addEventListener('click', () => {
+      if (game.current === act.id) game.stop(); else game.start(act.id);
+      renderActions();
+      renderActivity();
+    });
+    btn.addEventListener('mouseover', e => {
+      const tip = document.getElementById('tooltip');
+      if (!tip) return;
+      const tagLine = act.tags.length ? `Tags: ${act.tags.join(', ')}` : '';
+      tip.innerHTML = `<strong>${act.label}</strong><br>${act.description}${tagLine ? '<br>' + tagLine : ''}<br><em>${act.flavor}</em>`;
+      tip.style.display = 'block';
+      tip.style.left = e.pageX + 10 + 'px';
+      tip.style.top = e.pageY + 10 + 'px';
+    });
+    btn.addEventListener('mousemove', e => {
+      const tip = document.getElementById('tooltip');
+      if (tip && tip.style.display === 'block') {
+        tip.style.left = e.pageX + 10 + 'px';
+        tip.style.top = e.pageY + 10 + 'px';
+      }
+    });
+    btn.addEventListener('mouseout', () => {
+      const tip = document.getElementById('tooltip');
+      if (tip) tip.style.display = 'none';
+    });
+    actionsContainer.appendChild(btn);
+  });
+}
+
+function renderResources() {
+  if (!resourcesContainer) return;
+  resourcesContainer.innerHTML = '';
+  Object.entries(game.resources).forEach(([k, r]) => {
+    if (k === 'stamina') return;
+    const row = document.createElement('div');
+    row.classList.add('resource-entry');
+    row.textContent = `${k}: ${r.amount.toFixed(1)}`;
+    resourcesContainer.appendChild(row);
+  });
+  staminaFill.style.width = `${(game.resources.stamina.amount / game.staminaMax) * 100}%`;
+  if (staminaText) {
+    staminaText.textContent = `${Math.floor(game.resources.stamina.amount)}/${game.staminaMax}`;
+  }
+}
 
 function renderSkillsList(container) {
   if (!container) return;
   container.innerHTML = '';
-  Object.entries(skills).forEach(([key, data]) => {
-    const level = Math.floor(data.xp / 10) + 1;
-    const progress = data.xp % 10;
+  Object.values(game.skills).forEach(s => {
     const row = document.createElement('div');
     row.classList.add('skill-entry');
-    const name = key.replace(/([A-Z])/g, ' $1');
-    row.textContent = `${name.charAt(0).toUpperCase()+name.slice(1)}: Lv ${level} (${progress}/10)`;
+    const label = document.createElement('div');
+    label.textContent = `${s.displayName} Lv ${s.level}`;
+    const bar = document.createElement('div');
+    bar.classList.add('skill-progress');
+    const fill = document.createElement('div');
+    fill.classList.add('skill-progress-fill');
+    fill.style.width = `${Math.min(1, s.xp / s.threshold) * 100}%`;
+    bar.appendChild(fill);
+    row.append(label, bar);
+
+    row.addEventListener('mouseover', e => {
+      const tip = document.getElementById('tooltip');
+      if (!tip) return;
+      const info = skillInfo[s.name] || { effect: '', flavor: '' };
+      tip.innerHTML = `<strong>${s.displayName}</strong><br>${info.effect}<br><em>${info.flavor}</em>`;
+      tip.style.display = 'block';
+      tip.style.left = e.pageX + 10 + 'px';
+      tip.style.top = e.pageY + 10 + 'px';
+    });
+    row.addEventListener('mousemove', e => {
+      const tip = document.getElementById('tooltip');
+      if (tip && tip.style.display === 'block') {
+        tip.style.left = e.pageX + 10 + 'px';
+        tip.style.top = e.pageY + 10 + 'px';
+      }
+    });
+    row.addEventListener('mouseout', () => {
+      const tip = document.getElementById('tooltip');
+      if (tip) tip.style.display = 'none';
+    });
     container.appendChild(row);
   });
 }
 
 function renderActivity() {
   if (!activityDisplay) return;
-  const active = Object.keys(actionStates).find(id => actionStates[id].active);
-  if (active) {
-    const a = actions.find(act => act.id === active);
-    activityDisplay.textContent = a ? `${a.label}...` : '';
-  } else {
-    activityDisplay.textContent = '';
-  }
+  const act = game.activities[game.current];
+  activityDisplay.textContent = act ? `${act.label}...` : '';
 }
 
-function addResource(key, amt) {
-  const cap = key === 'cash' ? CASH_CAP : RESOURCE_CAP;
-  lifeResources[key] = Math.min(cap, lifeResources[key] + amt);
-}
-
-function startAction(action) {
-  const state = actionStates[action.id] || { active: false, elapsed: 0 };
-  if (state.active) return;
-  Object.values(actionStates).forEach(s => (s.active = false));
-  state.active = true;
-  state.elapsed = 0;
-  actionStates[action.id] = state;
-  renderActions();
-  renderActivity();
-}
-function cancelAction(id) {
-  const state = actionStates[id];
-  if (state) state.active = false;
-  renderActions();
-  renderActivity();
-}
-
-function tickActions(delta) {
-  let refreshed = false;
-  Object.entries(actionStates).forEach(([id, state]) => {
-    if (!state.active) return;
-    state.elapsed += delta;
-    const action = actions.find(a => a.id === id);
-    if (!action) return;
-    if (state.elapsed >= action.duration) {
-      state.elapsed -= action.duration;
-      addResource(action.resource, action.resGain);
-      skills[action.skill].xp += action.xpGain;
-      addCoreXP(action.taskType, action.xpGain);
-      refreshed = true;
-    }
-  });
-  if (refreshed) {
-    renderResources();
-    checkUnlocks();
-  }
-  renderActions();
-  renderActivity();
-}
-
-function checkUnlocks() {
-  let changed = false;
-  actions.forEach(a => {
-    if (!unlockedActions.has(a.id) && isActionUnlocked(a)) {
-      unlockedActions.add(a.id);
-      changed = true;
-    }
-  });
-  if (changed) renderActions();
-}
-
-function isActionUnlocked(action) {
-  if (action.unlockResource) {
-    if (lifeResources[action.unlockResource] < (action.unlockResourceAmt || 0)) return false;
-  }
-  if (!action.unlockSkill) return true;
-  return skills[action.unlockSkill].xp >= (action.unlockXp || 0);
-}
-
-function renderActions() {
-  if (!actionsContainer) return;
-  actionsContainer.innerHTML = '';
-  actions.forEach(act => {
-    if (!isActionUnlocked(act)) return;
-    const state = actionStates[act.id] || { active: false, elapsed: 0 };
-    actionStates[act.id] = state;
-    const btn = document.createElement('button');
-    btn.textContent = act.label;
-    if (state.active) btn.classList.add('active');
-    btn.addEventListener('click', () => {
-      if (state.active) cancelAction(act.id); else startAction(act);
-    });
-    actionsContainer.appendChild(btn);
-  });
-  const transfer = document.createElement('button');
-  transfer.textContent = 'Transfer Cash';
-  transfer.addEventListener('click', transferCashFromGame);
-  actionsContainer.appendChild(transfer);
-  renderActivity();
-}
-
-function renderResources() {
-  if (!resourcesContainer) return;
-  resourcesContainer.innerHTML = '';
-  ['inspiration','knowledge','endurance','ore','food','mana','influence','components','discovery','cash']
-    .forEach(k => {
-      const row = document.createElement('div');
-      row.classList.add('resource-entry');
-      row.textContent = `${k.charAt(0).toUpperCase()+k.slice(1)}: ${lifeResources[k]}`;
-      resourcesContainer.appendChild(row);
-    });
-}
-
-export function transferCashFromGame() {
-  const available = Math.min(getGameCash(), CASH_CAP - lifeResources.cash);
-  if (available <= 0) return;
-  spendGameCash(available);
-  addResource('cash', available);
+function tick() {
+  game.tick(1, addCoreXP);
   renderResources();
+  renderSkillsList(document.querySelector('.skills-list'));
+  renderActivity();
+  saveState();
 }
 
-export function initPlayerLife(opts = {}) {
-  getGameCash = opts.getGameCash || getGameCash;
-  spendGameCash = opts.spendGameCash || spendGameCash;
+function saveState() {
+  const data = {
+    skills: Object.fromEntries(Object.entries(game.skills).map(([k,s]) => [k,{level:s.level,xp:s.xp,threshold:s.threshold}])) ,
+    resources: Object.fromEntries(Object.entries(game.resources).map(([k,r])=>[k,{amount:r.amount,total:r.total}])) ,
+    current: game.current
+  };
+  localStorage.setItem('lifeGame', JSON.stringify(data));
+}
+
+function loadState() {
+  const raw = localStorage.getItem('lifeGame');
+  if (!raw) return;
+  try {
+    const data = JSON.parse(raw);
+    Object.entries(data.skills||{}).forEach(([k,v])=>{
+      if (game.skills[k]) {
+        game.skills[k].level = v.level;
+        game.skills[k].xp = v.xp;
+        game.skills[k].threshold = v.threshold;
+      }
+    });
+    Object.entries(data.resources||{}).forEach(([k,v])=>{
+      if (game.resources[k]) {
+        game.resources[k].amount = v.amount;
+        game.resources[k].total = v.total;
+      }
+    });
+    if (data.current) game.start(data.current);
+  } catch(e) {}
+}
+
+export function initPlayerLife() {
+  game = new LifeGame();
   actionsContainer = document.querySelector('.core-actions');
   resourcesContainer = document.querySelector('.core-resources');
   activityDisplay = document.getElementById('coreActivityText');
-  renderSkillsList(document.querySelector('.skills-list'));
+  staminaFill = document.getElementById('staminaFill');
+  staminaText = document.getElementById('staminaText');
+  initActivities();
+  loadState();
   renderActions();
   renderResources();
-  if (!tickTimer) {
-    tickTimer = setInterval(() => tickActions(1), 1000);
-  }
+  renderSkillsList(document.querySelector('.skills-list'));
+  if (!tickTimer) tickTimer = setInterval(tick, 1000);
 }
 
 export function refreshPlayerLife() {
