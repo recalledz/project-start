@@ -11,8 +11,8 @@ body {
     font-family: Trebuchet MS;
     padding: 5px;
     color: #fff;
-    height: 100vh;
-    overflow: hidden;
+    min-height: 100vh;
+    overflow-y: auto;
 }
 
 #debugPanel {
@@ -265,7 +265,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    font-size: 0.5rem;
+    font-size: 0.45rem;
 }
 
 .vignette-toggle {
@@ -295,6 +295,8 @@ body {
     background: rgba(133, 163, 139, 0.5);
     color: white;
     text-shadow: 0 0 5px black;
+    max-height: 120px;
+    overflow-y: auto;
 }
 
 .statsSidePanel > div {
@@ -324,7 +326,7 @@ body {
     border-radius: 8px;
     color: white;
     text-shadow: 0 0 5px black;
-    max-height: 150px;
+    max-height: 120px;
     overflow-y: auto;
 }
 
@@ -818,6 +820,34 @@ body {
     position: relative;
     margin-top: auto;
     align-self: center;
+}
+
+.deckContainer {
+    border: 2px solid rgb(91, 91, 87);
+    display: flex;
+    width: 75px;
+    height: 100px;
+    justify-content: center;
+    align-items: center;
+    border-bottom: 2px solid rgba(255, 255, 100, 0.3);
+    overflow: hidden;
+    position: relative;
+    margin-top: auto;
+    align-self: center;
+}
+
+.pile-count {
+    text-align: center;
+    font-size: 0.5rem;
+    color: #d4af37;
+    text-shadow: 0 0 5px black;
+}
+
+.deck-info, .discard-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
 }
 
 .card-wrapper {

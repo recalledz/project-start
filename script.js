@@ -248,9 +248,15 @@ function getCardState() {
   return {
     deck,
     drawnCards,
+    discardPile,
+    discardContainer,
+    cardBackImages,
     handContainer,
     renderCard: card => renderCard(card, handContainer),
     updateDeckDisplay,
+    renderDiscardCard,
+    renderDeckTop,
+    updatePileCounts,
     stats,
     showUpgradePopup,
     applyCardUpgrade,
@@ -277,6 +283,9 @@ const chipsDisplay = document.getElementById("chipsDisplay");
 const cardPointsDisplay = document.getElementById("cardPointsDisplay");
 const handContainer = document.getElementsByClassName("handContainer")[0];
 const discardContainer = document.getElementsByClassName("discardContainer")[0];
+const deckContainer = document.getElementsByClassName("deckContainer")[0];
+const deckCountDisplay = document.getElementById("deckCount");
+const discardCountDisplay = document.getElementById("discardCount");
 const dealerLifeDisplay =
 document.getElementsByClassName("dealerLifeDisplay")[0];
 const killsDisplay = document.getElementById("kills");
@@ -947,6 +956,24 @@ function updateDeckDisplay() {
   });
   renderJobAssignments(deckJobsContainer, pDeck);
   updateMasteryBars();
+}
+
+function renderDeckTop() {
+  if (!deckContainer) return;
+  deckContainer.innerHTML = '';
+  if (deck.length > 0) {
+    const top = deck[0];
+    const img = document.createElement('img');
+    img.alt = 'Deck';
+    img.src = cardBackImages[top.backType] || cardBackImages['basic-red'];
+    img.classList.add('card-back', top.backType);
+    deckContainer.appendChild(img);
+  }
+}
+
+function updatePileCounts() {
+  if (deckCountDisplay) deckCountDisplay.textContent = `Deck: ${deck.length}`;
+  if (discardCountDisplay) discardCountDisplay.textContent = `Discard: ${discardPile.length}`;
 }
 
 function updateMasteryBars() {
@@ -1907,7 +1934,8 @@ function updateHandDisplay() {
 // Move a card to the discard pile and update the UI
 function discardCard(card) {
   discardPile.push(card);
-  renderDiscardCard(card);
+  renderDiscardCard(card, discardContainer, cardBackImages);
+  updatePileCounts();
 }
 
 
@@ -2312,6 +2340,8 @@ function spawnPlayer() {
   while (drawnCards.length < stats.cardSlots && deck.length > 0) {
     drawCard(getCardState());
   }
+  renderDeckTop();
+  updatePileCounts();
 }
 
 function respawnPlayer() {
@@ -2342,6 +2372,8 @@ function respawnPlayer() {
   handContainer.innerHTML = "";
   discardContainer.innerHTML = "";
   deckTabContainer.innerHTML = "";
+  renderDeckTop();
+  updatePileCounts();
 
   cashDisplay.textContent = `Cash: $${formatNumber(cash)}`;
   updateChipsDisplay();

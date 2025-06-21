@@ -15,7 +15,9 @@ export function drawCard(state) {
     renderPurchasedUpgrades,
     updateActiveEffects,
     updateAllCardHp,
-    pDeck
+    pDeck,
+    renderDeckTop,
+    updatePileCounts
   } = state;
 
   if (deck.length === 0) return null;
@@ -39,6 +41,8 @@ export function drawCard(state) {
   drawnCards.push(card);
   renderCard(card, handContainer);
   updateDeckDisplay();
+  if (renderDeckTop) renderDeckTop();
+  if (updatePileCounts) updatePileCounts();
   return card;
 }
 
@@ -53,12 +57,24 @@ export function redrawHand(state) {
     updateDrawButton,
     updateDeckDisplay,
     updatePlayerStats,
-    pDeck
+    pDeck,
+    discardPile,
+    discardContainer,
+    cardBackImages,
+    renderDiscardCard,
+    renderDeckTop,
+    updatePileCounts
   } = state;
 
-  deck.push(...drawnCards);
+  // move current hand to discard pile
+  drawnCards.forEach(c => {
+    discardPile.push(c);
+    if (renderDiscardCard)
+      renderDiscardCard(c, discardContainer, cardBackImages);
+  });
   drawnCards.length = 0;
   handContainer.innerHTML = '';
+
   shuffleArray(deck);
   if (stats.healOnRedraw > 0) {
     pDeck.forEach(c => {
@@ -68,6 +84,8 @@ export function redrawHand(state) {
   while (drawnCards.length < stats.cardSlots && deck.length > 0) {
     drawCard(state);
   }
+  if (renderDeckTop) renderDeckTop();
+  if (updatePileCounts) updatePileCounts();
   updateDrawButton();
   updateDeckDisplay();
   updatePlayerStats(stats);
