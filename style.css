@@ -559,13 +559,26 @@ body {
 }
 
 .overlay-hand {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+    justify-items: center;
     gap: 4px;
-    justify-content: center;
-    flex-wrap: wrap;
+    padding: 2px 8px;
 }
 .overlay-hand .card-wrapper {
     transform: scale(0.8);
+}
+
+@media (min-width: 1024px) {
+    .overlay-hand {
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    }
+}
+
+@media (min-width: 768px) {
+    .overlay-hand {
+        gap: 8px;
+    }
 }
 
 .card-flavor {
