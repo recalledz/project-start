@@ -25,6 +25,7 @@ import { Jobs, assignJob, getAvailableJobs, renderJobAssignments, renderJobCarou
 import RateTracker from "./utils/rateTracker.js";
 import { formatNumber } from "./utils/numberFormat.js";
 import { initCore, refreshCore } from './core.js';
+import { createOverlay } from './ui/overlay.js';
 import {
   rollNewCardUpgrades,
   applyCardUpgrade,
@@ -1934,11 +1935,11 @@ function heartHeal() {
 
 let gamePaused = false;
 let campOverlayOpen = false;
-let campOverlay = null;
+let campOverlay = null; // overlay instance
 let inCombat = false;
 let redrawAllowed = false;
 let upgradeSelectionOpen = false;
-let upgradeOverlay = null;
+let upgradeOverlay = null; // overlay instance
 let redrawCost = 10;
 let stageProgressing = false;
 let stageProgressInterval = null;
@@ -1961,9 +1962,13 @@ function openCardUpgradeSelection() {
   gamePaused = true;
   stopStageProgress();
   dCardContainer.innerHTML = '';
-  upgradeOverlay = document.createElement('div');
-  upgradeOverlay.classList.add('upgrade-selection-overlay');
-  dealerContainer.appendChild(upgradeOverlay);
+  upgradeOverlay = createOverlay();
+  upgradeOverlay.onClose(() => {
+    upgradeSelectionOpen = false;
+    dCardContainer.innerHTML = '';
+    renderDealerCard();
+    gamePaused = false;
+  });
   const ids = rollNewCardUpgrades(3);
   ids.forEach(id => {
     const def = cardUpgradeDefinitions[id];
@@ -1978,21 +1983,14 @@ function openCardUpgradeSelection() {
       purchaseCardUpgrade(id, cost);
       closeCardUpgradeSelection();
     });
-    upgradeOverlay.appendChild(wrap);
+    upgradeOverlay.append(wrap);
   });
   lucide.createIcons();
 }
 
 function closeCardUpgradeSelection() {
-  if (!upgradeSelectionOpen) return;
-  upgradeSelectionOpen = false;
-  dCardContainer.innerHTML = '';
-  if (upgradeOverlay) {
-    upgradeOverlay.remove();
-    upgradeOverlay = null;
-  }
-  renderDealerCard();
-  gamePaused = false;
+  if (!upgradeSelectionOpen || !upgradeOverlay) return;
+  upgradeOverlay.close();
 }
 
 function openCamp(withUpgrade = false) {
@@ -2001,23 +1999,23 @@ function openCamp(withUpgrade = false) {
   redrawAllowed = true;
   gamePaused = true;
   stopStageProgress();
-  campOverlay = document.createElement('div');
-  campOverlay.classList.add('upgrade-selection-overlay', 'camp-overlay');
-  const continueBtn = document.createElement('button');
-  continueBtn.textContent = 'Continue';
-  continueBtn.addEventListener('click', () => {
+  campOverlay = createOverlay({ className: 'camp-overlay' });
+  campOverlay.onClose(() => {
+    campOverlayOpen = false;
+    redrawAllowed = false;
+    gamePaused = false;
+    updateRedrawButton();
+  });
+
+  campOverlay.appendButton('Continue', () => {
     closeCamp();
   });
-  const redrawBtn = document.createElement('button');
-  redrawBtn.textContent = 'Redraw & Cash Out';
-  redrawBtn.addEventListener('click', () => {
+  campOverlay.appendButton('Redraw & Cash Out', () => {
     cashOut();
     handleRedraw();
     closeCamp();
   });
-  const healBtn = document.createElement('button');
-  healBtn.textContent = 'Heal Party';
-  healBtn.addEventListener('click', () => {
+  campOverlay.appendButton('Heal Party', () => {
     drawnCards.forEach(c => {
       if (!c) return;
       c.currentHp = Math.min(c.maxHp, c.currentHp + c.maxHp * 0.5);
@@ -2025,40 +2023,22 @@ function openCamp(withUpgrade = false) {
     updateHandDisplay();
     closeCamp();
   });
-  campOverlay.appendChild(continueBtn);
-  campOverlay.appendChild(redrawBtn);
-  campOverlay.appendChild(healBtn);
   if (withUpgrade) {
-    const upBtn = document.createElement('button');
-    upBtn.textContent = 'Upgrade Card';
-    upBtn.addEventListener('click', () => {
+    campOverlay.appendButton('Upgrade Card', () => {
       closeCamp();
       openCardUpgradeSelection();
     });
-    campOverlay.appendChild(upBtn);
-
-    const nextBtn = document.createElement('button');
-    nextBtn.textContent = 'Next Stage';
-    nextBtn.addEventListener('click', () => {
+    campOverlay.appendButton('Next Stage', () => {
       closeCamp();
       nextStage();
     });
-    campOverlay.appendChild(nextBtn);
   }
-  document.body.appendChild(campOverlay);
   updateRedrawButton();
 }
 
 function closeCamp() {
-  if (!campOverlayOpen) return;
-  campOverlayOpen = false;
-  redrawAllowed = false;
-  if (campOverlay) {
-    campOverlay.remove();
-    campOverlay = null;
-  }
-  gamePaused = false;
-  updateRedrawButton();
+  if (!campOverlayOpen || !campOverlay) return;
+  campOverlay.close();
 }
 
 
