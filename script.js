@@ -1950,6 +1950,15 @@ function openCamp(withUpgrade = false) {
       openCardUpgradeSelection();
     });
     campOverlay.appendChild(upBtn);
+
+    const nextBtn = document.createElement('button');
+    nextBtn.textContent = 'Next Stage';
+    nextBtn.addEventListener('click', () => {
+      closeCamp();
+      nextStage();
+    });
+    campOverlay.appendChild(nextBtn);
+
   }
   dealerContainer.appendChild(campOverlay);
   updateRedrawButton();
