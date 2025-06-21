@@ -17,6 +17,7 @@ export function renderEnemyAttackBar() {
   const fill = document.createElement('div');
   bar.classList.add('enemyAttackBar');
   fill.classList.add('enemyAttackFill');
+  fill.style.width = '0%';
   bar.appendChild(fill);
   const lifeContainer = document.querySelector('.dealerLifeContainer');
   if (lifeContainer) lifeContainer.insertAdjacentElement('afterend', bar);

@@ -24,14 +24,6 @@ export const cardUpgradeDefinitions = {
       stats.attackSpeed = Math.max(1000, stats.attackSpeed - 100);
     }
   },
-  redrawCooldownReduction: {
-    id: 'redrawCooldownReduction',
-    name: 'Redraw Cooldown Reduction',
-    rarity: 'rare',
-    effect: ({ stats }) => {
-      stats.redrawCooldownReduction += 0.1;
-    }
-  },
   extraCardSlot: {
     id: 'extraCardSlot',
     name: 'Extra Card Slot',
@@ -57,31 +49,20 @@ export const cardUpgradeDefinitions = {
       stats.extraDamageMultiplier = (stats.extraDamageMultiplier || 1) * 1.1;
     }
   },
-  drawPointsIncrease: {
-    id: 'drawPointsIncrease',
-    name: 'Draw Points +10%',
-    rarity: 'common',
+  cashOutNoRedraw: {
+    id: 'cashOutNoRedraw',
+    name: 'Cash Out w/out Redraw',
+    rarity: 'rare',
     effect: ({ stats }) => {
-      stats.drawPointsMult = (stats.drawPointsMult || 1) * 1.1;
+      stats.cashOutWithoutRedraw = true;
     }
   },
-  damageBuff30s: {
-    id: 'damageBuff30s',
-    name: 'Damage Buff 30s',
+  spadeDamage15: {
+    id: 'spadeDamage15',
+    name: 'Spade Damage x1.5',
     rarity: 'uncommon',
-    noLevel: true,
-    effect: ({ stats, updateActiveEffects }) => {
-      const now = Date.now();
-      const expiry = now + 30000;
-      stats.damageBuffMultiplier = 1.3;
-      stats.damageBuffExpiration = Math.max(stats.damageBuffExpiration || 0, expiry);
-      updateActiveEffects?.();
-      setTimeout(() => {
-        if (Date.now() >= stats.damageBuffExpiration) {
-          stats.damageBuffMultiplier = 1;
-          updateActiveEffects?.();
-        }
-      }, expiry - now);
+    effect: ({ stats }) => {
+      stats.spadeDamageMultiplier = (stats.spadeDamageMultiplier || 1) * 1.5;
     }
   },
   // Prestige unlocked upgrades
@@ -121,31 +102,12 @@ export const cardUpgradeDefinitions = {
       stats.spadeDamageMultiplier = (stats.spadeDamageMultiplier || 1) + 0.05;
     }
   },
-  heartHpMultiplier: {
-    id: 'heartHpMultiplier',
-    name: 'Heart HP Multiplier +5%',
-    rarity: 'rare',
-    prestige: true,
-    effect: ({ stats, updateAllCardHp }) => {
-      stats.heartHpMultiplier = (stats.heartHpMultiplier || 1) + 0.05;
-      if (typeof updateAllCardHp === 'function') updateAllCardHp();
-    }
-  },
   clubsPlaceholder: {
     id: 'clubsPlaceholder',
     name: 'Clubs Placeholder',
     rarity: 'uncommon',
     prestige: true,
     effect: () => {}
-  },
-  diamondCashMultiplier: {
-    id: 'diamondCashMultiplier',
-    name: 'Diamond Cash Multiplier +5%',
-    rarity: 'rare',
-    prestige: true,
-    effect: ({ stats }) => {
-      stats.diamondCashMultiplier = (stats.diamondCashMultiplier || 1) + 0.05;
-    }
   }
 };
 
@@ -234,9 +196,8 @@ export const upgrades = {
     effect: ({ stats }) => {
       stats.jokerCooldownReduction = upgrades.jokerCooldownReduction.level * 0.05;
     }
-  },
-  // redrawCooldownReduction upgrade handled via card upgrades
-}; 
+  }
+};
 
 const rarityCostMultiplier = {
   common: 1,
@@ -256,15 +217,21 @@ export const unlockedCardUpgrades = [
   'healOnRedraw',
   'hpPerKill',
   'attackSpeedReduction',
-  'redrawCooldownReduction',
   'extraCardSlot',
-  'drawPointsIncrease',
-  'damageBuff30s'
+  'damageMultiplier',
+  'hpMultiplier',
+  'spadeDamage15',
+  'cashOutNoRedraw'
 ];
 
 export const upgradeLevels = {};
 
 let activeCardUpgrades = [];
+
+export function resetCardUpgrades() {
+  Object.keys(upgradeLevels).forEach(k => delete upgradeLevels[k]);
+  activeCardUpgrades.length = 0;
+}
 
 export function removeActiveUpgrade(id) {
   activeCardUpgrades = activeCardUpgrades.filter(a => a !== id);
@@ -305,10 +272,10 @@ export function getCardUpgradeCost(id, stats = {}, stageData = {}) {
   const def = cardUpgradeDefinitions[id];
   if (!def) return 0;
   const rarityMult = rarityCostMultiplier[def.rarity] || 1;
-  const kills = Math.floor(Math.random() * 6) + 10; // 10-15 kills
-  const points = stats.points || 30;
-  const baseReward = Math.floor(points * (1 + Math.sqrt(stageData.stage || 1)));
-  return Math.floor(baseReward * kills * rarityMult);
+  const stage = stageData.stage || 1;
+  const world = stageData.world || 1;
+  const base = 100 * stage * world;
+  return Math.floor(base * rarityMult);
 }
 
 export function addActiveUpgradeCardsToDeck(deck) {

@@ -28,9 +28,10 @@ export const deckConfigs = {
     damageMultiplier: 1,
     upgrades: [
       'hpPerKill',
-      'healOnRedraw',
-      'damageBuff30s',
-      'drawPointsIncrease'
+      'damageMultiplier',
+      'hpMultiplier',
+      'spadeDamage15',
+      'cashOutNoRedraw'
     ]
   }
 };
@@ -96,10 +97,9 @@ export function renderDeckList(container) {
       <span>DMG ×${cfg.damageMultiplier}</span>
     `;
 
-    const details = document.createElement('details');
-    const summary = document.createElement('summary');
-    summary.textContent = 'Upgrades';
-    details.appendChild(summary);
+    const upContainer = document.createElement('div');
+    const upTitle = document.createElement('div');
+    upTitle.textContent = 'Upgrades';
     const upList = document.createElement('ul');
     upList.classList.add('deck-upgrade-list');
     (cfg.upgrades || []).forEach(u => {
@@ -107,9 +107,9 @@ export function renderDeckList(container) {
       li.textContent = cardUpgradeDefinitions[u]?.name || u;
       upList.appendChild(li);
     });
-    details.appendChild(upList);
+    upContainer.append(upTitle, upList);
 
-    row.append(name, bottom, caps, details);
+    row.append(name, bottom, caps, upContainer);
     row.addEventListener('click', () => {
       selectedDeck = id;
       const event = new CustomEvent('deck-selected', { detail: { id } });

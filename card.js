@@ -89,8 +89,8 @@ export class Card {
   }
 
   /**
-   * Recalculate this card's max and current HP based on level and multipliers.
-   * @param {object} stats - Player stats providing heartHpMultiplier.
+ * Recalculate this card's max and current HP based on level and multipliers.
+ * @param {object} stats - Player stats providing global multipliers.
    * @param {object} barUpgrades - Bar data providing maxHp multiplier.
    */
   recalcHp(stats = {}, barUpgrades = {}) {
@@ -119,8 +119,7 @@ export function generateDeck() {
 export function recalcCardHp(card, stats = {}, barUpgrades = {}) {
   const baseMul = 1 + (card.value - 1) / 12;
   const baseHp = 5 * baseMul + 5 * (card.currentLevel - 1) + card.baseHpBoost;
-  const suitMult =
-    card.suit === 'Hearts' ? stats.heartHpMultiplier || 1 : 1;
+  const suitMult = 1;
   const maxHpMult = barUpgrades.maxHp?.multiplier || 1;
   const globalMult = stats.hpMultiplier || 1;
   const hp = Math.round(baseHp * maxHpMult * suitMult * globalMult);

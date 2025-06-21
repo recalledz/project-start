@@ -61,7 +61,6 @@
           </div>
         <span id="kills">kills: 0</span>
         <span id="distanceDisplay">distance: 0/0</span>
-        <span id="cashPerSecDisplay">Avg Cash/sec: 0</span>
         <div class="dealerLifeDisplay">
           Life:10
         </div>
@@ -72,6 +71,11 @@
       </div>
 
       <div class="sidePanel">
+        <div class="chipsContainer">
+          <div id="chipsDisplay">
+            Chips: 0
+          </div>
+        </div>
         <div class="vignette stats open">
           <button class="vignette-toggle">Stats</button>
           <div class="vignette-content">
@@ -90,9 +94,6 @@
               </div>
               <div id="cardPointsDisplay">
                 Card Points: 0
-              </div>
-              <div id="drawPointsDisplay">
-                DP: 0
               </div>
               <div id="hpPerKillDisplay">
                 HP per Kill: 1
@@ -123,9 +124,6 @@
             <div class="playerAttackFill"></div>
           </div>
           <button id="moveForwardBtn" title="Move Forward">➡️</button>
-          <button id="clickalipse" title="Draw">🃏</button>
-          <button id="redrawBtn" title="Re-draw">🔄</button>
-          <div id="redrawCostDisplay" class="redraw-cost"></div>
           <button id="nextStageBtn" style="display:none;" disabled title="Next Stage">🚀</button>
           <button id="fightBossBtn" style="display:none;" title="Fight Boss">👑</button>
         </div>
@@ -170,7 +168,12 @@
       <div id="star-chart-container"></div>
     </div>
     <div class="playerStatsTab">
-      <div id="playerStatsContainer" class="casino-section"></div>
+      <div class="stats-subtabs">
+        <button class="statsOverviewSubTabButton active">Overview</button>
+        <button class="statsEconomySubTabButton">Economy</button>
+      </div>
+      <div id="statsOverviewContainer" class="casino-section"></div>
+      <div id="statsEconomyContainer" class="casino-section" style="display:none;"></div>
     </div>
     <div class="playerTab">
       <div class="playerSidePanel casino-section">

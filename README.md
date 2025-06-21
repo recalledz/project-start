@@ -11,7 +11,7 @@ A dynamic card-based combat game where cards represent characters. Players battl
 
 🧩 Key Features
 
-Card-Based Stat and Level System: Classic cards—Clubs, Hearts, Diamonds, and Spades—each with unique attributes and effects.
+Card-Based Stat and Level System: Classic cards—Clubs, Hearts, Diamonds, and Spades—with no inherent suit bonuses.
 
 Job System: Unlock specialized roles for cards upon reaching level thresholds, with jobs determined by card suits.
 
@@ -132,16 +132,6 @@ Damage	value * level	Base damage scales with card value and level
 Max HP	value * level * baseHPMultiplier	HP influenced by card value, level, and attributes
 Ability Power	Tied to attribute/stat	Determines potency of magical abilities
 XP Requirement	XpReq = value * (level^2)	Higher value cards require more XP to level up
-
-
-🎴 Suit Effects
-
-Suit	Effect Description
-
-Hearts	Healing effects and HP bonuses
-Spades	Enhanced attack and critical hit scaling
-Diamonds	Increased cash gains
-Clubs	Boosted XP gain and auto-attack efficiency
 
 
 🧠 Attributes
