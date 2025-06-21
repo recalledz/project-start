@@ -161,7 +161,11 @@ let stageData = {
   kills: 0,
   cardXp: 1,
   playerXp: 1,
-  attackspeed: 10000 //10 sec at start
+  attackspeed: 10000, //10 sec at start
+  distance: 0,
+  distanceTarget: 100,
+  eventsRemaining: 0,
+  nextEventAt: 0
 };
 
 let speakerEncounterPending = false;
@@ -938,11 +942,14 @@ document.addEventListener("DOMContentLoaded", () => {
   renderPurchasedUpgrades();
   // Start or resume the game after loading
   spawnPlayer();
-  respawnDealerStage();
+  stageData.distance = 0;
+  stageData.distanceTarget = 100;
+  stageData.eventsRemaining = Math.floor(Math.random() * 2) + 1;
+  stageData.nextEventAt = Math.random() * stageData.distanceTarget;
+  updateDistanceDisplay();
   renderDealerCard();
   resetStageCashStats();
   renderStageInfo();
-  nextStageChecker();
   renderWorldsMenu();
   renderJobAssignments(deckJobsContainer, pDeck);
   rollNewCardUpgrades();
@@ -1346,13 +1353,19 @@ function nextStage() {
   resetStageCashStats();
   killsDisplay.textContent = `Kills: ${formatNumber(stageData.kills)}`;
   renderGlobalStats();
-  nextStageChecker();
   renderStageInfo();
   checkUpgradeUnlocks();
   checkSpeakerEncounter();
   // start the next stage without double-counting points
   lastCashOutPoints = stats.points;
-  respawnDealerStage();
+  stageData.distance = 0;
+  stageData.distanceTarget = 100;
+  stageData.eventsRemaining = Math.floor(Math.random() * 2) + 1;
+  stageData.nextEventAt = Math.random() * stageData.distanceTarget;
+  inCombat = false;
+  currentEnemy = null;
+  redrawAllowed = false;
+  updateDistanceDisplay();
 }
 
 // Called when a boss is defeated to move to the next world
@@ -1372,11 +1385,18 @@ function nextWorld() {
   }
   killsDisplay.textContent = `Kills: ${formatNumber(stageData.kills)}`;
   renderGlobalStats();
-  nextStageChecker();
   renderStageInfo();
   checkUpgradeUnlocks();
   // entering a new world resets cash-out tracking
   lastCashOutPoints = stats.points;
+  stageData.distance = 0;
+  stageData.distanceTarget = 100;
+  stageData.eventsRemaining = Math.floor(Math.random() * 2) + 1;
+  stageData.nextEventAt = Math.random() * stageData.distanceTarget;
+  inCombat = false;
+  currentEnemy = null;
+  redrawAllowed = false;
+  updateDistanceDisplay();
 }
 
 // Travel to a specific world when selected in the Worlds tab
@@ -1396,11 +1416,17 @@ function goToWorld(id) {
   }
   killsDisplay.textContent = `Kills: ${formatNumber(stageData.kills)}`;
   renderGlobalStats();
-  nextStageChecker();
   renderStageInfo();
   checkUpgradeUnlocks();
   lastCashOutPoints = stats.points;
-  respawnDealerStage();
+  stageData.distance = 0;
+  stageData.distanceTarget = 100;
+  stageData.eventsRemaining = Math.floor(Math.random() * 2) + 1;
+  stageData.nextEventAt = Math.random() * stageData.distanceTarget;
+  inCombat = false;
+  currentEnemy = null;
+  redrawAllowed = false;
+  updateDistanceDisplay();
   renderWorldsMenu();
   updateWorldTabNotification();
 }
@@ -1440,6 +1466,72 @@ function removeDealerLifeBar() {
   const atk = document.querySelector(".enemyAttackBar");
   if (atk) atk.remove();
   dealerLifeDisplay.textContent = "";
+}
+
+function spawnDealerEvent(powerMult = 1) {
+  inCombat = true;
+  removeDealerLifeBar();
+  const temp = { ...stageData, stage: Math.round(stageData.stage * powerMult) };
+  currentEnemy = spawnDealer(
+    temp,
+    enemyAttackProgress,
+    Enemy => {
+      const { minDamage, maxDamage } = calculateEnemyBasicDamage(temp.stage, temp.world);
+      const dmg = Math.floor(Math.random() * (maxDamage - minDamage + 1)) + minDamage;
+      cDealerDamage(dmg, null, Enemy.name);
+    },
+    onDealerDefeat
+  );
+  updateDealerLifeDisplay();
+  enemyAttackFill = renderEnemyAttackBar();
+  dealerDeathAnimation();
+}
+
+function spawnBossEvent() {
+  inCombat = true;
+  removeDealerLifeBar();
+  currentEnemy = spawnBoss(
+    stageData,
+    enemyAttackProgress,
+    boss => {
+      const { minDamage, maxDamage } = calculateEnemyBasicDamage(stageData.stage, stageData.world);
+      const dmg = Math.floor(Math.random() * (maxDamage - minDamage + 1)) + minDamage;
+      cDealerDamage(dmg, null, boss.name);
+    },
+    () => onBossDefeat(currentEnemy)
+  );
+  updateDealerLifeDisplay();
+  enemyAttackFill = renderEnemyAttackBar();
+  dealerDeathAnimation();
+}
+
+function triggerRandomEvent() {
+  const roll = Math.random();
+  if (roll < 0.6) {
+    spawnDealerEvent(1);
+  } else if (roll < 0.7) {
+    spawnDealerEvent(1.3);
+  } else {
+    openCamp();
+  }
+}
+
+function reachStageEnd() {
+  openCamp(true);
+}
+
+function advanceTravel(deltaTime) {
+  stageData.distance += (deltaTime / 1000);
+  updateDistanceDisplay();
+  if (stageData.eventsRemaining > 0 && stageData.distance >= stageData.nextEventAt) {
+    stageData.eventsRemaining -= 1;
+    stageData.nextEventAt = stageData.distance + Math.random() * (stageData.distanceTarget - stageData.distance);
+    triggerRandomEvent();
+  }
+  if (stageData.distance >= stageData.distanceTarget) {
+    reachStageEnd();
+    stageData.distance = stageData.distanceTarget;
+  }
 }
 
 // After a kill, decide whether to spawn a dealer or a boss
@@ -1499,8 +1591,9 @@ function onDealerDefeat() {
   recordWorldKill(stageData.world, stageData.stage);
   dealerDeathAnimation();
   dealerBarDeathAnimation(() => {
-    nextStageChecker();
-    respawnDealerStage();
+    inCombat = false;
+    currentEnemy = null;
+    updateDealerLifeDisplay();
   });
 } // need to define xp formula
 
@@ -1520,8 +1613,9 @@ function onSpeakerDefeat() {
   }
   dealerDeathAnimation();
   dealerBarDeathAnimation(() => {
-    nextStageChecker();
-    respawnDealerStage();
+    inCombat = false;
+    currentEnemy = null;
+    updateDealerLifeDisplay();
   });
 }
 
@@ -1553,23 +1647,9 @@ function onBossDefeat(boss) {
   fightBossBtn.style.display = "none";
   dealerDeathAnimation();
   dealerBarDeathAnimation(() => {
-    nextStageChecker();
-    currentEnemy = spawnDealer(
-      stageData,
-      enemyAttackProgress,
-      Enemy => {
-        const { minDamage, maxDamage } = calculateEnemyBasicDamage(
-          stageData.stage,
-          stageData.world
-        );
-        const dmg = Math.floor(Math.random() * (maxDamage - minDamage + 1)) +
-          minDamage;
-        cDealerDamage(dmg, null, Enemy.name);
-      },
-      onDealerDefeat
-    );
-    updateDealerLifeDisplay();
-    enemyAttackFill = renderEnemyAttackBar();
+    inCombat = false;
+    currentEnemy = null;
+    nextWorld();
   });
 }
 
@@ -1777,11 +1857,16 @@ function heartHeal() {
 }
 
 let gamePaused = false;
+let campOverlayOpen = false;
+let campOverlay = null;
+let inCombat = false;
+let redrawAllowed = false;
 let upgradeSelectionOpen = false;
 let upgradeOverlay = null;
 let redrawCost = 10;
 
 function handleRedraw() {
+  if (!redrawAllowed) return;
   if (cash < redrawCost) return;
   spendCash(redrawCost);
   stats.drawPoints = (stats.drawPoints || 0) + stats.drawPointsMult;
@@ -1829,6 +1914,62 @@ function closeCardUpgradeSelection() {
   }
   renderDealerCard();
   gamePaused = false;
+}
+
+function openCamp(withUpgrade = false) {
+  if (campOverlayOpen) return;
+  campOverlayOpen = true;
+  redrawAllowed = true;
+  gamePaused = true;
+  campOverlay = document.createElement('div');
+  campOverlay.classList.add('upgrade-selection-overlay', 'camp-overlay');
+  const redrawBtn = document.createElement('button');
+  redrawBtn.textContent = 'Redraw & Cash Out';
+  redrawBtn.addEventListener('click', () => {
+    cashOut();
+    handleRedraw();
+    closeCamp();
+  });
+  const healBtn = document.createElement('button');
+  healBtn.textContent = 'Heal Party';
+  healBtn.addEventListener('click', () => {
+    drawnCards.forEach(c => {
+      if (!c) return;
+      c.currentHp = Math.min(c.maxHp, c.currentHp + c.maxHp * 0.5);
+    });
+    updateHandDisplay();
+    closeCamp();
+  });
+  campOverlay.appendChild(redrawBtn);
+  campOverlay.appendChild(healBtn);
+  if (withUpgrade) {
+    const upBtn = document.createElement('button');
+    upBtn.textContent = 'Upgrade Card';
+    upBtn.addEventListener('click', () => {
+      closeCamp();
+      openCardUpgradeSelection();
+    });
+    campOverlay.appendChild(upBtn);
+  }
+  dealerContainer.appendChild(campOverlay);
+  updateRedrawButton();
+}
+
+function closeCamp() {
+  if (!campOverlayOpen) return;
+  campOverlayOpen = false;
+  redrawAllowed = false;
+  if (campOverlay) {
+    campOverlay.remove();
+    campOverlay = null;
+  }
+  gamePaused = false;
+  updateRedrawButton();
+}
+
+function updateDistanceDisplay() {
+  const disp = document.getElementById('distanceDisplay');
+  if (disp) disp.textContent = `distance: ${Math.floor(stageData.distance)}/${stageData.distanceTarget}`;
 }
 
 // Visual pulse when a card gains health
@@ -2496,6 +2637,9 @@ Math.max(0, ability.timer / ability.maxTimer)
 overlay.style.setProperty("--cooldown", ratio);
 }
 });
+}
+if (!currentEnemy && !gamePaused && !campOverlayOpen && !upgradeSelectionOpen) {
+  advanceTravel(deltaTime);
 }
 
   updateDrawButton();
