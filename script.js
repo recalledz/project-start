@@ -347,6 +347,56 @@ function setActiveTabButton(btn) {
   });
 }
 
+function setupTabHandlers() {
+  const tabHandlers = [
+    {
+      buttonSelector: '.mainTabButton',
+      onClick: () => {
+        showTab(mainTab);
+        setActiveTabButton(mainTabButton);
+      }
+    },
+    {
+      buttonSelector: '.deckTabButton',
+      onClick: () => {
+        showTab(deckTab);
+        setActiveTabButton(deckTabButton);
+        showDeckListView();
+      }
+    },
+    {
+      buttonSelector: '.starChartTabButton',
+      onClick: () => {
+        initStarChart();
+        showTab(starChartTab);
+        setActiveTabButton(starChartTabButton);
+      }
+    },
+    {
+      buttonSelector: '.playerStatsTabButton',
+      onClick: () => {
+        renderGlobalStats();
+        showTab(playerStatsTab);
+        setActiveTabButton(playerStatsTabButton);
+      }
+    },
+    {
+      buttonSelector: '.playerTabButton',
+      onClick: () => {
+        refreshPlayerLife();
+        refreshCore();
+        showTab(playerTab);
+        setActiveTabButton(playerTabButton);
+      }
+    }
+  ];
+
+  tabHandlers.forEach(({ buttonSelector, onClick }) => {
+    const btn = document.querySelector(buttonSelector);
+    if (btn) btn.addEventListener('click', onClick);
+  });
+}
+
 function applyWorldTheme() {
   if (mainTab) {
     mainTab.classList.toggle("world-2-theme", stageData.world === 2);
@@ -415,34 +465,7 @@ function initTabs() {
   playerCoreSubTabButton = document.querySelector(".playerCoreSubTabButton");
   playerSkillsPanel = document.querySelector(".player-skills-panel");
   playerCorePanel = document.querySelector(".player-core-panel");
-  if (mainTabButton)
-    mainTabButton.addEventListener("click", () => {
-      showTab(mainTab);
-      setActiveTabButton(mainTabButton);
-    });
-
-  if (deckTabButton)
-    deckTabButton.addEventListener("click", () => {
-      showTab(deckTab);
-      setActiveTabButton(deckTabButton);
-      showDeckListView();
-    });
-
-  if (starChartTabButton) {
-    starChartTabButton.addEventListener("click", () => {
-      initStarChart();
-      showTab(starChartTab);
-      setActiveTabButton(starChartTabButton);
-    });
-  }
-
-  if (playerStatsTabButton) {
-    playerStatsTabButton.addEventListener("click", () => {
-      renderGlobalStats();
-      showTab(playerStatsTab);
-      setActiveTabButton(playerStatsTabButton);
-    });
-  }
+  setupTabHandlers();
 
 
   if (worldSubTabButton) {
@@ -463,14 +486,6 @@ function initTabs() {
     });
   }
 
-  if (playerTabButton) {
-    playerTabButton.addEventListener('click', () => {
-      refreshPlayerLife();
-      refreshCore();
-      showTab(playerTab);
-      setActiveTabButton(playerTabButton);
-    });
-  }
 
   if (deckViewBtn) deckViewBtn.addEventListener('click', showDeckListView);
   if (jokerViewBtn) jokerViewBtn.addEventListener('click', showJokerView);
