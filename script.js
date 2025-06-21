@@ -1260,9 +1260,16 @@ function renderDealerCardBase(enemy) {
   const abilityPane = document.createElement('div');
   abilityPane.classList.add('dCardAbilityPane');
   const { color, blur } = getDealerIconStyle(stageData.stage);
-  pane.innerHTML = `\n    <i data-lucide="skull" class="dCard__icon" style="stroke:${color}; filter: drop-shadow(0 0 ${blur}px ${color});"></i>\n    <span class="dCard__text">\n    ${enemy.name}<br>\n    Damage: ${formatNumber(Math.floor(minDamage))} - ${formatNumber(Math.floor(maxDamage))}\n    </span>\n    `;
+  const iconHtml = enemy.isSpeaker
+    ? `<canvas class="dCard__icon speaker-icon" width="48" height="48"></canvas>`
+    : `<i data-lucide="skull" class="dCard__icon" style="stroke:${color}; filter: drop-shadow(0 0 ${blur}px ${color});"></i>`;
+  pane.innerHTML = `\n    ${iconHtml}\n    <span class="dCard__text">\n    ${enemy.name}<br>\n    Damage: ${formatNumber(Math.floor(minDamage))} - ${formatNumber(Math.floor(maxDamage))}\n    </span>\n    `;
   abilityPane.innerHTML = renderAbilityIcons(enemy.abilities, false);
   wrapper.append(pane, abilityPane);
+  if (enemy.isSpeaker) {
+    const canvas = pane.querySelector('canvas.speaker-icon');
+    if (canvas) drawSpeakerIcon(canvas);
+  }
   return wrapper;
 }
 
@@ -2178,6 +2185,26 @@ function drawCampFire(canvas) {
   ctx.fillStyle = grd;
   ctx.beginPath();
   ctx.arc(canvas.width / 2, canvas.height - 20, 20, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+function drawSpeakerIcon(canvas) {
+  const ctx = canvas.getContext('2d');
+  const { width, height } = canvas;
+  ctx.clearRect(0, 0, width, height);
+  ctx.fillStyle = 'rgba(0,0,0,0.9)';
+  // head
+  const cx = width / 2;
+  const headR = width * 0.15;
+  ctx.beginPath();
+  ctx.arc(cx, height * 0.25, headR, 0, Math.PI * 2);
+  ctx.fill();
+  // body (simple cloak shape)
+  ctx.beginPath();
+  ctx.moveTo(cx, height * 0.4);
+  ctx.lineTo(width * 0.2, height * 0.9);
+  ctx.lineTo(width * 0.8, height * 0.9);
+  ctx.closePath();
   ctx.fill();
 }
 

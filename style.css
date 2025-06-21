@@ -644,6 +644,12 @@ body {
     stroke: #a04444;
     margin-bottom: 6px;
 }
+.speaker-icon {
+    width: 3em;
+    height: 3em;
+    margin-bottom: 6px;
+    filter: drop-shadow(0 0 4px #000);
+}
 
 .dCard__text {
     color: #2c1a1a;
