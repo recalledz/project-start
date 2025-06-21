@@ -1096,6 +1096,7 @@ function renderGlobalStats() {
 }
 
 function renderDealerCard() {
+  if (!currentEnemy) return;
   const {
     minDamage,
     maxDamage
