@@ -72,3 +72,26 @@ export function spawnSpeaker(stageData, enemyAttackProgress, onAttack, onDefeat)
   enemy.isSpeaker = true;
   return enemy;
 }
+
+export function spawnEnemy(kind, stageData, enemyAttackProgress, onDefeat) {
+  const { stage, world } = stageData;
+  const { minDamage, maxDamage } = calculateEnemyBasicDamage(stage, world);
+  let damageMult = 1;
+  let spawner = spawnDealer;
+  if (kind === 'boss') {
+    spawner = spawnBoss;
+  } else if (kind === 'speaker') {
+    spawner = spawnSpeaker;
+    damageMult = 3;
+  }
+
+  const onAttack = enemy => {
+    const dmg = Math.floor(Math.random() * (maxDamage - minDamage + 1)) + minDamage;
+    const finalDmg = dmg * damageMult;
+    if (typeof globalThis.cDealerDamage === 'function') {
+      globalThis.cDealerDamage(finalDmg, null, enemy.name);
+    }
+  };
+
+  return spawner(stageData, enemyAttackProgress, onAttack, onDefeat);
+}
