@@ -24,6 +24,7 @@ import { initPlayerLife, refreshPlayerLife } from "./playerLife.js";
 import { Jobs, assignJob, getAvailableJobs, renderJobAssignments, renderJobCarousel } from "./jobs.js"; // job definitions
 import RateTracker from "./utils/rateTracker.js";
 import { formatNumber } from "./utils/numberFormat.js";
+import { runAnimation } from "./utils/animation.js";
 import { initCore, refreshCore } from './core.js';
 import { createOverlay } from './ui/overlay.js';
 import {
@@ -1184,17 +1185,7 @@ function animateCardHit(card) {
   if (!w) return;
 
   const target = card.cardElement || w;
-  target.classList.remove("hit-animate");
-  void target.offsetWidth;
-  target.classList.add("hit-animate");
-  target.addEventListener(
-    "animationend",
-    () => target.classList.remove("hit-animate"),
-
-    {
-      once: true
-    }
-  );
+  runAnimation(target, "hit-animate");
 }
 
 // Floating text that shows damage taken by a card
@@ -1735,20 +1726,11 @@ function dealerDeathAnimation() {
   const dCardWrapper = document.querySelector(".dCardWrapper:last-child");
   const dCardPane = document.querySelector(".dCardPane");
   if (!dCardWrapper) return;
-
-  dCardWrapper.classList.add("dealer-dead");
-  dCardPane.classList.add("dealer-dead");
-
-  dCardWrapper.addEventListener(
-    "animationend",
-    () => {
-      dCardContainer.innerHTML = "";
-      renderDealerCard();
-    },
-    {
-      once: true
-    }
-  );
+  runAnimation(dCardWrapper, "dealer-dead").then(() => {
+    dCardContainer.innerHTML = "";
+    renderDealerCard();
+  });
+  runAnimation(dCardPane, "dealer-dead");
 }
 
 function dealerBarDeathAnimation(callback) {
@@ -1757,17 +1739,10 @@ function dealerBarDeathAnimation(callback) {
     if (callback) callback();
     return;
   }
-  bar.classList.add("bar-dead");
-  bar.addEventListener(
-    "animationend",
-    () => {
-      removeDealerLifeBar();
-      if (callback) callback();
-    },
-    {
-      once: true
-    }
-  );
+  runAnimation(bar, "bar-dead").then(() => {
+    removeDealerLifeBar();
+    if (callback) callback();
+  });
 }
 
 //========deck functions===========
@@ -1968,27 +1943,13 @@ function closeCamp() {
 // Visual pulse when a card gains health
 function animateCardHeal(card) {
   const w = card.wrapperElement;
-  w.classList.add("heal-animate");
-  w.addEventListener(
-    "animationend",
-    () => w.classList.remove("heal-animate"),
-    {
-      once: true
-    }
-  );
+  runAnimation(w, "heal-animate");
 }
 
 // Brief animation shown when a card levels up
 function animateCardLevelUp(card) {
   const w = card.wrapperElement;
-  w.classList.add("levelup-animate");
-  w.addEventListener(
-    "animationend",
-    () => w.classList.remove("levelup-animate"),
-    {
-      once: true
-    }
-  );
+  runAnimation(w, "levelup-animate");
 }
 
 function showUpgradePopup(id) {
@@ -2015,19 +1976,7 @@ function animateCardDeath(card, callback) {
     callback?.();
     return;
   }
-  const onEnd = () => {
-    w.classList.remove("card-death");
-    w.removeEventListener("animationend", onEnd);
-    callback?.();
-  };
-
-  w.addEventListener("animationend", onEnd, {
-    once: true
-  });
-  w.classList.add("card-death");
-
-  // Fallback: ensure removal even if animation events don't fire
-  setTimeout(onEnd, 600);
+  runAnimation(w, "card-death", 600).then(() => callback?.());
 }
 
 function healCardsOnKill() {
