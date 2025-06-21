@@ -3,6 +3,8 @@ export const cardUpgradeDefinitions = {
     id: 'healOnRedraw',
     name: 'Heal on Redraw +1',
     rarity: 'common',
+    icon: 'heart',
+    flavor: 'Breathers mend old wounds.',
     effect: ({ stats }) => {
       stats.healOnRedraw = (stats.healOnRedraw || 0) + 1;
     }
@@ -11,6 +13,8 @@ export const cardUpgradeDefinitions = {
     id: 'hpPerKill',
     name: 'HP per Kill +1',
     rarity: 'common',
+    icon: 'heart',
+    flavor: 'Every victory makes us tougher.',
     effect: ({ stats, pDeck }) => {
       stats.hpPerKill += 1;
       pDeck.forEach(c => (c.hpPerKill = stats.hpPerKill));
@@ -20,6 +24,8 @@ export const cardUpgradeDefinitions = {
     id: 'attackSpeedReduction',
     name: 'Attack Speed Reduction',
     rarity: 'uncommon',
+    icon: 'timer',
+    flavor: 'Find rhythm between blows.',
     effect: ({ stats }) => {
       stats.attackSpeed = Math.max(1000, stats.attackSpeed - 100);
     }
@@ -28,6 +34,8 @@ export const cardUpgradeDefinitions = {
     id: 'extraCardSlot',
     name: 'Extra Card Slot',
     rarity: 'super-rare',
+    icon: 'plus-square',
+    flavor: 'More room for allies.',
     effect: ({ stats }) => {
       stats.cardSlots += 1;
     }
@@ -36,6 +44,8 @@ export const cardUpgradeDefinitions = {
     id: 'hpMultiplier',
     name: 'HP Multiplier x1.1',
     rarity: 'common',
+    icon: 'shield',
+    flavor: 'Sturdier foundations, tougher survivors.',
     effect: ({ stats, updateAllCardHp }) => {
       stats.hpMultiplier = (stats.hpMultiplier || 1) * 1.1;
       if (typeof updateAllCardHp === 'function') updateAllCardHp();
@@ -45,6 +55,8 @@ export const cardUpgradeDefinitions = {
     id: 'damageMultiplier',
     name: 'Damage Multiplier x1.1',
     rarity: 'common',
+    icon: 'sword',
+    flavor: 'A sharper cut for sharper foes.',
     effect: ({ stats }) => {
       stats.extraDamageMultiplier = (stats.extraDamageMultiplier || 1) * 1.1;
     }
@@ -53,6 +65,8 @@ export const cardUpgradeDefinitions = {
     id: 'cashOutNoRedraw',
     name: 'Cash Out w/out Redraw',
     rarity: 'rare',
+    icon: 'dollar-sign',
+    flavor: 'Take the winnings and run.',
     effect: ({ stats }) => {
       stats.cashOutWithoutRedraw = true;
     }
@@ -61,6 +75,8 @@ export const cardUpgradeDefinitions = {
     id: 'spadeDamage15',
     name: 'Spade Damage x1.5',
     rarity: 'uncommon',
+    icon: 'swords',
+    flavor: 'Spades pierce even deeper.',
     effect: ({ stats }) => {
       stats.spadeDamageMultiplier = (stats.spadeDamageMultiplier || 1) * 1.5;
     }
@@ -71,6 +87,8 @@ export const cardUpgradeDefinitions = {
     name: 'Max Mana +10',
     rarity: 'uncommon',
     prestige: true,
+    icon: 'droplet',
+    flavor: 'Feel the flow surge within.',
     effect: ({ stats }) => {
       stats.maxMana += 10;
     }
@@ -80,6 +98,8 @@ export const cardUpgradeDefinitions = {
     name: 'Mana Regeneration +0.1',
     rarity: 'uncommon',
     prestige: true,
+    icon: 'refresh-ccw',
+    flavor: 'Energy returns in steady waves.',
     effect: ({ stats }) => {
       stats.manaRegen += 0.1;
     }
@@ -89,6 +109,8 @@ export const cardUpgradeDefinitions = {
     name: 'Ability Power +5%',
     rarity: 'rare',
     prestige: true,
+    icon: 'zap',
+    flavor: 'Techniques hit with added force.',
     effect: ({ stats }) => {
       stats.abilityPower = (stats.abilityPower || 1) + 0.05;
     }
@@ -98,6 +120,8 @@ export const cardUpgradeDefinitions = {
     name: 'Spade Damage Multiplier +5%',
     rarity: 'rare',
     prestige: true,
+    icon: 'swords',
+    flavor: 'Spades strike with renewed power.',
     effect: ({ stats }) => {
       stats.spadeDamageMultiplier = (stats.spadeDamageMultiplier || 1) + 0.05;
     }
@@ -107,6 +131,8 @@ export const cardUpgradeDefinitions = {
     name: 'Clubs Placeholder',
     rarity: 'uncommon',
     prestige: true,
+    icon: 'club',
+    flavor: 'Untapped potential.',
     effect: () => {}
   }
 };

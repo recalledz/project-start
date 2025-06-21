@@ -716,8 +716,9 @@ function renderPurchasedUpgrades() {
     const wrap = document.createElement('div');
     wrap.classList.add('card-wrapper');
     const cardEl = document.createElement('div');
-    cardEl.classList.add('card', 'upgrade-card');
-    cardEl.innerHTML = `<div class="card-suit"><i data-lucide="sword"></i></div><div class="card-desc">${def.name} (Lv. ${lvl})</div>`;
+    cardEl.classList.add('card', 'upgrade-card', `rarity-${rarityClass(def.rarity)}`);
+    const icon = def.icon || 'sword';
+    cardEl.innerHTML = `<div class="card-suit"><i data-lucide="${icon}"></i></div><div class="card-desc">${def.name} (Lv. ${lvl})</div>`;
     wrap.appendChild(cardEl);
     purchasedUpgradeList.appendChild(wrap);
   });
@@ -1923,6 +1924,21 @@ let stageProgressInterval = null;
 let progressButtonActive = false;
 let stageEndEnemyActive = false;
 
+function rarityClass(rarity) {
+  switch (rarity) {
+    case 'common':
+      return 'basic';
+    case 'uncommon':
+      return 'rare';
+    case 'rare':
+      return 'epic';
+    case 'super-rare':
+      return 'legendary';
+    default:
+      return 'basic';
+  }
+}
+
 function handleRedraw() {
   if (!redrawAllowed) return;
   if (cash < redrawCost) return;
@@ -1938,7 +1954,7 @@ function openCardUpgradeSelection(onCloseCallback = null) {
   gamePaused = true;
   stopStageProgress();
   dCardContainer.innerHTML = '';
-  upgradeOverlay = createOverlay();
+  upgradeOverlay = createOverlay({ className: 'upgrade-selection-overlay' });
   upgradeOverlay.onClose(() => {
     upgradeSelectionOpen = false;
     dCardContainer.innerHTML = '';
@@ -1947,13 +1963,24 @@ function openCardUpgradeSelection(onCloseCallback = null) {
     if (progressButtonActive) startStageProgress();
     onCloseCallback?.();
   });
-  const header = document.createElement('h2');
-  header.textContent = 'Upgrades';
-  upgradeOverlay.element.prepend(header);
+
+  const box = upgradeOverlay.box;
+  box.classList.add('upgrade-box');
+
+  const headerWrap = document.createElement('div');
+  headerWrap.classList.add('upgrade-header');
+  headerWrap.innerHTML = `<h2><i data-lucide="sparkles"></i> Upgrade Selection</h2>`;
+  box.appendChild(headerWrap);
+
   const info = document.createElement('p');
   info.classList.add('upgrade-text');
   info.textContent = 'Choose an upgrade';
-  upgradeOverlay.append(info);
+  box.appendChild(info);
+
+  const cardsContainer = document.createElement('div');
+  cardsContainer.classList.add('upgrade-cards');
+  box.appendChild(cardsContainer);
+
   const ids = rollNewCardUpgrades(3);
   ids.forEach(id => {
     const def = cardUpgradeDefinitions[id];
@@ -1961,8 +1988,9 @@ function openCardUpgradeSelection(onCloseCallback = null) {
     const wrap = document.createElement('div');
     wrap.classList.add('card-wrapper');
     const card = document.createElement('div');
-    card.classList.add('card', 'upgrade-card');
-    card.innerHTML = `<div class="card-suit"><i data-lucide="sword"></i></div><div class="card-desc">${def.name} - $${cost}</div>`;
+    card.classList.add('card', 'upgrade-card', `rarity-${rarityClass(def.rarity)}`);
+    const icon = def.icon || 'sword';
+    card.innerHTML = `\n      <div class="card-suit"><i data-lucide="${icon}"></i></div>\n      <div class="card-desc">${def.name} - $${cost}</div>\n      <div class="card-flavor">${def.flavor || ''}</div>\n    `;
     wrap.appendChild(card);
     if (cash >= cost) {
       wrap.addEventListener('click', () => {
@@ -1972,7 +2000,7 @@ function openCardUpgradeSelection(onCloseCallback = null) {
     } else {
       card.classList.add('unaffordable');
     }
-    upgradeOverlay.append(wrap);
+    cardsContainer.appendChild(wrap);
   });
   upgradeOverlay.appendButton('Skip', () => closeCardUpgradeSelection());
   lucide.createIcons();
@@ -2000,25 +2028,53 @@ function openCamp(onCloseCallback = null) {
     onCloseCallback?.();
   });
 
-  const header = document.createElement('h2');
-  header.textContent = 'Camp';
-  campOverlay.element.prepend(header);
+  const box = campOverlay.box;
+  box.classList.add('camp-box');
 
-  campOverlay.appendButton('Continue', () => {
-    closeCamp();
-  });
+  const header = document.createElement('h2');
+  header.textContent = 'Sanctuary Found';
+  box.appendChild(header);
+
+  const sub = document.createElement('p');
+  sub.classList.add('camp-subheading', 'speaker-quote');
+  sub.textContent = 'You may catch your breath or press on.';
+  box.appendChild(sub);
+
+  const canvas = document.createElement('canvas');
+  canvas.width = 80;
+  canvas.height = 60;
+  canvas.classList.add('camp-fire');
+  box.appendChild(canvas);
+  drawCampFire(canvas);
+
+  const btnRow = document.createElement('div');
+  btnRow.classList.add('camp-buttons');
+  box.appendChild(btnRow);
+
+  function addBtn(label, handler) {
+    const btn = document.createElement('button');
+    btn.textContent = label;
+    btn.addEventListener('click', handler);
+    btnRow.appendChild(btn);
+    return btn;
+  }
+
+  addBtn('▶ Continue', () => closeCamp());
+
   if (stats.cashOutWithoutRedraw) {
-    campOverlay.appendButton('Cash Out', () => {
+    addBtn('💰 Cash Out', () => {
       cashOut();
       closeCamp();
     });
   }
-  campOverlay.appendButton('Redraw & Cash Out', () => {
+
+  addBtn('⟳ Redraw & Cash Out', () => {
     cashOut();
     handleRedraw();
     closeCamp();
   });
-  campOverlay.appendButton('Heal Party', () => {
+
+  addBtn('♥ Heal Party', () => {
     drawnCards.forEach(c => {
       if (!c) return;
       c.currentHp = Math.min(c.maxHp, c.currentHp + c.maxHp * 0.5);
@@ -2032,6 +2088,32 @@ function openCamp(onCloseCallback = null) {
 function closeCamp() {
   if (!campOverlayOpen || !campOverlay) return;
   campOverlay.close();
+}
+
+function drawCampFire(canvas) {
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // draw logs
+  ctx.fillStyle = '#663300';
+  ctx.fillRect(canvas.width / 2 - 20, canvas.height - 10, 40, 6);
+  ctx.fillRect(canvas.width / 2 - 10, canvas.height - 16, 40, 6);
+
+  // draw flame gradient
+  const grd = ctx.createRadialGradient(
+    canvas.width / 2,
+    canvas.height - 20,
+    2,
+    canvas.width / 2,
+    canvas.height - 30,
+    20
+  );
+  grd.addColorStop(0, 'rgba(255,200,0,0.9)');
+  grd.addColorStop(1, 'rgba(255,0,0,0)');
+  ctx.fillStyle = grd;
+  ctx.beginPath();
+  ctx.arc(canvas.width / 2, canvas.height - 20, 20, 0, Math.PI * 2);
+  ctx.fill();
 }
 
 
@@ -2054,8 +2136,8 @@ function showUpgradePopup(id) {
   wrapper.classList.add('upgrade-popup');
   wrapper.innerHTML = `
     <div class="card-wrapper">
-      <div class="card upgrade-card">
-        <div class="card-suit"><i data-lucide="sword"></i></div>
+      <div class="card upgrade-card rarity-${rarityClass(def.rarity)}">
+        <div class="card-suit"><i data-lucide="${def.icon || 'sword'}"></i></div>
         <div class="card-desc">${def.name}</div>
       </div>
     </div>`;

@@ -1,9 +1,13 @@
 export function createOverlay({ className = '', container = document.body } = {}) {
   const element = document.createElement('div');
-  element.classList.add('upgrade-selection-overlay');
+  element.classList.add('overlay');
   if (className) {
     className.split(' ').forEach(cls => cls && element.classList.add(cls));
   }
+
+  const box = document.createElement('div');
+  box.classList.add('overlay-box');
+  element.appendChild(box);
 
   const closeHandlers = new Set();
   function close() {
@@ -20,15 +24,15 @@ export function createOverlay({ className = '', container = document.body } = {}
     const btn = document.createElement('button');
     btn.textContent = label;
     if (handler) btn.addEventListener('click', handler);
-    element.appendChild(btn);
+    box.appendChild(btn);
     return btn;
   }
 
   function append(node) {
-    element.appendChild(node);
+    box.appendChild(node);
   }
 
   container.appendChild(element);
 
-  return { element, append, appendButton, onClose, close };
+  return { element, box, append, appendButton, onClose, close };
 }

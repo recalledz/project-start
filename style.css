@@ -439,34 +439,46 @@ body {
     box-shadow: 0 0 10px rgba(0,0,0,0.6);
 }
 
-/* Overlay shown when selecting card upgrades */
-.upgrade-selection-overlay {
+/* Generic overlay background */
+.overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(0, 0, 0, 0.8);
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 10px;
-    z-index: 10;
     padding: 10px;
+    opacity: 0;
+    animation: overlayFade 0.3s forwards;
+    z-index: 5000;
+}
+
+@keyframes overlayFade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Box that holds overlay contents */
+.overlay-box {
+    background: rgba(0, 0, 0, 0.85);
+    border-radius: 8px;
+    padding: 16px;
+    box-shadow: 0 0 12px rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+}
+
+.overlay-box button {
+    padding: 6px 12px;
+    font-size: 1rem;
 }
 
 .camp-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0, 0, 0, 0.8);
-    display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    z-index: 5000;
 }
 
 .camp-overlay button {
@@ -475,10 +487,90 @@ body {
     margin: 4px;
 }
 
+.camp-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 8px;
+    padding: 16px;
+    box-shadow: 0 0 10px rgba(255,255,255,0.2);
+}
+
+.camp-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.camp-fire {
+    width: 80px;
+    height: 60px;
+}
+
 .camp-overlay h2,
 .upgrade-selection-overlay h2 {
     margin-bottom: 10px;
     color: #fff;
+}
+
+.camp-subheading {
+    font-size: 1rem;
+    margin-top: -4px;
+    margin-bottom: 8px;
+}
+
+.upgrade-selection-overlay {
+    gap: 10px;
+}
+
+.upgrade-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.upgrade-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    justify-content: center;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+    padding-bottom: 4px;
+}
+
+.upgrade-cards {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.card-flavor {
+    font-size: 0.6rem;
+    font-style: italic;
+    text-align: center;
+}
+
+.rarity-basic {
+    border-color: #888;
+}
+
+.rarity-rare {
+    border-color: #39f;
+    box-shadow: 0 0 8px rgba(51,102,255,0.6);
+}
+
+.rarity-epic {
+    border-color: #b450ff;
+    box-shadow: 0 0 8px rgba(180,80,255,0.6);
+}
+
+.rarity-legendary {
+    border-color: gold;
+    box-shadow: 0 0 10px rgba(255,215,0,0.7);
 }
 
 /* Dealer card base */
@@ -1366,18 +1458,18 @@ body {
     color: #fff;
     font-size: 0.6rem;
     border-radius: 8px;
-    border: 2px solid #d4af37;
+    border: 2px solid #888;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 4px;
     transform: rotate(0deg);
-    box-shadow: 0 0 6px rgba(212, 175, 55, 0.5);
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.5);
     transition: transform 0.2s, box-shadow 0.2s;
 }
 .upgrade-card:hover {
     transform: rotate(-3deg) translateY(-2px);
-    box-shadow: 0 0 12px rgba(212, 175, 55, 0.8);
+    box-shadow: 0 0 12px rgba(255, 255, 255, 0.8);
 }
 .upgrade-card button {
     width: 100%;
