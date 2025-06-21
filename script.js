@@ -1241,7 +1241,7 @@ function renderBossCard(enemy) {
   const wrapper = document.createElement('div');
   wrapper.classList.add('dCardWrapper');
   const pane = document.createElement('div');
-  pane.classList.add('dCardPane', 'boss');
+  pane.classList.add('dCardPane', 'boss', `rarity-${enemy.rarity || 'basic'}`);
   const abilityPane = document.createElement('div');
   abilityPane.classList.add('dCardAbilityPane');
   const iconColor = enemy.iconColor || '#a04444';
@@ -1256,7 +1256,7 @@ function renderDealerCardBase(enemy) {
   const wrapper = document.createElement('div');
   wrapper.classList.add('dCardWrapper');
   const pane = document.createElement('div');
-  pane.classList.add('dCardPane', 'dealer');
+  pane.classList.add('dCardPane', 'dealer', `rarity-${enemy.rarity || 'basic'}`);
   const abilityPane = document.createElement('div');
   abilityPane.classList.add('dCardAbilityPane');
   const { color, blur } = getDealerIconStyle(stageData.stage);
@@ -2021,13 +2021,6 @@ function openCardUpgradeSelection(onCloseCallback = null) {
     <div>Cash: $${formatNumber(cash)}</div>`;
   box.appendChild(statsRow);
 
-  const handRow = document.createElement('div');
-  handRow.classList.add('overlay-hand');
-  drawnCards.forEach(c => {
-    if (!c || !c.wrapperElement) return;
-    handRow.appendChild(c.wrapperElement.cloneNode(true));
-  });
-  box.appendChild(handRow);
 
   const cardsContainer = document.createElement('div');
   cardsContainer.classList.add('upgrade-cards');
@@ -2058,6 +2051,15 @@ function openCardUpgradeSelection(onCloseCallback = null) {
     cardsContainer.appendChild(wrap);
   });
   upgradeOverlay.appendButton('Skip', () => closeCardUpgradeSelection());
+
+  const handRow = document.createElement('div');
+  handRow.classList.add('overlay-hand');
+  drawnCards.forEach(c => {
+    if (!c || !c.wrapperElement) return;
+    handRow.appendChild(c.wrapperElement.cloneNode(true));
+  });
+  box.appendChild(handRow);
+
   lucide.createIcons();
 }
 
@@ -2111,13 +2113,6 @@ function openCamp(onCloseCallback = null) {
     <div>Cash: $${formatNumber(cash)}</div>`;
   box.appendChild(statsRow);
 
-  const handRow = document.createElement('div');
-  handRow.classList.add('overlay-hand');
-  drawnCards.forEach(c => {
-    if (!c || !c.wrapperElement) return;
-    handRow.appendChild(c.wrapperElement.cloneNode(true));
-  });
-  box.appendChild(handRow);
 
   const btnRow = document.createElement('div');
   btnRow.classList.add('camp-buttons');
@@ -2155,6 +2150,14 @@ function openCamp(onCloseCallback = null) {
     closeCamp();
   });
   updateRedrawButton();
+
+  const handRow = document.createElement('div');
+  handRow.classList.add('overlay-hand');
+  drawnCards.forEach(c => {
+    if (!c || !c.wrapperElement) return;
+    handRow.appendChild(c.wrapperElement.cloneNode(true));
+  });
+  box.appendChild(handRow);
 }
 
 function closeCamp() {

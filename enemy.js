@@ -4,6 +4,9 @@ class Enemy  {
     this.world = world;
     this.name = config.name || "dealer";
 
+    // rarity tier for styling
+    this.rarity = config.rarity || "basic";
+
     // We expect the caller to supply these values
     this.maxHp = config.maxHp
     this.currentHp = this.maxHp;

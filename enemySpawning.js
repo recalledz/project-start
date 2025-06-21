@@ -30,6 +30,7 @@ export function spawnDealer(stageData, enemyAttackProgress, onAttack, onDefeat) 
   const world = stageData.world;
   const enemy = new Enemy(stage, world, {
     maxHp: calculateEnemyHp(stage, world),
+    rarity: 'basic',
     onAttack,
     onDefeat
   });
@@ -52,6 +53,7 @@ export function spawnBoss(stageData, enemyAttackProgress, onAttack, onDefeat) {
     iconColor: template.iconColor,
     xp: Math.pow(stage, 1.5) * world,
     abilities,
+    rarity: 'legendary',
     onAttack,
     onDefeat
   });
@@ -65,6 +67,7 @@ export function spawnSpeaker(stageData, enemyAttackProgress, onAttack, onDefeat)
   const enemy = new Enemy(stage, world, {
     name: "The Speaker",
     maxHp: calculateEnemyHp(stage, world) * 3,
+    rarity: 'rare',
     onAttack,
     onDefeat
   });

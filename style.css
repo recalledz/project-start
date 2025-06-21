@@ -575,21 +575,21 @@ body {
 }
 
 .rarity-basic {
-    border-color: #888;
+    border-color: #888 !important;
 }
 
 .rarity-rare {
-    border-color: #39f;
+    border-color: #39f !important;
     box-shadow: 0 0 8px rgba(51,102,255,0.6);
 }
 
 .rarity-epic {
-    border-color: #b450ff;
+    border-color: #b450ff !important;
     box-shadow: 0 0 8px rgba(180,80,255,0.6);
 }
 
 .rarity-legendary {
-    border-color: gold;
+    border-color: gold !important;
     box-shadow: 0 0 10px rgba(255,215,0,0.7);
 }
 
