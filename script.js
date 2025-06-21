@@ -1060,7 +1060,7 @@ document.addEventListener("DOMContentLoaded", () => {
   renderStageInfo();
   renderWorldsMenu();
   renderJobAssignments(deckJobsContainer, pDeck);
-  rollNewCardUpgrades();
+  rollNewCardUpgrades(2, deckConfigs[selectedDeck]?.upgrades || []);
   renderPurchasedUpgrades();
   shuffleArray(deck);
   checkUpgradeUnlocks();
@@ -1738,7 +1738,7 @@ function onBossDefeat(boss) {
 
   healCardsOnKill();
   stats.upgradePower += 5;
-  rollNewCardUpgrades();
+  rollNewCardUpgrades(2, deckConfigs[selectedDeck]?.upgrades || []);
   renderPurchasedUpgrades();
   shuffleArray(deck);
   checkSpeakerEncounter();
@@ -2005,20 +2005,40 @@ function openCardUpgradeSelection(onCloseCallback = null) {
   info.textContent = 'Choose an upgrade';
   box.appendChild(info);
 
+  const statsRow = document.createElement('div');
+  statsRow.classList.add('overlay-stats');
+  statsRow.innerHTML = `
+    <div>Damage: ${formatNumber(Math.floor(stats.pDamage))}</div>
+    <div>Attack: ${(stats.attackSpeed / 1000).toFixed(1)}s</div>
+    <div>HP/kill: ${stats.hpPerKill}</div>
+    <div>Cash: $${formatNumber(cash)}</div>`;
+  box.appendChild(statsRow);
+
+  const handRow = document.createElement('div');
+  handRow.classList.add('overlay-hand');
+  drawnCards.forEach(c => {
+    if (!c || !c.wrapperElement) return;
+    handRow.appendChild(c.wrapperElement.cloneNode(true));
+  });
+  box.appendChild(handRow);
+
   const cardsContainer = document.createElement('div');
   cardsContainer.classList.add('upgrade-cards');
   box.appendChild(cardsContainer);
 
-  const ids = rollNewCardUpgrades(3);
-  ids.forEach(id => {
+  const allowed = deckConfigs[selectedDeck]?.upgrades || [];
+  const ids = rollNewCardUpgrades(3, allowed);
+  const freeIndex = Math.floor(Math.random() * ids.length);
+  ids.forEach((id, idx) => {
     const def = cardUpgradeDefinitions[id];
-    const cost = getCardUpgradeCost(id, { points: stats.points }, stageData);
+    const baseCost = getCardUpgradeCost(id, { points: stats.points }, stageData);
+    const cost = idx === freeIndex ? 0 : baseCost;
     const wrap = document.createElement('div');
     wrap.classList.add('card-wrapper');
     const card = document.createElement('div');
     card.classList.add('card', 'upgrade-card', `rarity-${rarityClass(def.rarity)}`);
     const icon = def.icon || 'sword';
-    card.innerHTML = `\n      <div class="card-suit"><i data-lucide="${icon}"></i></div>\n      <div class="card-desc">${def.name} - $${cost}</div>\n      <div class="card-flavor">${def.flavor || ''}</div>\n    `;
+    card.innerHTML = `\n      <div class="card-suit"><i data-lucide="${icon}"></i></div>\n      <div class="card-desc">${def.name} - ${cost === 0 ? 'FREE' : '$' + cost}</div>\n      <div class="card-flavor">${def.flavor || ''}</div>\n    `;
     wrap.appendChild(card);
     if (cash >= cost) {
       wrap.addEventListener('click', () => {
@@ -2074,6 +2094,23 @@ function openCamp(onCloseCallback = null) {
   canvas.classList.add('camp-fire');
   box.appendChild(canvas);
   drawCampFire(canvas);
+
+  const statsRow = document.createElement('div');
+  statsRow.classList.add('overlay-stats');
+  statsRow.innerHTML = `
+    <div>Damage: ${formatNumber(Math.floor(stats.pDamage))}</div>
+    <div>Attack: ${(stats.attackSpeed / 1000).toFixed(1)}s</div>
+    <div>HP/kill: ${stats.hpPerKill}</div>
+    <div>Cash: $${formatNumber(cash)}</div>`;
+  box.appendChild(statsRow);
+
+  const handRow = document.createElement('div');
+  handRow.classList.add('overlay-hand');
+  drawnCards.forEach(c => {
+    if (!c || !c.wrapperElement) return;
+    handRow.appendChild(c.wrapperElement.cloneNode(true));
+  });
+  box.appendChild(handRow);
 
   const btnRow = document.createElement('div');
   btnRow.classList.add('camp-buttons');
@@ -2360,7 +2397,7 @@ function respawnPlayer() {
   redrawCost = 10;
   updateRedrawButton();
 
-  rollNewCardUpgrades();
+  rollNewCardUpgrades(2, deckConfigs[selectedDeck]?.upgrades || []);
   renderCardUpgrades(document.querySelector('.card-upgrade-list'), {
     stats,
     stageData,

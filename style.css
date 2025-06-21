@@ -550,6 +550,24 @@ body {
     justify-content: center;
 }
 
+.overlay-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    font-size: 0.7rem;
+    justify-content: center;
+}
+
+.overlay-hand {
+    display: flex;
+    gap: 4px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+.overlay-hand .card-wrapper {
+    transform: scale(0.8);
+}
+
 .card-flavor {
     font-size: 0.6rem;
     font-style: italic;

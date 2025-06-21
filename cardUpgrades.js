@@ -269,10 +269,26 @@ export function unlockCardUpgrade(id) {
   }
 }
 
-function weightedRandomId() {
+function rarityClass(rarity) {
+  switch (rarity) {
+    case 'common':
+      return 'basic';
+    case 'uncommon':
+      return 'rare';
+    case 'rare':
+      return 'epic';
+    case 'super-rare':
+      return 'legendary';
+    default:
+      return 'basic';
+  }
+}
+
+function weightedRandomId(pool = unlockedCardUpgrades) {
   const weighted = [];
-  unlockedCardUpgrades.forEach(id => {
+  pool.forEach(id => {
     const def = cardUpgradeDefinitions[id];
+    if (!def) return;
     const weight = rarityWeights[def.rarity] || 1;
     for (let i = 0; i < weight; i++) weighted.push(id);
   });
@@ -280,10 +296,13 @@ function weightedRandomId() {
   return weighted[Math.floor(Math.random() * weighted.length)];
 }
 
-export function rollNewCardUpgrades(count = 2) {
+export function rollNewCardUpgrades(count = 2, allowedIds = []) {
+  const pool = allowedIds.length
+    ? unlockedCardUpgrades.filter(id => allowedIds.includes(id))
+    : unlockedCardUpgrades;
   const chosen = new Set();
-  while (chosen.size < count && unlockedCardUpgrades.length > 0) {
-    const id = weightedRandomId();
+  while (chosen.size < count && pool.length > 0) {
+    const id = weightedRandomId(pool);
     if (id) chosen.add(id);
   }
   activeCardUpgrades = Array.from(chosen);
@@ -325,22 +344,26 @@ export function renderCardUpgrades(container, options = {}) {
   const { stats = {}, stageData = {}, cash = 0, onPurchase = null } = options;
   container.innerHTML = '';
   const ids = new Set([...activeCardUpgrades, ...Object.keys(upgradeLevels)]);
-  ids.forEach(id => {
+  const idArr = Array.from(ids);
+  const affordable = idArr.some(id => getCardUpgradeCost(id, stats, stageData) <= cash);
+  const freeIndex = affordable ? -1 : 0;
+  idArr.forEach((id, idx) => {
     const def = cardUpgradeDefinitions[id];
     const level = upgradeLevels[id] || 0;
-    const cost = getCardUpgradeCost(id, stats, stageData);
+    const baseCost = getCardUpgradeCost(id, stats, stageData);
+    const cost = idx === freeIndex ? 0 : baseCost;
     const wrapper = document.createElement('div');
     wrapper.classList.add('card-wrapper');
     wrapper.dataset.id = id;
     const card = document.createElement('div');
-    card.classList.add('card', 'upgrade-card');
+    card.classList.add('card', 'upgrade-card', `rarity-${rarityClass(def.rarity)}`);
     card.innerHTML = `
       <div class="card-suit"><i data-lucide="sword"></i></div>
       <div class="card-desc">${def.name} (Lv. ${level})</div>
     `;
     wrapper.appendChild(card);
     const btn = document.createElement('button');
-    btn.textContent = `Buy $${cost}`;
+    btn.textContent = cost === 0 ? 'Free' : `Buy $${cost}`;
     btn.disabled = cash < cost || !onPurchase;
     btn.addEventListener('click', () => {
       if (!onPurchase) return;
