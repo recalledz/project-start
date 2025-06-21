@@ -2646,35 +2646,39 @@ lastFrameTime = currentTime;
 const deltaTime = rawDelta * timeScale;
 
 if (currentEnemy) {
-currentEnemy.tick(deltaTime);
-updateDealerLifeBar(currentEnemy);
+    currentEnemy.tick(deltaTime);
 
-if (enemyAttackFill) {
-const eratio = Math.min(
-1,
-currentEnemy.attackTimer / currentEnemy.attackInterval
-);
-enemyAttackFill.style.width = `${eratio * 100}%`;
-}
+    // Enemy may be cleared during tick (on defeat callbacks)
+    if (currentEnemy) {
+        updateDealerLifeBar(currentEnemy);
 
-// Update cooldown overlays
-const overlays = document.querySelectorAll(".cooldown-overlay");
-overlays.forEach((overlay, i) => {
-const ability = currentEnemy.abilities[i];
+        if (enemyAttackFill) {
+            const eratio = Math.min(
+                1,
+                currentEnemy.attackTimer / currentEnemy.attackInterval
+            );
+            enemyAttackFill.style.width = `${eratio * 100}%`;
+        }
 
-// Defensive check: ensure ability has timer + maxTimer
-if (
-ability &&
-typeof ability.timer === "number" &&
-typeof ability.maxTimer === "number"
-) {
-const ratio = Math.min(
-1,
-Math.max(0, ability.timer / ability.maxTimer)
-);
-overlay.style.setProperty("--cooldown", ratio);
-}
-});
+        // Update cooldown overlays
+        const overlays = document.querySelectorAll(".cooldown-overlay");
+        overlays.forEach((overlay, i) => {
+            const ability = currentEnemy.abilities[i];
+
+            // Defensive check: ensure ability has timer + maxTimer
+            if (
+                ability &&
+                typeof ability.timer === "number" &&
+                typeof ability.maxTimer === "number"
+            ) {
+                const ratio = Math.min(
+                    1,
+                    Math.max(0, ability.timer / ability.maxTimer)
+                );
+                overlay.style.setProperty("--cooldown", ratio);
+            }
+        });
+    }
 }
 
 
