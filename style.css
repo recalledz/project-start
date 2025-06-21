@@ -1476,7 +1476,7 @@ body {
 /* Stage traversal progress bar */
 .stage-progress {
     width: 50%;
-    height: 8px;
+    height: 4px;
     background: #090b09;
     border: 1px solid grey;
     border-radius: 4px;

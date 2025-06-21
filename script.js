@@ -294,6 +294,14 @@ const manaText = document.getElementById("manaText");
 const manaRegenDisplay = document.getElementById("manaRegenDisplay");
 const dpsDisplay = document.getElementById("dpsDisplay");
 
+function hideStageProgressBar() {
+  if (stageProgressBar) stageProgressBar.style.display = "none";
+}
+
+function showStageProgressBar() {
+  if (stageProgressBar) stageProgressBar.style.display = "block";
+}
+
 const unlockedJokers = [];
 
 // attack progress bars
@@ -990,6 +998,7 @@ document.addEventListener("DOMContentLoaded", () => {
   nextStageBtn.addEventListener("click", nextStage);
   fightBossBtn.addEventListener("click", () => {
     fightBossBtn.style.display = "none";
+    hideStageProgressBar();
     stageData.stage = 10;
     stageData.kills = playerStats.stageKills[stageData.stage] || 0;
     renderStageInfo();
@@ -1461,6 +1470,7 @@ function removeDealerLifeBar() {
 
 function spawnDealerEvent(powerMult = 1) {
   stopStageProgress();
+  hideStageProgressBar();
   inCombat = true;
   removeDealerLifeBar();
   const temp = { ...stageData, stage: Math.round(stageData.stage * powerMult) };
@@ -1472,6 +1482,7 @@ function spawnDealerEvent(powerMult = 1) {
 
 function spawnBossEvent() {
   stopStageProgress();
+  hideStageProgressBar();
   inCombat = true;
   removeDealerLifeBar();
   currentEnemy = spawnEnemy('boss', stageData, enemyAttackProgress, () => onBossDefeat(currentEnemy));
@@ -1541,6 +1552,7 @@ function stepStageProgress() {
 
 function startStageProgress() {
   if (stageProgressing) return;
+  showStageProgressBar();
   stageProgressing = true;
   stageProgressInterval = setInterval(stepStageProgress, 1000);
 }
@@ -1552,6 +1564,7 @@ function moveForward() {
 
 // After a kill, decide whether to spawn a dealer or a boss
 function respawnDealerStage() {
+  hideStageProgressBar();
   removeDealerLifeBar();
   if (speakerEncounterPending) {
     speakerEncounterPending = false;
@@ -1583,6 +1596,7 @@ function onDealerDefeat() {
     inCombat = false;
     currentEnemy = null;
     updateDealerLifeDisplay();
+    showStageProgressBar();
   });
 } // need to define xp formula
 
@@ -1605,6 +1619,7 @@ function onSpeakerDefeat() {
     inCombat = false;
     currentEnemy = null;
     updateDealerLifeDisplay();
+    showStageProgressBar();
   });
 }
 
@@ -1638,6 +1653,7 @@ function onBossDefeat(boss) {
   dealerBarDeathAnimation(() => {
     inCombat = false;
     currentEnemy = null;
+    showStageProgressBar();
     nextWorld();
   });
 }
