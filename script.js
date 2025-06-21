@@ -283,6 +283,7 @@ const jobCarouselContainer = document.querySelector('.jobCarouselContainer');
 const dCardContainer = document.getElementsByClassName("dCardContainer")[0];
 const dealerContainer = document.querySelector('.dealerContainer');
 const stageProgressFill = document.getElementById("stageProgressFill");
+const stageProgressBar = document.getElementById("stageProgressBar");
 const jokerContainers = document.querySelectorAll(".jokerContainer");
 const manaBar = document.getElementById("manaBar");
 const manaFill = document.getElementById("manaFill");
@@ -966,6 +967,7 @@ document.addEventListener("DOMContentLoaded", () => {
   btn.addEventListener("click", () => drawCard(getCardState()));
   redrawBtn.addEventListener("click", handleRedraw);
   moveForwardBtn.addEventListener("click", moveForward);
+  if (stageProgressBar) stageProgressBar.addEventListener("click", moveForward);
   nextStageBtn.addEventListener("click", nextStage);
   fightBossBtn.addEventListener("click", () => {
     fightBossBtn.style.display = "none";
@@ -1484,6 +1486,7 @@ function removeDealerLifeBar() {
 }
 
 function spawnDealerEvent(powerMult = 1) {
+  stopStageProgress();
   inCombat = true;
   removeDealerLifeBar();
   const temp = { ...stageData, stage: Math.round(stageData.stage * powerMult) };
@@ -1503,6 +1506,7 @@ function spawnDealerEvent(powerMult = 1) {
 }
 
 function spawnBossEvent() {
+  stopStageProgress();
   inCombat = true;
   removeDealerLifeBar();
   currentEnemy = spawnBoss(
@@ -1546,9 +1550,17 @@ function updateStageProgressDisplay() {
   if (disp) disp.textContent = `distance: ${Math.floor(stageData.progress)}/${stageData.progressTarget}`;
 }
 
-function moveForward() {
+function stopStageProgress() {
+  if (stageProgressInterval) {
+    clearInterval(stageProgressInterval);
+    stageProgressInterval = null;
+  }
+  stageProgressing = false;
+}
+
+function stepStageProgress() {
   if (currentEnemy || campOverlayOpen || upgradeSelectionOpen) return;
-  stageData.progress = Math.min(stageData.progress + 25, stageData.progressTarget);
+  stageData.progress = Math.min(stageData.progress + 1, stageData.progressTarget);
   updateStageProgressDisplay();
   if (!stageData.event50 && stageData.progress >= stageData.progressTarget * 0.5) {
     stageData.event50 = true;
@@ -1559,10 +1571,22 @@ function moveForward() {
     maybeTriggerEvent();
   }
   if (stageData.progress >= stageData.progressTarget) {
+    stopStageProgress();
     moveForwardBtn.style.display = 'none';
     nextStageBtn.style.display = 'inline-block';
     nextStageChecker();
   }
+}
+
+function startStageProgress() {
+  if (stageProgressing) return;
+  stageProgressing = true;
+  stageProgressInterval = setInterval(stepStageProgress, 1000);
+}
+
+function moveForward() {
+  if (currentEnemy || campOverlayOpen || upgradeSelectionOpen) return;
+  startStageProgress();
 }
 
 // After a kill, decide whether to spawn a dealer or a boss
@@ -1895,6 +1919,8 @@ let redrawAllowed = false;
 let upgradeSelectionOpen = false;
 let upgradeOverlay = null;
 let redrawCost = 10;
+let stageProgressing = false;
+let stageProgressInterval = null;
 
 function handleRedraw() {
   if (!redrawAllowed) return;
@@ -1912,6 +1938,7 @@ function openCardUpgradeSelection() {
   if (upgradeSelectionOpen) return;
   upgradeSelectionOpen = true;
   gamePaused = true;
+  stopStageProgress();
   dCardContainer.innerHTML = '';
   upgradeOverlay = document.createElement('div');
   upgradeOverlay.classList.add('upgrade-selection-overlay');
@@ -1952,6 +1979,7 @@ function openCamp(withUpgrade = false) {
   campOverlayOpen = true;
   redrawAllowed = true;
   gamePaused = true;
+  stopStageProgress();
   campOverlay = document.createElement('div');
   campOverlay.classList.add('upgrade-selection-overlay', 'camp-overlay');
   const continueBtn = document.createElement('button');
@@ -1996,7 +2024,7 @@ function openCamp(withUpgrade = false) {
     });
     campOverlay.appendChild(nextBtn);
   }
-  dealerContainer.appendChild(campOverlay);
+  document.body.appendChild(campOverlay);
   updateRedrawButton();
 }
 
@@ -2705,16 +2733,18 @@ if (currentEnemy) {
     }
     worldProgressTimer = 0;
   }
-playerAttackTimer += deltaTime;
-if (playerAttackFill) {
-const pratio = Math.min(1, playerAttackTimer / stats.attackSpeed);
-playerAttackFill.style.width = `${pratio * 100}%`;
-}
-if (playerAttackTimer >= stats.attackSpeed) {
-attack();
-playerAttackTimer = 0;
-if (playerAttackFill) playerAttackFill.style.width = "0%";
-}
+  if (!stageProgressing) {
+    playerAttackTimer += deltaTime;
+    if (playerAttackFill) {
+      const pratio = Math.min(1, playerAttackTimer / stats.attackSpeed);
+      playerAttackFill.style.width = `${pratio * 100}%`;
+    }
+    if (playerAttackTimer >= stats.attackSpeed) {
+      attack();
+      playerAttackTimer = 0;
+      if (playerAttackFill) playerAttackFill.style.width = "0%";
+    }
+  }
 
 if (systems.manaUnlocked) {
 stats.mana = Math.min(
