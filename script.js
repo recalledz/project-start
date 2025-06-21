@@ -302,7 +302,8 @@ let cashTimer = 0;
 let worldProgressTimer = 0;
 const cashRateTracker = new RateTracker(10000);
 const worldProgressRateTracker = new RateTracker(30000);
-const EVENT_CHANCE = 0.5;
+// Chance to trigger an event every tick of stage progress
+const EVENT_CHANCE = 0.3;
 
 // Load saved state when DOM is ready
 window.addEventListener("beforeunload", saveGame);
@@ -1526,12 +1527,15 @@ function spawnBossEvent() {
 
 function triggerRandomEvent() {
   const roll = Math.random();
-  if (roll < 0.6) {
+  if (roll < 0.5) {
     spawnDealerEvent(1);
-  } else if (roll < 0.7) {
+  } else if (roll < 0.65) {
     spawnDealerEvent(1.3);
-  } else if (roll < 0.9) {
+  } else if (roll < 0.85) {
     openCamp();
+  } else {
+    // Optional upgrade camp when implemented
+    openCamp(true);
   }
 }
 
@@ -1560,6 +1564,8 @@ function stopStageProgress() {
 
 function stepStageProgress() {
   if (currentEnemy || campOverlayOpen || upgradeSelectionOpen) return;
+  // Each tick has a chance to trigger a random event
+  maybeTriggerEvent();
   stageData.progress = Math.min(stageData.progress + 1, stageData.progressTarget);
   updateStageProgressDisplay();
   if (!stageData.event50 && stageData.progress >= stageData.progressTarget * 0.5) {
