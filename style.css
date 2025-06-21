@@ -345,6 +345,11 @@ body {
     font-size: 0.8rem;
 }
 
+#distanceDisplay {
+    align-self: flex-start;
+    font-size: 0.8rem;
+}
+
 #cashPerSecDisplay {
     align-self: flex-start;
     font-size: 0.8rem;
@@ -418,6 +423,12 @@ body {
     gap: 10px;
     z-index: 10;
     padding: 10px;
+}
+
+.camp-overlay button {
+    font-size: 1rem;
+    padding: 6px 10px;
+    margin: 4px;
 }
 
 /* Dealer card base */
@@ -1443,6 +1454,28 @@ body {
 .world-progress-text {
     font-size: 12px;
     margin-left: 4px;
+}
+
+/* Stage traversal progress bar */
+.stage-progress {
+    width: 50%;
+    height: 8px;
+    background: #090b09;
+    border: 1px solid grey;
+    border-radius: 4px;
+    position: relative;
+    overflow: hidden;
+    margin: 4px auto;
+    flex-basis: 100%;
+}
+
+.stage-progress-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 0;
+    background: green;
 }
 
 .card-upgrades {
