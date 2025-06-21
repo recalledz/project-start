@@ -505,6 +505,19 @@ body {
     gap: 8px;
 }
 
+.camp-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+.camp-btn-info {
+    font-size: 0.7rem;
+    text-align: center;
+    max-width: 90px;
+}
+
 .camp-fire {
     width: 80px;
     height: 60px;
@@ -1637,7 +1650,7 @@ body {
     color: #ddd;
     font-style: italic;
     text-shadow: 0 0 8px #fff;
-    animation: fogFade 3s ease-in-out;
+    animation: fogFade 7s ease-in-out;
 }
 @keyframes fogFade {
     from { opacity: 0; filter: blur(4px); }
@@ -1688,7 +1701,6 @@ body {
     position: relative;
     overflow: hidden;
     margin: 4px auto;
-    flex-basis: 100%;
 }
 
 .stage-progress-fill {

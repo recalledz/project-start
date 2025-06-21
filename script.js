@@ -1810,8 +1810,9 @@ function cDealerDamage(damageAmount = null, ability = null, source = "dealer") {
     finalDamage -= absorbed;
   }
 
-  // target the front‐line card
-  const card = drawnCards[0];
+  // randomly target one of the drawn cards
+  const idx = Math.floor(Math.random() * drawnCards.length);
+  const card = drawnCards[idx];
 
   // subtract **one** hit’s worth
   card.currentHp = Math.round(Math.max(0, card.currentHp - finalDamage));
@@ -1831,7 +1832,7 @@ function cDealerDamage(damageAmount = null, ability = null, source = "dealer") {
   // if it’s dead, remove it
   if (card.currentHp === 0) {
     // immediately remove from data so new draws don't shift the wrong card
-    drawnCards.shift();
+    drawnCards.splice(idx, 1);
 
     animateCardDeath(card, () => {
       // 1) from the DOM
@@ -2118,28 +2119,37 @@ function openCamp(onCloseCallback = null) {
   btnRow.classList.add('camp-buttons');
   box.appendChild(btnRow);
 
-  function addBtn(label, handler) {
+  function addBtn(label, handler, infoText) {
+    const wrap = document.createElement('div');
+    wrap.classList.add('camp-btn');
     const btn = document.createElement('button');
     btn.textContent = label;
     btn.addEventListener('click', handler);
-    btnRow.appendChild(btn);
+    wrap.appendChild(btn);
+    if (infoText) {
+      const info = document.createElement('div');
+      info.classList.add('camp-btn-info');
+      info.textContent = infoText;
+      wrap.appendChild(info);
+    }
+    btnRow.appendChild(wrap);
     return btn;
   }
 
-  addBtn('▶ Continue', () => closeCamp());
+  addBtn('▶ Continue', () => closeCamp(), 'Resume journey');
 
   if (stats.cashOutWithoutRedraw) {
     addBtn('💰 Cash Out', () => {
       cashOut();
       closeCamp();
-    });
+    }, 'Collect chips and quit');
   }
 
   addBtn('⟳ Redraw & Cash Out', () => {
     cashOut();
     handleRedraw();
     closeCamp();
-  });
+  }, 'Cash out then draw again');
 
   addBtn('♥ Heal Party', () => {
     drawnCards.forEach(c => {
@@ -2148,7 +2158,7 @@ function openCamp(onCloseCallback = null) {
     });
     updateHandDisplay();
     closeCamp();
-  });
+  }, 'Restore half HP');
   updateRedrawButton();
 
   const handRow = document.createElement('div');
@@ -2512,7 +2522,7 @@ function showSpeakerQuote(text) {
   msg.textContent = text;
   speakerOverlay.appendChild(msg);
   document.body.appendChild(speakerOverlay);
-  setTimeout(hideSpeakerQuote, 4000);
+  setTimeout(hideSpeakerQuote, 8000);
 }
 
 function hideSpeakerQuote() {
