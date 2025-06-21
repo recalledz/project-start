@@ -1114,103 +1114,68 @@ function renderGlobalStats() {
   container.appendChild(restartBtn);
 }
 
-function renderDealerCard() {
-  if (!currentEnemy) return;
-  const {
-    minDamage,
-    maxDamage
-  } = calculateEnemyBasicDamage(
-    stageData.stage,
-    stageData.world
-  ); //calculate damage for the current stage min and max
-
-  // define d container wrapper
-  const dCardWrapper = document.createElement("div");
-  dCardWrapper.classList.add("dCardWrapper");
-
-  const dCardPane = document.createElement("div");
-  dCardPane.classList.add("dCardPane");
-  const typeClass = currentEnemy instanceof Boss ? "boss": "dealer";
-  dCardPane.classList.add(typeClass);
-
-  const dCardAbilityPane = document.createElement("div");
-  dCardAbilityPane.classList.add("dCardAbilityPane");
-
-  if (currentEnemy instanceof Boss) {
-    let abilitiesHTML = `<div class="dCard_abilities">`;
-
-    for (const ability of currentEnemy.abilities) {
-      const icon = ability.icon || "sparkles";
-      const label = ability.label || "Ability";
+function renderAbilityIcons(abilities, showCooldown = false) {
+  let html = '<div class="dCard_abilities">';
+  for (const ability of abilities) {
+    const icon = ability.icon || 'sparkles';
+    const label = ability.label || 'Ability';
+    const typeClass = ability.colorClass || '';
+    if (showCooldown) {
       const isOnCooldown = ability.timer < ability.cooldown;
       const cooldownRatio = ability.timer / ability.cooldown;
-      const typeClass = ability.colorClass || "";
-      const cooldownClass =
-      ability.timer &&
-      ability.cooldown &&
-      ability.timer < ability.cooldown
-      ? "onCooldown": "";
-
-      abilitiesHTML += `<div class="dCard_ability ${cooldownClass} ${typeClass}" title="${label}">
-      <i data-lucide="${icon}"></i>
-      ${
-      isOnCooldown
-      ? `<div class="cooldown-overlay" style="--cooldown:${cooldownRatio}"></div>`: ""
-      }
-      </div>`;
+      const cooldownClass = ability.timer && ability.cooldown && ability.timer < ability.cooldown ? 'onCooldown' : '';
+      html += `<div class="dCard_ability ${cooldownClass} ${typeClass}" title="${label}">` +
+        `<i data-lucide="${icon}"></i>` +
+        (isOnCooldown ? `<div class="cooldown-overlay" style="--cooldown:${cooldownRatio}"></div>` : '') +
+        `</div>`;
+    } else {
+      html += `<div class="dCard_ability ${typeClass}" title="${label}">` +
+        `<i data-lucide="${icon}"></i>` +
+        `</div>`;
     }
-    abilitiesHTML += `</div>`;
-
-    const iconColor = currentEnemy.iconColor || "#a04444";
-    dCardPane.innerHTML = `
-    <i data-lucide="${currentEnemy.icon}" class="dCard__icon" style="color:${iconColor}"></i>
-    <span class="dCard__text">
-    ${currentEnemy.name}<br>
-    Damage: ${formatNumber(minDamage)} - ${formatNumber(maxDamage)}
-    </span>
-    `;
-
-    //add abilities to the card
-    dCardAbilityPane.innerHTML = abilitiesHTML;
-    // apend card pane data and ability data to wrapper
-    dCardWrapper.appendChild(dCardPane);
-    dCardWrapper.appendChild(dCardAbilityPane);
-    // append wrapper to container
-    dCardContainer.appendChild(dCardWrapper);
-    lucide.createIcons();
-  } else {
-    let abilitiesHTML = `<div class="dCard_abilities">`;
-    for (const ability of currentEnemy.abilities) {
-      const icon = ability.icon || "sparkles";
-      const label = ability.label || "Ability";
-
-      abilitiesHTML += `<div class="dCard_ability" title="${label}">
-      <i data-lucide="${icon}"></i>
-      </div>`;
-    }
-    abilitiesHTML += `</div>`;
-
-    const {
-      color,
-      blur
-    } = getDealerIconStyle(stageData.stage);
-    dCardPane.innerHTML = `
-    <i data-lucide="skull" class="dCard__icon" style="stroke:${color}; filter: drop-shadow(0 0 ${blur}px ${color});"></i>
-    <span class="dCard__text">
-    ${currentEnemy.name}<br>
-    Damage: ${formatNumber(Math.floor(minDamage))} - ${formatNumber(Math.floor(maxDamage))}
-    </span>
-    `;
-
-    //add abilities to the card
-    dCardAbilityPane.innerHTML = abilitiesHTML;
-    // apend card pane data and ability data to wrapper
-    dCardWrapper.appendChild(dCardPane);
-    dCardWrapper.appendChild(dCardAbilityPane);
-    // append wrapper to container
-    dCardContainer.appendChild(dCardWrapper);
-    lucide.createIcons();
   }
+  html += '</div>';
+  return html;
+}
+
+function renderBossCard(enemy) {
+  const { minDamage, maxDamage } = calculateEnemyBasicDamage(enemy.stage, enemy.world);
+  const wrapper = document.createElement('div');
+  wrapper.classList.add('dCardWrapper');
+  const pane = document.createElement('div');
+  pane.classList.add('dCardPane', 'boss');
+  const abilityPane = document.createElement('div');
+  abilityPane.classList.add('dCardAbilityPane');
+  const iconColor = enemy.iconColor || '#a04444';
+  pane.innerHTML = `\n    <i data-lucide="${enemy.icon}" class="dCard__icon" style="color:${iconColor}"></i>\n    <span class="dCard__text">\n    ${enemy.name}<br>\n    Damage: ${formatNumber(minDamage)} - ${formatNumber(maxDamage)}\n    </span>\n    `;
+  abilityPane.innerHTML = renderAbilityIcons(enemy.abilities, true);
+  wrapper.append(pane, abilityPane);
+  return wrapper;
+}
+
+function renderDealerCardBase(enemy) {
+  const { minDamage, maxDamage } = calculateEnemyBasicDamage(enemy.stage, enemy.world);
+  const wrapper = document.createElement('div');
+  wrapper.classList.add('dCardWrapper');
+  const pane = document.createElement('div');
+  pane.classList.add('dCardPane', 'dealer');
+  const abilityPane = document.createElement('div');
+  abilityPane.classList.add('dCardAbilityPane');
+  const { color, blur } = getDealerIconStyle(stageData.stage);
+  pane.innerHTML = `\n    <i data-lucide="skull" class="dCard__icon" style="stroke:${color}; filter: drop-shadow(0 0 ${blur}px ${color});"></i>\n    <span class="dCard__text">\n    ${enemy.name}<br>\n    Damage: ${formatNumber(Math.floor(minDamage))} - ${formatNumber(Math.floor(maxDamage))}\n    </span>\n    `;
+  abilityPane.innerHTML = renderAbilityIcons(enemy.abilities, false);
+  wrapper.append(pane, abilityPane);
+  return wrapper;
+}
+
+function renderDealerCard() {
+  if (!currentEnemy) return;
+  const card = currentEnemy instanceof Boss
+    ? renderBossCard(currentEnemy)
+    : renderDealerCardBase(currentEnemy);
+  dCardContainer.innerHTML = '';
+  dCardContainer.appendChild(card);
+  lucide.createIcons();
 }
 
 function animateCardHit(card) {
