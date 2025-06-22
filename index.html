@@ -4,12 +4,10 @@
   <link rel="stylesheet" href="style.css">
   <script src="https://unpkg.com/lucide@latest"></script>
   <title>Page Title</title>
-  <script src="https://cdn.jsdelivr.net/npm/pixi.js@6.5.8/dist/browser/pixi.min.js"></script>
-  <!-- :contentReference[oaicite:0]{index=0} -->
+  <script src="pixi.min.js"></script>
 
   <!-- And the GlowFilter plugin: -->
-  <script src="https://cdn.jsdelivr.net/npm/pixi-filters@latest/dist/browser/pixi-filters.min.js"></script>
-  <!-- :contentReference[oaicite:1]{index=1} -->
+  <script src="pixi-filters.min.js"></script>
 </head>
   <body>
     <button id="debugToggle" class="debug-toggle">Debug</button>
@@ -56,8 +54,9 @@
       </div>
       <div class="cardSubTab">
         <div class="dealerContainer casino-section">
-          <div id="stage">
-            Stage 1
+          <div class="dealer-header">
+            <div id="stage">Stage 1</div>
+            <div id="insanityOrb" class="insanity-orb" title="The mind frays..."></div>
           </div>
         <span id="kills">kills: 0</span>
         <span id="distanceDisplay">distance: 0/0</span>
@@ -130,18 +129,19 @@
           <div id="playerAttackBar" class="playerAttackBar">
             <div class="playerAttackFill"></div>
           </div>
+          <div class="manaBar" id="manaBar" style="display:none;">
+            <div class="manaBarInner">
+              <div class="manaFill" id="manaFill"></div>
+              <div class="manaText" id="manaText">0/0</div>
+            </div>
+          </div>
           <button id="moveForwardBtn" title="Move Forward">➡️</button>
+          <button id="campBtn" style="display:none;" title="Find the Light"><i data-lucide="eye"></i></button>
           <button id="nextStageBtn" style="display:none;" disabled title="Next Stage">🚀</button>
           <button id="fightBossBtn" style="display:none;" title="Fight Boss">👑</button>
         </div>
         <div class="handContainer casino-section"></div>
         <div class="jokerContainer casino-section"></div>
-        <div class="manaBar" id="manaBar" style="display:none;">
-          <div class="manaBarInner">
-            <div class="manaFill" id="manaFill"></div>
-            <div class="manaText" id="manaText">0/0</div>
-          </div>
-        </div>
       </div>
       </div>
       <div class="worldsTab" style="display:none;">

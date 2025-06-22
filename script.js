@@ -27,6 +27,7 @@ import { formatNumber } from "./utils/numberFormat.js";
 import { runAnimation } from "./utils/animation.js";
 import { initCore, refreshCore } from './core.js';
 import { createOverlay } from './ui/overlay.js';
+import { showRestartScreen } from './ui/restartOverlay.js';
 import {
   rollNewCardUpgrades,
   applyCardUpgrade,
@@ -111,8 +112,8 @@ function upgradePowerCost() {
   return Math.floor(50 * Math.pow(1.5, upgradePowerPurchased));
 }
 
-// Persistent player stats affecting combat and rewards
-const stats = {
+// Base player stats used for resets
+const BASE_STATS = {
   points: 0,
   upgradePower: 0,
   pDamage: 0,
@@ -129,6 +130,8 @@ const stats = {
   maxMana: 0,
   mana: 0,
   manaRegen: 0,
+  maxSanity: 100,
+  sanity: 100,
   healOnRedraw: 0,
   abilityPower: 1,
   spadeDamageMultiplier: 1,
@@ -142,6 +145,9 @@ const stats = {
   damageBuffExpiration: 0,
   cashOutWithoutRedraw: false
 };
+
+// Persistent player stats affecting combat and rewards
+const stats = { ...BASE_STATS };
 
 const systems = {
   manaUnlocked: false
@@ -207,6 +213,31 @@ function checkSpeakerEncounter() {
   }
 }
 
+function updateCampButtonGlow(ratio) {
+  if (!campGlowFilter) return;
+  campGlowFilter.outerStrength = 1 + (1 - ratio) * 3;
+}
+
+function initCampHalo() {
+  if (!campBtn || typeof PIXI !== 'object') return;
+  campHaloApp = new PIXI.Application({ width: 60, height: 60, backgroundAlpha: 0 });
+  campBtn.appendChild(campHaloApp.view);
+  campHaloApp.view.style.position = 'absolute';
+  campHaloApp.view.style.inset = '0';
+  campHaloApp.view.style.pointerEvents = 'none';
+  const halo = new PIXI.Graphics();
+  halo.beginFill(0xffffee, 0.15);
+  halo.drawCircle(30, 30, 28);
+  halo.endFill();
+  campGlowFilter = new PIXI.filters.GlowFilter({ distance: 10, outerStrength: 1, color: 0xffffee });
+  halo.filters = [campGlowFilter];
+  campHaloApp.stage.addChild(halo);
+  campHaloApp.ticker.add(() => {
+    halo.alpha = 0.4 + 0.1 * Math.sin(Date.now() / 1000);
+  });
+  updateCampButtonGlow(stats.maxSanity > 0 ? stats.sanity / stats.maxSanity : 1);
+}
+
 const playerStats = {
   timesPrestiged: 0,
   decksUnlocked: 1,
@@ -266,6 +297,7 @@ function getCardState() {
     renderPurchasedUpgrades,
     updateActiveEffects,
     updateAllCardHp: recalcAllCardHp,
+    updateHandDisplay,
     pDeck,
     shuffleArray,
     updateDrawButton,
@@ -277,6 +309,7 @@ function getCardState() {
 const nextStageBtn = document.getElementById("nextStageBtn");
 const moveForwardBtn = document.getElementById("moveForwardBtn");
 const fightBossBtn = document.getElementById("fightBossBtn");
+const campBtn = document.getElementById("campBtn");
 const pointsDisplay = document.getElementById("pointsDisplay");
 const cashDisplay = document.getElementById("cashDisplay");
 const chipsDisplay = document.getElementById("chipsDisplay");
@@ -303,6 +336,19 @@ const jokerContainers = document.querySelectorAll(".jokerContainer");
 const manaBar = document.getElementById("manaBar");
 const manaFill = document.getElementById("manaFill");
 const manaText = document.getElementById("manaText");
+const sanityFill = document.getElementById('sanityFill');
+const sanityText = document.getElementById('sanityText');
+const insanityOrb = document.getElementById('insanityOrb');
+let campHaloApp = null;
+let campGlowFilter = null;
+const insanityMessages = [
+  "You feel watched.",
+  "The walls bend inward.",
+  "Thoughts scatter like crows..."
+];
+let insanityMsgIndex = 0;
+let lastInsanityMsg = 0;
+let lowSanityOverlayShown = false;
 const manaRegenDisplay = document.getElementById("manaRegenDisplay");
 const dpsDisplay = document.getElementById("dpsDisplay");
 
@@ -335,6 +381,7 @@ let playerAttackTimer = 0;
 let enemyAttackProgress = 0; // carryover ratio of enemy attack timer
 let cashTimer = 0;
 let worldProgressTimer = 0;
+let sanityTimer = 0;
 const cashRateTracker = new RateTracker(10000);
 const cashRateTracker1h = new RateTracker(3600000);
 const cashRateTracker24h = new RateTracker(86400000);
@@ -1041,6 +1088,8 @@ document.addEventListener("DOMContentLoaded", () => {
   initTabs();
   loadGame();
   initVignetteToggles();
+  initCampHalo();
+  if (window.lucide) lucide.createIcons();
   initPlayerLife({ getGameCash: () => cash, spendGameCash: spendCash });
   initCore();
   window.addEventListener('core-mind-upgrade', () => {
@@ -1095,11 +1144,19 @@ document.addEventListener("DOMContentLoaded", () => {
     enemyAttackFill = renderEnemyAttackBar();
     dealerDeathAnimation();
   });
+  if (campBtn) {
+    campBtn.addEventListener('click', () => {
+      campBtn.style.display = 'none';
+      stageComplete = false;
+      openCamp(() => openCardUpgradeSelection(nextStage));
+    });
+  }
   renderJokers();
   const buttons = document.querySelector('.buttonsContainer');
   playerAttackFill = renderPlayerAttackBar(buttons);
   hidePlayerAttackBar();
   updateChipsDisplay();
+  updateSanityBar();
   requestAnimationFrame(gameLoop);
 });
 
@@ -1115,6 +1172,38 @@ function updateManaBar() {
   const ratio = stats.maxMana > 0 ? stats.mana / stats.maxMana: 0;
   if (manaFill) manaFill.style.width = `${Math.min(1, ratio) * 100}%`;
   if (manaText) manaText.textContent = `${Math.floor(stats.mana)}/${Math.floor(stats.maxMana)}`;
+}
+
+function updateSanityBar() {
+  const ratio = stats.maxSanity > 0 ? stats.sanity / stats.maxSanity : 0;
+  if (sanityFill) sanityFill.style.width = `${Math.min(1, ratio) * 100}%`;
+  if (sanityText) sanityText.textContent = `${Math.floor(stats.sanity)}/${Math.floor(stats.maxSanity)}`;
+  updateInsanityOrb(ratio);
+  updateCampButtonGlow(ratio);
+}
+
+function updateInsanityOrb(ratio) {
+  if (!insanityOrb) return;
+  const dur = 3 - 2 * (1 - ratio);
+  insanityOrb.style.setProperty('--pulse-duration', `${dur}s`);
+  if (ratio < 0.3) {
+    insanityOrb.classList.add('critical');
+    document.body.classList.add('insanity-low');
+    const now = Date.now();
+    if (now - lastInsanityMsg > 5000) {
+      addLog(insanityMessages[insanityMsgIndex]);
+      insanityMsgIndex = (insanityMsgIndex + 1) % insanityMessages.length;
+      lastInsanityMsg = now;
+    }
+    if (ratio < 0.1 && !lowSanityOverlayShown) {
+      showSpeakerQuote("Reach for the light. before it's too late");
+      lowSanityOverlayShown = true;
+    }
+  } else {
+    insanityOrb.classList.remove('critical');
+    document.body.classList.remove('insanity-low');
+    if (ratio >= 0.1) lowSanityOverlayShown = false;
+  }
 }
 
 function unlockManaSystem() {
@@ -1437,6 +1526,9 @@ function nextStage() {
   playerStats.stageKills[stageData.stage] = stageData.kills;
   stageData.stage += 1;
   stageData.kills = playerStats.stageKills[stageData.stage] || 0;
+  const isBossStage = stageData.stage % 10 === 0;
+  stats.sanity = stats.maxSanity;
+  updateSanityBar();
   resetStageCashStats();
   killsDisplay.textContent = `Kills: ${formatNumber(stageData.kills)}`;
   renderGlobalStats();
@@ -1450,10 +1542,15 @@ function nextStage() {
   inCombat = false;
   currentEnemy = null;
   redrawAllowed = false;
-  moveForwardBtn.style.display = 'inline-block';
+  moveForwardBtn.style.display = isBossStage ? 'none' : 'inline-block';
   nextStageBtn.style.display = 'none';
   updateStageProgressDisplay();
-  if (progressButtonActive) startStageProgress();
+  if (isBossStage) {
+    progressButtonActive = false;
+    respawnDealerStage();
+  } else if (progressButtonActive) {
+    startStageProgress();
+  }
 }
 
 // Called when a boss is defeated to move to the next world
@@ -1462,6 +1559,8 @@ function nextWorld() {
   stageData.world += 1;
   stageData.stage = 1;
   stageData.kills = playerStats.stageKills[stageData.stage] || 0;
+  stats.sanity = stats.maxSanity;
+  updateSanityBar();
   redrawCost = 10;
   updateRedrawButton();
   applyWorldTheme();
@@ -1627,6 +1726,8 @@ function stepStageProgress() {
     stopStageProgress();
     moveForwardBtn.style.display = 'none';
     stageEndEnemyActive = true;
+    stageComplete = true;
+    if (campBtn) campBtn.style.display = 'inline-block';
     spawnDealerEvent(1.3);
   }
 }
@@ -1658,7 +1759,7 @@ function respawnDealerStage() {
   if (speakerEncounterPending) {
     speakerEncounterPending = false;
     currentEnemy = spawnEnemy('speaker', stageData, enemyAttackProgress, onSpeakerDefeat);
-  } else if (stageData.stage === 10) {
+  } else if (stageData.stage % 10 === 0) {
     currentEnemy = spawnEnemy('boss', stageData, enemyAttackProgress, () => onBossDefeat(currentEnemy));
   } else {
     currentEnemy = spawnEnemy('dealer', stageData, enemyAttackProgress, onDealerDefeat);
@@ -1690,7 +1791,9 @@ function onDealerDefeat() {
       hidePlayerAttackBar();
       if (stageEndEnemyActive) {
         stageEndEnemyActive = false;
-        openCamp(() => openCardUpgradeSelection(nextStage));
+        respawnDealerStage();
+      } else if (stageComplete) {
+        respawnDealerStage();
       } else {
         showStageProgressBar();
         progressButtonActive = true;
@@ -1761,7 +1864,7 @@ function onBossDefeat(boss) {
     updateChipsDisplay();
     hidePlayerAttackBar();
     showStageProgressBar();
-    nextWorld();
+    nextStage();
     progressButtonActive = true;
     startStageProgress();
   });
@@ -1788,7 +1891,8 @@ function updateDealerLifeDisplay() {
 function cDealerDamage(damageAmount = null, ability = null, source = "dealer") {
   // If no card is available to take the hit, trigger game over
   if (drawnCards.length === 0) {
-    showRestartScreen();
+    playerStats.hasDied = true;
+    showRestartScreen(respawnPlayer);
     return;
   }
 
@@ -1842,8 +1946,9 @@ function cDealerDamage(damageAmount = null, ability = null, source = "dealer") {
       updatePlayerStats(stats);
       updateDrawButton();
       updateDeckDisplay();
-      if (drawnCards.length === 0 && deck.length === 0) {
-        showRestartScreen();
+      if (drawnCards.length === 0) {
+        playerStats.hasDied = true;
+        showRestartScreen(respawnPlayer);
       }
     });
   }
@@ -1959,6 +2064,7 @@ let stageProgressing = false;
 let stageProgressInterval = null;
 let progressButtonActive = false;
 let stageEndEnemyActive = false;
+let stageComplete = false;
 
 function rarityClass(rarity) {
   switch (rarity) {
@@ -2090,12 +2196,12 @@ function openCamp(onCloseCallback = null) {
   box.classList.add('camp-box');
 
   const header = document.createElement('h2');
-  header.textContent = 'Sanctuary Found';
+  header.textContent = 'Find the Light';
   box.appendChild(header);
 
   const sub = document.createElement('p');
   sub.classList.add('camp-subheading', 'speaker-quote');
-  sub.textContent = 'You may catch your breath or press on.';
+  sub.textContent = '“Reach for the light. before it\'s too late”';
   box.appendChild(sub);
 
   const canvas = document.createElement('canvas');
@@ -2424,6 +2530,7 @@ function spawnPlayer() {
 function respawnPlayer() {
   enemyAttackProgress = 0;
   playerStats.hasDied = false;
+  Object.assign(stats, BASE_STATS);
   cash = 0;
   chips = 0;
   resetCashRates(cash);
@@ -2472,45 +2579,6 @@ function respawnPlayer() {
   checkSpeakerEncounter();
 }
 
-let restartOverlay = null;
-let restartTimer = null;
-
-function showRestartScreen() {
-if (restartOverlay) return;
-playerStats.hasDied = true;
-restartOverlay = document.createElement("div");
-restartOverlay.classList.add("restart-overlay");
-
-const message = document.createElement("div");
-message.classList.add("restart-message");
-message.textContent = "Game Over";
-
-const btn = document.createElement("button");
-btn.textContent = "Restart";
-btn.addEventListener("click", () => {
-respawnPlayer();
-hideRestartScreen();
-});
-
-restartOverlay.append(message, btn);
-document.body.appendChild(restartOverlay);
-
-restartTimer = setTimeout(() => {
-respawnPlayer();
-hideRestartScreen();
-}, 5000);
-}
-
-function hideRestartScreen() {
-if (restartOverlay) {
-restartOverlay.remove();
-restartOverlay = null;
-}
-if (restartTimer) {
-clearTimeout(restartTimer);
-restartTimer = null;
-}
-}
 
 let speakerOverlay = null;
 function showSpeakerQuote(text) {
@@ -2871,6 +2939,7 @@ if (currentEnemy) {
   updatePlayerStats(stats);
   cashTimer += deltaTime;
   worldProgressTimer += deltaTime;
+  sanityTimer += deltaTime;
   if (cashTimer >= 1000) {
     recordCashRates(cash);
     if (statsEconomyContainer && statsEconomyContainer.style.display !== 'none') {
@@ -2886,6 +2955,17 @@ if (currentEnemy) {
       worldProgressPerSecDisplay.textContent = `Avg World Progress/sec: ${rate.toFixed(2)}%`;
     }
     worldProgressTimer = 0;
+  }
+  if (sanityTimer >= 1000) {
+    sanityTimer = 0;
+    if (!campOverlayOpen) {
+      if (stats.sanity > 0) {
+        stats.sanity = Math.max(0, stats.sanity - 1);
+        updateSanityBar();
+      } else {
+        cDealerDamage(1);
+      }
+    }
   }
   if (currentEnemy) {
     playerAttackTimer += deltaTime;
@@ -2933,8 +3013,8 @@ if (btn) btn.addEventListener("click", toggleDebug);
 
 // Developer helpers exposed on the console for testing
 window.devTools = {
-spawnBoss,
-spawnDealer,
+  spawnBoss: () => spawnBossEvent(),
+  spawnDealer: () => spawnDealerEvent(),
 cDealerDamage,
 killEnemy: () => {
 if (!currentEnemy) return;

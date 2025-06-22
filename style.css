@@ -197,10 +197,9 @@ body {
 .gameColumn {
     display: grid;
     grid-template-columns: 1fr;
-    grid-template-rows: auto auto 1fr auto;
+    grid-template-rows: auto 1fr auto;
     grid-template-areas:
         "buttons"
-        "mana"
         "hand"
         "jokers";
     overflow-y: auto;
@@ -222,12 +221,12 @@ body {
 }
 
 .manaBar {
-    grid-area: mana;
     display: flex;
     justify-content: center;
     align-items: center;
     height: 30px;
-    width: 80%;
+    width: 50%;
+    margin: 0 auto;
 }
 
 .manaBarInner {
@@ -236,6 +235,8 @@ body {
     height: 100%;
     background: rgba(0, 0, 0, 0.8);
     border: 1px solid #3498db;
+    border-radius: 8px;
+    overflow: hidden;
     box-shadow: inset 0 0 6px #3498db;
 }
 
@@ -246,6 +247,7 @@ body {
     height: 100%;
     width: 0%;
     background: #3498db;
+    transition: width 0.3s;
 }
 
 .manaText {
@@ -257,6 +259,46 @@ body {
     font-size: 0.7rem;
     white-space: nowrap;
 }
+
+.insanity-orb {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #9b59b6 0%, #2e003e 100%);
+    box-shadow: 0 0 10px rgba(155, 89, 182, 0.7), 0 0 20px rgba(155, 89, 182, 0.5);
+    animation: orbPulse var(--pulse-duration, 3s) infinite;
+    pointer-events: auto;
+}
+
+@keyframes orbPulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+.insanity-orb.critical {
+    background: radial-gradient(circle, #8b0000 0%, #300000 100%);
+    box-shadow: 0 0 10px rgba(255, 0, 0, 0.8), 0 0 20px rgba(255, 0, 0, 0.6);
+}
+
+body.insanity-low {
+    filter: grayscale(0.4);
+}
+
+body.insanity-low::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(circle, rgba(0, 0, 0, 0) 60%, rgba(0, 0, 0, 0.6) 100%);
+    z-index: 999;
+}
+
+
 
 
 /*============ main tab side panel============== */
@@ -343,6 +385,13 @@ body {
 
 .dealerContainer > .dealerLifeDisplay {
     justify-self: center;
+}
+
+.dealer-header {
+    align-self: flex-start;
+    display: flex;
+    align-items: center;
+    gap: 4px;
 }
 #stage {
     align-self: flex-start;
@@ -472,6 +521,8 @@ body {
     box-shadow: 0 0 12px rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.2);
     color: #fff;
+    width: 100%;
+    max-width: 600px;
 }
 
 .overlay-box button {
@@ -577,6 +628,7 @@ body {
     justify-items: center;
     gap: 4px;
     padding: 2px 8px;
+    width: 100%;
 }
 .overlay-hand .card-wrapper {
     transform: scale(0.8);
@@ -794,6 +846,22 @@ body {
 #moveForwardBtn.active {
     background: #5cb85c;
     border-color: #3e8e41;
+}
+
+#campBtn {
+    width: 48px;
+    height: 48px;
+    position: relative;
+    margin: 0 6px;
+    overflow: hidden;
+}
+#campBtn canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
 }
 
 /* auto attack progress bars */
@@ -1604,17 +1672,7 @@ body {
 }
 
 .restart-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0, 0, 0, 0.8);
-    display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    z-index: 5000;
 }
 
 .restart-overlay .restart-message {
@@ -1622,10 +1680,27 @@ body {
     margin-bottom: 1rem;
 }
 
-.restart-overlay button {
-    padding: 6px 12px;
+.restart-overlay .restart-flavor {
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+    opacity: 0.8;
+    text-align: center;
+}
+
+.restart-overlay .restart-button {
+    padding: 6px 16px;
     font-size: 1rem;
     cursor: pointer;
+    background: linear-gradient(#900, #500);
+    border: 1px solid #600;
+    color: #fff;
+    border-radius: 4px;
+}
+
+.restart-art {
+    width: 80px;
+    height: 60px;
+    margin-bottom: 8px;
 }
 
 @media (min-width: 768px) {
@@ -1694,7 +1769,7 @@ body {
 /* Stage traversal progress bar */
 .stage-progress {
     width: 50%;
-    height: 2px;
+    height: 8px;
     background: #090b09;
     border: 1px solid grey;
     border-radius: 4px;
@@ -1709,7 +1784,7 @@ body {
     left: 0;
     height: 100%;
     width: 0;
-    background: green;
+    background: #2ecc71;
 }
 
 .card-upgrades {

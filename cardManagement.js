@@ -15,6 +15,7 @@ export function drawCard(state) {
     renderPurchasedUpgrades,
     updateActiveEffects,
     updateAllCardHp,
+    updateHandDisplay,
     pDeck,
     renderDeckTop,
     updatePileCounts
@@ -35,6 +36,7 @@ export function drawCard(state) {
     renderPurchasedUpgrades();
     updateActiveEffects();
     updateAllCardHp();
+    if (typeof updateHandDisplay === 'function') updateHandDisplay();
     return null;
   }
 
