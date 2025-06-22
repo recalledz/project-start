@@ -219,8 +219,17 @@ function updateCampButtonGlow(ratio) {
 }
 
 function initCampHalo() {
-  if (!campBtn || typeof PIXI !== 'object') return;
-  campHaloApp = new PIXI.Application({ width: 60, height: 60, transparent: true });
+  if (!campBtn || typeof PIXI !== 'object' || typeof PIXI.Application !== 'function') return;
+  try {
+    campHaloApp = new PIXI.Application({ width: 60, height: 60, transparent: true });
+  } catch (err) {
+    console.error('Failed to create camp halo PIXI app:', err);
+    return;
+  }
+  if (!campHaloApp.view) {
+    console.error('Camp halo app has no view');
+    return;
+  }
   campBtn.appendChild(campHaloApp.view);
   campHaloApp.view.style.position = 'absolute';
   campHaloApp.view.style.inset = '0';
