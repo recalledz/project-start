@@ -261,7 +261,10 @@ body {
 }
 
 .insanity-orb {
-    display: inline-block;
+    position: fixed;
+    top: 50%;
+    left: 10px;
+    transform: translateY(-50%);
     width: 40px;
     height: 40px;
     border-radius: 50%;
@@ -269,14 +272,15 @@ body {
     box-shadow: 0 0 10px rgba(155, 89, 182, 0.7), 0 0 20px rgba(155, 89, 182, 0.5);
     animation: orbPulse var(--pulse-duration, 3s) infinite;
     pointer-events: auto;
+    z-index: 1000;
 }
 
 @keyframes orbPulse {
     0%, 100% {
-        transform: scale(1);
+        transform: translateY(-50%) scale(1);
     }
     50% {
-        transform: scale(1.1);
+        transform: translateY(-50%) scale(1.1);
     }
 }
 
@@ -385,13 +389,6 @@ body.insanity-low::after {
 
 .dealerContainer > .dealerLifeDisplay {
     justify-self: center;
-}
-
-.dealer-header {
-    align-self: flex-start;
-    display: flex;
-    align-items: center;
-    gap: 4px;
 }
 #stage {
     align-self: flex-start;

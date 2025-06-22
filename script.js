@@ -220,7 +220,7 @@ function updateCampButtonGlow(ratio) {
 
 function initCampHalo() {
   if (!campBtn || typeof PIXI !== 'object') return;
-  campHaloApp = new PIXI.Application({ width: 60, height: 60, backgroundAlpha: 0 });
+  campHaloApp = new PIXI.Application({ width: 60, height: 60, transparent: true });
   campBtn.appendChild(campHaloApp.view);
   campHaloApp.view.style.position = 'absolute';
   campHaloApp.view.style.inset = '0';
