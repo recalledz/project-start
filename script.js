@@ -315,9 +315,6 @@ const manaFill = document.getElementById("manaFill");
 const manaText = document.getElementById("manaText");
 //const stageProgressFill = document.getElementById("stageProgressFill");
 //const stageProgressBar = document.getElementById("stageProgressBar");
-const sanityFill = null;
-const sanityText = null;
-const insanityOrb = null;
 //const insanityMessages = [
 //  "You feel watched.",
 //  "The walls bend inward.",
@@ -507,9 +504,6 @@ function showTab(tab) {
   if (tab) tab.style.display = "";
 }
 
-function hideUpgradePanels() {}
-function showBarUpgradesPanel() {}
-function showCardUpgradesPanel() {}
 
 function initTabs() {
   if (typeof document === 'undefined') return;
@@ -634,37 +628,6 @@ function initVignetteToggles() {
   });
 }
 
-// Build the upgrade shop list in the Deck tab
-function renderUpgrades() {
-  const container = document.querySelector(".upgrade-list");
-  if (!container) return;
-  container.innerHTML = "";
-
-  Object.entries(upgrades).forEach(([key, up]) => {
-    if (!up.unlocked) return;
-    const row = document.createElement("div");
-    row.classList.add("upgrade-item");
-    row.dataset.key = key;
-
-    const label = document.createElement("span");
-    label.textContent = `${up.name} (Lv. ${up.level})`;
-
-    const cost = up.costFormula(up.level + 1);
-    const btn = document.createElement("button");
-    btn.textContent = `Buy $${cost}`;
-    if (cash < cost) {
-      btn.disabled = true;
-      row.classList.add("unaffordable");
-    } else {
-      row.classList.add("affordable");
-    }
-    btn.addEventListener("click", () => purchaseUpgrade(key));
-
-    row.append(label, btn);
-    container.appendChild(row);
-  });
-}
-
 // Refresh button states (enabled/disabled) based on available cash
 function updateUpgradeButtons() {
   document.querySelectorAll(".upgrade-item").forEach(row => {
@@ -709,18 +672,6 @@ function checkUpgradeUnlocks() {
   }
 }
 
-function purchaseUpgrade(key) {
-  const up = upgrades[key];
-  const cost = up.costFormula(up.level + 1);
-  if (cash < cost) return;
-  cash -= cost;
-  cashDisplay.textContent = `Cash: $${formatNumber(cash)}`;
-  recordCashRates(cash);
-  up.level += 1;
-  up.effect({ stats, pDeck, stageData, systems });
-  updateDrawButton();
-  renderPlayerStats(stats);
-}
 
 function purchaseCardUpgrade(id, cost) {
   if (cash < cost) return;
@@ -777,11 +728,6 @@ function updateActiveEffects() {
   }
 }
 
-function updateUpgradePowerDisplay() {
-  const el = document.getElementById('upgradePowerDisplay');
-  if (el) el.textContent = `Upgrade Power: ${formatNumber(Math.floor(stats.upgradePower))}`;
-}
-
 function updateUpgradePowerCost() {
   const btn = document.getElementById('buyUpgradePowerBtn');
   if (btn) btn.textContent = `Buy Upgrade Point ($${formatNumber(upgradePowerCost())})`;
@@ -800,23 +746,6 @@ function updateBarUI(key) {
   if (pointsEl) pointsEl.textContent = bar.points;
 }
 
-function allocateBarPoint(key) {
-  if (stats.upgradePower <= 0) return;
-  const bar = barUpgrades[key];
-  bar.points += 1;
-  stats.upgradePower -= 1;
-  updateBarUI(key);
-  updateUpgradePowerDisplay();
-}
-
-function deallocateBarPoint(key) {
-  const bar = barUpgrades[key];
-  if (bar.points <= 0) return;
-  bar.points -= 1;
-  stats.upgradePower += 1;
-  updateBarUI(key);
-  updateUpgradePowerDisplay();
-}
 
 function tickBarProgress(delta) {
   Object.entries(barUpgrades).forEach(([key, bar]) => {
@@ -836,103 +765,7 @@ function tickBarProgress(delta) {
   });
 }
 
-function renderBarUpgrades() {
-  const container = document.querySelector('.bar-upgrades');
-  if (!container) return;
-  container.innerHTML = '';
-  Object.entries(barUpgrades).forEach(([key, bar]) => {
-    const row = document.createElement('div');
-    row.classList.add('bar-upgrade');
-    row.dataset.key = key;
-    const header = document.createElement('div');
-    header.classList.add('bar-header');
-    const label = document.createElement('div');
-    label.classList.add('bar-label');
-    label.textContent = key === 'damage' ? 'Damage' : 'Max HP';
-    const info = document.createElement('div');
-    info.classList.add('bar-info');
-    header.append(label, info);
-    const barEl = document.createElement('div');
-    barEl.classList.add('bar');
-    const fill = document.createElement('div');
-    fill.classList.add('bar-fill');
-    barEl.appendChild(fill);
-    const controls = document.createElement('div');
-    controls.classList.add('bar-controls');
-    const minus = document.createElement('button');
-    minus.textContent = '-';
-    minus.addEventListener('click', () => deallocateBarPoint(key));
-    const pts = document.createElement('span');
-    pts.classList.add('bar-points');
-    pts.textContent = bar.points;
-    const plus = document.createElement('button');
-    plus.textContent = '+';
-    plus.addEventListener('click', () => allocateBarPoint(key));
-    controls.append(minus, pts, plus);
-    row.append(header, barEl, controls);
-    container.appendChild(row);
-    updateBarUI(key);
-  });
-  updateUpgradePowerDisplay();
-}
 //=========card tab==========
-
-// Render a single card inside the Deck tab listing
-function renderTabCard(card) {
-  // 1) Wrapper
-  const wrapper = document.createElement("div");
-  wrapper.classList.add("card-wrapper");
-
-  // 2) Card pane (value / suite / HP)
-  const cardPane = document.createElement("div");
-  cardPane.classList.add("card");
-  cardPane.innerHTML = `
-  <div class="card-value" style="color: ${card.color}">${card.value}</div>
-  <div class="card-suit" style="color: ${card.color}">${card.symbol}</div>
-  <div class="card-hp">HP: ${formatNumber(Math.round(card.currentHp))}/${formatNumber(Math.round(card.maxHp))}</div>
-  `;
-
-  // 3) XP bar
-  const xpBar = document.createElement("div");
-  const xpBarFill = document.createElement("div");
-  const xpLabel = document.createElement("div");
-  xpBar.classList.add("xpBar");
-  xpBarFill.classList.add("xpBarFill");
-  xpLabel.classList.add("xpBarLabel");
-  xpLabel.textContent = `LV: ${card.currentLevel}`;
-  xpBar.append(xpBarFill, xpLabel);
-
-  // 4) Store references on the card object for deck tab
-  card.deckXpBarFill = xpBarFill;
-  card.deckXpLabel = xpLabel;
-  card.deckHpDisplay = cardPane.querySelector(".card-hp");
-
-  // 5) Nest and append
-  wrapper.append(cardPane, xpBar);
-  deckTabContainer.appendChild(wrapper);
-
-  wrapper.addEventListener("mouseover", e => {
-    tooltip.innerHTML = `
-    <strong>${card.value}${card.symbol}</strong><br>
-    Level: ${card.currentLevel}<br>
-    XP: ${formatNumber(card.XpCurrent)}/${formatNumber(card.XpReq)}<br>
-    Damage: ${formatNumber(card.damage)}<br>
-    `;
-    tooltip.style.display = "block";
-  });
-
-  // move with the mouse
-  wrapper.addEventListener("mousemove", e => {
-    // offset so the tip doesn’t sit *under* the cursor
-    tooltip.style.left = e.pageX + 10 + "px";
-    tooltip.style.top = e.pageY + 10 + "px";
-  });
-
-  // hide when you leave
-  wrapper.addEventListener("mouseout", () => {
-    tooltip.style.display = "none";
-  });
-}
 
 function renderMiniCard(card) {
   const wrapper = document.createElement('div');
@@ -1609,24 +1442,7 @@ function spawnBossEvent() {
   dealerDeathAnimation();
 }
 
-function triggerRandomEvent() {
-  const roll = Math.random();
-  if (roll < 0.7) {
-    spawnDealerEvent(1);
-  } else if (roll < 0.85) {
-    spawnDealerEvent(1.3);
-  } else if (roll < 0.95) {
-    openCamp();
-  } else {
-    openCamp(() => openCardUpgradeSelection());
-  }
-}
 
-function maybeTriggerEvent() {
-  if (Math.random() < EVENT_CHANCE) {
-    triggerRandomEvent();
-  }
-}
 
 //function updateStageProgressDisplay() {}
 //function stopStageProgress() {}
@@ -2284,9 +2100,6 @@ function renderJokers() {
   });
 }
 
-function openJokerDetails(joker) {
-  // Legacy overlay display no longer used
-}
 
 function showJokerTooltip(joker, x, y) {
   if (!tooltip) return;
@@ -2743,17 +2556,7 @@ e);
 }
 
 
-/*function retry() {
-  points =0
-  pointsDisplay.textContent = points;
-  suite = [1,2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
-  drawnCards = []
-  handContainer.innerHTML = ""
-}*/
-
 //=========game loop===========
-
-/*setInterval(updateUi(), 1000);*/
 
 
 let lastFrameTime = performance.now();
