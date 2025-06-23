@@ -133,6 +133,33 @@ Max HP	value * level * baseHPMultiplier	HP influenced by card value, level, and 
 Ability Power	Tied to attribute/stat	Determines potency of magical abilities
 XP Requirement	XpReq = value * (level^2)	Higher value cards require more XP to level up
 
+XP per Kill     0.389 * L^2 / (1 + 0.007*(L-1))  L = stage + 10*(world-1)
+
+### XP Calculation
+
+Cards level up by defeating enemies. Two formulas keep the pace near
+"one level per stage" for an average value card:
+
+1. **Requirement** for level `L`
+
+   `XpReq = value * (L^2)`
+
+   Low-value cards reach higher levels quickly, while face cards require
+   more grinding.
+
+2. **XP award** when an enemy from stage `s` and world `w` is defeated
+
+   ```
+   L = s + 10 * (w - 1)
+   XP = 0.389 * L^2 / (1 + 0.007 * (L - 1))
+   ```
+
+   `L` is the effective difficulty across worlds. Each new world adds 10
+   levels to the scale. The small epsilon term increases kills needed by
+   roughly one every few stages (e.g., stage 9 takes ~3m10s instead of 3m).
+
+Cards in the deck but not currently drawn gain only half of this XP.
+
 
 🧠 Attributes
 

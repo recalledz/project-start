@@ -28,6 +28,7 @@ import { runAnimation } from "./utils/animation.js";
 import { initCore, refreshCore } from './core.js';
 import { createOverlay } from './ui/overlay.js';
 import { showRestartScreen } from './ui/restartOverlay.js';
+import { calculateKillXp, XP_EFFICIENCY } from './utils/xp.js';
 import {
   rollNewCardUpgrades,
   applyCardUpgrade,
@@ -182,7 +183,7 @@ let stageData = {
 
 const STAGE_KILL_REQUIREMENT = 10;
 
-const xpEfficiency = 0.5;
+const xpEfficiency = XP_EFFICIENCY;
 
 let speakerEncounterPending = false;
 
@@ -1654,7 +1655,7 @@ function respawnDealerStage() {
 function onDealerDefeat() {
   // capture remaining attack progress before resetting
   enemyAttackProgress = currentEnemy.attackTimer / currentEnemy.attackInterval;
-  cardXp(stageData.stage ** 1.5 * stageData.world);
+  cardXp(calculateKillXp(stageData.stage, stageData.world));
   chips += computeChipReward();
   updateChipsDisplay();
   healCardsOnKill();
@@ -1672,7 +1673,7 @@ function onDealerDefeat() {
       hidePlayerAttackBar();
       respawnDealerStage();
     });
-} // need to define xp formula
+}
 
 function onSpeakerDefeat() {
   playerStats.speakerEncounters += 1;

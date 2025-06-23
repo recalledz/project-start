@@ -1,6 +1,7 @@
 import Enemy from './enemy.js';
 import { Boss, BossTemplates } from './boss.js';
 import { AbilityRegistry } from './dealerabilities.js';
+import { calculateKillXp } from './utils/xp.js';
 
 export function calculateEnemyHp(stage, world, isBoss = false) {
   const baseHp = 10 + stage;
@@ -51,7 +52,7 @@ export function spawnBoss(stageData, enemyAttackProgress, onAttack, onDefeat) {
     name: template.name,
     icon: template.icon,
     iconColor: template.iconColor,
-    xp: Math.pow(stage, 1.5) * world,
+    xp: calculateKillXp(stage, world),
     abilities,
     rarity: 'legendary',
     onAttack,

@@ -14,6 +14,8 @@ export const suitColors = {
 
 export const suits = ['Hearts', 'Spades', 'Diamonds', 'Clubs'];
 
+import { xpRequirement } from './utils/xp.js';
+
 const names = {
   1: 'Ace',
   11: 'Jack',
@@ -34,7 +36,7 @@ export class Card {
 
     this.currentLevel = 1;
     this.XpCurrent = 0;
-    this.XpReq = 1;
+    this.XpReq = xpRequirement(this.value, this.currentLevel);
 
     const baseMultiplier = 1 + (value - 1) / 12;
     this.baseDamage = 5 * baseMultiplier;
@@ -63,7 +65,7 @@ export class Card {
 
   levelUp() {
     this.currentLevel++;
-    this.XpReq += this.currentLevel * 1.7 * (this.value ** 2);
+    this.XpReq = xpRequirement(this.value, this.currentLevel);
     this.damage = this.baseDamage + 5 * (this.currentLevel - 1);
     const baseMultiplier = 1 + (this.value - 1) / 12;
     const prevHp = this.currentHp;

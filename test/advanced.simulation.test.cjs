@@ -171,6 +171,7 @@ describe('🧪 General Simulation Test Templates', () => {
   it('Boss defeat grants card XP', async () => {
     const { Card } = await import('../card.js');
     const { Boss } = await import('../boss.js');
+    const { calculateKillXp } = await import('../utils/xp.js');
 
     const card = new Card('Hearts', 2);
     const drawn = [card];
@@ -178,7 +179,7 @@ describe('🧪 General Simulation Test Templates', () => {
 
     const boss = new Boss(5, 1, {
       maxHp: 1,
-      xp: Math.pow(5, 1.5) * 1,
+      xp: calculateKillXp(5, 1),
       onDefeat: b => cardXp(b.xp)
     });
 
