@@ -853,6 +853,10 @@ body {
     overflow: hidden;
 }
 
+#nextStageBtn {
+    flex-basis: 100%;
+}
+
 /* auto attack progress bars */
 .playerAttackBar {
     width: 50%;

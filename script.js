@@ -123,7 +123,7 @@ const BASE_STATS = {
   upgradeDamageMultiplier: 1,
   cardSlots: 3,
   //at start max
-  attackSpeed: 5000,
+  attackSpeed: 10000,
   //ms between automatic attacks
   hpPerKill: 1,
   baseCardHpBoost: 0,
@@ -1086,7 +1086,10 @@ document.addEventListener("DOMContentLoaded", () => {
   checkUpgradeUnlocks();
 
   nextStageBtn.style.display = 'none';
-  nextStageBtn.addEventListener("click", nextStage);
+  nextStageBtn.addEventListener("click", () => {
+    nextStageBtn.style.display = 'none';
+    openCamp(nextStage);
+  });
   fightBossBtn.addEventListener("click", () => {
     fightBossBtn.style.display = "none";
     stageData.stage = 10;

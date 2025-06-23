@@ -2,11 +2,11 @@ const { expect } = require('chai');
 
 describe('⚙️ autoAttackSpeed Upgrade', () => {
   function setup() {
-    const stats = { attackSpeed: 5000 };
+    const stats = { attackSpeed: 10000 };
     const upgrades = {
       autoAttackSpeed: {
         level: 0,
-        baseValue: 5000,
+        baseValue: 10000,
         costFormula: level => Math.floor(300 * level ** 2),
         effect: player => {
           const lvl = upgrades.autoAttackSpeed.level;
@@ -27,15 +27,15 @@ describe('⚙️ autoAttackSpeed Upgrade', () => {
   it('reduces attack interval with each purchase', () => {
     const { stats, purchase } = setup();
     const expected = [
-      4500,
-      4000,
-      3500,
-      3000,
-      2750,
-      2500,
-      2250,
-      2000,
-      2000
+      9500,
+      9000,
+      8500,
+      8000,
+      7750,
+      7500,
+      7250,
+      7000,
+      6750
     ];
     expected.forEach(val => {
       purchase();

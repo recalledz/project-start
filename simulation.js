@@ -12,7 +12,7 @@ export class GameSimulator {
       hpPerKill: 1,
       baseCardHpBoost: 0,
       cardSlots: 3,
-      attackSpeed: 5000,
+      attackSpeed: 10000,
       stage: 1,
       cash: 500,
       xp: 0,
