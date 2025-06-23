@@ -123,15 +123,15 @@ const BASE_STATS = {
   upgradeDamageMultiplier: 1,
   cardSlots: 3,
   //at start max
-  attackSpeed: 5000,
+  attackSpeed: 10000,
   //ms between automatic attacks
   hpPerKill: 1,
   baseCardHpBoost: 0,
   maxMana: 0,
   mana: 0,
   manaRegen: 0,
-  maxSanity: 100,
-  sanity: 100,
+  //maxSanity: 100,
+  //sanity: 100,
   healOnRedraw: 0,
   abilityPower: 1,
   spadeDamageMultiplier: 1,
@@ -177,10 +177,10 @@ let stageData = {
   kills: 0,
   cardXp: 1,
   playerXp: 1,
-  attackspeed: 10000, //10 sec at start
-  progress: 0,
-  progressTarget: 10
-}; 
+  attackspeed: 10000 //10 sec at start
+};
+
+const STAGE_KILL_REQUIREMENT = 10;
 
 let speakerEncounterPending = false;
 
@@ -213,39 +213,6 @@ function checkSpeakerEncounter() {
   }
 }
 
-function updateCampButtonGlow(ratio) {
-  if (!campGlowFilter) return;
-  campGlowFilter.outerStrength = 1 + (1 - ratio) * 3;
-}
-
-function initCampHalo() {
-  if (!campBtn || typeof PIXI !== 'object' || typeof PIXI.Application !== 'function') return;
-  try {
-    campHaloApp = new PIXI.Application({ width: 60, height: 60, transparent: true });
-  } catch (err) {
-    console.error('Failed to create camp halo PIXI app:', err);
-    return;
-  }
-  if (!campHaloApp.view) {
-    console.error('Camp halo app has no view');
-    return;
-  }
-  campBtn.appendChild(campHaloApp.view);
-  campHaloApp.view.style.position = 'absolute';
-  campHaloApp.view.style.inset = '0';
-  campHaloApp.view.style.pointerEvents = 'none';
-  const halo = new PIXI.Graphics();
-  halo.beginFill(0xffffee, 0.15);
-  halo.drawCircle(30, 30, 28);
-  halo.endFill();
-  campGlowFilter = new PIXI.filters.GlowFilter({ distance: 10, outerStrength: 1, color: 0xffffee });
-  halo.filters = [campGlowFilter];
-  campHaloApp.stage.addChild(halo);
-  campHaloApp.ticker.add(() => {
-    halo.alpha = 0.4 + 0.1 * Math.sin(Date.now() / 1000);
-  });
-  updateCampButtonGlow(stats.maxSanity > 0 ? stats.sanity / stats.maxSanity : 1);
-}
 
 const playerStats = {
   timesPrestiged: 0,
@@ -316,7 +283,7 @@ function getCardState() {
 }
 
 const nextStageBtn = document.getElementById("nextStageBtn");
-const moveForwardBtn = document.getElementById("moveForwardBtn");
+//const moveForwardBtn = document.getElementById("moveForwardBtn");
 const fightBossBtn = document.getElementById("fightBossBtn");
 const campBtn = document.getElementById("campBtn");
 const pointsDisplay = document.getElementById("pointsDisplay");
@@ -339,25 +306,23 @@ const deckJobsContainer = document.querySelector('.deckJobsContainer');
 const jobCarouselContainer = document.querySelector('.jobCarouselContainer');
 const dCardContainer = document.getElementsByClassName("dCardContainer")[0];
 const dealerContainer = document.querySelector('.dealerContainer');
-const stageProgressFill = document.getElementById("stageProgressFill");
-const stageProgressBar = document.getElementById("stageProgressBar");
 const jokerContainers = document.querySelectorAll(".jokerContainer");
 const manaBar = document.getElementById("manaBar");
 const manaFill = document.getElementById("manaFill");
 const manaText = document.getElementById("manaText");
-const sanityFill = document.getElementById('sanityFill');
-const sanityText = document.getElementById('sanityText');
-const insanityOrb = document.getElementById('insanityOrb');
-let campHaloApp = null;
-let campGlowFilter = null;
-const insanityMessages = [
-  "You feel watched.",
-  "The walls bend inward.",
-  "Thoughts scatter like crows..."
-];
-let insanityMsgIndex = 0;
-let lastInsanityMsg = 0;
-let lowSanityOverlayShown = false;
+//const stageProgressFill = document.getElementById("stageProgressFill");
+//const stageProgressBar = document.getElementById("stageProgressBar");
+const sanityFill = null;
+const sanityText = null;
+const insanityOrb = null;
+//const insanityMessages = [
+//  "You feel watched.",
+//  "The walls bend inward.",
+//  "Thoughts scatter like crows..."
+//];
+//let insanityMsgIndex = 0;
+//let lastInsanityMsg = 0;
+//let lowSanityOverlayShown = false;
 const manaRegenDisplay = document.getElementById("manaRegenDisplay");
 const dpsDisplay = document.getElementById("dpsDisplay");
 
@@ -373,13 +338,13 @@ function hidePlayerAttackBar() {
   playerAttackTimer = 0;
 }
 
-function hideStageProgressBar() {
-  if (stageProgressBar) stageProgressBar.style.display = "none";
-}
+//function hideStageProgressBar() {
+//  if (stageProgressBar) stageProgressBar.style.display = "none";
+//}
 
-function showStageProgressBar() {
-  if (stageProgressBar) stageProgressBar.style.display = "block";
-}
+//function showStageProgressBar() {
+//  if (stageProgressBar) stageProgressBar.style.display = "block";
+//}
 
 const unlockedJokers = [];
 
@@ -390,7 +355,7 @@ let playerAttackTimer = 0;
 let enemyAttackProgress = 0; // carryover ratio of enemy attack timer
 let cashTimer = 0;
 let worldProgressTimer = 0;
-let sanityTimer = 0;
+//let sanityTimer = 0;
 const cashRateTracker = new RateTracker(10000);
 const cashRateTracker1h = new RateTracker(3600000);
 const cashRateTracker24h = new RateTracker(86400000);
@@ -1097,7 +1062,6 @@ document.addEventListener("DOMContentLoaded", () => {
   initTabs();
   loadGame();
   initVignetteToggles();
-  initCampHalo();
   if (window.lucide) lucide.createIcons();
   initPlayerLife({ getGameCash: () => cash, spendGameCash: spendCash });
   initCore();
@@ -1110,9 +1074,7 @@ document.addEventListener("DOMContentLoaded", () => {
   renderPurchasedUpgrades();
   // Start or resume the game after loading
   spawnPlayer();
-  stageData.progress = 0;
-  stageData.progressTarget = 10;
-  updateStageProgressDisplay();
+  respawnDealerStage();
   renderDealerCard();
   resetStageCashStats();
   renderStageInfo();
@@ -1124,14 +1086,12 @@ document.addEventListener("DOMContentLoaded", () => {
   checkUpgradeUnlocks();
 
   nextStageBtn.style.display = 'none';
-  moveForwardBtn.style.display = 'inline-block';
-
-  moveForwardBtn.addEventListener("click", moveForward);
-  if (stageProgressBar) stageProgressBar.addEventListener("click", moveForward);
-  nextStageBtn.addEventListener("click", nextStage);
+  nextStageBtn.addEventListener("click", () => {
+    nextStageBtn.style.display = 'none';
+    openCamp(() => openCardUpgradeSelection(nextStage));
+  });
   fightBossBtn.addEventListener("click", () => {
     fightBossBtn.style.display = "none";
-    hideStageProgressBar();
     stageData.stage = 10;
     stageData.kills = playerStats.stageKills[stageData.stage] || 0;
     renderStageInfo();
@@ -1156,7 +1116,6 @@ document.addEventListener("DOMContentLoaded", () => {
   if (campBtn) {
     campBtn.addEventListener('click', () => {
       campBtn.style.display = 'none';
-      stageComplete = false;
       openCamp(() => openCardUpgradeSelection(nextStage));
     });
   }
@@ -1165,7 +1124,6 @@ document.addEventListener("DOMContentLoaded", () => {
   playerAttackFill = renderPlayerAttackBar(buttons);
   hidePlayerAttackBar();
   updateChipsDisplay();
-  updateSanityBar();
   requestAnimationFrame(gameLoop);
 });
 
@@ -1183,37 +1141,8 @@ function updateManaBar() {
   if (manaText) manaText.textContent = `${Math.floor(stats.mana)}/${Math.floor(stats.maxMana)}`;
 }
 
-function updateSanityBar() {
-  const ratio = stats.maxSanity > 0 ? stats.sanity / stats.maxSanity : 0;
-  if (sanityFill) sanityFill.style.width = `${Math.min(1, ratio) * 100}%`;
-  if (sanityText) sanityText.textContent = `${Math.floor(stats.sanity)}/${Math.floor(stats.maxSanity)}`;
-  updateInsanityOrb(ratio);
-  updateCampButtonGlow(ratio);
-}
-
-function updateInsanityOrb(ratio) {
-  if (!insanityOrb) return;
-  const dur = 3 - 2 * (1 - ratio);
-  insanityOrb.style.setProperty('--pulse-duration', `${dur}s`);
-  if (ratio < 0.3) {
-    insanityOrb.classList.add('critical');
-    document.body.classList.add('insanity-low');
-    const now = Date.now();
-    if (now - lastInsanityMsg > 5000) {
-      addLog(insanityMessages[insanityMsgIndex]);
-      insanityMsgIndex = (insanityMsgIndex + 1) % insanityMessages.length;
-      lastInsanityMsg = now;
-    }
-    if (ratio < 0.1 && !lowSanityOverlayShown) {
-      showSpeakerQuote("Reach for the light. before it's too late");
-      lowSanityOverlayShown = true;
-    }
-  } else {
-    insanityOrb.classList.remove('critical');
-    document.body.classList.remove('insanity-low');
-    if (ratio >= 0.1) lowSanityOverlayShown = false;
-  }
-}
+//function updateSanityBar() {}
+//function updateInsanityOrb(ratio) {}
 
 function unlockManaSystem() {
   // prevent duplicate initialization
@@ -1241,6 +1170,7 @@ function renderStageInfo() {
   stageData.kills = playerStats.stageKills[stageData.stage] || stageData.kills || 0;
   stageDisplay.textContent = `Stage ${stageData.stage} World ${stageData.world}`;
   killsDisplay.textContent = `Kills: ${formatNumber(stageData.kills)}`;
+  updateNextStageAvailability();
 }
 
 function renderPlayerStats(stats) {
@@ -1536,29 +1466,23 @@ function nextStage() {
   stageData.stage += 1;
   stageData.kills = playerStats.stageKills[stageData.stage] || 0;
   const isBossStage = stageData.stage % 10 === 0;
-  stats.sanity = stats.maxSanity;
-  updateSanityBar();
   resetStageCashStats();
   killsDisplay.textContent = `Kills: ${formatNumber(stageData.kills)}`;
+  updateNextStageAvailability();
   renderGlobalStats();
   renderStageInfo();
   checkUpgradeUnlocks();
   checkSpeakerEncounter();
   // start the next stage without double-counting points
   lastCashOutPoints = stats.points;
-  stageData.progress = 0;
-  stageData.progressTarget = 10;
   inCombat = false;
   currentEnemy = null;
   redrawAllowed = false;
-  moveForwardBtn.style.display = isBossStage ? 'none' : 'inline-block';
   nextStageBtn.style.display = 'none';
-  updateStageProgressDisplay();
   if (isBossStage) {
-    progressButtonActive = false;
     respawnDealerStage();
-  } else if (progressButtonActive) {
-    startStageProgress();
+  } else {
+    respawnDealerStage();
   }
 }
 
@@ -1568,8 +1492,6 @@ function nextWorld() {
   stageData.world += 1;
   stageData.stage = 1;
   stageData.kills = playerStats.stageKills[stageData.stage] || 0;
-  stats.sanity = stats.maxSanity;
-  updateSanityBar();
   redrawCost = 10;
   updateRedrawButton();
   applyWorldTheme();
@@ -1580,20 +1502,17 @@ function nextWorld() {
     worldProgressPerSecDisplay.textContent = "Avg World Progress/sec: 0%";
   }
   killsDisplay.textContent = `Kills: ${formatNumber(stageData.kills)}`;
+  updateNextStageAvailability();
   renderGlobalStats();
   renderStageInfo();
   checkUpgradeUnlocks();
   // entering a new world resets cash-out tracking
   lastCashOutPoints = stats.points;
-  stageData.progress = 0;
-  stageData.progressTarget = 10;
   inCombat = false;
   currentEnemy = null;
   redrawAllowed = false;
-  moveForwardBtn.style.display = 'inline-block';
   nextStageBtn.style.display = 'none';
-  updateStageProgressDisplay();
-  if (progressButtonActive) startStageProgress();
+  respawnDealerStage();
 }
 
 // Travel to a specific world when selected in the Worlds tab
@@ -1616,16 +1535,13 @@ function goToWorld(id) {
   renderStageInfo();
   checkUpgradeUnlocks();
   lastCashOutPoints = stats.points;
-  stageData.progress = 0;
-  stageData.progressTarget = 10;
   inCombat = false;
   currentEnemy = null;
   redrawAllowed = false;
-  moveForwardBtn.style.display = 'inline-block';
   nextStageBtn.style.display = 'none';
-  updateStageProgressDisplay();
   renderWorldsMenu();
   updateWorldTabNotification();
+  respawnDealerStage();
 }
 
 // Reset tracking for average cash when a new stage begins
@@ -1634,12 +1550,18 @@ function resetStageCashStats() {
   resetCashRates(cash);
 }
 
-// Enable the next stage button when kill requirements met
-function nextStageChecker() {
-  const ready = stageData.progress >= stageData.progressTarget;
-  nextStageBtn.disabled = !ready;
-  nextStageBtn.style.background = ready ? "green" : "grey";
+function updateNextStageAvailability() {
+  if (stageData.kills >= STAGE_KILL_REQUIREMENT) {
+    nextStageBtn.disabled = false;
+    nextStageBtn.style.display = 'inline-block';
+  } else {
+    nextStageBtn.disabled = true;
+    nextStageBtn.style.display = 'none';
+  }
 }
+
+// Enable the next stage button when kill requirements met
+//function nextStageChecker() {}
 
 //dealer
 
@@ -1664,8 +1586,6 @@ function removeDealerLifeBar() {
 }
 
 function spawnDealerEvent(powerMult = 1) {
-  stopStageProgress();
-  hideStageProgressBar();
   inCombat = true;
   removeDealerLifeBar();
   const temp = { ...stageData, stage: Math.round(stageData.stage * powerMult) };
@@ -1677,8 +1597,6 @@ function spawnDealerEvent(powerMult = 1) {
 }
 
 function spawnBossEvent() {
-  stopStageProgress();
-  hideStageProgressBar();
   inCombat = true;
   removeDealerLifeBar();
   currentEnemy = spawnEnemy('boss', stageData, enemyAttackProgress, () => onBossDefeat(currentEnemy));
@@ -1707,63 +1625,14 @@ function maybeTriggerEvent() {
   }
 }
 
-function updateStageProgressDisplay() {
-  if (stageProgressFill) {
-    const ratio = Math.min(stageData.progress / stageData.progressTarget, 1);
-    stageProgressFill.style.width = `${ratio * 100}%`;
-  }
-  const disp = document.getElementById('distanceDisplay');
-  if (disp) disp.textContent = `distance: ${Math.floor(stageData.progress)}/${stageData.progressTarget}`;
-}
-
-function stopStageProgress() {
-  if (stageProgressInterval) {
-    clearInterval(stageProgressInterval);
-    stageProgressInterval = null;
-  }
-  stageProgressing = false;
-  moveForwardBtn.classList.remove('active');
-}
-
-function stepStageProgress() {
-  if (currentEnemy || campOverlayOpen || upgradeSelectionOpen) return;
-  // Each tick has a chance to trigger a random event
-  maybeTriggerEvent();
-  stageData.progress = Math.min(stageData.progress + 1, stageData.progressTarget);
-  updateStageProgressDisplay();
-  if (stageData.progress >= stageData.progressTarget) {
-    stopStageProgress();
-    moveForwardBtn.style.display = 'none';
-    stageEndEnemyActive = true;
-    stageComplete = true;
-    if (campBtn) campBtn.style.display = 'inline-block';
-    spawnDealerEvent(1.3);
-  }
-}
-
-function startStageProgress() {
-  if (stageProgressing) return;
-  showStageProgressBar();
-  stageProgressing = true;
-  stageProgressInterval = setInterval(stepStageProgress, 1000);
-  moveForwardBtn.classList.add('active');
-}
-
-function moveForward() {
-  if (currentEnemy || campOverlayOpen || upgradeSelectionOpen) return;
-  if (stageProgressing) {
-    progressButtonActive = false;
-    stopStageProgress();
-    hideStageProgressBar();
-  } else {
-    progressButtonActive = true;
-    startStageProgress();
-  }
-}
+//function updateStageProgressDisplay() {}
+//function stopStageProgress() {}
+//function stepStageProgress() {}
+//function startStageProgress() {}
+//function moveForward() {}
 
 // After a kill, decide whether to spawn a dealer or a boss
 function respawnDealerStage() {
-  hideStageProgressBar();
   removeDealerLifeBar();
   if (speakerEncounterPending) {
     speakerEncounterPending = false;
@@ -1790,6 +1659,7 @@ function onDealerDefeat() {
   stageData.kills += 1;
   playerStats.stageKills[stageData.stage] = stageData.kills;
   killsDisplay.textContent = `Kills: ${formatNumber(stageData.kills)}`;
+  updateNextStageAvailability();
   renderGlobalStats();
   recordWorldKill(stageData.world, stageData.stage);
   dealerDeathAnimation();
@@ -1798,16 +1668,7 @@ function onDealerDefeat() {
       currentEnemy = null;
       updateDealerLifeDisplay();
       hidePlayerAttackBar();
-      if (stageEndEnemyActive) {
-        stageEndEnemyActive = false;
-        respawnDealerStage();
-      } else if (stageComplete) {
-        respawnDealerStage();
-      } else {
-        showStageProgressBar();
-        progressButtonActive = true;
-        startStageProgress();
-      }
+      respawnDealerStage();
     });
 } // need to define xp formula
 
@@ -1833,9 +1694,7 @@ function onSpeakerDefeat() {
     updateChipsDisplay();
     updateDealerLifeDisplay();
     hidePlayerAttackBar();
-    showStageProgressBar();
-    progressButtonActive = true;
-    startStageProgress();
+    respawnDealerStage();
   });
 }
 
@@ -1872,10 +1731,7 @@ function onBossDefeat(boss) {
     chips += computeChipReward();
     updateChipsDisplay();
     hidePlayerAttackBar();
-    showStageProgressBar();
     nextStage();
-    progressButtonActive = true;
-    startStageProgress();
   });
 }
 
@@ -2069,11 +1925,11 @@ let redrawAllowed = false;
 let upgradeSelectionOpen = false;
 let upgradeOverlay = null; // overlay instance
 let redrawCost = 10;
-let stageProgressing = false;
-let stageProgressInterval = null;
-let progressButtonActive = false;
-let stageEndEnemyActive = false;
-let stageComplete = false;
+//let stageProgressing = false;
+//let stageProgressInterval = null;
+//let progressButtonActive = false;
+//let stageEndEnemyActive = false;
+//let stageComplete = false;
 
 function rarityClass(rarity) {
   switch (rarity) {
@@ -2103,7 +1959,6 @@ function openCardUpgradeSelection(onCloseCallback = null) {
   if (upgradeSelectionOpen) return;
   upgradeSelectionOpen = true;
   gamePaused = true;
-  stopStageProgress();
   dCardContainer.innerHTML = '';
   upgradeOverlay = createOverlay({ className: 'upgrade-selection-overlay' });
   upgradeOverlay.onClose(() => {
@@ -2111,7 +1966,6 @@ function openCardUpgradeSelection(onCloseCallback = null) {
     dCardContainer.innerHTML = '';
     renderDealerCard();
     gamePaused = false;
-    if (progressButtonActive) startStageProgress();
     onCloseCallback?.();
   });
 
@@ -2189,7 +2043,6 @@ function openCamp(onCloseCallback = null) {
   campOverlayOpen = true;
   redrawAllowed = true;
   gamePaused = true;
-  stopStageProgress();
   hidePlayerAttackBar();
   campOverlay = createOverlay({ className: 'camp-overlay' });
   campOverlay.onClose(() => {
@@ -2197,7 +2050,6 @@ function openCamp(onCloseCallback = null) {
     redrawAllowed = false;
     gamePaused = false;
     updateRedrawButton();
-    if (progressButtonActive) startStageProgress();
     onCloseCallback?.();
   });
 
@@ -2948,7 +2800,6 @@ if (currentEnemy) {
   updatePlayerStats(stats);
   cashTimer += deltaTime;
   worldProgressTimer += deltaTime;
-  sanityTimer += deltaTime;
   if (cashTimer >= 1000) {
     recordCashRates(cash);
     if (statsEconomyContainer && statsEconomyContainer.style.display !== 'none') {
@@ -2964,17 +2815,6 @@ if (currentEnemy) {
       worldProgressPerSecDisplay.textContent = `Avg World Progress/sec: ${rate.toFixed(2)}%`;
     }
     worldProgressTimer = 0;
-  }
-  if (sanityTimer >= 1000) {
-    sanityTimer = 0;
-    if (!campOverlayOpen) {
-      if (stats.sanity > 0) {
-        stats.sanity = Math.max(0, stats.sanity - 1);
-        updateSanityBar();
-      } else {
-        cDealerDamage(1);
-      }
-    }
   }
   if (currentEnemy) {
     playerAttackTimer += deltaTime;

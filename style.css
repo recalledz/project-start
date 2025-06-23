@@ -260,7 +260,7 @@ body {
     white-space: nowrap;
 }
 
-.insanity-orb {
+/*.insanity-orb {
     position: fixed;
     top: 50%;
     left: 10px;
@@ -273,7 +273,7 @@ body {
     animation: orbPulse var(--pulse-duration, 3s) infinite;
     pointer-events: auto;
     z-index: 1000;
-}
+}*/
 
 @keyframes orbPulse {
     0%, 100% {
@@ -284,23 +284,23 @@ body {
     }
 }
 
-.insanity-orb.critical {
+/*.insanity-orb.critical {
     background: radial-gradient(circle, #8b0000 0%, #300000 100%);
     box-shadow: 0 0 10px rgba(255, 0, 0, 0.8), 0 0 20px rgba(255, 0, 0, 0.6);
-}
+}*/
 
-body.insanity-low {
+/*body.insanity-low {
     filter: grayscale(0.4);
-}
+}*/
 
-body.insanity-low::after {
+/*body.insanity-low::after {
     content: '';
     position: fixed;
     inset: 0;
     pointer-events: none;
     background: radial-gradient(circle, rgba(0, 0, 0, 0) 60%, rgba(0, 0, 0, 0.6) 100%);
     z-index: 999;
-}
+}*/
 
 
 
@@ -408,14 +408,14 @@ body.insanity-low::after {
     display: block; /* prevent text from jumbling when progress bar appears */
 }
 
-#distanceDisplay {
+/*#distanceDisplay {
     align-self: flex-start;
     font-size: 0.8rem;
     color: #d4af37;
     text-shadow: 0 0 5px black;
     z-index: 1;
     display: block; /* ensure consistent vertical spacing */
-}
+}*/
 
 #chipsDisplay {
     align-self: flex-start;
@@ -852,18 +852,15 @@ body.insanity-low::after {
     margin: 0 6px;
     overflow: hidden;
 }
-#campBtn canvas {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: -1;
+
+#nextStageBtn {
+    flex-basis: 100%;
 }
 
 /* auto attack progress bars */
 .playerAttackBar {
     width: 50%;
+    max-width: 50%;
     height: 6px; /* larger for better visibility */
     display: none;
     background: rgba(0, 0, 0, 0.8);
@@ -1764,7 +1761,7 @@ body.insanity-low::after {
 }
 
 /* Stage traversal progress bar */
-.stage-progress {
+/*.stage-progress {
     width: 50%;
     height: 8px;
     background: #090b09;
@@ -1782,7 +1779,7 @@ body.insanity-low::after {
     height: 100%;
     width: 0;
     background: #2ecc71;
-}
+}*/
 
 .card-upgrades {
     margin-top: 6px;

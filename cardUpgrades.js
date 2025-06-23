@@ -187,7 +187,7 @@ export const upgrades = {
   autoAttackSpeed: {
     name: 'Auto-Attack Speed',
     level: 0,
-    baseValue: 5000,
+    baseValue: 10000,
     unlocked: false,
     unlockCondition: ({ stageData }) => stageData.stage >= 10,
     costFormula: level => Math.floor(300 * level ** 2),

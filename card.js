@@ -66,8 +66,9 @@ export class Card {
     this.XpReq += this.currentLevel * 1.7 * (this.value ** 2);
     this.damage = this.baseDamage + 5 * (this.currentLevel - 1);
     const baseMultiplier = 1 + (this.value - 1) / 12;
+    const prevHp = this.currentHp;
     this.maxHp = Math.round(5 * baseMultiplier + 5 * (this.currentLevel - 1) + this.baseHpBoost);
-    this.currentHp = this.maxHp;
+    this.currentHp = Math.min(this.maxHp, prevHp);
   }
 
   healFromKill() {
