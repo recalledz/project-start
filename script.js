@@ -182,6 +182,8 @@ let stageData = {
 
 const STAGE_KILL_REQUIREMENT = 10;
 
+const xpEfficiency = 0.5;
+
 let speakerEncounterPending = false;
 
 // Weight a kill's contribution toward world completion based on the stage
@@ -1852,13 +1854,16 @@ function dealerBarDeathAnimation(callback) {
 //========deck functions===========
 
 function cardXp(xpAmount) {
-  drawnCards.forEach(card => {
+  pDeck.forEach(card => {
     if (!card) return;
 
-    const leveled = card.gainXp(xpAmount);
+    const amount = drawnCards.includes(card)
+      ? xpAmount
+      : xpAmount * xpEfficiency;
+    const leveled = card.gainXp(amount);
     if (leveled) {
       cardPoints += 1;
-      animateCardLevelUp(card);
+      if (card.wrapperElement) animateCardLevelUp(card);
       addDeckMasteryProgress(selectedDeck, 1);
       addLog(
         `${card.value}${card.symbol} leveled up to level ${card.currentLevel}!`,
