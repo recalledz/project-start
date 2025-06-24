@@ -1,10 +1,14 @@
 const { expect } = require('chai');
 let calculateEnemyHp;
 let calculateEnemyBasicDamage;
+let calculateRelativeEnemyStats;
+let assignEnemyStats;
 before(async () => {
   const mod = await import('../enemySpawning.js');
   calculateEnemyHp = mod.calculateEnemyHp;
   calculateEnemyBasicDamage = mod.calculateEnemyBasicDamage;
+  calculateRelativeEnemyStats = mod.calculateRelativeEnemyStats;
+  assignEnemyStats = mod.assignEnemyStats;
 });
 
 describe('🧮 Enemy Scaling Functions', () => {
@@ -29,20 +33,55 @@ describe('🧮 Enemy Scaling Functions', () => {
 
   describe('calculateEnemyBasicDamage', () => {
     const cases = [
-      { stage: 1, world: 1, min: 1, max: 1 },
-      { stage: 1, world: 2, min: 3, max: 4 },
-      { stage: 5, world: 1, min: 3, max: 5 },
-      { stage: 5, world: 2, min: 11, max: 20 },
-      { stage: 10, world: 1, min: 11, max: 20 },
-      { stage: 10, world: 2, min: 41, max: 80 },
-      { stage: 15, world: 1, min: 12, max: 22 },
-      { stage: 15, world: 2, min: 45, max: 88 }
+      { stage: 1, world: 1, min: 2, max: 3 },
+      { stage: 1, world: 2, min: 20, max: 38 },
+      { stage: 5, world: 1, min: 5, max: 9 },
+      { stage: 5, world: 2, min: 27, max: 52 },
+      { stage: 10, world: 1, min: 10, max: 18 },
+      { stage: 10, world: 2, min: 35, max: 68 },
+      { stage: 15, world: 1, min: 14, max: 26 },
+      { stage: 15, world: 2, min: 43, max: 85 }
     ];
 
     cases.forEach(({ stage, world, min, max }) => {
       it(`stage ${stage} world ${world} => damage ${min}-${max}`, () => {
         const result = calculateEnemyBasicDamage(stage, world);
         expect(result).to.deep.equal({ minDamage: min, maxDamage: max });
+      });
+    });
+  });
+
+  describe('calculateRelativeEnemyStats', () => {
+    const cases = [
+      { stage: 1, world: 1, hp: 23, dmg: 3 },
+      { stage: 5, world: 1, hp: 83, dmg: 9 },
+      { stage: 1, world: 2, hp: 345, dmg: 38 }
+    ];
+    cases.forEach(({ stage, world, hp, dmg }) => {
+      it(`stage ${stage} world ${world} => hp ${hp} dmg ${dmg}`, () => {
+        const res = calculateRelativeEnemyStats(stage, world);
+        expect(res).to.deep.equal({ hp, damage: dmg });
+      });
+    });
+  });
+
+  describe('assignEnemyStats', () => {
+    const Enemy = function () {
+      this.maxHp = 0;
+      this.currentHp = 0;
+      this.minDamage = 0;
+      this.maxDamage = 0;
+      this.damage = 0;
+    };
+    it('applies stats to the enemy instance', () => {
+      const enemy = new Enemy();
+      assignEnemyStats(enemy, 1, 1);
+      expect(enemy).to.deep.equal({
+        maxHp: 23,
+        currentHp: 23,
+        minDamage: 2,
+        maxDamage: 3,
+        damage: 3
       });
     });
   });

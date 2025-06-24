@@ -43,7 +43,7 @@ import {
   resetCardUpgrades
 } from "./cardUpgrades.js";
 import {
-  calculateEnemyHp,
+  // calculateEnemyHp,
   calculateEnemyBasicDamage,
   spawnDealer,
   spawnBoss,
@@ -1104,7 +1104,6 @@ function renderAbilityIcons(abilities, showCooldown = false) {
 }
 
 function renderBossCard(enemy) {
-  const { minDamage, maxDamage } = calculateEnemyBasicDamage(enemy.stage, enemy.world);
   const wrapper = document.createElement('div');
   wrapper.classList.add('dCardWrapper');
   const pane = document.createElement('div');
@@ -1112,6 +1111,7 @@ function renderBossCard(enemy) {
   const abilityPane = document.createElement('div');
   abilityPane.classList.add('dCardAbilityPane');
   const iconColor = enemy.iconColor || '#a04444';
+  const { minDamage, maxDamage } = calculateEnemyBasicDamage(enemy.stage, enemy.world);
   pane.innerHTML = `\n    <i data-lucide="${enemy.icon}" class="dCard__icon" style="color:${iconColor}"></i>\n    <span class="dCard__text">\n    ${enemy.name}<br>\n    Damage: ${formatNumber(minDamage)} - ${formatNumber(maxDamage)}\n    </span>\n    `;
   abilityPane.innerHTML = renderAbilityIcons(enemy.abilities, true);
   wrapper.append(pane, abilityPane);
@@ -1119,7 +1119,6 @@ function renderBossCard(enemy) {
 }
 
 function renderDealerCardBase(enemy) {
-  const { minDamage, maxDamage } = calculateEnemyBasicDamage(enemy.stage, enemy.world);
   const wrapper = document.createElement('div');
   wrapper.classList.add('dCardWrapper');
   const pane = document.createElement('div');
@@ -1130,6 +1129,7 @@ function renderDealerCardBase(enemy) {
   const iconHtml = enemy.isSpeaker
     ? `<canvas class="dCard__icon speaker-icon" width="48" height="48"></canvas>`
     : `<i data-lucide="skull" class="dCard__icon" style="stroke:${color}; filter: drop-shadow(0 0 ${blur}px ${color});"></i>`;
+  const { minDamage, maxDamage } = calculateEnemyBasicDamage(enemy.stage, enemy.world);
   pane.innerHTML = `\n    ${iconHtml}\n    <span class="dCard__text">\n    ${enemy.name}<br>\n    Damage: ${formatNumber(Math.floor(minDamage))} - ${formatNumber(Math.floor(maxDamage))}\n    </span>\n    `;
   abilityPane.innerHTML = renderAbilityIcons(enemy.abilities, false);
   wrapper.append(pane, abilityPane);
