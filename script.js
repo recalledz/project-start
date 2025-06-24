@@ -660,6 +660,7 @@ function updateUpgradeButtons() {
     const btn = row.querySelector("button");
     if (!key || !btn) return;
     const up = upgrades[key];
+    if (!up || typeof up.costFormula !== 'function') return;
     const cost = up.costFormula(up.level + 1);
     const affordable = cash >= cost;
     btn.disabled = !affordable;
