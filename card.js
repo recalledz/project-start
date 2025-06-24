@@ -76,8 +76,8 @@ export class Card {
     }
   }
 
-  healFromKill() {
-    const healed = Math.min(this.maxHp, this.currentHp + this.hpPerKill);
+  healFromKill(amount = this.hpPerKill) {
+    const healed = Math.min(this.maxHp, this.currentHp + amount);
     this.currentHp = healed;
   }
 

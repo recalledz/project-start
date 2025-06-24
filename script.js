@@ -2061,7 +2061,7 @@ function animateCardDeath(card, callback) {
 function healCardsOnKill() {
   drawnCards.forEach(card => {
     if (!card) return;
-    card.healFromKill();
+    card.healFromKill(stats.hpPerKill);
   });
   updateHandDisplay();
   updateDeckDisplay();
