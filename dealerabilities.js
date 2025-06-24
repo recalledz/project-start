@@ -5,15 +5,15 @@ export const AbilityRegistry = {
       const ability = {
         name: "Heal",
         icon: "cross",
-        cooldown: 3000,
+        cooldown: 5000,
         timer: 0,
         colorClass: "green",
-        maxTimer: 3000,
+        maxTimer: 5000,
 
         tick(deltaTime, enemy) {
           this.timer += deltaTime;
           if (this.timer >= this.cooldown) {
-            const healAmount = Math.floor(enemy.maxHp * 0.2);
+            const healAmount = Math.floor(enemy.maxHp * 0.1);
             enemy.currentHp = Math.min(enemy.currentHp + healAmount, enemy.maxHp);
             this.timer = 0;
           }

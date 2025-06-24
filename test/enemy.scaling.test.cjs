@@ -33,14 +33,14 @@ describe('🧮 Enemy Scaling Functions', () => {
 
   describe('calculateEnemyBasicDamage', () => {
     const cases = [
-      { stage: 1, world: 1, min: 2, max: 3 },
-      { stage: 1, world: 2, min: 20, max: 38 },
-      { stage: 5, world: 1, min: 5, max: 9 },
-      { stage: 5, world: 2, min: 27, max: 52 },
-      { stage: 10, world: 1, min: 10, max: 18 },
-      { stage: 10, world: 2, min: 35, max: 68 },
-      { stage: 15, world: 1, min: 14, max: 26 },
-      { stage: 15, world: 2, min: 43, max: 85 }
+      { stage: 1, world: 1, min: 2, max: 2 },
+      { stage: 1, world: 2, min: 12, max: 23 },
+      { stage: 5, world: 1, min: 4, max: 6 },
+      { stage: 5, world: 2, min: 16, max: 31 },
+      { stage: 10, world: 1, min: 6, max: 11 },
+      { stage: 10, world: 2, min: 21, max: 41 },
+      { stage: 15, world: 1, min: 9, max: 16 },
+      { stage: 15, world: 2, min: 26, max: 51 }
     ];
 
     cases.forEach(({ stage, world, min, max }) => {
@@ -53,9 +53,9 @@ describe('🧮 Enemy Scaling Functions', () => {
 
   describe('calculateRelativeEnemyStats', () => {
     const cases = [
-      { stage: 1, world: 1, hp: 23, dmg: 3 },
-      { stage: 5, world: 1, hp: 83, dmg: 9 },
-      { stage: 1, world: 2, hp: 345, dmg: 38 }
+      { stage: 1, world: 1, hp: 23, dmg: 2 },
+      { stage: 5, world: 1, hp: 83, dmg: 6 },
+      { stage: 1, world: 2, hp: 345, dmg: 23 }
     ];
     cases.forEach(({ stage, world, hp, dmg }) => {
       it(`stage ${stage} world ${world} => hp ${hp} dmg ${dmg}`, () => {
@@ -80,8 +80,8 @@ describe('🧮 Enemy Scaling Functions', () => {
         maxHp: 23,
         currentHp: 23,
         minDamage: 2,
-        maxDamage: 3,
-        damage: 3
+        maxDamage: 2,
+        damage: 2
       });
     });
   });

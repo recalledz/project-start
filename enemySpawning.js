@@ -43,7 +43,7 @@ export function calculateRelativeEnemyStats(stage, world, opts = {}) {
   const expectedHp = expectedStat * hp;
   return {
     hp: Math.round(expectedDamage * 3),
-    damage: Math.round(expectedHp / 3)
+    damage: Math.round(expectedHp / 5)
   };
 }
 
@@ -105,6 +105,9 @@ export function spawnBoss(stageData, enemyAttackProgress, onAttack, onDefeat) {
   assignEnemyStats(boss, stage, world);
   boss.maxHp *= 5;
   boss.currentHp = boss.maxHp;
+  boss.minDamage = Math.max(1, Math.floor(boss.minDamage / 2));
+  boss.maxDamage = Math.max(1, Math.floor(boss.maxDamage / 2));
+  boss.damage = Math.max(1, Math.floor(boss.damage / 2));
   boss.attackTimer = boss.attackInterval * enemyAttackProgress;
   return boss;
 }
