@@ -1,5 +1,6 @@
 // Constants tuned so an average card levels roughly once every 18 kills
-export const XP_KILL_BASE = 0.389;
+// Using 7/18 keeps stage-one progression exact
+export const XP_KILL_BASE = 7 / 18;
 export const XP_KILL_EPSILON = 0.007;
 export const XP_EFFICIENCY = 0.5; // deck cards gain half XP when not drawn
 
