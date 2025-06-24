@@ -80,6 +80,8 @@ export class LifeGame {
     this.resources.stamina.amount = this.staminaMax;
     this.activities = {};
     this.current = null;
+    this.intent = null;
+    this.autoResume = false;
   }
 
   addActivity(act) {
@@ -89,6 +91,7 @@ export class LifeGame {
   start(id) {
     if (!this.activities[id] || !this.activities[id].unlock(this)) return;
     this.current = id;
+    this.intent = id;
   }
 
   stop() {
@@ -99,23 +102,40 @@ export class LifeGame {
     const act = this.activities[this.current];
     if (!act) return;
     if (act.stamina < 0 && this.resources.stamina.amount <= 0) {
-      this.stop();
-      if (this.activities.ponder) this.start('ponder');
+      this.current = this.activities.ponder ? 'ponder' : null;
       return;
     }
 
     if (act.stamina !== 0) {
       this.resources.stamina.amount = Math.max(0, Math.min(this.staminaMax, this.resources.stamina.amount + act.stamina * delta));
       if (act.stamina < 0 && this.resources.stamina.amount <= 0) {
-        this.stop();
-        if (this.activities.ponder) this.start('ponder');
+        this.current = this.activities.ponder ? 'ponder' : null;
         return;
       }
     }
-    if (act.resource) this.resources[act.resource].add(act.rate * delta);
-    if (act.skill) this.skills[act.skill].addXP(act.xpRate * delta);
+    const mult = this._computeMultiplier(act);
+    if (act.resource) this.resources[act.resource].add(act.rate * mult * delta);
+    if (act.skill) this.skills[act.skill].addXP(act.xpRate * mult * delta);
     if (act.tags.includes('mental')) addCoreXP('mental', 0.1 * delta);
     if (act.tags.includes('body')) addCoreXP('physical', 0.1 * delta);
     if (act.tags.includes('will')) addCoreXP('will', 0.1 * delta);
+
+    if (
+      this.autoResume &&
+      this.current === 'ponder' &&
+      this.intent &&
+      this.intent !== 'ponder' &&
+      this.resources.stamina.amount >= this.staminaMax
+    ) {
+      this.current = this.intent;
+    }
+  }
+
+  _computeMultiplier(act) {
+    let m = 1;
+    if (act.tags.includes('mental')) {
+      m += this.skills.mentalAcuity.level * 0.02;
+    }
+    return m;
   }
 }

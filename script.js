@@ -185,6 +185,7 @@ let stageData = {
 };
 
 const STAGE_KILL_REQUIREMENT = 10;
+const PROGRESS_CIRCUMFERENCE = 2 * Math.PI * 22;
 
 const xpEfficiency = XP_EFFICIENCY;
 
@@ -291,8 +292,10 @@ function getCardState() {
 }
 
 const nextStageBtn = document.getElementById("nextStageBtn");
+const nextStageProgress = document.getElementById("nextStageProgress");
 //const moveForwardBtn = document.getElementById("moveForwardBtn");
 const fightBossBtn = document.getElementById("fightBossBtn");
+const bossProgress = document.getElementById("bossProgress");
 const campBtn = document.getElementById("campBtn");
 const pointsDisplay = document.getElementById("pointsDisplay");
 const cashDisplay = document.getElementById("cashDisplay");
@@ -411,8 +414,10 @@ let deckUpgradesViewBtn;
 let deckUpgradesContainer;
 let playerSkillsSubTabButton;
 let playerCoreSubTabButton;
+let playerUpgradesSubTabButton;
 let playerSkillsPanel;
 let playerCorePanel;
+let playerUpgradesPanel;
 let statsOverviewSubTabButton;
 let statsEconomySubTabButton;
 let statsOverviewContainer;
@@ -538,8 +543,10 @@ function initTabs() {
   jobsCarouselBtn = document.querySelector('.jobsCarouselBtn');
   playerSkillsSubTabButton = document.querySelector(".playerSkillsSubTabButton");
   playerCoreSubTabButton = document.querySelector(".playerCoreSubTabButton");
+  playerUpgradesSubTabButton = document.querySelector('.playerUpgradesSubTabButton');
   playerSkillsPanel = document.querySelector(".player-skills-panel");
   playerCorePanel = document.querySelector(".player-core-panel");
+  playerUpgradesPanel = document.querySelector('.player-upgrades-panel');
   statsOverviewSubTabButton = document.querySelector('.statsOverviewSubTabButton');
   statsEconomySubTabButton = document.querySelector('.statsEconomySubTabButton');
   statsOverviewContainer = document.getElementById('statsOverviewContainer');
@@ -593,15 +600,28 @@ function initTabs() {
     playerSkillsSubTabButton.addEventListener("click", () => {
       if (playerSkillsPanel) playerSkillsPanel.style.display = "flex";
       if (playerCorePanel) playerCorePanel.style.display = "none";
+      if (playerUpgradesPanel) playerUpgradesPanel.style.display = "none";
       playerSkillsSubTabButton.classList.add("active");
       if (playerCoreSubTabButton) playerCoreSubTabButton.classList.remove("active");
+      if (playerUpgradesSubTabButton) playerUpgradesSubTabButton.classList.remove('active');
     });
   if (playerCoreSubTabButton)
     playerCoreSubTabButton.addEventListener("click", () => {
       if (playerSkillsPanel) playerSkillsPanel.style.display = "none";
       if (playerCorePanel) playerCorePanel.style.display = "flex";
+      if (playerUpgradesPanel) playerUpgradesPanel.style.display = "none";
       playerCoreSubTabButton.classList.add("active");
       if (playerSkillsSubTabButton) playerSkillsSubTabButton.classList.remove("active");
+      if (playerUpgradesSubTabButton) playerUpgradesSubTabButton.classList.remove('active');
+    });
+  if (playerUpgradesSubTabButton)
+    playerUpgradesSubTabButton.addEventListener('click', () => {
+      if (playerSkillsPanel) playerSkillsPanel.style.display = 'none';
+      if (playerCorePanel) playerCorePanel.style.display = 'none';
+      if (playerUpgradesPanel) playerUpgradesPanel.style.display = 'flex';
+      playerUpgradesSubTabButton.classList.add('active');
+      if (playerCoreSubTabButton) playerCoreSubTabButton.classList.remove('active');
+      if (playerSkillsSubTabButton) playerSkillsSubTabButton.classList.remove('active');
     });
   if (statsOverviewSubTabButton)
     statsOverviewSubTabButton.addEventListener('click', () => {
@@ -933,28 +953,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   fightBossBtn.addEventListener("click", () => {
     fightBossBtn.style.display = "none";
-    const data = worldProgress[stageData.world];
-    const bossStage = 10 * (data?.level || 1);
-    stageData.stage = bossStage;
-    stageData.kills = playerStats.stageKills[stageData.stage] || 0;
-    renderStageInfo();
-    currentEnemy = spawnBoss(
-      stageData,
-      enemyAttackProgress,
-      boss => {
-        const { minDamage, maxDamage } = calculateEnemyBasicDamage(
-          stageData.stage,
-          stageData.world
-        );
-        const dmg = Math.floor(Math.random() * (maxDamage - minDamage + 1)) +
-          minDamage;
-        cDealerDamage(dmg, null, boss.name);
-      },
-      () => onBossDefeat(currentEnemy)
-    );
-    updateDealerLifeDisplay();
-    enemyAttackFill = renderEnemyAttackBar();
-    dealerDeathAnimation();
+    spawnBossEvent();
   });
   if (campBtn) {
     campBtn.addEventListener('click', () => {
@@ -1015,6 +1014,7 @@ function renderStageInfo() {
   stageDisplay.textContent = `Stage ${stageData.stage} World ${stageData.world} (Lv ${lvl})`;
   killsDisplay.textContent = `Kills: ${formatNumber(stageData.kills)}`;
   updateNextStageAvailability();
+  updateBossProgress();
 }
 
 function renderPlayerStats(stats) {
@@ -1186,6 +1186,7 @@ function recordWorldKill(world, stage) {
   if (data.progress >= data.progressTarget && !data.bossDefeated) return;
   data.progress += stageWeight(stage);
   updateWorldProgressUI(world);
+  if (world === stageData.world) updateBossProgress();
   if (world === stageData.world) {
     worldProgressRateTracker.record(computeWorldProgress(world) * 100);
   }
@@ -1209,6 +1210,7 @@ function updateWorldProgressUI(id) {
     `.world-progress[data-world="${id}"] .world-progress-fill`
   );
   if (fill) fill.style.width = `${pct}%`;
+  if (id == stageData.world) updateBossProgress();
   const textEl = document.querySelector(
     `.world-progress-text[data-world="${id}"]`
   );
@@ -1312,6 +1314,7 @@ function nextStage() {
   const isBossStage = stageData.stage % 10 === 0;
   resetStageCashStats();
   killsDisplay.textContent = `Kills: ${formatNumber(stageData.kills)}`;
+  updateNextStageProgress();
   updateNextStageAvailability();
   renderGlobalStats();
   renderStageInfo();
@@ -1346,6 +1349,8 @@ function nextWorld() {
     worldProgressPerSecDisplay.textContent = "Avg World Progress/sec: 0%";
   }
   killsDisplay.textContent = `Kills: ${formatNumber(stageData.kills)}`;
+  updateNextStageProgress();
+  updateBossProgress();
   updateNextStageAvailability();
   renderGlobalStats();
   renderStageInfo();
@@ -1375,6 +1380,8 @@ function goToWorld(id) {
     worldProgressPerSecDisplay.textContent = "Avg World Progress/sec: 0%";
   }
   killsDisplay.textContent = `Kills: ${formatNumber(stageData.kills)}`;
+  updateNextStageProgress();
+  updateBossProgress();
   renderGlobalStats();
   renderStageInfo();
   checkUpgradeUnlocks();
@@ -1402,6 +1409,22 @@ function updateNextStageAvailability() {
     nextStageBtn.disabled = true;
     nextStageBtn.style.display = 'none';
   }
+  updateNextStageProgress();
+}
+
+function setProgress(circle, ratio) {
+  if (!circle) return;
+  const clamped = Math.max(0, Math.min(1, ratio));
+  const offset = PROGRESS_CIRCUMFERENCE * (1 - clamped);
+  circle.style.strokeDashoffset = offset;
+}
+
+function updateNextStageProgress() {
+  setProgress(nextStageProgress, stageData.kills / STAGE_KILL_REQUIREMENT);
+}
+
+function updateBossProgress() {
+  setProgress(bossProgress, computeWorldProgress(stageData.world));
 }
 
 // Enable the next stage button when kill requirements met
@@ -1534,7 +1557,8 @@ function onBossDefeat(boss) {
   const data = worldProgress[stageData.world];
   data.bossDefeated = true;
   data.rewardClaimed = false;
-  if (data.level === 1 && worldProgress[stageData.world + 1]) {
+  // Unlock the next world upon boss defeat if it exists
+  if (worldProgress[stageData.world + 1]) {
     worldProgress[stageData.world + 1].unlocked = true;
   }
   data.level += 1;
@@ -1556,7 +1580,7 @@ function onBossDefeat(boss) {
   renderPurchasedUpgrades();
   shuffleArray(deck);
   checkSpeakerEncounter();
-  // Unlock the next world but require the player to travel manually
+  // Unlock and immediately travel to the next world
   updateWorldTabNotification();
   renderWorldsMenu();
   fightBossBtn.style.display = "none";
@@ -1567,7 +1591,7 @@ function onBossDefeat(boss) {
     chips += computeChipReward();
     updateChipsDisplay();
     hidePlayerAttackBar();
-    nextStage();
+    nextWorld();
   });
 }
 

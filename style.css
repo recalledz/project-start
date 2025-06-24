@@ -818,7 +818,8 @@ body {
     align-items: center;
 }
 
-.buttonsContainer > button {
+.buttonsContainer > button,
+.progress-wrapper > button {
     display: flex; /* turn the button into a flex container */
     align-items: center; /* vertically center icon */
     justify-content: center; /* horizontally center content */
@@ -855,6 +856,51 @@ body {
 
 #nextStageBtn {
     flex-basis: 100%;
+}
+
+.progress-wrapper {
+    position: relative;
+    width: 48px;
+    height: 48px;
+    margin: 0 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.progress-wrapper > button {
+    position: relative;
+    z-index: 1;
+}
+
+.progress-ring {
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform: rotate(-90deg);
+    pointer-events: none;
+}
+
+.progress-ring-bg,
+.progress-ring-fill {
+    fill: none;
+    stroke-width: 4;
+}
+
+.progress-ring-bg {
+    stroke: rgba(120, 120, 130, 0.3);
+}
+
+.progress-ring-fill {
+    stroke: #6b5b95;
+    stroke-dasharray: 138;
+    stroke-dashoffset: 138;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.3s ease;
+}
+
+.progress-wrapper.boss-progress .progress-ring-fill {
+    stroke: #8b0000;
 }
 
 /* auto attack progress bars */
@@ -903,7 +949,8 @@ body {
     background: #ffd700; /* brighter gold for clarity */
 }
 
-.buttonsContainer > button:hover {
+.buttonsContainer > button:hover,
+.progress-wrapper > button:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 128, 0, 0.6);
     background: linear-gradient(135deg, #fafafa, #f0f0f0);
@@ -2057,6 +2104,18 @@ body {
     box-shadow: inset 0 0 8px #fff8c6, 0 0 12px #a86b32;
     color: #220000;
 }
+.playerUpgradesSubTabButton {
+    background: linear-gradient(60deg, #376fa8, #1e3a5c, #376fa8);
+    background-size: 200% 100%;
+    border-color: #376fa8;
+    box-shadow: 0 0 8px rgba(55, 111, 168, 0.5);
+    color: #e0f0ff;
+}
+.playerUpgradesSubTabButton.active {
+    background: #376fa8;
+    box-shadow: inset 0 0 8px #fff8c6, 0 0 12px #376fa8;
+    color: #220000;
+}
 .player-skills-panel {
     display: flex;
     flex-direction: column;
@@ -2119,6 +2178,13 @@ body {
 }
 .core-level-text {
     margin-top: 4px;
+}
+
+.player-upgrades-panel {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: 6px;
 }
 
 .core-main {

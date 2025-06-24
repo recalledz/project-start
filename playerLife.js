@@ -8,6 +8,19 @@ let activityDisplay;
 let staminaFill;
 let staminaText;
 let tickTimer;
+let upgradesContainer;
+let getGameCash = () => 0;
+let spendGameCash = () => 0;
+
+const lifeUpgrades = {
+  guidingHand: {
+    name: 'Guiding Hand',
+    description: 'Resume previous task when stamina is restored',
+    cost: 50,
+    unlock: g => g.skills.mentalAcuity.level >= 1,
+    purchased: false
+  }
+};
 
 const skillInfo = {
   mentalAcuity: {
@@ -182,6 +195,31 @@ function renderSkillsList(container) {
   });
 }
 
+function renderLifeUpgrades() {
+  if (!upgradesContainer) return;
+  upgradesContainer.innerHTML = '';
+  Object.entries(lifeUpgrades).forEach(([key, up]) => {
+    if (up.purchased || !up.unlock(game)) return;
+    const row = document.createElement('div');
+    row.classList.add('upgrade-item');
+    row.dataset.key = key;
+    row.textContent = up.name;
+    const btn = document.createElement('button');
+    const cost = up.cost;
+    btn.textContent = `Buy $${cost}`;
+    btn.disabled = getGameCash() < cost;
+    btn.addEventListener('click', () => {
+      if (getGameCash() < cost) return;
+      spendGameCash(cost);
+      up.purchased = true;
+      if (key === 'guidingHand') game.autoResume = true;
+      renderLifeUpgrades();
+    });
+    row.appendChild(btn);
+    upgradesContainer.appendChild(row);
+  });
+}
+
 function renderActivity() {
   if (!activityDisplay) return;
   const act = game.activities[game.current];
@@ -193,6 +231,7 @@ function tick() {
   renderResources();
   renderSkillsList(document.querySelector('.skills-list'));
   renderActivity();
+  renderLifeUpgrades();
   saveState();
 }
 
@@ -200,7 +239,10 @@ function saveState() {
   const data = {
     skills: Object.fromEntries(Object.entries(game.skills).map(([k,s]) => [k,{level:s.level,xp:s.xp,threshold:s.threshold}])) ,
     resources: Object.fromEntries(Object.entries(game.resources).map(([k,r])=>[k,{amount:r.amount,total:r.total}])) ,
-    current: game.current
+    current: game.current,
+    upgrades: Object.fromEntries(
+      Object.entries(lifeUpgrades).map(([k, u]) => [k, { purchased: u.purchased }])
+    )
   };
   localStorage.setItem('lifeGame', JSON.stringify(data));
 }
@@ -224,21 +266,35 @@ function loadState() {
       }
     });
     if (data.current) game.start(data.current);
+    if (data.upgrades) {
+      Object.entries(data.upgrades).forEach(([k, v]) => {
+        if (lifeUpgrades[k]) {
+          lifeUpgrades[k].purchased = !!v.purchased;
+          if (k === 'guidingHand' && lifeUpgrades[k].purchased) {
+            game.autoResume = true;
+          }
+        }
+      });
+    }
   } catch(e) {}
 }
 
-export function initPlayerLife() {
+export function initPlayerLife(options = {}) {
+  getGameCash = options.getGameCash || (() => 0);
+  spendGameCash = options.spendGameCash || (() => 0);
   game = new LifeGame();
   actionsContainer = document.querySelector('.core-actions');
   resourcesContainer = document.querySelector('.core-resources');
   activityDisplay = document.getElementById('coreActivityText');
   staminaFill = document.getElementById('staminaFill');
   staminaText = document.getElementById('staminaText');
+  upgradesContainer = document.querySelector('.life-upgrades-list');
   initActivities();
   loadState();
   renderActions();
   renderResources();
   renderSkillsList(document.querySelector('.skills-list'));
+  renderLifeUpgrades();
   if (!tickTimer) tickTimer = setInterval(tick, 1000);
 }
 
@@ -246,6 +302,7 @@ export function refreshPlayerLife() {
   renderActions();
   renderResources();
   renderSkillsList(document.querySelector('.skills-list'));
+  renderLifeUpgrades();
 }
 
 export { renderSkillsList };
