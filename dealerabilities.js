@@ -5,10 +5,10 @@ export const AbilityRegistry = {
       const ability = {
         name: "Heal",
         icon: "cross",
-        cooldown: 5000,
+        cooldown: 10000,
         timer: 0,
         colorClass: "green",
-        maxTimer: 5000,
+        maxTimer: 10000,
 
         tick(deltaTime, enemy) {
           this.timer += deltaTime;

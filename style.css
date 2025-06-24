@@ -1031,6 +1031,7 @@ body {
     margin-bottom: 2px;
     color: #000;
     font-size: 1.2em;
+    position: relative;
 }
 
 .card-wrapper {
@@ -1447,25 +1448,26 @@ body {
 
 .damage-float {
     position: absolute;
-    top: 0;
+    top: 50%;
     left: 50%;
-    transform: translate(-50%, 0);
+    transform: translate(-50%, -50%);
     color: red;
     font-weight: bold;
     pointer-events: none;
     z-index: 1;
     text-shadow: 0 0 2px #000;
-    animation: damage-float 1.2s ease-out forwards;
+    font-size: 1.4em;
+    animation: damage-float 3s ease-out forwards;
 }
 
 @keyframes damage-float {
     from {
         opacity: 1;
-        transform: translate(-50%, 0);
+        transform: translate(-50%, -50%);
     }
     to {
         opacity: 0;
-        transform: translate(-50%, -24px);
+        transform: translate(-50%, -90px);
     }
 }
 

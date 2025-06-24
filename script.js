@@ -197,7 +197,7 @@ function stageWeight(stage) {
 }
 
 // Total weighted kills needed for a world to be considered "complete"
-const WORLD_PROGRESS_TARGET = 1820; // roughly matches old fixed requirements
+const WORLD_PROGRESS_TARGET = 1820; // base requirement for level 1
 
 const worldProgress = {};
 Object.keys(BossTemplates).forEach(id => {
@@ -205,7 +205,9 @@ Object.keys(BossTemplates).forEach(id => {
     unlocked: parseInt(id) === 1,
     bossDefeated: false,
     rewardClaimed: false,
-    stageKills: {}
+    level: 1,
+    progress: 0,
+    progressTarget: WORLD_PROGRESS_TARGET
   };
 });
 
@@ -931,7 +933,9 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   fightBossBtn.addEventListener("click", () => {
     fightBossBtn.style.display = "none";
-    stageData.stage = 10;
+    const data = worldProgress[stageData.world];
+    const bossStage = 10 * (data?.level || 1);
+    stageData.stage = bossStage;
     stageData.kills = playerStats.stageKills[stageData.stage] || 0;
     renderStageInfo();
     currentEnemy = spawnBoss(
@@ -1007,7 +1011,8 @@ function unlockManaSystem() {
 function renderStageInfo() {
   const stageDisplay = document.getElementById("stage");
   stageData.kills = playerStats.stageKills[stageData.stage] || stageData.kills || 0;
-  stageDisplay.textContent = `Stage ${stageData.stage} World ${stageData.world}`;
+  const lvl = worldProgress[stageData.world]?.level || 1;
+  stageDisplay.textContent = `Stage ${stageData.stage} World ${stageData.world} (Lv ${lvl})`;
   killsDisplay.textContent = `Kills: ${formatNumber(stageData.kills)}`;
   updateNextStageAvailability();
 }
@@ -1170,7 +1175,7 @@ function showDamageFloat(card, amount) {
   dmg.addEventListener("animationend", () => dmg.remove(), {
     once: true
   });
-  setTimeout(() => dmg.remove(), 1200);
+  setTimeout(() => dmg.remove(), 3000);
 }
 
 //=========stage functions===========
@@ -1178,7 +1183,8 @@ function showDamageFloat(card, amount) {
 function recordWorldKill(world, stage) {
   const data = worldProgress[world];
   if (!data) return;
-  data.stageKills[stage] = (data.stageKills[stage] || 0) + 1;
+  if (data.progress >= data.progressTarget && !data.bossDefeated) return;
+  data.progress += stageWeight(stage);
   updateWorldProgressUI(world);
   if (world === stageData.world) {
     worldProgressRateTracker.record(computeWorldProgress(world) * 100);
@@ -1187,16 +1193,13 @@ function recordWorldKill(world, stage) {
 
 function computeWorldWeight(id) {
   const data = worldProgress[id];
-  if (!data) return 0;
-  let weight = 0;
-  for (const [stage, kills] of Object.entries(data.stageKills)) {
-    weight += stageWeight(parseInt(stage)) * kills;
-  }
-  return weight;
+  return data ? data.progress : 0;
 }
 
 function computeWorldProgress(id) {
-  return Math.min(computeWorldWeight(id) / WORLD_PROGRESS_TARGET, 1);
+  const data = worldProgress[id];
+  if (!data) return 0;
+  return Math.min(data.progress / data.progressTarget, 1);
 }
 
 function updateWorldProgressUI(id) {
@@ -1210,7 +1213,9 @@ function updateWorldProgressUI(id) {
     `.world-progress-text[data-world="${id}"]`
   );
   if (textEl) {
-    textEl.textContent = `${weight}/${WORLD_PROGRESS_TARGET} (${pct.toFixed(1)}%)`;
+    const level = worldProgress[id].level;
+    const target = worldProgress[id].progressTarget;
+    textEl.textContent = `Lv ${level}: ${weight}/${target} (${pct.toFixed(1)}%)`;
   }
   if (
     worldProgress[id] &&
@@ -1232,7 +1237,7 @@ function renderWorldsMenu() {
     if (!data.unlocked) return;
     const entry = document.createElement("div");
     entry.classList.add("world-entry");
-    entry.innerHTML = `<div>World ${id}</div>`;
+    entry.innerHTML = `<div>World ${id} (Lv ${data.level})</div>`;
     entry.addEventListener("click", e => {
       if (e.target.tagName !== "BUTTON") {
         selectWorld(id);
@@ -1438,7 +1443,10 @@ function spawnDealerEvent(powerMult = 1) {
 function spawnBossEvent() {
   inCombat = true;
   removeDealerLifeBar();
-  currentEnemy = spawnEnemy('boss', stageData, enemyAttackProgress, () => onBossDefeat(currentEnemy));
+  const data = worldProgress[stageData.world];
+  const bossStage = 10 * (data?.level || 1);
+  const temp = { ...stageData, stage: bossStage };
+  currentEnemy = spawnEnemy('boss', temp, enemyAttackProgress, () => onBossDefeat(currentEnemy));
   updateDealerLifeDisplay();
   enemyAttackFill = renderEnemyAttackBar();
   showPlayerAttackBar();
@@ -1459,8 +1467,6 @@ function respawnDealerStage() {
   if (speakerEncounterPending) {
     speakerEncounterPending = false;
     currentEnemy = spawnEnemy('speaker', stageData, enemyAttackProgress, onSpeakerDefeat);
-  } else if (stageData.stage % 10 === 0) {
-    currentEnemy = spawnEnemy('boss', stageData, enemyAttackProgress, () => onBossDefeat(currentEnemy));
   } else {
     currentEnemy = spawnEnemy('dealer', stageData, enemyAttackProgress, onDealerDefeat);
   }
@@ -1525,11 +1531,19 @@ function onBossDefeat(boss) {
   // capture remaining attack progress before resetting
   enemyAttackProgress = boss.attackTimer / boss.attackInterval;
   cardXp(boss.xp);
-  worldProgress[stageData.world].bossDefeated = true;
-  worldProgress[stageData.world].rewardClaimed = false;
-  if (worldProgress[stageData.world + 1]) {
+  const data = worldProgress[stageData.world];
+  data.bossDefeated = true;
+  data.rewardClaimed = false;
+  if (data.level === 1 && worldProgress[stageData.world + 1]) {
     worldProgress[stageData.world + 1].unlocked = true;
   }
+  data.level += 1;
+  data.progress = 0;
+  data.progressTarget *= 3;
+  data.bossDefeated = false;
+  updateWorldProgressUI(stageData.world);
+  renderWorldsMenu();
+  renderStageInfo();
   addLog(`${boss.name} was defeated!`);
   currentEnemy = null;
 
