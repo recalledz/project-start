@@ -70,3 +70,47 @@ export function renderDiscardCard(card, discardContainer, backImages) {
   discardContainer.appendChild(img);
   card.discardElement = img;
 }
+
+function drawBloodSplat(canvas) {
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  for (let i = 0; i < 6; i++) {
+    const r = Math.random() * 10 + 5;
+    const x = Math.random() * canvas.width;
+    const y = Math.random() * canvas.height;
+    ctx.beginPath();
+    ctx.fillStyle = `rgba(150,0,0,${0.5 + Math.random() * 0.5})`;
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+export function applyBloodSplat(card) {
+  if (!card.cardElement) return;
+  if (card.bloodSplatEl) return;
+  const rect = card.cardElement.getBoundingClientRect();
+  const canvas = document.createElement('canvas');
+  canvas.classList.add('blood-splat');
+  canvas.width = rect.width;
+  canvas.height = rect.height;
+  drawBloodSplat(canvas);
+  card.cardElement.appendChild(canvas);
+  card.bloodSplatEl = canvas;
+}
+
+export function removeBloodSplat(card) {
+  if (card.bloodSplatEl) {
+    card.bloodSplatEl.remove();
+    card.bloodSplatEl = null;
+  }
+}
+
+export function updateBloodSplat(card) {
+  if (!card) return;
+  const ratio = card.maxHp > 0 ? card.currentHp / card.maxHp : 0;
+  if (ratio <= 0.1) {
+    applyBloodSplat(card);
+  } else {
+    removeBloodSplat(card);
+  }
+}

@@ -55,7 +55,10 @@ import {
   renderDealerLifeBar,
   renderEnemyAttackBar,
   renderPlayerAttackBar,
-  renderDealerLifeBarFill
+  renderDealerLifeBarFill,
+  applyBloodSplat,
+  removeBloodSplat,
+  updateBloodSplat
 } from "./rendering.js";
 import { drawCard, redrawHand } from "./cardManagement.js";
 import {
@@ -1617,6 +1620,7 @@ function cDealerDamage(damageAmount = null, ability = null, source = "dealer") {
     // Show actual damage dealt after shield reduction
     showDamageFloat(card, finalDamage);
   }
+  updateBloodSplat(card);
   // if it’s dead, remove it
   if (card.currentHp === 0) {
     // immediately remove from data so new draws don't shift the wrong card
@@ -1624,6 +1628,7 @@ function cDealerDamage(damageAmount = null, ability = null, source = "dealer") {
 
     animateCardDeath(card, () => {
       // 1) from the DOM
+      removeBloodSplat(card);
       card.wrapperElement?.remove();
 
       discardCard(card);
@@ -1725,6 +1730,7 @@ function updateHandDisplay() {
     card.hpDisplay.textContent = `HP: ${formatNumber(Math.round(card.currentHp))}/${formatNumber(Math.round(card.maxHp))}`;
     card.xpLabel.textContent = `LV: ${card.currentLevel}`;
     card.xpBarFill.style.width = `${(card.XpCurrent / card.XpReq) * 100}%`;
+    updateBloodSplat(card);
   });
 }
 
@@ -2011,6 +2017,8 @@ function drawSpeakerIcon(canvas) {
 }
 
 
+
+
 // Visual pulse when a card gains health
 function animateCardHeal(card) {
   const w = card.wrapperElement;
@@ -2131,6 +2139,7 @@ function useJoker(joker) {
         card.currentHp = Math.round(Math.min(card.maxHp, card.currentHp + healAmt));
         card.hpDisplay.textContent = `HP: ${formatNumber(Math.round(card.currentHp))}/${formatNumber(Math.round(card.maxHp))}`;
         animateCardHeal(card);
+        updateBloodSplat(card);
       });
       addLog(`Healed ${healAmt} HP`,
         "heal");
