@@ -52,18 +52,18 @@ export class Card {
     this.traits = [];
   }
 
-  gainXp(amount) {
+  gainXp(amount, stats, barUpgrades) {
     this.XpCurrent += amount;
     let leveled = false;
     while (this.XpCurrent >= this.XpReq) {
       this.XpCurrent -= this.XpReq;
-      this.levelUp();
+      this.levelUp(stats, barUpgrades);
       leveled = true;
     }
     return leveled;
   }
 
-  levelUp() {
+  levelUp(stats, barUpgrades) {
     this.currentLevel++;
     this.XpReq = xpRequirement(this.value, this.currentLevel);
     this.damage = this.baseDamage + 5 * (this.currentLevel - 1);
@@ -71,11 +71,14 @@ export class Card {
     const prevHp = this.currentHp;
     this.maxHp = Math.round(5 * baseMultiplier + 5 * (this.currentLevel - 1) + this.baseHpBoost);
     this.currentHp = Math.min(this.maxHp, prevHp);
+    if (stats || barUpgrades) {
+      this.recalcHp(stats, barUpgrades);
+    }
   }
 
   healFromKill() {
     const healed = Math.min(this.maxHp, this.currentHp + this.hpPerKill);
-    this.currentHp = Math.round(healed);
+    this.currentHp = healed;
   }
 
   upgradeHpPerKill(amount = 1) {

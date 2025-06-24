@@ -1026,6 +1026,7 @@ body {
 }
 
 .card-hp {
+    position: relative;
     align-self: flex-end;
     margin-right: 4px;
     margin-bottom: 2px;
@@ -1454,7 +1455,7 @@ body {
     font-weight: bold;
     pointer-events: none;
     text-shadow: 0 0 2px #000;
-    animation: damage-float 1s ease-out forwards;
+    animation: damage-float 1.2s ease-out forwards;
 }
 
 @keyframes damage-float {
@@ -1464,7 +1465,7 @@ body {
     }
     to {
         opacity: 0;
-        transform: translate(-50%, -20px);
+        transform: translate(-50%, -24px);
     }
 }
 

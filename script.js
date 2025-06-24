@@ -1170,7 +1170,7 @@ function showDamageFloat(card, amount) {
   dmg.addEventListener("animationend", () => dmg.remove(), {
     once: true
   });
-  setTimeout(() => dmg.remove(), 1000);
+  setTimeout(() => dmg.remove(), 1200);
 }
 
 //=========stage functions===========
@@ -1682,7 +1682,7 @@ function cardXp(xpAmount) {
     const amount = drawnCards.includes(card)
       ? xpAmount
       : xpAmount * xpEfficiency;
-    const leveled = card.gainXp(amount);
+    const leveled = card.gainXp(amount, stats, barUpgrades);
     if (leveled) {
       cardPoints += 1;
       if (card.wrapperElement) animateCardLevelUp(card);
