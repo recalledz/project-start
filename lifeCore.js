@@ -82,6 +82,8 @@ export class LifeGame {
     this.current = null;
     this.intent = null;
     this.autoResume = false;
+    this.discoveryProgress = 0;
+    this.locations = [];
   }
 
   addActivity(act) {
@@ -114,7 +116,14 @@ export class LifeGame {
       }
     }
     const mult = this._computeMultiplier(act);
-    if (act.resource) this.resources[act.resource].add(act.rate * mult * delta);
+    let gain = 0;
+    if (act.resource) {
+      gain = act.rate * mult * delta;
+      this.resources[act.resource].add(gain);
+      if (act.resource === 'discovery') {
+        this._handleDiscovery(gain);
+      }
+    }
     if (act.skill) this.skills[act.skill].addXP(act.xpRate * mult * delta);
     if (act.tags.includes('mental')) addCoreXP('mental', 0.1 * delta);
     if (act.tags.includes('body')) addCoreXP('physical', 0.1 * delta);
@@ -129,6 +138,39 @@ export class LifeGame {
     ) {
       this.current = this.intent;
     }
+  }
+
+  _handleDiscovery(amount) {
+    this.discoveryProgress += amount;
+    while (this.discoveryProgress >= 1) {
+      this.discoveryProgress -= 1;
+      this._attemptDiscoveryEvent();
+    }
+  }
+
+  _attemptDiscoveryEvent() {
+    const total = this.resources.discovery.total;
+    const events = [
+      { req: 1, chance: 0.001, type: 'item', key: 'pick' },
+      { req: 100, chance: 0.001, type: 'location', key: 'Mystery Garden' },
+      { req: 1, chance: 0.000001, type: 'item', key: 'esotericRemembrance' },
+      { req: 1, chance: 0.1, type: 'item', key: 'paper' }
+    ];
+    events.forEach(ev => {
+      if (total >= ev.req && Math.random() < ev.chance) {
+        if (ev.type === 'item') {
+          if (!this.resources[ev.key]) this.resources[ev.key] = new Resource(ev.key);
+          this.resources[ev.key].add(1);
+        } else if (ev.type === 'location') {
+          if (!this.locations.includes(ev.key)) {
+            this.locations.push(ev.key);
+            if (typeof window !== 'undefined') {
+              window.dispatchEvent(new CustomEvent('location-discovered', { detail: { name: ev.key } }));
+            }
+          }
+        }
+      }
+    });
   }
 
   _computeMultiplier(act) {

@@ -45,6 +45,7 @@
       <button class="starChartTabButton">star chart</button>
       <button class="playerStatsTabButton">stats</button>
       <button class="playerTabButton">real</button>
+      <button class="locationTabButton" style="display:none;">locations</button>
     </div>
 
     <!--------------main tab panel----------------->
@@ -136,20 +137,21 @@
             </div>
           </div>
           <!--<button id="moveForwardBtn" title="Move Forward">➡️</button>-->
-          <div class="progress-wrapper">
-            <svg class="progress-ring" width="48" height="48">
-              <circle class="progress-ring-bg" cx="24" cy="24" r="22" />
-              <circle id="nextStageProgress" class="progress-ring-fill" cx="24" cy="24" r="22" />
-            </svg>
-            <button id="nextStageBtn" style="display:none;" disabled title="Next Stage">🚀</button>
-          </div>
-          <button id="campBtn" style="display:none;" title="Find the Light"><i data-lucide="eye"></i></button>
-          <div class="progress-wrapper boss-progress">
-            <svg class="progress-ring" width="48" height="48">
-              <circle class="progress-ring-bg" cx="24" cy="24" r="22" />
-              <circle id="bossProgress" class="progress-ring-fill boss" cx="24" cy="24" r="22" />
-            </svg>
-            <button id="fightBossBtn" style="display:none;" title="Fight Boss">💀</button>
+          <div class="canvasButtonsRow">
+            <div id="nextStageArea" class="progress-wrapper">
+              <svg class="progress-ring" width="48" height="48">
+                <circle class="progress-ring-bg" cx="24" cy="24" r="22" />
+                <circle id="nextStageProgress" class="progress-ring-fill" cx="24" cy="24" r="22" />
+              </svg>
+            </div>
+            <button id="campBtn" style="display:none;" title="Find the Light"><i data-lucide="eye"></i></button>
+            <div class="progress-wrapper boss-progress">
+              <svg class="progress-ring" width="48" height="48">
+                <circle class="progress-ring-bg" cx="24" cy="24" r="22" />
+                <circle id="bossProgress" class="progress-ring-fill boss" cx="24" cy="24" r="22" />
+              </svg>
+              <button id="fightBossBtn" style="display:none;" title="Fight Boss">💀</button>
+            </div>
           </div>
         </div>
         <div class="handContainer casino-section"></div>
@@ -218,6 +220,9 @@
           <div class="life-upgrades-list upgrade-list"></div>
         </div>
       </div>
+    </div>
+    <div class="locationTab" style="display:none;">
+      <div class="location-list casino-section"></div>
     </div>
     <div id="tooltip"></div>
     <script type="module" src="script.js"></script>

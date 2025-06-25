@@ -1,4 +1,4 @@
-import { LifeGame, Activity } from './lifeCore.js';
+import { LifeGame, Activity, Resource } from './lifeCore.js';
 import { addCoreXP } from './core.js';
 
 let game;
@@ -242,7 +242,8 @@ function saveState() {
     current: game.current,
     upgrades: Object.fromEntries(
       Object.entries(lifeUpgrades).map(([k, u]) => [k, { purchased: u.purchased }])
-    )
+    ),
+    locations: game.locations
   };
   localStorage.setItem('lifeGame', JSON.stringify(data));
 }
@@ -260,10 +261,11 @@ function loadState() {
       }
     });
     Object.entries(data.resources||{}).forEach(([k,v])=>{
-      if (game.resources[k]) {
-        game.resources[k].amount = v.amount;
-        game.resources[k].total = v.total;
+      if (!game.resources[k]) {
+        game.resources[k] = new Resource(k);
       }
+      game.resources[k].amount = v.amount;
+      game.resources[k].total = v.total;
     });
     if (data.current) game.start(data.current);
     if (data.upgrades) {
@@ -273,6 +275,14 @@ function loadState() {
           if (k === 'guidingHand' && lifeUpgrades[k].purchased) {
             game.autoResume = true;
           }
+        }
+      });
+    }
+    if (Array.isArray(data.locations)) {
+      game.locations = data.locations;
+      data.locations.forEach(name => {
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('location-discovered', { detail: { name } }));
         }
       });
     }

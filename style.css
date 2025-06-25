@@ -818,6 +818,13 @@ body {
     align-items: center;
 }
 
+.canvasButtonsRow {
+    display: flex;
+    gap: 5px;
+    width: 100%;
+    justify-content: center;
+}
+
 .buttonsContainer > button,
 .progress-wrapper > button {
     display: flex; /* turn the button into a flex container */
@@ -829,10 +836,10 @@ body {
     padding: 0;
 
     color: #080707; /* no quotes here */
-    background: linear-gradient(135deg, #f0f0f0, #fafafa);
-    border: 2px solid #4caf50;
+    background: linear-gradient(135deg, #fff2b0, #fff8d0);
+    border: 2px solid #d4af37;
     border-radius: 6px;
-    box-shadow: 0 2px 6px rgba(0, 128, 0, 0.4);
+    box-shadow: 0 2px 6px rgba(212, 175, 55, 0.4);
 
     font-size: 1.2rem;
     cursor: pointer;
@@ -854,9 +861,6 @@ body {
     overflow: hidden;
 }
 
-#nextStageBtn {
-    flex-basis: 100%;
-}
 
 .progress-wrapper {
     position: relative;
@@ -866,6 +870,10 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+#nextStageArea.clickable {
+    cursor: pointer;
 }
 
 .progress-wrapper > button {
@@ -952,8 +960,8 @@ body {
 .buttonsContainer > button:hover,
 .progress-wrapper > button:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 128, 0, 0.6);
-    background: linear-gradient(135deg, #fafafa, #f0f0f0);
+    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.6);
+    background: linear-gradient(135deg, #fff8d0, #fff2b0);
 }
 
 
