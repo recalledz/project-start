@@ -1,8 +1,7 @@
+import { speechState } from './speech.js';
+
 export const coreState = {
   coreLevel: 1,
-  mind: { level: 1, xp: 0, maxXP: 1000 },
-  body: { level: 1, xp: 0, maxXP: 10 },
-  will: { level: 1, xp: 0, maxXP: 10 },
   meditationProgress: 0,
   meditating: false
 };
@@ -33,7 +32,7 @@ const bodyPath = `M200 140
     <svg id="coreDiagram" viewBox="0 0 400 400" width="100%" height="100%">
       <defs>
         <clipPath id="bodyShapeClip"><path d="${bodyPath}" /></clipPath>
-        <clipPath id="mindClip"><circle cx="200" cy="80" r="20" /></clipPath>
+        <clipPath id="insightClip"><circle cx="200" cy="80" r="20" /></clipPath>
         <clipPath id="bodyOrbClip"><circle cx="113" cy="230" r="20" /></clipPath>
         <clipPath id="willClip"><circle cx="287" cy="230" r="20" /></clipPath>
       </defs>
@@ -41,9 +40,9 @@ const bodyPath = `M200 140
       <circle id="coreHalo" cx="200" cy="180" r="70" fill="none" stroke="gold" stroke-width="4" opacity="0" />
       <rect id="bodyFill" x="170" y="240" width="60" height="0" fill="rgba(255,255,255,0.4)" clip-path="url(#bodyShapeClip)" />
       <circle cx="200" cy="80" r="20" fill="rgba(100,150,255,0.3)" />
-      <rect id="mindFill" x="180" y="100" width="40" height="0" fill="rgba(100,150,255,0.6)" clip-path="url(#mindClip)" />
-      <circle id="mindOrb" cx="200" cy="80" r="20" fill="none" stroke="#88aaff" stroke-width="2" />
-      <text id="mindText" x="200" y="115" text-anchor="middle" class="orb-text"></text>
+      <rect id="insightFill" x="180" y="100" width="40" height="0" fill="rgba(100,150,255,0.6)" clip-path="url(#insightClip)" />
+      <circle id="insightOrb" cx="200" cy="80" r="20" fill="none" stroke="#88aaff" stroke-width="2" />
+      <text id="insightText" x="200" y="115" text-anchor="middle" class="orb-text"></text>
       <circle cx="113" cy="230" r="20" fill="rgba(255,100,100,0.3)" />
       <rect id="bodyOrbFill" x="93" y="250" width="40" height="0" fill="rgba(255,100,100,0.6)" clip-path="url(#bodyOrbClip)" />
       <circle id="bodyOrb" cx="113" cy="230" r="20" fill="none" stroke="#ff8888" stroke-width="2" />
@@ -58,12 +57,15 @@ const bodyPath = `M200 140
   meditateBtn = container.querySelector("#meditateCoreBtn");
   levelDisplay = container.querySelector('#coreLevelText');
   progressText = container.querySelector("#coreProgressText");
-  const mindOrb = container.querySelector('#mindOrb');
-  mindOrb.addEventListener('click', onMindOrbClick);
-  mindOrb.addEventListener('mouseenter', e => {
-    window.showTooltip(`Mind: ${Math.floor(coreState.mind.xp)}/${coreState.mind.maxXP}`, e.pageX + 10, e.pageY + 10);
-  });
-  mindOrb.addEventListener('mouseleave', window.hideTooltip);
+  window.addEventListener('orbs-changed', renderCore);
+  const insightOrb = container.querySelector('#insightOrb');
+  if (insightOrb) {
+    insightOrb.addEventListener('mouseenter', e => {
+      const orb = speechState.orbs.insight;
+      window.showTooltip(`Insight: ${Math.floor(orb.current)}/${orb.max}`, e.pageX + 10, e.pageY + 10);
+    });
+    insightOrb.addEventListener('mouseleave', window.hideTooltip);
+  }
   meditateBtn.addEventListener('click', startMeditation);
   meditateBtn.addEventListener('mouseenter', e => {
     window.showTooltip('Begin or advance meditation', e.pageX + 10, e.pageY + 10);
@@ -72,46 +74,22 @@ const bodyPath = `M200 140
   const bodyOrbEl = container.querySelector('#bodyOrb');
   if (bodyOrbEl) {
     bodyOrbEl.addEventListener('mouseenter', e => {
-      window.showTooltip(`Body: ${Math.floor(coreState.body.xp)}/${coreState.body.maxXP}`, e.pageX + 10, e.pageY + 10);
+      const orb = speechState.orbs.body;
+      window.showTooltip(`Body: ${Math.floor(orb.current)}/${orb.max}`, e.pageX + 10, e.pageY + 10);
     });
     bodyOrbEl.addEventListener('mouseleave', window.hideTooltip);
   }
   const willOrbEl = container.querySelector('#willOrb');
   if (willOrbEl) {
     willOrbEl.addEventListener('mouseenter', e => {
-      window.showTooltip(`Will: ${Math.floor(coreState.will.xp)}/${coreState.will.maxXP}`, e.pageX + 10, e.pageY + 10);
+      const orb = speechState.orbs.will;
+      window.showTooltip(`Will: ${Math.floor(orb.current)}/${orb.max}`, e.pageX + 10, e.pageY + 10);
     });
     willOrbEl.addEventListener('mouseleave', window.hideTooltip);
   }
   renderCore();
 }
 
-export function getMindLevel() {
-  return coreState.mind.level;
-}
-
-export function addCoreXP(type, amt = 1) {
-  const orb =
-    type === 'mental' ? coreState.mind :
-    type === 'physical' ? coreState.body :
-    type === 'will' ? coreState.will : null;
-  if (!orb) return;
-  const maxLevel = coreState.coreLevel * 5;
-  if (orb.level >= maxLevel) return;
-  orb.xp = Math.min(orb.maxXP, orb.xp + amt);
-  renderCore();
-}
-
-function onMindOrbClick() {
-  const orb = coreState.mind;
-  const maxLevel = coreState.coreLevel * 5;
-  if (orb.xp < orb.maxXP || orb.level >= maxLevel) return;
-  orb.level += 1;
-  coreState.mind.xp = 0;
-  coreState.mind.maxXP = Math.floor(coreState.mind.maxXP * 1.5);
-  window.dispatchEvent(new CustomEvent('core-mind-upgrade'));
-  renderCore();
-}
 
 function startMeditation() {
   if (coreState.meditationProgress >= 100) {
@@ -141,18 +119,18 @@ function breakthrough() {
   }
   coreState.coreLevel += 1;
   coreState.meditationProgress = 0;
-  coreState.mind.xp = 0;
-  coreState.body.xp = 0;
-  coreState.will.xp = 0;
+  speechState.orbs.insight.current = 0;
+  speechState.orbs.body.current = 0;
+  speechState.orbs.will.current = 0;
   meditateBtn.textContent = 'Meditate Core';
   renderCore();
 }
 
 function renderCore() {
   if (!container) return;
-  const mindFill = Math.min(1, coreState.mind.xp / coreState.mind.maxXP);
-  const bodyFill = Math.min(1, coreState.body.xp / coreState.body.maxXP);
-  const willFill = Math.min(1, coreState.will.xp / coreState.will.maxXP);
+  const insightFill = Math.min(1, speechState.orbs.insight.current / speechState.orbs.insight.max);
+  const bodyFill = Math.min(1, speechState.orbs.body.current / speechState.orbs.body.max);
+  const willFill = Math.min(1, speechState.orbs.will.current / speechState.orbs.will.max);
 
   const coreFill = Math.min(1, coreState.meditationProgress / 100);
 
@@ -165,28 +143,28 @@ function renderCore() {
     rect.setAttribute('height', h);
   };
 
-  updateRect('#mindFill', 200, 80, 20, mindFill);
+  updateRect('#insightFill', 200, 80, 20, insightFill);
   updateRect('#bodyOrbFill', 113, 230, 20, bodyFill);
   updateRect('#willFill', 287, 230, 20, willFill);
   updateRect('#bodyFill', 200, 180, 60, coreFill);
 
-  const mindOrb = container.querySelector('#mindOrb');
-  if (mindOrb) mindOrb.setAttribute('stroke', mindFill >= 1 ? '#ffffaa' : '#88aaff');
+  const insightOrbEl = container.querySelector('#insightOrb');
+  if (insightOrbEl) insightOrbEl.setAttribute('stroke', insightFill >= 1 ? '#ffffaa' : '#88aaff');
   const bodyOrb = container.querySelector('#bodyOrb');
   if (bodyOrb) bodyOrb.setAttribute('stroke', bodyFill >= 1 ? '#ffcccc' : '#ff8888');
   const willOrb = container.querySelector('#willOrb');
   if (willOrb) willOrb.setAttribute('stroke', willFill >= 1 ? '#ddaaff' : '#cc88ff');
 
-  const mindText = container.querySelector('#mindText');
-  if (mindText) mindText.textContent = `${Math.floor(coreState.mind.xp)}/${coreState.mind.maxXP}`;
+  const insightText = container.querySelector('#insightText');
+  if (insightText) insightText.textContent = `${Math.floor(speechState.orbs.insight.current)}/${speechState.orbs.insight.max}`;
   const bodyText = container.querySelector('#bodyText');
-  if (bodyText) bodyText.textContent = `${Math.floor(coreState.body.xp)}/${coreState.body.maxXP}`;
+  if (bodyText) bodyText.textContent = `${Math.floor(speechState.orbs.body.current)}/${speechState.orbs.body.max}`;
   const willText = container.querySelector('#willText');
-  if (willText) willText.textContent = `${Math.floor(coreState.will.xp)}/${coreState.will.maxXP}`;
+  if (willText) willText.textContent = `${Math.floor(speechState.orbs.will.current)}/${speechState.orbs.will.max}`;
   const progressText = container.querySelector('#coreProgressText');
   if (progressText) progressText.textContent = `${Math.floor(coreState.meditationProgress)}/100`;
   levelDisplay.textContent = `Core Level: ${coreState.coreLevel}`;
-  const ready = mindFill >= 1 && bodyFill >= 1 && willFill >= 1 && !coreState.meditating && coreState.meditationProgress === 0;
+  const ready = insightFill >= 1 && bodyFill >= 1 && willFill >= 1 && !coreState.meditating && coreState.meditationProgress === 0;
 
   if (coreState.meditationProgress >= 100) {
     meditateBtn.textContent = 'Breakthrough';
