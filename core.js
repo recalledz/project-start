@@ -33,25 +33,25 @@ const bodyPath = `M200 140
     <svg id="coreDiagram" viewBox="0 0 400 400" width="100%" height="100%">
       <defs>
         <clipPath id="bodyShapeClip"><path d="${bodyPath}" /></clipPath>
-        <clipPath id="mindClip"><circle cx="200" cy="60" r="20" /></clipPath>
-        <clipPath id="bodyOrbClip"><circle cx="120" cy="220" r="20" /></clipPath>
-        <clipPath id="willClip"><circle cx="280" cy="220" r="20" /></clipPath>
+        <clipPath id="mindClip"><circle cx="200" cy="80" r="20" /></clipPath>
+        <clipPath id="bodyOrbClip"><circle cx="113" cy="230" r="20" /></clipPath>
+        <clipPath id="willClip"><circle cx="287" cy="230" r="20" /></clipPath>
       </defs>
       <path d="${bodyPath}" fill="rgba(0,0,0,0.3)" stroke="#888" stroke-width="2" />
       <circle id="coreHalo" cx="200" cy="180" r="70" fill="none" stroke="gold" stroke-width="4" opacity="0" />
       <rect id="bodyFill" x="170" y="240" width="60" height="0" fill="rgba(255,255,255,0.4)" clip-path="url(#bodyShapeClip)" />
-      <circle cx="200" cy="60" r="20" fill="rgba(100,150,255,0.3)" />
-      <rect id="mindFill" x="180" y="80" width="40" height="0" fill="rgba(100,150,255,0.6)" clip-path="url(#mindClip)" />
-      <circle id="mindOrb" cx="200" cy="60" r="20" fill="none" stroke="#88aaff" stroke-width="2" />
-      <text id="mindText" x="200" y="95" text-anchor="middle" class="orb-text"></text>
-      <circle cx="120" cy="220" r="20" fill="rgba(255,100,100,0.3)" />
-      <rect id="bodyOrbFill" x="100" y="240" width="40" height="0" fill="rgba(255,100,100,0.6)" clip-path="url(#bodyOrbClip)" />
-      <circle id="bodyOrb" cx="120" cy="220" r="20" fill="none" stroke="#ff8888" stroke-width="2" />
-      <text id="bodyText" x="120" y="255" text-anchor="middle" class="orb-text"></text>
-      <circle cx="280" cy="220" r="20" fill="rgba(180,100,255,0.3)" />
-      <rect id="willFill" x="260" y="240" width="40" height="0" fill="rgba(180,100,255,0.6)" clip-path="url(#willClip)" />
-      <circle id="willOrb" cx="280" cy="220" r="20" fill="none" stroke="#cc88ff" stroke-width="2" />
-      <text id="willText" x="280" y="255" text-anchor="middle" class="orb-text"></text>
+      <circle cx="200" cy="80" r="20" fill="rgba(100,150,255,0.3)" />
+      <rect id="mindFill" x="180" y="100" width="40" height="0" fill="rgba(100,150,255,0.6)" clip-path="url(#mindClip)" />
+      <circle id="mindOrb" cx="200" cy="80" r="20" fill="none" stroke="#88aaff" stroke-width="2" />
+      <text id="mindText" x="200" y="115" text-anchor="middle" class="orb-text"></text>
+      <circle cx="113" cy="230" r="20" fill="rgba(255,100,100,0.3)" />
+      <rect id="bodyOrbFill" x="93" y="250" width="40" height="0" fill="rgba(255,100,100,0.6)" clip-path="url(#bodyOrbClip)" />
+      <circle id="bodyOrb" cx="113" cy="230" r="20" fill="none" stroke="#ff8888" stroke-width="2" />
+      <text id="bodyText" x="113" y="265" text-anchor="middle" class="orb-text"></text>
+      <circle cx="287" cy="230" r="20" fill="rgba(180,100,255,0.3)" />
+      <rect id="willFill" x="267" y="250" width="40" height="0" fill="rgba(180,100,255,0.6)" clip-path="url(#willClip)" />
+      <circle id="willOrb" cx="287" cy="230" r="20" fill="none" stroke="#cc88ff" stroke-width="2" />
+      <text id="willText" x="287" y="265" text-anchor="middle" class="orb-text"></text>
       <text id="coreProgressText" x="200" y="260" text-anchor="middle" class="orb-text"></text>
     </svg>
   `;
@@ -60,7 +60,29 @@ const bodyPath = `M200 140
   progressText = container.querySelector("#coreProgressText");
   const mindOrb = container.querySelector('#mindOrb');
   mindOrb.addEventListener('click', onMindOrbClick);
+  mindOrb.addEventListener('mouseenter', e => {
+    window.showTooltip(`Mind: ${Math.floor(coreState.mind.xp)}/${coreState.mind.maxXP}`, e.pageX + 10, e.pageY + 10);
+  });
+  mindOrb.addEventListener('mouseleave', window.hideTooltip);
   meditateBtn.addEventListener('click', startMeditation);
+  meditateBtn.addEventListener('mouseenter', e => {
+    window.showTooltip('Begin or advance meditation', e.pageX + 10, e.pageY + 10);
+  });
+  meditateBtn.addEventListener('mouseleave', window.hideTooltip);
+  const bodyOrbEl = container.querySelector('#bodyOrb');
+  if (bodyOrbEl) {
+    bodyOrbEl.addEventListener('mouseenter', e => {
+      window.showTooltip(`Body: ${Math.floor(coreState.body.xp)}/${coreState.body.maxXP}`, e.pageX + 10, e.pageY + 10);
+    });
+    bodyOrbEl.addEventListener('mouseleave', window.hideTooltip);
+  }
+  const willOrbEl = container.querySelector('#willOrb');
+  if (willOrbEl) {
+    willOrbEl.addEventListener('mouseenter', e => {
+      window.showTooltip(`Will: ${Math.floor(coreState.will.xp)}/${coreState.will.maxXP}`, e.pageX + 10, e.pageY + 10);
+    });
+    willOrbEl.addEventListener('mouseleave', window.hideTooltip);
+  }
   renderCore();
 }
 
@@ -143,9 +165,9 @@ function renderCore() {
     rect.setAttribute('height', h);
   };
 
-  updateRect('#mindFill', 200, 60, 20, mindFill);
-  updateRect('#bodyOrbFill', 120, 220, 20, bodyFill);
-  updateRect('#willFill', 280, 220, 20, willFill);
+  updateRect('#mindFill', 200, 80, 20, mindFill);
+  updateRect('#bodyOrbFill', 113, 230, 20, bodyFill);
+  updateRect('#willFill', 287, 230, 20, willFill);
   updateRect('#bodyFill', 200, 180, 60, coreFill);
 
   const mindOrb = container.querySelector('#mindOrb');

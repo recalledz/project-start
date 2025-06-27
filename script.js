@@ -20,7 +20,7 @@ import {
 import {
   initStarChart
 } from "./starChart.js"; // optional star chart tab
-import { initPlayerLife, refreshPlayerLife } from "./playerLife.js";
+import { initSpeech, tickSpeech } from "./speech.js";
 import { Jobs, assignJob, getAvailableJobs, renderJobAssignments, renderJobCarousel } from "./jobs.js"; // job definitions
 import RateTracker from "./utils/rateTracker.js";
 import { formatNumber } from "./utils/numberFormat.js";
@@ -415,12 +415,8 @@ let deckViewBtn;
 let jokerViewBtn;
 let deckUpgradesViewBtn;
 let deckUpgradesContainer;
-let playerSkillsSubTabButton;
 let playerCoreSubTabButton;
-let playerUpgradesSubTabButton;
-let playerSkillsPanel;
 let playerCorePanel;
-let playerUpgradesPanel;
 let statsOverviewSubTabButton;
 let statsEconomySubTabButton;
 let statsOverviewContainer;
@@ -484,7 +480,6 @@ function setupTabHandlers() {
     {
       buttonSelector: '.playerTabButton',
       onClick: () => {
-        refreshPlayerLife();
         refreshCore();
         showTab(playerTab);
         setActiveTabButton(playerTabButton);
@@ -569,12 +564,8 @@ function initTabs() {
   deckUpgradesContainer = document.querySelector('.deckUpgradesContainer');
   jobsViewBtn = document.querySelector('.jobsViewBtn');
   jobsCarouselBtn = document.querySelector('.jobsCarouselBtn');
-  playerSkillsSubTabButton = document.querySelector(".playerSkillsSubTabButton");
   playerCoreSubTabButton = document.querySelector(".playerCoreSubTabButton");
-  playerUpgradesSubTabButton = document.querySelector('.playerUpgradesSubTabButton');
-  playerSkillsPanel = document.querySelector(".player-skills-panel");
   playerCorePanel = document.querySelector(".player-core-panel");
-  playerUpgradesPanel = document.querySelector('.player-upgrades-panel');
   statsOverviewSubTabButton = document.querySelector('.statsOverviewSubTabButton');
   statsEconomySubTabButton = document.querySelector('.statsEconomySubTabButton');
   statsOverviewContainer = document.getElementById('statsOverviewContainer');
@@ -624,32 +615,10 @@ function initTabs() {
         deckUpgradesContainer.style.display = 'flex';
       }
     });
-  if (playerSkillsSubTabButton)
-    playerSkillsSubTabButton.addEventListener("click", () => {
-      if (playerSkillsPanel) playerSkillsPanel.style.display = "flex";
-      if (playerCorePanel) playerCorePanel.style.display = "none";
-      if (playerUpgradesPanel) playerUpgradesPanel.style.display = "none";
-      playerSkillsSubTabButton.classList.add("active");
-      if (playerCoreSubTabButton) playerCoreSubTabButton.classList.remove("active");
-      if (playerUpgradesSubTabButton) playerUpgradesSubTabButton.classList.remove('active');
-    });
   if (playerCoreSubTabButton)
     playerCoreSubTabButton.addEventListener("click", () => {
-      if (playerSkillsPanel) playerSkillsPanel.style.display = "none";
       if (playerCorePanel) playerCorePanel.style.display = "flex";
-      if (playerUpgradesPanel) playerUpgradesPanel.style.display = "none";
       playerCoreSubTabButton.classList.add("active");
-      if (playerSkillsSubTabButton) playerSkillsSubTabButton.classList.remove("active");
-      if (playerUpgradesSubTabButton) playerUpgradesSubTabButton.classList.remove('active');
-    });
-  if (playerUpgradesSubTabButton)
-    playerUpgradesSubTabButton.addEventListener('click', () => {
-      if (playerSkillsPanel) playerSkillsPanel.style.display = 'none';
-      if (playerCorePanel) playerCorePanel.style.display = 'none';
-      if (playerUpgradesPanel) playerUpgradesPanel.style.display = 'flex';
-      playerUpgradesSubTabButton.classList.add('active');
-      if (playerCoreSubTabButton) playerCoreSubTabButton.classList.remove('active');
-      if (playerSkillsSubTabButton) playerSkillsSubTabButton.classList.remove('active');
     });
   if (statsOverviewSubTabButton)
     statsOverviewSubTabButton.addEventListener('click', () => {
@@ -954,8 +923,8 @@ document.addEventListener("DOMContentLoaded", () => {
   loadGame();
   initVignetteToggles();
   if (window.lucide) lucide.createIcons();
-  initPlayerLife({ getGameCash: () => cash, spendGameCash: spendCash });
   initCore();
+  initSpeech();
   window.addEventListener('core-mind-upgrade', () => {
     stats.maxMana += 10;
     updateManaBar();
@@ -2180,17 +2149,32 @@ function renderJokers() {
 }
 
 
-function showJokerTooltip(joker, x, y) {
+function showTooltip(html, x, y) {
   if (!tooltip) return;
-  tooltip.innerHTML = `<strong>${joker.name}</strong><br>${joker.description}<br>Mana Cost: ${joker.manaCost}`;
+  tooltip.innerHTML = html;
   tooltip.style.display = "block";
   tooltip.style.left = x + "px";
   tooltip.style.top = y + "px";
 }
 
+function hideTooltip() {
+  if (tooltip) tooltip.style.display = "none";
+}
+
+window.showTooltip = showTooltip;
+window.hideTooltip = hideTooltip;
+
+function showJokerTooltip(joker, x, y) {
+  showTooltip(
+    `<strong>${joker.name}</strong><br>${joker.description}<br>Mana Cost: ${joker.manaCost}`,
+    x,
+    y
+  );
+}
+
 document.addEventListener("click", e => {
   if (!e.target.closest(".joker-wrapper")) {
-    if (tooltip) tooltip.style.display = "none";
+    hideTooltip();
   }
 });
 
@@ -2718,17 +2702,18 @@ if (currentEnemy) {
     }
   }
 
-if (systems.manaUnlocked) {
-stats.mana = Math.min(
-stats.maxMana,
-stats.mana + (stats.manaRegen * deltaTime) / 1000
+  if (systems.manaUnlocked) {
+  stats.mana = Math.min(
+  stats.maxMana,
+  stats.mana + (stats.manaRegen * deltaTime) / 1000
 );
  updateManaBar();
 }
 
   // passive progress for bar upgrades
   tickBarProgress(deltaTime);
-requestAnimationFrame(gameLoop);
+  tickSpeech(deltaTime);
+  requestAnimationFrame(gameLoop);
 }
 
 //devtools
