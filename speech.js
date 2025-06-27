@@ -66,6 +66,7 @@ export function initSpeech() {
   if (!container) return;
   container.innerHTML = `
     <div class="speech-xp-bar"><div class="speech-xp-fill"></div></div>
+    <div id="speechLevel" class="speech-level"></div>
     <div class="speech-orbs">
       <div class="speech-orb" id="orbBody"><div class="orb-fill"></div></div>
       <div class="speech-orb" id="orbInsight"><div class="orb-fill"></div></div>
@@ -87,10 +88,32 @@ export function initSpeech() {
   });
   const castBtn = container.querySelector('#castPhraseBtn');
   castBtn.addEventListener('click', castPhrase);
+  castBtn.addEventListener('mouseenter', e => {
+    const wordsArr = speechState.slots.filter(Boolean);
+    if (wordsArr.length < 1) return;
+    const phrase = wordsArr.join(' ');
+    const def = phraseEffects[phrase];
+    if (!def) return;
+    const complexity = (def.complexity?.verb || 0) + (def.complexity?.target || 0);
+    const mastery = speechState.level;
+    const chance = ((mastery + 0.5) / (complexity + 100)) * 100;
+    window.showTooltip(`${chance.toFixed(1)}% chance`, e.pageX + 10, e.pageY + 10);
+  });
+  castBtn.addEventListener('mouseleave', window.hideTooltip);
   renderSlots();
   renderResources();
   renderGains();
   renderUpgrades();
+
+  container.querySelectorAll('.speech-orb').forEach(el => {
+    el.addEventListener('mouseenter', e => {
+      const id = e.currentTarget.id.replace('orb', '').toLowerCase();
+      const orb = speechState.orbs[id];
+      if (!orb) return;
+      window.showTooltip(`${id}: ${Math.floor(orb.current)}/${orb.max}`, e.pageX + 10, e.pageY + 10);
+    });
+    el.addEventListener('mouseleave', window.hideTooltip);
+  });
 }
 
 function onDrag(e) {
@@ -186,7 +209,11 @@ function renderPhraseInfo() {
         .join(', ')
     : 'None';
   const cd = def.cd ? def.cd / 1000 + 's' : '0s';
-  info.textContent = `Cost: ${cost} | Effect: ${effect} | CD: ${cd}`;
+  const complexity = (def.complexity?.verb || 0) + (def.complexity?.target || 0);
+  const mastery = speechState.level;
+  const chance = ((mastery + 0.5) / (complexity + 100)) * 100;
+  info.textContent =
+    `Cost: ${cost} | Effect: ${effect} | CD: ${cd} | Diff: ${complexity} | Chance: ${chance.toFixed(1)}%`;
   const cap = def.capacity || 0;
   const capDisplay = container.querySelector('#capacityDisplay');
   if (capDisplay) capDisplay.textContent = `Capacity: ${cap}/${speechState.capacity}`;
@@ -262,6 +289,8 @@ function renderXpBar() {
   const pct = Math.min(1, (speechState.xp - levelBase) / 10);
   fill.style.width = `${pct * 100}%`;
   bar.title = `Speech XP ${speechState.xp}/${levelBase + 10}`;
+  const levelEl = container.querySelector('#speechLevel');
+  if (levelEl) levelEl.textContent = `Speech Lv.${speechState.level}`;
 }
 
 function checkUnlocks() {

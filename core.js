@@ -60,7 +60,29 @@ const bodyPath = `M200 140
   progressText = container.querySelector("#coreProgressText");
   const mindOrb = container.querySelector('#mindOrb');
   mindOrb.addEventListener('click', onMindOrbClick);
+  mindOrb.addEventListener('mouseenter', e => {
+    window.showTooltip(`Mind: ${Math.floor(coreState.mind.xp)}/${coreState.mind.maxXP}`, e.pageX + 10, e.pageY + 10);
+  });
+  mindOrb.addEventListener('mouseleave', window.hideTooltip);
   meditateBtn.addEventListener('click', startMeditation);
+  meditateBtn.addEventListener('mouseenter', e => {
+    window.showTooltip('Begin or advance meditation', e.pageX + 10, e.pageY + 10);
+  });
+  meditateBtn.addEventListener('mouseleave', window.hideTooltip);
+  const bodyOrbEl = container.querySelector('#bodyOrb');
+  if (bodyOrbEl) {
+    bodyOrbEl.addEventListener('mouseenter', e => {
+      window.showTooltip(`Body: ${Math.floor(coreState.body.xp)}/${coreState.body.maxXP}`, e.pageX + 10, e.pageY + 10);
+    });
+    bodyOrbEl.addEventListener('mouseleave', window.hideTooltip);
+  }
+  const willOrbEl = container.querySelector('#willOrb');
+  if (willOrbEl) {
+    willOrbEl.addEventListener('mouseenter', e => {
+      window.showTooltip(`Will: ${Math.floor(coreState.will.xp)}/${coreState.will.maxXP}`, e.pageX + 10, e.pageY + 10);
+    });
+    willOrbEl.addEventListener('mouseleave', window.hideTooltip);
+  }
   renderCore();
 }
 

@@ -2149,17 +2149,32 @@ function renderJokers() {
 }
 
 
-function showJokerTooltip(joker, x, y) {
+function showTooltip(html, x, y) {
   if (!tooltip) return;
-  tooltip.innerHTML = `<strong>${joker.name}</strong><br>${joker.description}<br>Mana Cost: ${joker.manaCost}`;
+  tooltip.innerHTML = html;
   tooltip.style.display = "block";
   tooltip.style.left = x + "px";
   tooltip.style.top = y + "px";
 }
 
+function hideTooltip() {
+  if (tooltip) tooltip.style.display = "none";
+}
+
+window.showTooltip = showTooltip;
+window.hideTooltip = hideTooltip;
+
+function showJokerTooltip(joker, x, y) {
+  showTooltip(
+    `<strong>${joker.name}</strong><br>${joker.description}<br>Mana Cost: ${joker.manaCost}`,
+    x,
+    y
+  );
+}
+
 document.addEventListener("click", e => {
   if (!e.target.closest(".joker-wrapper")) {
-    if (tooltip) tooltip.style.display = "none";
+    hideTooltip();
   }
 });
 
