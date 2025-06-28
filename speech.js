@@ -147,11 +147,14 @@ function addWordXp(word, amt) {
 }
 
 let container;
+let pointerDrag = null;
 function attachWordListeners() {
   if (!container) return;
   container.querySelectorAll('.word-tile').forEach(t => {
     t.removeEventListener('dragstart', onDrag);
     t.addEventListener('dragstart', onDrag);
+    t.removeEventListener('pointerdown', onTilePointerDown);
+    t.addEventListener('pointerdown', onTilePointerDown);
   });
 }
 
@@ -258,6 +261,26 @@ function onDrop(e) {
   if (idx === 0 && type !== 'verb') return;
   speechState.slots[idx] = word;
   renderSlots();
+}
+
+function onTilePointerDown(e) {
+  e.preventDefault();
+  pointerDrag = { word: e.currentTarget.dataset.word, type: e.currentTarget.dataset.type };
+  window.addEventListener('pointerup', onTilePointerUp, { once: true });
+}
+
+function onTilePointerUp(e) {
+  if (!pointerDrag) return;
+  const el = document.elementFromPoint(e.clientX, e.clientY);
+  const slot = el && el.closest('.phrase-slot');
+  if (slot) {
+    const idx = Number(slot.dataset.index);
+    if (!(idx === 0 && pointerDrag.type !== 'verb')) {
+      speechState.slots[idx] = pointerDrag.word;
+      renderSlots();
+    }
+  }
+  pointerDrag = null;
 }
 
 function onSlotClick(e) {
