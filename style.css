@@ -2500,6 +2500,28 @@ body {
     justify-content: center;
 }
 
+.saved-phrases {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.saved-phrase-card {
+    display: flex;
+    flex-direction: column;
+    padding: 2px 4px;
+    background: #222;
+    border: 1px solid #555;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    cursor: pointer;
+}
+
+.saved-phrase-word {
+    line-height: 1;
+}
+
 .construct-panel {
     position: absolute;
     top: 0;

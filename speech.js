@@ -102,7 +102,8 @@ const wordData = {
   },
   targets: {
     Self: { capacity: 1 },
-    Form: { capacity: 2 }
+    Form: { capacity: 2 },
+    Mind: { capacity: 1 }
   },
   modifiers: {
     Inwardly: { capacity: 0, costDelta: -1, potency: 1.1, cdDelta: 0, complexity: 0.5 },
@@ -168,6 +169,10 @@ function buildPhraseDef(wordsArr) {
     result.complexity[cat.slice(0, -1)] += data.complexity || 0;
     if (data.repeat) result.repeat = true;
   });
+  const hasVerb = wordsArr.some(w => getWordCategory(w) === 'verbs');
+  if (hasVerb && wordsArr.includes('Mind')) {
+    result.create.thought = (result.create.thought || 0) + 1;
+  }
   if (result.cost.insight !== undefined) {
     result.cost.insight = Math.max(1, result.cost.insight);
   }
@@ -256,6 +261,7 @@ export function initSpeech() {
         </div>
         <div id="phraseInfo" class="phrase-info"></div>
       </div>
+      <div id="savedPhraseCards" class="saved-phrases"></div>
     </div>
   `;
   if (window.lucide) lucide.createIcons();
@@ -317,6 +323,7 @@ export function initSpeech() {
   renderGains();
   renderUpgrades();
   renderHotbar();
+  renderSavedPhraseCards();
   checkUnlocks();
 }
 
@@ -399,8 +406,19 @@ function renderLists() {
   attachWordListeners();
 }
 
+function ensureSlotCount() {
+  const minSlots = speechState.capacity + 1;
+  while (speechState.slots.length < minSlots) {
+    speechState.slots.push(null);
+  }
+  if (!speechState.slots.includes(null)) {
+    speechState.slots.push(null);
+  }
+}
+
 function createSlots() {
   if (!container) return;
+  ensureSlotCount();
   const slotContainer = container.querySelector('#phraseSlots');
   slotContainer.innerHTML = '';
   speechState.slots.forEach((_, idx) => {
@@ -436,6 +454,7 @@ function renderOrbs() {
 
 function renderSlots() {
   if (!container) return;
+  ensureSlotCount();
   createSlots();
   container.querySelectorAll('.phrase-slot').forEach(slot => {
     const idx = Number(slot.dataset.index);
@@ -558,6 +577,7 @@ function castPhrase(phraseArg) {
         words.modifiers.push('Inwardly');
         wordState.modifiers['Inwardly'] = { level: 1, xp: 0 };
         addLog('Modifier unlocked: Inwardly', 'info');
+        glowConstructToggle();
         renderLists();
       }
     }
@@ -568,6 +588,7 @@ function castPhrase(phraseArg) {
       words.modifiers.push('Sharply');
       wordState.modifiers['Sharply'] = { level: 1, xp: 0 };
       addLog('Modifier unlocked: Sharply', 'info');
+      glowConstructToggle();
       renderLists();
     }
     if (speechState.lastPhrase === phrase) {
@@ -581,6 +602,7 @@ function castPhrase(phraseArg) {
       words.modifiers.push('Persistently');
       wordState.modifiers['Persistently'] = { level: 1, xp: 0 };
       addLog('Modifier unlocked: Persistently', 'info');
+      glowConstructToggle();
       renderLists();
     }
     if (wordsArr.includes('Persistently')) {
@@ -628,6 +650,13 @@ function toggleConstructPanel(forceOpen) {
   }
 }
 
+function glowConstructToggle() {
+  const toggle = container.querySelector('#constructToggle');
+  if (!toggle) return;
+  toggle.classList.add('glow-notify');
+  setTimeout(() => toggle.classList.remove('glow-notify'), 3000);
+}
+
 function savePhrase() {
   const wordsArr = speechState.slots.filter(Boolean);
   if (wordsArr.length < 2) return; // need verb + target
@@ -638,6 +667,7 @@ function savePhrase() {
   if ((def.capacity || 0) > speechState.capacity) return;
   speechState.savedPhrases.push(phrase);
   renderHotbar();
+  renderSavedPhraseCards();
 }
 
 function renderHotbar() {
@@ -650,6 +680,24 @@ function renderHotbar() {
     btn.textContent = p;
     btn.addEventListener('click', () => castPhrase(p));
     bar.appendChild(btn);
+  });
+}
+
+function renderSavedPhraseCards() {
+  const cont = container.querySelector('#savedPhraseCards');
+  if (!cont) return;
+  cont.innerHTML = '';
+  speechState.savedPhrases.forEach(p => {
+    const card = document.createElement('div');
+    card.className = 'saved-phrase-card';
+    p.split(' ').forEach(w => {
+      const line = document.createElement('div');
+      line.className = 'saved-phrase-word';
+      line.textContent = w;
+      card.appendChild(line);
+    });
+    card.addEventListener('click', () => castPhrase(p));
+    cont.appendChild(card);
   });
 }
 
@@ -695,11 +743,11 @@ function addSpeechXP(amt) {
   if (speechState.level !== oldLevel) {
     if (!words.verbs.includes('Murmur')) {
       words.verbs.push('Murmur');
+      glowConstructToggle();
+      renderLists();
+    } else {
+      renderLists();
     }
-    if (speechState.level >= 10 && speechState.slots.length < 3) {
-      speechState.slots.push(null);
-    }
-    renderLists();
     renderSlots();
     checkUnlocks();
   }
@@ -727,12 +775,15 @@ function checkUnlocks() {
     toggleConstructPanel(true);
     addLog('You feel your words press outward. You may now construct meaning.', 'info');
   }
+  if (speechState.level >= 2 && !words.targets.includes('Mind')) {
+    words.targets.push('Mind');
+    wordState.targets['Mind'] = { level: 1, xp: 0 };
+    addLog('Your awareness turns inward. Target "Mind" unlocked.', 'info');
+    glowConstructToggle();
+    renderLists();
+  }
   if (speechState.level >= 3) {
     speechState.capacity = Math.max(speechState.capacity, 2);
-  }
-  if (speechState.level >= 4 && speechState.slots.length < 3) {
-    speechState.slots.push(null);
-    renderSlots();
   }
   const thought = speechState.resources.thought.current;
   if (!speechState.formUnlocked && Math.floor(thought + 1e-6) >= FORM_UNLOCK_THOUGHT_REQ) {
@@ -742,8 +793,8 @@ function checkUnlocks() {
       wordState.targets['Form'] = { level: 1, xp: 0 };
     }
     speechState.resources.structure.unlocked = true;
-    if (speechState.slots.length < 2) speechState.slots.push(null);
     addLog('A concept stabilizes… Form is now available.', 'info');
+    glowConstructToggle();
     renderLists();
     renderResources();
     renderSlots();
@@ -824,6 +875,7 @@ function purchaseUpgrade(name) {
     speechState.masteryBonus += 0.5;
   } else if (name === 'capacityBoost') {
     speechState.capacity += 2;
+    renderSlots();
   } else if (name === 'expandMind') {
     speechState.orbs.insight.max += 10;
   }
