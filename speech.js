@@ -263,9 +263,18 @@ export function initSpeech() {
   container.innerHTML = `
     <h3 class="section-title">Core Orbs</h3>
     <div class="speech-orbs speech-tab-orbs">
-      <div id="orbInsight" class="speech-orb"><div class="orb-fill"></div></div>
-      <div id="orbBody" class="speech-orb" style="display:none"><div class="orb-fill"></div></div>
-      <div id="orbWill" class="speech-orb" style="display:none"><div class="orb-fill"></div></div>
+      <div id="orbInsightContainer" class="orb-container">
+        <div id="orbInsight" class="speech-orb"><div class="orb-fill"></div></div>
+        <div id="orbInsightValue" class="orb-value"></div>
+      </div>
+      <div id="orbBodyContainer" class="orb-container" style="display:none">
+        <div id="orbBody" class="speech-orb"><div class="orb-fill"></div></div>
+        <div id="orbBodyValue" class="orb-value"></div>
+      </div>
+      <div id="orbWillContainer" class="orb-container" style="display:none">
+        <div id="orbWill" class="speech-orb"><div class="orb-fill"></div></div>
+        <div id="orbWillValue" class="orb-value"></div>
+      </div>
     </div>
     <h3 class="section-title">Speech Progression</h3>
     <div class="speech-xp-container">
@@ -489,14 +498,16 @@ function renderOrbs() {
         el.title = `${Math.floor(orb.current)}/${orb.max} (${speechState.gains[id.replace('orb','').toLowerCase()].toFixed(1)}/sec)`;
         el.classList.toggle('full', orb.current >= orb.max);
       }
+      const label = container.querySelector(`#${id}Value`);
+      if (label) label.textContent = `${Math.floor(orb.current)}/${orb.max}`;
     };
     update('orbBody', speechState.orbs.body);
     update('orbInsight', speechState.orbs.insight);
     update('orbWill', speechState.orbs.will);
-    const bodyEl = container.querySelector('#orbBody');
-    if (bodyEl) bodyEl.style.display = speechState.orbs.body.current >= 1 ? 'block' : 'none';
-    const willEl = container.querySelector('#orbWill');
-    if (willEl) willEl.style.display = speechState.orbs.will.current >= 1 ? 'block' : 'none';
+    const bodyEl = container.querySelector('#orbBodyContainer');
+    if (bodyEl) bodyEl.style.display = speechState.orbs.body.current >= 1 ? 'flex' : 'none';
+    const willEl = container.querySelector('#orbWillContainer');
+    if (willEl) willEl.style.display = speechState.orbs.will.current >= 1 ? 'flex' : 'none';
   }
   window.dispatchEvent(new CustomEvent('orbs-changed'));
 }
