@@ -2354,6 +2354,9 @@ body {
 .capacity-display {
     font-size: 0.8rem;
 }
+.capacity-display.exceeded {
+    color: #f66;
+}
 
 .speech-orbs {
     display: flex;
@@ -2507,19 +2510,44 @@ body {
     justify-content: center;
 }
 
-.saved-phrase-card {
+.phrase-card {
     display: flex;
     flex-direction: column;
-    padding: 2px 4px;
-    background: #222;
+    min-height: 64px;
+    padding: 4px 8px;
     border: 1px solid #555;
     border-radius: 4px;
-    font-size: 0.7rem;
+    font-size: 1.2rem;
     cursor: pointer;
+    background: #222;
+}
+.phrase-card.active {
+    box-shadow: 0 0 6px #ffd27d;
 }
 
-.saved-phrase-word {
+.phrase-word {
     line-height: 1;
+    display: block;
+}
+
+.memory-slots {
+    display: flex;
+    gap: 4px;
+    justify-content: center;
+    margin-bottom: 4px;
+}
+
+.memory-slot {
+    width: 10px;
+    height: 10px;
+    border: 1px solid #555;
+    background: #222;
+    border-radius: 2px;
+}
+
+.memory-slot.filled {
+    background: #88f;
+    box-shadow: 0 0 4px #88f;
 }
 
 .construct-panel {
@@ -2566,6 +2594,16 @@ body {
     z-index: 11;
 }
 
+.construct-top, .construct-bottom {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.construct-bottom {
+    margin-top: auto;
+}
+
 .speech-panel.construct-mode .speech-orbs {
     position: absolute;
     right: 8px;
@@ -2576,6 +2614,7 @@ body {
 
 .hotbar-phrase {
     font-size: 0.75rem;
+    min-height: 40px;
 }
 
 .cast-button {
@@ -2640,8 +2679,12 @@ body {
     left: 0;
     height: 100%;
     width: 0%;
-    background: #789;
 }
+.resource-fill.insight { background: #88f; }
+.resource-fill.thought { background: #4466aa; }
+.resource-fill.structure { background: #a97b5d; }
+.resource-fill.body { background: #f66; }
+.resource-fill.will { background: #a060ff; }
 
 .resource-text {
     font-size: 0.7rem;
