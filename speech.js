@@ -33,12 +33,18 @@ export const speechState = {
   level: 1,
   formUnlocked: false,
   failCount: 0,
-  masteryBonus: 0
+  masteryBonus: 0,
+  modifierUnlocks: { Inwardly: false, Sharply: false, Persistently: false },
+  selfCastCount: 0,
+  lastPhrase: '',
+  repeatCount: 0,
+  highCostPhrases: new Set()
 };
 
 const words = {
   verbs: ['Murmur'],
-  targets: []
+  targets: ['Self'],
+  modifiers: []
 };
 
 const resourceIcons = {
@@ -84,7 +90,8 @@ function formatCost(cost) {
 
 export const wordState = {
   verbs: { Murmur: { level: 1, xp: 0 } },
-  targets: {}
+  targets: { Self: { level: 1, xp: 0 } },
+  modifiers: {}
 };
 
 const wordData = {
@@ -92,7 +99,13 @@ const wordData = {
     Murmur: { capacity: 1, cost: { insight: 5 }, power: 1, cd: 0 }
   },
   targets: {
+    Self: { capacity: 1 },
     Form: { capacity: 2 }
+  },
+  modifiers: {
+    Inwardly: { capacity: 0, costDelta: -1, potency: 1.1, cdDelta: 0, complexity: 0.5 },
+    Sharply: { capacity: 1, costDelta: 2, potency: 2, cdDelta: 2000, complexity: 1.5 },
+    Persistently: { capacity: 1, costDelta: 1, potency: 1, cdDelta: 1000, complexity: 1.0, repeat: true }
   }
 };
 
@@ -116,9 +129,53 @@ const phraseEffects = {
   }
 };
 
+function buildPhraseDef(wordsArr) {
+  if (!wordsArr.length) return null;
+  const result = {
+    cost: {},
+    create: {},
+    cd: 0,
+    xp: 1,
+    capacity: 0,
+    complexity: { verb: 0, target: 0, modifier: 0 },
+    repeat: false,
+    potency: 1
+  };
+  wordsArr.forEach(w => {
+    const cat = getWordCategory(w);
+    if (!cat) return;
+    const data = wordData[cat][w];
+    if (!data) return;
+    result.capacity += data.capacity || 0;
+    if (data.cost) {
+      for (const [k, v] of Object.entries(data.cost)) {
+        result.cost[k] = (result.cost[k] || 0) + v;
+      }
+    }
+    if (data.costDelta) {
+      result.cost.insight = (result.cost.insight || 0) + data.costDelta;
+    }
+    if (data.create) {
+      for (const [k, v] of Object.entries(data.create)) {
+        result.create[k] = (result.create[k] || 0) + v;
+      }
+    }
+    result.cd += data.cd || 0;
+    if (data.cdDelta) result.cd += data.cdDelta;
+    if (data.potency) result.potency *= data.potency;
+    result.complexity[cat.slice(0, -1)] += data.complexity || 0;
+    if (data.repeat) result.repeat = true;
+  });
+  if (result.cost.insight !== undefined) {
+    result.cost.insight = Math.max(1, result.cost.insight);
+  }
+  return result;
+}
+
 function getWordCategory(word) {
   if (wordData.verbs[word]) return 'verbs';
   if (wordData.targets[word]) return 'targets';
+  if (wordData.modifiers[word]) return 'modifiers';
   return null;
 }
 
@@ -186,6 +243,7 @@ export function initSpeech() {
       </div>
       <div class="word-list" id="verbList"></div>
       <div class="word-list" id="targetList" style="display:none"></div>
+      <div class="word-list" id="modifierList" style="display:none"></div>
       <div class="phrase-slots" id="phraseSlots"></div>
       <div id="capacityDisplay" class="capacity-display"></div>
       <div class="cast-container">
@@ -208,10 +266,9 @@ export function initSpeech() {
   castBtn.addEventListener('mouseenter', e => {
     const wordsArr = speechState.slots.filter(Boolean);
     if (wordsArr.length < 1) return;
-    const phrase = wordsArr.join(' ');
-    const def = phraseEffects[phrase];
+    const def = buildPhraseDef(wordsArr);
     if (!def) return;
-    const complexity = (def.complexity?.verb || 0) + (def.complexity?.target || 0);
+    const complexity = (def.complexity.verb || 0) + (def.complexity.target || 0) + (def.complexity.modifier || 0);
     const mastery = speechState.level + speechState.masteryBonus;
     const difficulty = complexity;
     const chance = 0.95 / (1 + Math.exp(difficulty - mastery - 0.2)) * 100;
@@ -270,7 +327,7 @@ function onDrop(e) {
   const type = e.dataTransfer.getData('text/type');
   const word = e.dataTransfer.getData('text/word');
   const idx = Number(e.currentTarget.dataset.index);
-  if (idx === 0 && type !== 'verb') return;
+  if ((idx === 0 && type !== 'verb') || (idx === 1 && type !== 'target') || (idx > 1 && type !== 'modifier')) return;
   speechState.slots[idx] = word;
   renderSlots();
 }
@@ -287,7 +344,7 @@ function onTilePointerUp(e) {
   const slot = el && el.closest('.phrase-slot');
   if (slot) {
     const idx = Number(slot.dataset.index);
-    if (!(idx === 0 && pointerDrag.type !== 'verb')) {
+    if (!((idx === 0 && pointerDrag.type !== 'verb') || (idx === 1 && pointerDrag.type !== 'target') || (idx > 1 && pointerDrag.type !== 'modifier'))) {
       speechState.slots[idx] = pointerDrag.word;
       renderSlots();
     }
@@ -330,6 +387,12 @@ function renderLists() {
     targetList.innerHTML = '';
     words.targets.forEach(w => targetList.appendChild(makeTile(w, 'target')));
     targetList.style.display = words.targets.length ? 'flex' : 'none';
+  }
+  const modList = container.querySelector('#modifierList');
+  if (modList) {
+    modList.innerHTML = '';
+    words.modifiers.forEach(w => modList.appendChild(makeTile(w, 'modifier')));
+    modList.style.display = words.modifiers.length ? 'flex' : 'none';
   }
   attachWordListeners();
 }
@@ -375,7 +438,8 @@ function renderSlots() {
   container.querySelectorAll('.phrase-slot').forEach(slot => {
     const idx = Number(slot.dataset.index);
     slot.classList.toggle('verb-slot', idx === 0);
-    slot.classList.toggle('target-slot', idx > 0);
+    slot.classList.toggle('target-slot', idx === 1);
+    slot.classList.toggle('modifier-slot', idx > 1);
     const word = speechState.slots[idx];
     slot.innerHTML = '';
     if (word) {
@@ -408,13 +472,12 @@ function renderPhraseInfo() {
     info.textContent = '';
     return;
   }
-  const phrase = wordsArr.join(' ');
-  const def = phraseEffects[phrase];
+  const def = buildPhraseDef(wordsArr);
   if (!def) {
     info.textContent = '';
     return;
   }
-  const potMult = wordsArr.reduce((a, w) => a + getWordPotency(w), 0) / wordsArr.length;
+  const potMult = (wordsArr.reduce((a, w) => a + getWordPotency(w), 0) / wordsArr.length) * def.potency;
   const cost = Object.entries(def.cost)
     .map(([k, v]) => `${Math.ceil(v * potMult)} ${k}`)
     .join(', ');
@@ -424,7 +487,7 @@ function renderPhraseInfo() {
         .join(', ')
     : 'None';
   const cd = def.cd ? def.cd / 1000 + 's' : '0s';
-  const complexity = (def.complexity?.verb || 0) + (def.complexity?.target || 0);
+  const complexity = (def.complexity.verb || 0) + (def.complexity.target || 0) + (def.complexity.modifier || 0);
   const mastery = speechState.level + speechState.masteryBonus;
   const difficulty = complexity;
   const chance = 0.95 / (1 + Math.exp(difficulty - mastery - 0.2)) * 100;
@@ -448,7 +511,7 @@ function castPhrase(phraseArg) {
   const wordsArr = phraseArg ? phraseArg.split(' ') : speechState.slots.filter(Boolean);
   if (wordsArr.length < 1) return;
   const phrase = wordsArr.join(' ');
-  const def = phraseEffects[phrase];
+  const def = buildPhraseDef(wordsArr);
   if (!def) return;
   for (const orb of Object.values(speechState.orbs)) {
     if (orb.current < 0) return;
@@ -458,11 +521,11 @@ function castPhrase(phraseArg) {
   }
   if (speechState.cooldowns[phrase] && Date.now() < speechState.cooldowns[phrase]) return;
   if ((def.capacity || 0) > speechState.capacity) return;
-  const potMult = wordsArr.reduce((a, w) => a + getWordPotency(w), 0) / wordsArr.length;
+  const potMult = (wordsArr.reduce((a, w) => a + getWordPotency(w), 0) / wordsArr.length) * def.potency;
   for (const [orb, cost] of Object.entries(def.cost)) {
     if (speechState.orbs[orb].current < cost * potMult) return;
   }
-  const complexity = (def.complexity?.verb || 0) + (def.complexity?.target || 0);
+  const complexity = (def.complexity.verb || 0) + (def.complexity.target || 0) + (def.complexity.modifier || 0);
   const mastery = speechState.level + speechState.masteryBonus;
   const difficulty = complexity;
   const chance = 0.95 / (1 + Math.exp(difficulty - mastery - 0.2));
@@ -486,6 +549,41 @@ function castPhrase(phraseArg) {
     wordsArr.forEach(w => addWordXp(w, def.xp || 1));
     if (def.xp) addSpeechXP(def.xp);
     showPhraseCloud(phrase);
+    if (wordsArr.includes('Self')) {
+      speechState.selfCastCount += 1;
+      if (!speechState.modifierUnlocks.Inwardly && speechState.selfCastCount >= 3) {
+        speechState.modifierUnlocks.Inwardly = true;
+        words.modifiers.push('Inwardly');
+        wordState.modifiers['Inwardly'] = { level: 1, xp: 0 };
+        addLog('Modifier unlocked: Inwardly', 'info');
+        renderLists();
+      }
+    }
+    const totalCost = Object.values(def.cost).reduce((a, v) => a + v, 0);
+    if (totalCost >= 6) speechState.highCostPhrases.add(phrase);
+    if (!speechState.modifierUnlocks.Sharply && speechState.highCostPhrases.size >= 3) {
+      speechState.modifierUnlocks.Sharply = true;
+      words.modifiers.push('Sharply');
+      wordState.modifiers['Sharply'] = { level: 1, xp: 0 };
+      addLog('Modifier unlocked: Sharply', 'info');
+      renderLists();
+    }
+    if (speechState.lastPhrase === phrase) {
+      speechState.repeatCount += 1;
+    } else {
+      speechState.repeatCount = 1;
+    }
+    speechState.lastPhrase = phrase;
+    if (!speechState.modifierUnlocks.Persistently && speechState.repeatCount >= 3) {
+      speechState.modifierUnlocks.Persistently = true;
+      words.modifiers.push('Persistently');
+      wordState.modifiers['Persistently'] = { level: 1, xp: 0 };
+      addLog('Modifier unlocked: Persistently', 'info');
+      renderLists();
+    }
+    if (wordsArr.includes('Persistently')) {
+      setTimeout(() => castPhrase(phrase), 5000);
+    }
   } else {
     speechState.failCount += 1;
     if (!speechState.upgrades.vocalMaturity.unlocked && speechState.failCount >= 5) {
@@ -533,7 +631,7 @@ function savePhrase() {
   if (wordsArr.length < 2) return; // need verb + target
   const phrase = wordsArr.join(' ');
   if (speechState.savedPhrases.includes(phrase)) return;
-  const def = phraseEffects[phrase];
+  const def = buildPhraseDef(wordsArr);
   if (!def) return;
   if ((def.capacity || 0) > speechState.capacity) return;
   speechState.savedPhrases.push(phrase);
@@ -566,7 +664,7 @@ function updateCastCooldown() {
     return;
   }
   const phrase = wordsArr.join(' ');
-  const def = phraseEffects[phrase];
+  const def = buildPhraseDef(wordsArr);
   if (!def) return;
   const cdEnd = speechState.cooldowns[phrase];
   if (cdEnd && Date.now() < cdEnd) {

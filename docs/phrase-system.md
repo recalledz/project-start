@@ -70,6 +70,14 @@ This document outlines the updated rules for constructing phrases in the Codex g
 * Effect: +3 Structure with faster casting
 * Cooldown: 2s
 
+## Modifier Words
+
+| Modifier | Effect | Orb Cost | Cooldown | Capacity | Potency | Complexity | Unlock Condition |
+| -------- | ------ | -------- | -------- | -------- | ------- | ---------- | ---------------- |
+| Inwardly | Self-target only; small focus boost | −1 total (min 1) | No change | +0 | ×1.1 | +0.5 | Cast any phrase with Self as the target 3 times |
+| Sharply | Doubles output | +2 total | +2s | +1 | ×2 | +1.5 | Cast 3 different phrases with total orb cost ≥ 6 |
+| Persistently | Repeats once after 5 seconds | +1 total | +1s | +1 | ×1 | +1.0 | Cast the same phrase 3 times in a row |
+
 ## 7. Speech Level Scaling
 
 | Level | Unlock                              |

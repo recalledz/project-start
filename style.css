@@ -2418,6 +2418,10 @@ body {
     background: #322;
     border-color: #755;
 }
+.word-tile.modifier {
+    background: #232;
+    border-color: #575;
+}
 
 .phrase-slots {
     display: flex;
@@ -2463,6 +2467,9 @@ body {
 }
 .phrase-slot.target-slot {
     background: rgba(51,34,34,0.4);
+}
+.phrase-slot.modifier-slot {
+    background: rgba(34,51,34,0.4);
 }
 .phrase-slot.filled {
     cursor: pointer;
