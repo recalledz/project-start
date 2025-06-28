@@ -2181,7 +2181,7 @@ body {
 .player-speech-panel {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: stretch;
     gap: 6px;
     flex: 1;
 }
@@ -2312,6 +2312,9 @@ body {
     align-items: center;
     margin-top: 10px;
     position: relative; /* allow floating phrase clouds */
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
 }
 
 .speech-xp-container {
@@ -2404,6 +2407,7 @@ body {
     border-radius: 4px;
     cursor: grab;
     user-select: none;
+    touch-action: none;
     font-size: 0.8rem;
 }
 .word-tile.verb {
@@ -2503,7 +2507,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 6px;
-    transform: translateX(-100%);
+    transform: translateX(100%);
     opacity: 0;
     transition: transform 0.3s ease-out, opacity 0.3s ease-out;
     z-index: 10;
@@ -2516,6 +2520,21 @@ body {
 
 .construct-panel.close-right {
     transform: translateX(100%);
+}
+
+.construct-toggle {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+    background: #222;
+    border: 1px solid #555;
+    border-right: none;
+    border-radius: 6px 0 0 6px;
+    padding: 4px 6px;
+    cursor: pointer;
+    user-select: none;
+    z-index: 11;
 }
 
 .speech-panel.construct-mode .speech-orbs {

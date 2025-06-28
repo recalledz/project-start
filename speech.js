@@ -176,8 +176,8 @@ export function initSpeech() {
     </div>
     <div class="murmur-controls">
       <button id="murmurBtn" class="cast-button">Murmur</button>
-      <button id="constructBtn" class="cast-button" style="display:none">Construct</button>
     </div>
+    <div id="constructToggle" class="construct-toggle" style="display:none">❮</div>
     <div id="phraseHotbar" class="phrase-hotbar"></div>
     <div id="constructPanel" class="construct-panel">
       <div class="construct-header">
@@ -222,8 +222,20 @@ export function initSpeech() {
   if (saveBtn) saveBtn.addEventListener('click', savePhrase);
   const murmurBtn = container.querySelector('#murmurBtn');
   if (murmurBtn) murmurBtn.addEventListener('click', castMurmur);
-  const constructBtn = container.querySelector('#constructBtn');
-  if (constructBtn) constructBtn.addEventListener('click', toggleConstructPanel);
+  const constructToggle = container.querySelector('#constructToggle');
+  if (constructToggle) {
+    constructToggle.addEventListener('click', () => toggleConstructPanel());
+    constructToggle.addEventListener('pointerdown', e => {
+      const start = e.clientX;
+      function up(ev) {
+        const diff = start - ev.clientX;
+        if (diff > 30) toggleConstructPanel(true);
+        if (diff < -30) toggleConstructPanel(false);
+        window.removeEventListener('pointerup', up);
+      }
+      window.addEventListener('pointerup', up);
+    });
+  }
   const closeBtn = container.querySelector('#closeConstructBtn');
   if (closeBtn) closeBtn.addEventListener('click', toggleConstructPanel);
   const panel = container.querySelector('#constructPanel');
@@ -498,6 +510,7 @@ function castMurmur() {
 
 function toggleConstructPanel(forceOpen) {
   const panel = container.querySelector('#constructPanel');
+  const toggle = container.querySelector('#constructToggle');
   if (!panel) return;
   const isOpen = panel.classList.contains('open');
   const shouldOpen = typeof forceOpen === 'boolean' ? forceOpen : !isOpen;
@@ -505,10 +518,12 @@ function toggleConstructPanel(forceOpen) {
     panel.classList.remove('close-right');
     panel.classList.add('open');
     container.classList.add('construct-mode');
+    if (toggle) toggle.textContent = '❯';
   } else {
     panel.classList.remove('open');
     panel.classList.add('close-right');
     container.classList.remove('construct-mode');
+    if (toggle) toggle.textContent = '❮';
     panel.addEventListener('transitionend', () => panel.classList.remove('close-right'), { once: true });
   }
 }
@@ -607,8 +622,9 @@ function renderXpBar() {
 function checkUnlocks() {
   if (!speechState.constructUnlocked && speechState.level >= 2) {
     speechState.constructUnlocked = true;
-    const btn = container.querySelector('#constructBtn');
-    if (btn) btn.style.display = 'inline-block';
+    const toggle = container.querySelector('#constructToggle');
+    if (toggle) toggle.style.display = 'block';
+    toggleConstructPanel(true);
     addLog('You feel your words press outward. You may now construct meaning.', 'info');
   }
   if (speechState.level >= 3) {
