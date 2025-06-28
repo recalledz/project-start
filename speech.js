@@ -27,6 +27,8 @@ export const speechState = {
   capacity: 1,
   slots: [null],
   cooldowns: {},
+  constructUnlocked: false,
+  savedPhrases: [],
   xp: 0,
   level: 1,
   formUnlocked: false,
@@ -97,7 +99,8 @@ const wordData = {
 const phraseEffects = {
   Murmur: {
     cost: { insight: 5 },
-    create: { thought: 1 },
+    // Murmur simply grants Speech XP and has no direct effect
+    create: null,
     cd: 0,
     xp: 1,
     capacity: 1,
@@ -168,18 +171,28 @@ export function initSpeech() {
       <div class="speech-xp-bar"><div class="speech-xp-fill"></div></div>
       <div id="speechLevel" class="speech-level"></div>
     </div>
-
-    <h3 class="section-title">Phrase Builder</h3>
-    <div class="word-list" id="verbList"></div>
-    <div class="word-list" id="targetList" style="display:none"></div>
-    <div class="phrase-slots" id="phraseSlots"></div>
-    <div id="capacityDisplay" class="capacity-display"></div>
-    <div class="cast-container">
-      <div class="cast-wrapper">
-        <button id="castPhraseBtn" class="cast-button"><span>Cast</span><div class="cooldown-overlay" style="--cooldown:0; display:none"></div></button>
-        <div id="castCooldownCircle" class="cast-cooldown" style="display:none"><div class="cooldown-overlay" style="--cooldown:0"></div></div>
+    <div class="murmur-controls">
+      <button id="murmurBtn" class="cast-button">Murmur</button>
+      <button id="constructBtn" class="cast-button" style="display:none">Construct</button>
+    </div>
+    <div id="phraseHotbar" class="phrase-hotbar"></div>
+    <div id="constructPanel" class="construct-panel">
+      <div class="construct-header">
+        <h3 class="section-title">Construct Reality</h3>
+        <button id="closeConstructBtn" class="cast-button">❌</button>
       </div>
-      <div id="phraseInfo" class="phrase-info"></div>
+      <div class="word-list" id="verbList"></div>
+      <div class="word-list" id="targetList" style="display:none"></div>
+      <div class="phrase-slots" id="phraseSlots"></div>
+      <div id="capacityDisplay" class="capacity-display"></div>
+      <div class="cast-container">
+        <div class="cast-wrapper">
+          <button id="castPhraseBtn" class="cast-button"><span>Cast</span><div class="cooldown-overlay" style="--cooldown:0; display:none"></div></button>
+          <button id="savePhraseBtn" class="cast-button">Save</button>
+          <div id="castCooldownCircle" class="cast-cooldown" style="display:none"><div class="cooldown-overlay" style="--cooldown:0"></div></div>
+        </div>
+        <div id="phraseInfo" class="phrase-info"></div>
+      </div>
     </div>
   `;
   if (window.lucide) lucide.createIcons();
@@ -202,11 +215,21 @@ export function initSpeech() {
     window.showTooltip(`${chance.toFixed(1)}% chance`, e.pageX + 10, e.pageY + 10);
   });
   castBtn.addEventListener('mouseleave', window.hideTooltip);
+  const saveBtn = container.querySelector('#savePhraseBtn');
+  if (saveBtn) saveBtn.addEventListener('click', savePhrase);
+  const murmurBtn = container.querySelector('#murmurBtn');
+  if (murmurBtn) murmurBtn.addEventListener('click', castMurmur);
+  const constructBtn = container.querySelector('#constructBtn');
+  if (constructBtn) constructBtn.addEventListener('click', toggleConstructPanel);
+  const closeBtn = container.querySelector('#closeConstructBtn');
+  if (closeBtn) closeBtn.addEventListener('click', toggleConstructPanel);
   renderSlots();
   updateCastCooldown();
   renderResources();
   renderGains();
   renderUpgrades();
+  renderHotbar();
+  checkUnlocks();
 }
 
 function onDrag(e) {
@@ -372,8 +395,8 @@ function renderPhraseInfo() {
   if (capDisplay) capDisplay.textContent = `Capacity: ${cap}/${speechState.capacity}`;
 }
 
-function castPhrase() {
-  const wordsArr = speechState.slots.filter(Boolean);
+function castPhrase(phraseArg) {
+  const wordsArr = phraseArg ? phraseArg.split(' ') : speechState.slots.filter(Boolean);
   if (wordsArr.length < 1) return;
   const phrase = wordsArr.join(' ');
   const def = phraseEffects[phrase];
@@ -431,6 +454,42 @@ function castPhrase() {
   checkUnlocks();
 }
 
+function castMurmur() {
+  castPhrase('Murmur');
+  updateCastCooldown();
+}
+
+function toggleConstructPanel() {
+  const panel = container.querySelector('#constructPanel');
+  if (!panel) return;
+  const open = panel.classList.toggle('open');
+  container.classList.toggle('construct-mode', open);
+}
+
+function savePhrase() {
+  const wordsArr = speechState.slots.filter(Boolean);
+  if (wordsArr.length < 2) return; // need verb + target
+  const phrase = wordsArr.join(' ');
+  if (speechState.savedPhrases.includes(phrase)) return;
+  const def = phraseEffects[phrase];
+  if (!def) return;
+  if ((def.capacity || 0) > speechState.capacity) return;
+  speechState.savedPhrases.push(phrase);
+  renderHotbar();
+}
+
+function renderHotbar() {
+  const bar = container.querySelector('#phraseHotbar');
+  if (!bar) return;
+  bar.innerHTML = '';
+  speechState.savedPhrases.forEach(p => {
+    const btn = document.createElement('button');
+    btn.className = 'cast-button hotbar-phrase';
+    btn.textContent = p;
+    btn.addEventListener('click', () => castPhrase(p));
+    bar.appendChild(btn);
+  });
+}
 
 function updateCastCooldown() {
   const castBtn = container.querySelector('#castPhraseBtn');
@@ -480,6 +539,7 @@ function addSpeechXP(amt) {
     }
     renderLists();
     renderSlots();
+    checkUnlocks();
   }
   renderXpBar();
 }
@@ -498,6 +558,19 @@ function renderXpBar() {
 }
 
 function checkUnlocks() {
+  if (!speechState.constructUnlocked && speechState.level >= 2) {
+    speechState.constructUnlocked = true;
+    const btn = container.querySelector('#constructBtn');
+    if (btn) btn.style.display = 'inline-block';
+    addLog('You feel your words press outward. You may now construct meaning.', 'info');
+  }
+  if (speechState.level >= 3) {
+    speechState.capacity = Math.max(speechState.capacity, 2);
+  }
+  if (speechState.level >= 4 && speechState.slots.length < 3) {
+    speechState.slots.push(null);
+    renderSlots();
+  }
   if (!speechState.formUnlocked && speechState.resources.thought.current >= 15) {
     speechState.formUnlocked = true;
     if (!words.targets.includes('Form')) {
