@@ -417,6 +417,8 @@ let deckUpgradesViewBtn;
 let deckUpgradesContainer;
 let playerCoreSubTabButton;
 let playerCorePanel;
+let playerSpeechSubTabButton;
+let playerSpeechPanel;
 let statsOverviewSubTabButton;
 let statsEconomySubTabButton;
 let statsOverviewContainer;
@@ -566,6 +568,8 @@ function initTabs() {
   jobsCarouselBtn = document.querySelector('.jobsCarouselBtn');
   playerCoreSubTabButton = document.querySelector(".playerCoreSubTabButton");
   playerCorePanel = document.querySelector(".player-core-panel");
+  playerSpeechSubTabButton = document.querySelector('.playerSpeechSubTabButton');
+  playerSpeechPanel = document.querySelector('.player-speech-panel');
   statsOverviewSubTabButton = document.querySelector('.statsOverviewSubTabButton');
   statsEconomySubTabButton = document.querySelector('.statsEconomySubTabButton');
   statsOverviewContainer = document.getElementById('statsOverviewContainer');
@@ -618,7 +622,16 @@ function initTabs() {
   if (playerCoreSubTabButton)
     playerCoreSubTabButton.addEventListener("click", () => {
       if (playerCorePanel) playerCorePanel.style.display = "flex";
+      if (playerSpeechPanel) playerSpeechPanel.style.display = "none";
       playerCoreSubTabButton.classList.add("active");
+      if (playerSpeechSubTabButton) playerSpeechSubTabButton.classList.remove("active");
+    });
+  if (playerSpeechSubTabButton)
+    playerSpeechSubTabButton.addEventListener('click', () => {
+      if (playerCorePanel) playerCorePanel.style.display = 'none';
+      if (playerSpeechPanel) playerSpeechPanel.style.display = 'flex';
+      playerSpeechSubTabButton.classList.add('active');
+      if (playerCoreSubTabButton) playerCoreSubTabButton.classList.remove('active');
     });
   if (statsOverviewSubTabButton)
     statsOverviewSubTabButton.addEventListener('click', () => {
