@@ -1,4 +1,6 @@
 import addLog from './log.js';
+
+const FORM_UNLOCK_THOUGHT_REQ = 15;
 export const speechState = {
   orbs: {
     body: { current: 0, max: 10 },
@@ -732,7 +734,8 @@ function checkUnlocks() {
     speechState.slots.push(null);
     renderSlots();
   }
-  if (!speechState.formUnlocked && speechState.resources.thought.current >= 15) {
+  const thought = speechState.resources.thought.current;
+  if (!speechState.formUnlocked && Math.floor(thought + 1e-6) >= FORM_UNLOCK_THOUGHT_REQ) {
     speechState.formUnlocked = true;
     if (!words.targets.includes('Form')) {
       words.targets.push('Form');
