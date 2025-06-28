@@ -11,7 +11,7 @@ export const speechState = {
   },
   gains: {
     body: 0,
-    insight: 1,
+    insight: 0.2,
     will: 0
   },
   upgrades: {
@@ -223,6 +223,20 @@ export function initSpeech() {
   if (constructBtn) constructBtn.addEventListener('click', toggleConstructPanel);
   const closeBtn = container.querySelector('#closeConstructBtn');
   if (closeBtn) closeBtn.addEventListener('click', toggleConstructPanel);
+  const panel = container.querySelector('#constructPanel');
+  if (panel) {
+    panel.addEventListener('pointerdown', e => {
+      if (!panel.classList.contains('open')) return;
+      if (e.target.closest('.word-tile')) return;
+      const startX = e.clientX;
+      function up(ev) {
+        const diff = ev.clientX - startX;
+        if (diff > 50) toggleConstructPanel(false);
+        window.removeEventListener('pointerup', up);
+      }
+      window.addEventListener('pointerup', up);
+    });
+  }
   renderSlots();
   updateCastCooldown();
   renderResources();
@@ -459,11 +473,21 @@ function castMurmur() {
   updateCastCooldown();
 }
 
-function toggleConstructPanel() {
+function toggleConstructPanel(forceOpen) {
   const panel = container.querySelector('#constructPanel');
   if (!panel) return;
-  const open = panel.classList.toggle('open');
-  container.classList.toggle('construct-mode', open);
+  const isOpen = panel.classList.contains('open');
+  const shouldOpen = typeof forceOpen === 'boolean' ? forceOpen : !isOpen;
+  if (shouldOpen) {
+    panel.classList.remove('close-right');
+    panel.classList.add('open');
+    container.classList.add('construct-mode');
+  } else {
+    panel.classList.remove('open');
+    panel.classList.add('close-right');
+    container.classList.remove('construct-mode');
+    panel.addEventListener('transitionend', () => panel.classList.remove('close-right'), { once: true });
+  }
 }
 
 function savePhrase() {
