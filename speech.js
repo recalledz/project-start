@@ -211,14 +211,18 @@ function phraseGradient(phrase) {
 function createPhraseCard(phrase) {
   const card = document.createElement('div');
   card.className = 'phrase-card';
-  card.style.background = phraseGradient(phrase);
+  card.style.background = '#111';
   phrase.split(' ').forEach(w => {
     const line = document.createElement('div');
     line.className = 'phrase-word';
     line.textContent = w;
-    line.style.color = '#000';
+    line.style.color = '#eee';
     card.appendChild(line);
   });
+  const bar = document.createElement('div');
+  bar.className = 'phrase-bar';
+  bar.style.background = phraseGradient(phrase);
+  card.appendChild(bar);
   return card;
 }
 
@@ -295,21 +299,23 @@ export function initSpeech() {
         <button id="closeConstructBtn" class="cast-button">❌</button>
       </div>
       <div class="construct-tab constructor-view">
-        <div class="construct-top">
+        <div class="phrase-constructor">
+          <h3 class="section-title">Phrase Constructor</h3>
           <div class="word-list" id="verbList"></div>
           <div class="word-list" id="targetList" style="display:none"></div>
           <div class="word-list" id="modifierList" style="display:none"></div>
           <div class="phrase-slots" id="phraseSlots"></div>
           <div id="capacityDisplay" class="capacity-display"></div>
-          <div class="cast-container">
-            <div class="cast-wrapper">
-              <button id="castPhraseBtn" class="cast-button"><span>Cast</span><div class="cooldown-overlay" style="--cooldown:0; display:none"></div></button>
-              <div id="castCooldownCircle" class="cast-cooldown" style="display:none"><div class="cooldown-overlay" style="--cooldown:0"></div></div>
-            </div>
-            <div id="phraseInfo" class="phrase-info"></div>
+          <div class="cast-wrapper">
+            <button id="castPhraseBtn" class="cast-button"><span>Attempt Creation</span><div class="cooldown-overlay" style="--cooldown:0; display:none"></div></button>
+            <div id="castCooldownCircle" class="cast-cooldown" style="display:none"><div class="cooldown-overlay" style="--cooldown:0"></div></div>
           </div>
         </div>
-        <div class="construct-bottom">
+        <div class="phrase-output">
+          <div id="phraseInfo" class="phrase-info"></div>
+        </div>
+        <div class="built-phrases">
+          <h3 class="section-title">Built Phrases</h3>
           <div id="savedPhraseCards" class="saved-phrases"></div>
           <div id="memorySlotsDisplay" class="memory-slots"></div>
           <div id="phraseDetails" class="phrase-info"></div>
