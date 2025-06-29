@@ -1,4 +1,5 @@
 import addLog from './log.js';
+import { coreState, refreshCore } from './core.js';
 
 const FORM_UNLOCK_THOUGHT_REQ = 15;
 export const speechState = {
@@ -955,7 +956,7 @@ function renderResources() {
     const box = document.createElement('div');
     box.className = 'resource-box';
     const icon = document.createElement('i');
-    icon.dataset.lucide = key === 'thought' ? 'brain' : 'cube';
+    icon.dataset.lucide = key === 'thought' ? 'brain' : key === 'structure' ? 'brick-wall' : 'cube';
     const name = document.createElement('span');
     name.className = 'resource-name';
     name.textContent = capFirst(key);
@@ -975,6 +976,7 @@ function renderResources() {
     panel.appendChild(box);
   });
   if (window.lucide) lucide.createIcons();
+  window.dispatchEvent(new CustomEvent('resources-changed'));
 }
 
 function renderGains() {
@@ -1088,6 +1090,7 @@ export function renderUpgrades() {
       g.appendChild(btn);
     });
   });
+  window.dispatchEvent(new CustomEvent('upgrades-changed'));
 }
 
 export function tickSpeech(delta) {
@@ -1096,12 +1099,17 @@ export function tickSpeech(delta) {
   ['insight', 'body', 'will'].forEach(k => {
     const orb = speechState.orbs[k];
     const rate = speechState.gains[k];
-    if (rate > 0 && orb.current < orb.max) {
-      orb.current = Math.min(orb.max, orb.current + rate * dt);
+    if (rate > 0) {
+      if (coreState.meditating) {
+        coreState.meditationProgress += rate * dt;
+      } else if (orb.current < orb.max) {
+        orb.current = Math.min(orb.max, orb.current + rate * dt);
+      }
     }
   });
   renderOrbs();
   renderResources();
+  refreshCore();
   renderXpBar();
   renderPhraseInfo();
   updateCastCooldown();

@@ -3,14 +3,15 @@ import { speechState } from './speech.js';
 export const coreState = {
   coreLevel: 1,
   meditationProgress: 0,
-  meditating: false
+  meditating: false,
+  requirement: 100000
 };
 
 let container;
 let meditateBtn;
 let levelDisplay;
 let progressText;
-let meditationTimer;
+let meditationTimer; // unused now but kept for compatibility
 let speechLevelEl;
 let mindValEl;
 let bodyValEl;
@@ -76,9 +77,9 @@ const bodyPath = `M200 140
     });
     insightOrb.addEventListener('mouseleave', window.hideTooltip);
   }
-  meditateBtn.addEventListener('click', startMeditation);
+  meditateBtn.addEventListener('click', toggleMeditation);
   meditateBtn.addEventListener('mouseenter', e => {
-    window.showTooltip('Begin or advance meditation', e.pageX + 10, e.pageY + 10);
+    window.showTooltip('Toggle meditation focus', e.pageX + 10, e.pageY + 10);
   });
   meditateBtn.addEventListener('mouseleave', window.hideTooltip);
   const bodyOrbEl = container.querySelector('#bodyOrb');
@@ -107,25 +108,13 @@ const bodyPath = `M200 140
 }
 
 
-function startMeditation() {
-  if (coreState.meditationProgress >= 100) {
+function toggleMeditation() {
+  if (coreState.meditationProgress >= coreState.requirement) {
     breakthrough();
     return;
   }
-  if (coreState.meditating) return;
-  coreState.meditating = true;
-  meditateBtn.textContent = 'Meditating...';
-  meditateBtn.disabled = true;
-  meditationTimer = setInterval(() => {
-    coreState.meditationProgress = Math.min(100, coreState.meditationProgress + 1);
-    renderCore();
-    if (coreState.meditationProgress >= 100) {
-      clearInterval(meditationTimer);
-      coreState.meditating = false;
-      meditateBtn.textContent = 'Breakthrough';
-      meditateBtn.disabled = false;
-    }
-  }, 100);
+  coreState.meditating = !coreState.meditating;
+  meditateBtn.textContent = coreState.meditating ? 'Meditating...' : 'Meditate Core';
 }
 
 function breakthrough() {
@@ -135,6 +124,7 @@ function breakthrough() {
   }
   coreState.coreLevel += 1;
   coreState.meditationProgress = 0;
+  // requirement could scale later; keep constant for now
   speechState.orbs.insight.current = 0;
   speechState.orbs.body.current = 0;
   speechState.orbs.will.current = 0;
@@ -148,7 +138,7 @@ function renderCore() {
   const bodyFill = Math.min(1, speechState.orbs.body.current / speechState.orbs.body.max);
   const willFill = Math.min(1, speechState.orbs.will.current / speechState.orbs.will.max);
 
-  const coreFill = Math.min(1, coreState.meditationProgress / 100);
+  const coreFill = Math.min(1, coreState.meditationProgress / coreState.requirement);
 
   const updateRect = (id, cx, cy, r, fill) => {
     const rect = container.querySelector(id);
@@ -178,26 +168,24 @@ function renderCore() {
   const willText = container.querySelector('#willText');
   if (willText) willText.textContent = `${Math.floor(speechState.orbs.will.current)}/${speechState.orbs.will.max}`;
   const progressText = container.querySelector('#coreProgressText');
-  if (progressText) progressText.textContent = `${Math.floor(coreState.meditationProgress)}/100`;
+  if (progressText) progressText.textContent = `${Math.floor(coreState.meditationProgress)}/${coreState.requirement}`;
   levelDisplay.textContent = `Core Level: ${coreState.coreLevel}`;
   if (speechLevelEl) speechLevelEl.textContent = speechState.level;
   if (mindValEl) mindValEl.textContent = `${Math.floor(speechState.orbs.insight.current)}/${speechState.orbs.insight.max}`;
   if (bodyValEl) bodyValEl.textContent = `${Math.floor(speechState.orbs.body.current)}/${speechState.orbs.body.max}`;
   if (willValEl) willValEl.textContent = `${Math.floor(speechState.orbs.will.current)}/${speechState.orbs.will.max}`;
-  const ready = insightFill >= 1 && bodyFill >= 1 && willFill >= 1 && !coreState.meditating && coreState.meditationProgress === 0;
-
-  if (coreState.meditationProgress >= 100) {
+  if (coreState.meditationProgress >= coreState.requirement) {
     meditateBtn.textContent = 'Breakthrough';
-    meditateBtn.disabled = false;
   } else {
     meditateBtn.textContent = coreState.meditating ? 'Meditating...' : 'Meditate Core';
-    meditateBtn.disabled = !ready;
   }
+  meditateBtn.disabled = false;
 
   const halo = container.querySelector('#coreHalo');
-  if (halo) halo.setAttribute('opacity', coreState.meditationProgress >= 100 ? '1' : '0');
+  if (halo) halo.setAttribute('opacity', coreState.meditationProgress >= coreState.requirement ? '1' : '0');
 }
 
 export function refreshCore() {
   renderCore();
 }
+

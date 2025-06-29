@@ -2224,6 +2224,36 @@ body.darkenshift-mode .tabsContainer button.active {
     padding: 8px;
     box-shadow: 0 0 10px var(--core-glow);
 }
+
+.core-side-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 0.8rem;
+    min-width: 160px;
+}
+.speech-side-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 0.8rem;
+    min-width: 160px;
+}
+.core-resources, .core-upgrades {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 4px;
+}
+.core-resources .resource-entry {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.core-resources .resource-entry i {
+    width: 16px;
+    height: 16px;
+}
 #coreTabContent {
     display: flex;
     flex-direction: column;
@@ -2287,9 +2317,9 @@ body.darkenshift-mode .tabsContainer button.active {
 
 .player-speech-panel {
     display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 6px;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 8px;
     flex: 1;
 }
 
@@ -2306,6 +2336,12 @@ body.darkenshift-mode .tabsContainer button.active {
     align-items: center;
     gap: 6px;
     flex: 1;
+}
+.speech-main {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    gap: 6px;
 }
 
 .core-actions {

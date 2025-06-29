@@ -212,10 +212,24 @@
           </div>
         </div>
         <div class="player-speech-panel" style="display:none;">
-          <div id="speechPanel" class="speech-panel"></div>
-          <div id="secondaryResources" class="secondary-resources"></div>
-          <div id="speechGains" class="speech-gains"></div>
-          <div id="speechUpgrades" class="speech-upgrades"></div>
+          <div class="speech-side-panel sidePanel">
+            <div class="vignette resources open">
+              <button class="vignette-toggle">Resources</button>
+              <div class="vignette-content">
+                <div id="secondaryResources" class="secondary-resources"></div>
+              </div>
+            </div>
+            <div class="vignette upgrades">
+              <button class="vignette-toggle">Upgrades</button>
+              <div class="vignette-content">
+                <div id="speechUpgrades" class="speech-upgrades"></div>
+              </div>
+            </div>
+          </div>
+          <div class="speech-main">
+            <div id="speechPanel" class="speech-panel"></div>
+            <div id="speechGains" class="speech-gains"></div>
+          </div>
         </div>
       </div>
     </div>
