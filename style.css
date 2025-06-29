@@ -2424,6 +2424,8 @@ body.darkenshift-mode .tabsContainer button.active {
     width: 100%;
     height: 100%;
     overflow: hidden;
+    color: #e0e0f0;
+    font-family: inherit;
 }
 
 .speech-xp-container {
@@ -2880,6 +2882,7 @@ body.darkenshift-mode .tabsContainer button.active {
     gap: 6px;
     padding-left: 8px;
     font-size: 0.8rem;
+    align-self: flex-start;
 }
 .secondary-resources .resource-box {
     display: flex;
@@ -2890,7 +2893,7 @@ body.darkenshift-mode .tabsContainer button.active {
 .resource-bar {
     position: relative;
     width: 100%;
-    height: 10px;
+    height: 16px;
     background: #222;
     border: 1px solid #555;
     border-radius: 4px;
@@ -2904,11 +2907,11 @@ body.darkenshift-mode .tabsContainer button.active {
     height: 100%;
     width: 0%;
 }
-.resource-fill.insight { background: #88f; }
+.resource-fill.insight { background: #7fd9ff; }
 .resource-fill.thought { background: #c785ff; }
 .resource-fill.structure { background: #a97b5d; }
-.resource-fill.body { background: #f66; }
-.resource-fill.will { background: #a060ff; }
+.resource-fill.body { background: #ff8888; }
+.resource-fill.will { background: #ffa37f; }
 
 .resource-text {
     font-size: 0.7rem;

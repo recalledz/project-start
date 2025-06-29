@@ -1,4 +1,4 @@
-import { speechState, renderUpgrades } from './speech.js';
+import { speechState } from './speech.js';
 
 export const coreState = {
   coreLevel: 1,
@@ -63,7 +63,6 @@ const bodyPath = `M200 140
       <text id="willText" x="287" y="265" text-anchor="middle" class="orb-text"></text>
       <text id="coreProgressText" x="200" y="260" text-anchor="middle" class="orb-text"></text>
     </svg>
-    <div id="coreUpgrades" class="core-upgrades"></div>
   `;
   meditateBtn = container.querySelector("#meditateCoreBtn");
   levelDisplay = container.querySelector('#coreLevelText');
@@ -103,7 +102,6 @@ const bodyPath = `M200 140
   bodyValEl = container.querySelector('#bodyValue');
   willValEl = container.querySelector('#willValue');
   if (window.lucide) lucide.createIcons();
-  renderUpgrades();
   window.addEventListener('speech-xp-changed', renderCore);
   renderCore();
 }
@@ -198,7 +196,6 @@ function renderCore() {
 
   const halo = container.querySelector('#coreHalo');
   if (halo) halo.setAttribute('opacity', coreState.meditationProgress >= 100 ? '1' : '0');
-  renderUpgrades();
 }
 
 export function refreshCore() {

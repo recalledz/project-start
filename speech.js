@@ -291,10 +291,6 @@ export function initSpeech() {
     <div id="phraseHotbar" class="phrase-hotbar"></div>
     <div id="constructPanel" class="construct-panel">
       <div class="construct-header">
-        <div class="construct-tabs">
-          <button class="constructTabButton active">Constructor</button>
-          <button class="upgradeTabButton">Upgrades</button>
-        </div>
         <button id="closeConstructBtn" class="cast-button">❌</button>
       </div>
       <div class="construct-tab constructor-view">
@@ -317,10 +313,6 @@ export function initSpeech() {
           <div id="memorySlotsDisplay" class="memory-slots"></div>
           <div id="phraseDetails" class="phrase-info"></div>
         </div>
-      </div>
-      <div class="construct-tab upgrades-view" style="display:none;">
-        <div id="speechGains" class="speech-gains"></div>
-        <div id="speechUpgrades" class="speech-upgrades"></div>
       </div>
     </div>
   `;
@@ -376,24 +368,9 @@ export function initSpeech() {
     });
   }
 
-  const constructorTabBtn = container.querySelector('.constructTabButton');
-  const upgradeTabBtn = container.querySelector('.upgradeTabButton');
   const constructorView = container.querySelector('.constructor-view');
-  const upgradesView = container.querySelector('.upgrades-view');
-  if (constructorTabBtn && upgradeTabBtn && constructorView && upgradesView) {
-    constructorTabBtn.addEventListener('click', () => {
-      constructorView.style.display = 'flex';
-      upgradesView.style.display = 'none';
-      constructorTabBtn.classList.add('active');
-      upgradeTabBtn.classList.remove('active');
-    });
-    upgradeTabBtn.addEventListener('click', () => {
-      constructorView.style.display = 'none';
-      upgradesView.style.display = 'flex';
-      upgradeTabBtn.classList.add('active');
-      constructorTabBtn.classList.remove('active');
-      renderUpgrades();
-    });
+  if (constructorView) {
+    constructorView.style.display = 'flex';
   }
   renderSlots();
   updateCastCooldown();
@@ -1056,12 +1033,12 @@ function purchaseUpgrade(name) {
 }
 
 export function renderUpgrades() {
-  const panels = [
-    document.getElementById('speechUpgrades'),
-    document.getElementById('coreUpgrades')
-  ].filter(Boolean);
+  const panel = document.getElementById('speechUpgrades');
+  if (!panel) return;
+  panel.innerHTML = '';
+  const panels = [panel];
   if (!panels.length) return;
-  panels.forEach(panel => (panel.innerHTML = ''));
+  panels.forEach(p => (p.innerHTML = ''));
   const addSection = title => {
     const h = document.createElement('h4');
     h.className = 'section-title';
