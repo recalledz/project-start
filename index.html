@@ -2,6 +2,7 @@
 <html>
 <head>
   <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest"></script>
   <title>Page Title</title>
   <script src="pixi.min.js"></script>
@@ -12,6 +13,7 @@
   <body>
     <!--<div id="insanityOrb" class="insanity-orb" title="The mind frays..."></div>-->
     <button id="debugToggle" class="debug-toggle">Debug</button>
+    <button id="themeToggle" class="theme-toggle"><i data-lucide="moon"></i> Darkenshift</button>
     <div id="debugPanel" style="display:none;">
       <label>Cash: <input id="debugCash" type="number" value="10000" style="width: 60px;"></label>
       <button onclick="devTools.giveCash()">Give</button>
@@ -197,11 +199,6 @@
       <div id="statsEconomyContainer" class="casino-section" style="display:none;"></div>
     </div>
     <div class="playerTab">
-      <div class="playerSidePanel casino-section">
-        <h3 class="section-title">Core Stats &amp; Upgrades</h3>
-        <div id="speechGains" class="speech-gains"></div>
-        <div id="speechUpgrades" class="speech-upgrades"></div>
-      </div>
       <div class="playerMainContainer">
         <div class="player-header">
           <div class="player-subtabs">

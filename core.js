@@ -1,4 +1,4 @@
-import { speechState } from './speech.js';
+import { speechState, renderUpgrades } from './speech.js';
 
 export const coreState = {
   coreLevel: 1,
@@ -11,6 +11,10 @@ let meditateBtn;
 let levelDisplay;
 let progressText;
 let meditationTimer;
+let speechLevelEl;
+let mindValEl;
+let bodyValEl;
+let willValEl;
 
 export function initCore() {
   container = document.getElementById('coreTabContent');
@@ -25,6 +29,12 @@ const bodyPath = `M200 140
                C230 190, 230 160, 210 140
                Z`;
   container.innerHTML = `
+    <div id="speechLevelDisplay" class="speech-level-display">Speech Level: <span id="speechLevelValue" class="speech-level-value"></span></div>
+    <div class="core-resource-indicators">
+      <div class="resource-box mind"><i data-lucide="brain"></i><span id="mindValue" class="resource-value"></span></div>
+      <div class="resource-box body"><i data-lucide="heart"></i><span id="bodyValue" class="resource-value"></span></div>
+      <div class="resource-box will"><i data-lucide="flame"></i><span id="willValue" class="resource-value"></span></div>
+    </div>
     <div class="core-button-wrapper">
       <button id="meditateCoreBtn" disabled>Meditate Core</button>
       <div id="coreLevelText" class="core-level-text"></div>
@@ -39,20 +49,21 @@ const bodyPath = `M200 140
       <path d="${bodyPath}" fill="rgba(0,0,0,0.3)" stroke="#888" stroke-width="2" />
       <circle id="coreHalo" cx="200" cy="180" r="70" fill="none" stroke="gold" stroke-width="4" opacity="0" />
       <rect id="bodyFill" x="170" y="240" width="60" height="0" fill="rgba(255,255,255,0.4)" clip-path="url(#bodyShapeClip)" />
-      <circle cx="200" cy="80" r="20" fill="rgba(100,150,255,0.3)" />
-      <rect id="insightFill" x="180" y="100" width="40" height="0" fill="rgba(100,150,255,0.6)" clip-path="url(#insightClip)" />
-      <circle id="insightOrb" cx="200" cy="80" r="20" fill="none" stroke="#88aaff" stroke-width="2" />
+      <circle cx="200" cy="80" r="20" fill="rgba(127,217,255,0.3)" />
+      <rect id="insightFill" x="180" y="100" width="40" height="0" fill="rgba(127,217,255,0.6)" clip-path="url(#insightClip)" />
+      <circle id="insightOrb" cx="200" cy="80" r="20" fill="none" stroke="#7fd9ff" stroke-width="2" />
       <text id="insightText" x="200" y="115" text-anchor="middle" class="orb-text"></text>
       <circle cx="113" cy="230" r="20" fill="rgba(255,100,100,0.3)" />
       <rect id="bodyOrbFill" x="93" y="250" width="40" height="0" fill="rgba(255,100,100,0.6)" clip-path="url(#bodyOrbClip)" />
       <circle id="bodyOrb" cx="113" cy="230" r="20" fill="none" stroke="#ff8888" stroke-width="2" />
       <text id="bodyText" x="113" y="265" text-anchor="middle" class="orb-text"></text>
-      <circle cx="287" cy="230" r="20" fill="rgba(180,100,255,0.3)" />
-      <rect id="willFill" x="267" y="250" width="40" height="0" fill="rgba(180,100,255,0.6)" clip-path="url(#willClip)" />
-      <circle id="willOrb" cx="287" cy="230" r="20" fill="none" stroke="#cc88ff" stroke-width="2" />
+      <circle cx="287" cy="230" r="20" fill="rgba(255,163,127,0.3)" />
+      <rect id="willFill" x="267" y="250" width="40" height="0" fill="rgba(255,163,127,0.6)" clip-path="url(#willClip)" />
+      <circle id="willOrb" cx="287" cy="230" r="20" fill="none" stroke="#ffa37f" stroke-width="2" />
       <text id="willText" x="287" y="265" text-anchor="middle" class="orb-text"></text>
       <text id="coreProgressText" x="200" y="260" text-anchor="middle" class="orb-text"></text>
     </svg>
+    <div id="coreUpgrades" class="core-upgrades"></div>
   `;
   meditateBtn = container.querySelector("#meditateCoreBtn");
   levelDisplay = container.querySelector('#coreLevelText');
@@ -87,6 +98,13 @@ const bodyPath = `M200 140
     });
     willOrbEl.addEventListener('mouseleave', window.hideTooltip);
   }
+  speechLevelEl = container.querySelector('#speechLevelValue');
+  mindValEl = container.querySelector('#mindValue');
+  bodyValEl = container.querySelector('#bodyValue');
+  willValEl = container.querySelector('#willValue');
+  if (window.lucide) lucide.createIcons();
+  renderUpgrades();
+  window.addEventListener('speech-xp-changed', renderCore);
   renderCore();
 }
 
@@ -149,11 +167,11 @@ function renderCore() {
   updateRect('#bodyFill', 200, 180, 60, coreFill);
 
   const insightOrbEl = container.querySelector('#insightOrb');
-  if (insightOrbEl) insightOrbEl.setAttribute('stroke', insightFill >= 1 ? '#ffffaa' : '#88aaff');
+  if (insightOrbEl) insightOrbEl.setAttribute('stroke', insightFill >= 1 ? '#7fafff' : '#7fd9ff');
   const bodyOrb = container.querySelector('#bodyOrb');
-  if (bodyOrb) bodyOrb.setAttribute('stroke', bodyFill >= 1 ? '#ffcccc' : '#ff8888');
+  if (bodyOrb) bodyOrb.setAttribute('stroke', bodyFill >= 1 ? '#7fafff' : '#ff8888');
   const willOrb = container.querySelector('#willOrb');
-  if (willOrb) willOrb.setAttribute('stroke', willFill >= 1 ? '#ddaaff' : '#cc88ff');
+  if (willOrb) willOrb.setAttribute('stroke', willFill >= 1 ? '#7fafff' : '#ffa37f');
 
   const insightText = container.querySelector('#insightText');
   if (insightText) insightText.textContent = `${Math.floor(speechState.orbs.insight.current)}/${speechState.orbs.insight.max}`;
@@ -164,6 +182,10 @@ function renderCore() {
   const progressText = container.querySelector('#coreProgressText');
   if (progressText) progressText.textContent = `${Math.floor(coreState.meditationProgress)}/100`;
   levelDisplay.textContent = `Core Level: ${coreState.coreLevel}`;
+  if (speechLevelEl) speechLevelEl.textContent = speechState.level;
+  if (mindValEl) mindValEl.textContent = `${Math.floor(speechState.orbs.insight.current)}/${speechState.orbs.insight.max}`;
+  if (bodyValEl) bodyValEl.textContent = `${Math.floor(speechState.orbs.body.current)}/${speechState.orbs.body.max}`;
+  if (willValEl) willValEl.textContent = `${Math.floor(speechState.orbs.will.current)}/${speechState.orbs.will.max}`;
   const ready = insightFill >= 1 && bodyFill >= 1 && willFill >= 1 && !coreState.meditating && coreState.meditationProgress === 0;
 
   if (coreState.meditationProgress >= 100) {
@@ -176,6 +198,7 @@ function renderCore() {
 
   const halo = container.querySelector('#coreHalo');
   if (halo) halo.setAttribute('opacity', coreState.meditationProgress >= 100 ? '1' : '0');
+  renderUpgrades();
 }
 
 export function refreshCore() {

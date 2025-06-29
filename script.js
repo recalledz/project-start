@@ -84,6 +84,8 @@ let discardPile = [];
 const cardBackImages = {
   "basic-red": "img/basic deck.png"
 };
+// theme state
+let isDarkenshift = false;
 // resources and progress trackers
 let cash = 0;
 let chips = 0;
@@ -2736,6 +2738,16 @@ const panel = document.getElementById("debugPanel");
 panel.style.display = panel.style.display === "none" ? "block": "none";
 }
 
+function applyTheme() {
+  document.body.classList.toggle('darkenshift-mode', isDarkenshift);
+}
+
+function toggleTheme() {
+  isDarkenshift = !isDarkenshift;
+  localStorage.setItem('isDarkenshift', isDarkenshift);
+  applyTheme();
+}
+
 document.addEventListener("keydown", e => {
 if (e.shiftKey && e.key === "D") {
 toggleDebug();
@@ -2745,6 +2757,15 @@ toggleDebug();
 document.addEventListener("DOMContentLoaded", () => {
 const btn = document.getElementById("debugToggle");
 if (btn) btn.addEventListener("click", toggleDebug);
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+  const tbtn = document.getElementById("themeToggle");
+  if (tbtn) {
+    isDarkenshift = localStorage.getItem('isDarkenshift') === 'true';
+    applyTheme();
+    tbtn.addEventListener("click", toggleTheme);
+  }
 });
 
 // Developer helpers exposed on the console for testing

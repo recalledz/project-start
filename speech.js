@@ -215,7 +215,7 @@ function createPhraseCard(phrase) {
     const line = document.createElement('div');
     line.className = 'phrase-word';
     line.textContent = w;
-    line.style.color = wordColor(w);
+    line.style.color = '#000';
     card.appendChild(line);
   });
   return card;
@@ -279,8 +279,10 @@ export function initSpeech() {
     <h3 class="section-title">Speech Progression</h3>
     <div class="speech-xp-container">
       <i data-lucide="mic" class="speech-icon"></i>
-      <div class="speech-xp-bar"><div class="speech-xp-fill"></div></div>
-      <div id="speechLevel" class="speech-level"></div>
+      <div class="speech-progress">
+        <div id="speechLevel" class="speech-level"></div>
+        <div class="speech-xp-bar"><div class="speech-xp-fill"></div></div>
+      </div>
     </div>
     <div class="murmur-controls">
       <button id="murmurBtn" class="cast-button">Murmur</button>
@@ -289,27 +291,36 @@ export function initSpeech() {
     <div id="phraseHotbar" class="phrase-hotbar"></div>
     <div id="constructPanel" class="construct-panel">
       <div class="construct-header">
-        <h3 class="section-title">Construct Reality</h3>
+        <div class="construct-tabs">
+          <button class="constructTabButton active">Constructor</button>
+          <button class="upgradeTabButton">Upgrades</button>
+        </div>
         <button id="closeConstructBtn" class="cast-button">❌</button>
       </div>
-      <div class="construct-top">
-        <div class="word-list" id="verbList"></div>
-        <div class="word-list" id="targetList" style="display:none"></div>
-        <div class="word-list" id="modifierList" style="display:none"></div>
-        <div class="phrase-slots" id="phraseSlots"></div>
-        <div id="capacityDisplay" class="capacity-display"></div>
-        <div class="cast-container">
-          <div class="cast-wrapper">
-            <button id="castPhraseBtn" class="cast-button"><span>Cast</span><div class="cooldown-overlay" style="--cooldown:0; display:none"></div></button>
-            <div id="castCooldownCircle" class="cast-cooldown" style="display:none"><div class="cooldown-overlay" style="--cooldown:0"></div></div>
+      <div class="construct-tab constructor-view">
+        <div class="construct-top">
+          <div class="word-list" id="verbList"></div>
+          <div class="word-list" id="targetList" style="display:none"></div>
+          <div class="word-list" id="modifierList" style="display:none"></div>
+          <div class="phrase-slots" id="phraseSlots"></div>
+          <div id="capacityDisplay" class="capacity-display"></div>
+          <div class="cast-container">
+            <div class="cast-wrapper">
+              <button id="castPhraseBtn" class="cast-button"><span>Cast</span><div class="cooldown-overlay" style="--cooldown:0; display:none"></div></button>
+              <div id="castCooldownCircle" class="cast-cooldown" style="display:none"><div class="cooldown-overlay" style="--cooldown:0"></div></div>
+            </div>
+            <div id="phraseInfo" class="phrase-info"></div>
           </div>
-          <div id="phraseInfo" class="phrase-info"></div>
+        </div>
+        <div class="construct-bottom">
+          <div id="savedPhraseCards" class="saved-phrases"></div>
+          <div id="memorySlotsDisplay" class="memory-slots"></div>
+          <div id="phraseDetails" class="phrase-info"></div>
         </div>
       </div>
-      <div class="construct-bottom">
-        <div id="savedPhraseCards" class="saved-phrases"></div>
-        <div id="memorySlotsDisplay" class="memory-slots"></div>
-        <div id="phraseDetails" class="phrase-info"></div>
+      <div class="construct-tab upgrades-view" style="display:none;">
+        <div id="speechGains" class="speech-gains"></div>
+        <div id="speechUpgrades" class="speech-upgrades"></div>
       </div>
     </div>
   `;
@@ -319,7 +330,7 @@ export function initSpeech() {
   createSlots();
   attachWordListeners();
   const castBtn = container.querySelector('#castPhraseBtn');
-  castBtn.addEventListener('click', castPhrase);
+  castBtn.addEventListener('click', () => castPhrase());
   castBtn.addEventListener('mouseenter', e => {
     const wordsArr = speechState.slots.filter(Boolean);
     if (wordsArr.length < 1) return;
@@ -362,6 +373,26 @@ export function initSpeech() {
         window.removeEventListener('pointerup', up);
       }
       window.addEventListener('pointerup', up);
+    });
+  }
+
+  const constructorTabBtn = container.querySelector('.constructTabButton');
+  const upgradeTabBtn = container.querySelector('.upgradeTabButton');
+  const constructorView = container.querySelector('.constructor-view');
+  const upgradesView = container.querySelector('.upgrades-view');
+  if (constructorTabBtn && upgradeTabBtn && constructorView && upgradesView) {
+    constructorTabBtn.addEventListener('click', () => {
+      constructorView.style.display = 'flex';
+      upgradesView.style.display = 'none';
+      constructorTabBtn.classList.add('active');
+      upgradeTabBtn.classList.remove('active');
+    });
+    upgradeTabBtn.addEventListener('click', () => {
+      constructorView.style.display = 'none';
+      upgradesView.style.display = 'flex';
+      upgradeTabBtn.classList.add('active');
+      constructorTabBtn.classList.remove('active');
+      renderUpgrades();
     });
   }
   renderSlots();
@@ -604,11 +635,13 @@ function castPhrase(phraseArg) {
   const wordsArr = phraseArg ? phraseArg.split(' ') : speechState.slots.filter(Boolean);
   if (wordsArr.length < 1) return;
   const phrase = wordsArr.join(' ');
-  const def = buildPhraseDef(wordsArr);
+  let def = buildPhraseDef(wordsArr);
   if (!def) return;
+  const special = phraseEffects[phrase];
+  if (special) def = { ...def, ...special };
   const hasVerb = wordsArr.some(w => getWordCategory(w) === 'verbs');
   const hasTarget = wordsArr.some(w => getWordCategory(w) === 'targets');
-  if (!(hasVerb && hasTarget) && phrase !== 'Murmur') return;
+  if (!(hasVerb && hasTarget) && (phrase !== 'Murmur' || words.targets.includes('Mind'))) return;
   if (wordsArr.includes('Chant') && wordsArr.includes('Persistently')) return;
   for (const orb of Object.values(speechState.orbs)) {
     if (orb.current < 0) return;
@@ -691,6 +724,9 @@ function castPhrase(phraseArg) {
     if (castBtn) castBtn.disabled = true;
     showPhraseDetails(phrase);
     renderPhraseInfo();
+    // Clear slots after casting for easier new phrase construction
+    speechState.slots = [null];
+    renderSlots();
   } else {
     speechState.failCount += 1;
     if (!speechState.upgrades.vocalMaturity.unlocked && speechState.failCount >= 5) {
@@ -850,7 +886,7 @@ function addSpeechXP(amt) {
   const oldLevel = speechState.level;
   speechState.level = Math.floor(speechState.xp / 10) + 1;
   if (speechState.level !== oldLevel) {
-    if (!words.verbs.includes('Murmur')) {
+    if (!words.verbs.includes('Murmur') && !words.targets.includes('Mind')) {
       words.verbs.push('Murmur');
       glowConstructToggle();
       renderLists();
@@ -861,6 +897,7 @@ function addSpeechXP(amt) {
     checkUnlocks();
   }
   renderXpBar();
+  window.dispatchEvent(new CustomEvent('speech-xp-changed'));
 }
 
 function renderXpBar() {
@@ -889,11 +926,8 @@ function checkUnlocks() {
     wordState.targets['Mind'] = { level: 1, xp: 0 };
     addLog('Your awareness turns inward. Target "Mind" unlocked.', 'info');
     const murmurBtn = container.querySelector('#murmurBtn');
-    if (murmurBtn) murmurBtn.textContent = 'Murmur Mind';
-    const idx = speechState.activePhrases.indexOf('Murmur');
-    if (idx >= 0) speechState.activePhrases[idx] = 'Murmur Mind';
-    const spIdx = speechState.savedPhrases.indexOf('Murmur');
-    if (spIdx >= 0) speechState.savedPhrases.splice(spIdx, 1);
+    if (murmurBtn) murmurBtn.remove();
+    if (!speechState.activePhrases.includes('Murmur Mind')) speechState.activePhrases.push('Murmur Mind');
     if (!speechState.savedPhrases.includes('Murmur Mind')) speechState.savedPhrases.push('Murmur Mind');
     speechState.capacity += 1;
     renderSlots();
@@ -941,21 +975,29 @@ function renderResources() {
   panel.innerHTML = '';
   Object.entries(speechState.resources).forEach(([key, res]) => {
     if (res.unlocked === false) return;
-    const wrapper = document.createElement('div');
-    wrapper.className = 'resource';
-    const text = document.createElement('div');
-    text.className = 'resource-text';
-    text.textContent = `${key}: ${Math.floor(res.current)}/${res.max}`;
+    const box = document.createElement('div');
+    box.className = 'resource-box';
+    const icon = document.createElement('i');
+    icon.dataset.lucide = key === 'thought' ? 'brain' : 'cube';
+    const name = document.createElement('span');
+    name.className = 'resource-name';
+    name.textContent = capFirst(key);
     const bar = document.createElement('div');
     bar.className = 'resource-bar';
     const fill = document.createElement('div');
     fill.className = `resource-fill ${key}`;
     fill.style.width = `${(res.current / res.max) * 100}%`;
+    const value = document.createElement('span');
+    value.className = `resource-value ${key}`;
+    value.textContent = `${Math.floor(res.current)}/${res.max}`;
     bar.appendChild(fill);
-    wrapper.appendChild(text);
-    wrapper.appendChild(bar);
-    panel.appendChild(wrapper);
+    box.appendChild(icon);
+    box.appendChild(name);
+    box.appendChild(bar);
+    box.appendChild(value);
+    panel.appendChild(box);
   });
+  if (window.lucide) lucide.createIcons();
 }
 
 function renderGains() {
@@ -1013,42 +1055,61 @@ function purchaseUpgrade(name) {
   renderPhraseInfo();
 }
 
-function renderUpgrades() {
-  const panel = document.getElementById('speechUpgrades');
-  if (!panel) return;
-  panel.innerHTML = '';
+export function renderUpgrades() {
+  const panels = [
+    document.getElementById('speechUpgrades'),
+    document.getElementById('coreUpgrades')
+  ].filter(Boolean);
+  if (!panels.length) return;
+  panels.forEach(panel => (panel.innerHTML = ''));
   const addSection = title => {
     const h = document.createElement('h4');
     h.className = 'section-title';
     h.textContent = title;
-    panel.appendChild(h);
+    panels.forEach(p => p.appendChild(h.cloneNode(true)));
   };
 
   addSection('Core Upgrades');
+  const coreGroups = panels.map(p => {
+    const div = document.createElement('div');
+    div.className = 'upgrade-group';
+    p.appendChild(div);
+    return div;
+  });
   const coreUp = [
     ['cohere', `Cohere Lv.${speechState.upgrades.cohere.level}`],
     ['expandMind', `Expand Mind Lv.${speechState.upgrades.expandMind.level}`]
   ];
   coreUp.forEach(([name, label]) => {
-    const btn = document.createElement('button');
-    const cost = getUpgradeCost(name);
-    btn.innerHTML = `${label} (${formatCost(cost)})`;
-    btn.addEventListener('click', () => purchaseUpgrade(name));
-    panel.appendChild(btn);
+    coreGroups.forEach(g => {
+      const btn = document.createElement('button');
+      const cost = getUpgradeCost(name);
+      btn.innerHTML = `${label} (${formatCost(cost)})`;
+      btn.addEventListener('click', () => purchaseUpgrade(name));
+      g.appendChild(btn);
+    });
   });
 
   addSection('Vocal Growth');
+  const vocalGroups = panels.map(p => {
+    const div = document.createElement('div');
+    div.className = 'upgrade-group';
+    p.appendChild(div);
+    return div;
+  });
   const vocalUp = [];
   if (speechState.upgrades.vocalMaturity.unlocked)
     vocalUp.push(['vocalMaturity', `Vocal Maturity Lv.${speechState.upgrades.vocalMaturity.level}`]);
   if (speechState.upgrades.capacityBoost.unlocked)
     vocalUp.push(['capacityBoost', 'Capacity +2']);
   vocalUp.forEach(([name, label]) => {
-    const btn = document.createElement('button');
-    const cost = getUpgradeCost(name);
-    btn.innerHTML = `${label} (${formatCost(cost)})`;
-    btn.addEventListener('click', () => purchaseUpgrade(name));
-    panel.appendChild(btn);
+    vocalGroups.forEach(g => {
+      const btn = document.createElement('button');
+      const cost = getUpgradeCost(name);
+      btn.innerHTML = `${label} (${formatCost(cost)})`;
+      btn.addEventListener('click', () => purchaseUpgrade(name));
+      g.appendChild(btn);
+    });
   });
 }
 
