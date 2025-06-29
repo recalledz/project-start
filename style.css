@@ -381,17 +381,18 @@ body.darkenshift-mode .tabsContainer button.active {
     width: 100%;
     padding: 4px 6px;
     background: linear-gradient(135deg, #333, #111);
-    border: 2px solid #d4af37;
+    border: 2px solid #b76eff;
     border-radius: 6px;
-    color: #d4af37;
-    box-shadow: 0 2px 6px rgba(212, 175, 55, 0.4);
+    color: #e0d0ff;
+    box-shadow: 0 2px 6px rgba(183, 110, 255, 0.4);
     cursor: pointer;
     font-size: inherit; /* match side panel text size */
     text-shadow: 0 0 5px black;
+    box-sizing: border-box;
 }
 
 .vignette-toggle:hover {
-    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.6);
+    box-shadow: 0 4px 12px rgba(183, 110, 255, 0.6);
 }
 
 .vignette-content {
@@ -2238,6 +2239,9 @@ body.darkenshift-mode .tabsContainer button.active {
     gap: 8px;
     font-size: 0.8rem;
     min-width: 160px;
+    flex: 0 0 33%;
+    max-width: 33%;
+    color: var(--core-text);
 }
 .core-resources, .core-upgrades {
     display: flex;
@@ -2625,7 +2629,7 @@ body.darkenshift-mode .tabsContainer button.active {
     text-align: center;
     margin: 4px 0;
     font-size: 0.9rem;
-    color: #d4af37;
+    color: #e0d0ff;
 }
 
 .phrase-slot {
@@ -2970,8 +2974,17 @@ body.darkenshift-mode .tabsContainer button.active {
 }
 .secondary-resources .resource-box {
     display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    width: 100%;
+}
+
+.resource-text {
+    display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 4px;
+    font-size: 0.7rem;
 }
 
 .resource-bar {

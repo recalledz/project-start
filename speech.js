@@ -961,24 +961,32 @@ function renderResources() {
     if (res.unlocked === false) return;
     const box = document.createElement('div');
     box.className = 'resource-box';
+
+    const header = document.createElement('div');
+    header.className = 'resource-text';
+
     const icon = document.createElement('i');
     icon.dataset.lucide = key === 'thought' ? 'brain' : key === 'structure' ? 'brick-wall' : 'cube';
     const name = document.createElement('span');
     name.className = 'resource-name';
     name.textContent = capFirst(key);
+    const value = document.createElement('span');
+    value.className = `resource-value ${key}`;
+    value.textContent = `${Math.floor(res.current)}/${res.max}`;
+
+    header.appendChild(icon);
+    header.appendChild(name);
+    header.appendChild(value);
+
     const bar = document.createElement('div');
     bar.className = 'resource-bar';
     const fill = document.createElement('div');
     fill.className = `resource-fill ${key}`;
     fill.style.width = `${(res.current / res.max) * 100}%`;
-    const value = document.createElement('span');
-    value.className = `resource-value ${key}`;
-    value.textContent = `${Math.floor(res.current)}/${res.max}`;
     bar.appendChild(fill);
-    box.appendChild(icon);
-    box.appendChild(name);
+
+    box.appendChild(header);
     box.appendChild(bar);
-    box.appendChild(value);
     panel.appendChild(box);
   });
   if (window.lucide) lucide.createIcons();
