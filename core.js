@@ -102,7 +102,7 @@ const bodyPath = `M200 140
   mindValEl = container.querySelector('#mindValue');
   bodyValEl = container.querySelector('#bodyValue');
   willValEl = container.querySelector('#willValue');
-  if (window.lucide) lucide.createIcons();
+  if (window.lucide) lucide.createIcons({ icons: lucide.icons });
   window.addEventListener('speech-xp-changed', renderCore);
   renderCore();
 }

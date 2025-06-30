@@ -1,6 +1,6 @@
 # Construct Reality Sliding Panel
 
-This document describes the user interface layout and entrance animation for the **Construct Reality** panel. It supplements `phrase-system.md` with guidance for implementing the new freeform phrase builder and animated panel.
+This document describes the user interface layout and entrance animation for the **Construct Reality** panel. It supplements `phrase-system.md` with guidance for the new pot based construct interface.
 
 ---
 
@@ -13,20 +13,12 @@ This document describes the user interface layout and entrance animation for the
   1. **Header**
      * `Construct Reality` title
      * `Close` button (❌)
-  2. **Phrase Builder Row**
-     * Horizontal list where words can be placed in any order
-     * Scrollable if the phrase exceeds the visible width
-  3. **Capacity Meter**
-     * Shows current capacity usage, e.g. `🧠 ▮▮▮▯▯ (3 / 5)`
-  4. **Word Tile Bank**
-     * Grouped subsections for **Verbs**, **Targets**, and **Modifiers**
-     * Clicking a tile adds it to the row; clicking a tile in the row removes it
-  5. **Etched Phrases**
-     * Scrollable list on the right side of the panel displaying saved phrases
-     * Each entry includes an `Equip` or `Cast` button and shows a tooltip with effect details
-  6. **Action Buttons**
-     * `Save Phrase` (enabled only when the phrase is valid)
-     * `Clear Phrase`
+  2. **Construct Pot**
+     * Displays the resources placed inside.
+  3. **Resource Buttons**
+     * Shows each unlocked resource that can be added to the pot.
+  4. **Construct Cards**
+     * Completed constructs appear here and can be slotted for use.
 
 ## Entrance Animation
 

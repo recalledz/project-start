@@ -866,6 +866,13 @@ body.darkenshift-mode .tabsContainer button.active {
     pointer-events: none;
     border-radius: 50%;
 }
+.phrase-card.onCooldown {
+    pointer-events: none;
+    opacity: 0.6;
+}
+.phrase-card .cooldown-overlay {
+    border-radius: 4px;
+}
 
 .dCard_ability.green {
     background: #d0f0d0;
@@ -1867,6 +1874,9 @@ body.darkenshift-mode .tabsContainer button.active {
     pointer-events: none;
     animation: cloud-rise 3s ease-out forwards;
 }
+.phrase-card .phrase-cloud {
+    top: 0;
+}
 
 @keyframes cloud-rise {
     0% { opacity: 0; transform: translate(-50%, 20px); filter: blur(4px); }
@@ -2239,8 +2249,8 @@ body.darkenshift-mode .tabsContainer button.active {
     gap: 8px;
     font-size: 0.8rem;
     min-width: 160px;
-    flex: 0 0 33%;
-    max-width: 33%;
+    flex: 0 0 25%;
+    max-width: 25%;
     color: var(--core-text);
 }
 .core-resources, .core-upgrades {
@@ -2325,6 +2335,7 @@ body.darkenshift-mode .tabsContainer button.active {
     align-items: flex-start;
     gap: 8px;
     flex: 1;
+    height: 100%;
 }
 
 .player-upgrades-panel {
@@ -2346,6 +2357,8 @@ body.darkenshift-mode .tabsContainer button.active {
     flex-direction: column;
     flex: 1;
     gap: 6px;
+    position: relative;
+    height: 100%;
 }
 
 .core-actions {
@@ -2459,13 +2472,37 @@ body.darkenshift-mode .tabsContainer button.active {
     flex-direction: column;
     gap: 8px;
     align-items: center;
-    margin-top: 10px;
+    margin-top: 0;
     position: relative; /* allow floating phrase clouds */
     width: 100%;
     height: 100%;
+    flex: 1;
     overflow: hidden;
     color: #e0e0f0;
     font-family: inherit;
+}
+
+.speech-top {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+    margin-bottom: 30px;
+}
+
+.speech-top .orbs-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+.speech-top .xp-column {
+    flex: 0 0 25%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
 }
 
 .speech-xp-container {
@@ -2534,6 +2571,7 @@ body.darkenshift-mode .tabsContainer button.active {
     flex-direction: column;
     align-items: center;
     gap: 2px;
+    padding: 4px;
 }
 
 .orb-value {
@@ -2541,9 +2579,15 @@ body.darkenshift-mode .tabsContainer button.active {
     text-align: center;
 }
 
+.orb-regen {
+    font-size: 0.6rem;
+    text-align: center;
+    color: #aaa;
+}
+
 .speech-orb {
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     border: 1px solid #888;
     position: relative;
@@ -2667,11 +2711,6 @@ body.darkenshift-mode .tabsContainer button.active {
     align-items: center;
 }
 
-.murmur-controls {
-    display: flex;
-    gap: 6px;
-    justify-content: center;
-}
 
 .phrase-hotbar {
     display: flex;
@@ -2752,22 +2791,35 @@ body.darkenshift-mode .tabsContainer button.active {
 
 .construct-panel {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    inset: 0;
     margin: 0;
     padding: 8px;
     box-sizing: border-box;
-    background: rgba(0, 0, 0, 0.9);
-    border-right: 1px solid #555;
+    background: linear-gradient(#11131c, #0e0f1a);
+    border: 1px solid #4a4a60;
+    box-shadow: 0 0 8px #7f7fcf;
+    backdrop-filter: blur(4px);
     display: flex;
     flex-direction: column;
+    height: 100%;
     gap: 6px;
     transform: translateX(100%);
     opacity: 0;
     transition: transform 0.3s ease-out, opacity 0.3s ease-out;
     z-index: 10;
+}
+
+.construct-tab {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.constructor-view {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
 }
 
 .construct-panel.open {
@@ -2835,6 +2887,8 @@ body.darkenshift-mode .tabsContainer button.active {
     flex-direction: column;
     gap: 6px;
     padding: 8px;
+    flex: 1;
+    overflow-y: auto;
 }
 
 .phrase-output {
@@ -2842,19 +2896,21 @@ body.darkenshift-mode .tabsContainer button.active {
     background: rgba(255,255,255,0.05);
     padding: 6px;
     margin-top: 4px;
+    flex: 0 0 auto;
 }
 
 .built-phrases {
     display: flex;
-    flex-direction: column;
-    gap: 6px;
+    flex-wrap: wrap;
+    gap: 10px;
     padding: 6px;
     overflow-y: auto;
+    flex: 1;
+    justify-content: center;
+    align-items: flex-start;
 }
-.built-phrases .saved-phrases {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-    gap: 6px;
+.construct-panel .phrase-card {
+    width: 80px;
 }
 
 .speech-panel.construct-mode .speech-orbs {
@@ -3009,6 +3065,9 @@ body.darkenshift-mode .tabsContainer button.active {
 .resource-fill.structure { background: #a97b5d; }
 .resource-fill.body { background: #ff8888; }
 .resource-fill.will { background: #ffa37f; }
+.resource-fill.sound {
+    background: linear-gradient(#555, #999);
+}
 
 .resource-text {
     font-size: 0.7rem;
@@ -3034,14 +3093,50 @@ body.darkenshift-mode .tabsContainer button.active {
 }
 
 .speech-orb#orbInsight {
-    background: rgba(0,0,255,0.2);
-    border-color: #8888ff;
-    color: #8888ff;
+    background: rgba(127,217,255,0.2);
+    border-color: #7fd9ff;
+    color: #7fd9ff;
 }
 
 .speech-tab-orbs .speech-orb {
     width: 48px;
     height: 48px;
+}
+
+.playerLexiconSubTabButton {
+    background: linear-gradient(60deg, #32a852, #145c2c, #32a852);
+    background-size: 200% 100%;
+    border-color: #32a852;
+    box-shadow: 0 0 8px rgba(50, 168, 82, 0.5);
+    color: #e0ffe0;
+}
+.playerLexiconSubTabButton.active {
+    background: #32a852;
+    box-shadow: inset 0 0 8px #fff8c6, 0 0 12px #32a852;
+    color: #220000;
+}
+
+.player-lexicon-panel {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    gap: 6px;
+    padding: 6px;
+    overflow-y: auto;
+}
+
+.tags-guide table {
+    border-collapse: collapse;
+    width: 100%;
+}
+.tags-guide th,
+.tags-guide td {
+    border: 1px solid #888;
+    padding: 4px;
+    font-size: 0.8rem;
+}
+.tags-guide th {
+    background: #222;
 }
 
 .slot-clear {
@@ -3053,5 +3148,64 @@ body.darkenshift-mode .tabsContainer button.active {
     pointer-events: none;
 }
 .speech-orb#orbInsight .orb-fill {
-    background: rgba(0,0,255,0.6);
+    background: rgba(127,217,255,0.6);
 }
+
+.construct-pot { text-align:center; font-size:2rem; margin:8px 0; }
+.resource-buttons { display:flex; flex-wrap:wrap; gap:4px; justify-content:center; }
+.construct-button {
+    padding: 4px 8px;
+    margin: 4px auto;
+    border: 2px solid #b76eff;
+    background: #4b0082;
+    color: #e0d0ff;
+}
+.construct-button.invalid {
+    background: #662222;
+    border-color: #aa4444;
+}
+.construct-effect,
+.construct-cost {
+    font-size: 0.65rem;
+    text-align: center;
+}
+
+.construct-card-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 80px;
+    gap: 2px;
+    margin: 4px;
+}
+
+.construct-info {
+    font-size: 0.65rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.construct-info i {
+    width: 12px;
+    height: 12px;
+}
+
+.construct-icons {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    font-size: 0.65rem;
+}
+.construct-icons .icon-row {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+.construct-icons i {
+    width: 12px;
+    height: 12px;
+}
+
