@@ -9,7 +9,10 @@ const MIDPOINT = 1000;
 const K = 200;
 
 // Seasonal cycle configuration
-const SEASON_LENGTH_DAYS = 13;
+// Each "day" in the season ticker currently represents one real second. To
+// ensure that every season lasts at least ten minutes, set the length to
+// 600 days (600 seconds).
+const SEASON_LENGTH_DAYS = 600;
 const seasons = [
   { name: 'Verdantia', multiplier: 1.20 },
   { name: 'Solara', multiplier: 1.35 },
@@ -70,7 +73,8 @@ speechState.resources.insight = speechState.orbs.insight;
 const recipes = [
   {
     name: 'Murmur',
-    input: { insight: 2 },
+    // Increased cost to make early insight management more meaningful
+    input: { insight: 25 },
     output: { sound: 1 },
     xp: 1,
     unlocked: true,
@@ -195,7 +199,9 @@ export function initSpeech() {
           <div id="orbInsightContainer" class="orb-container">
             <div id="orbInsight" class="speech-orb"><div class="orb-fill"></div></div>
             <div id="orbInsightValue" class="orb-value"></div>
-            <div id="orbInsightRegen" class="orb-regen"><span></span></div>
+            <div id="orbInsightRegen" class="orb-regen">
+              <span class="season-icon"></span><span class="regen-value"></span>
+            </div>
           </div>
           <div id="orbBodyContainer" class="orb-container" style="display:none">
             <div id="orbBody" class="speech-orb"><div class="orb-fill"></div></div>
@@ -507,17 +513,20 @@ function renderOrbs() {
     const regenLabel = container.querySelector(`#${id}Regen`);
     if (regenLabel) {
       if (speechState.upgrades.clarividence.level > 0) {
-        const valEl = regenLabel.querySelector('span');
-        if (valEl) valEl.textContent = `+${speechState.gains[id.replace('orb','').toLowerCase()].toFixed(3)}/s`;
-        regenLabel.style.display = 'flex';
-        if (id === 'orbInsight') {
+        const iconEl = regenLabel.querySelector('.season-icon');
+        const valEl = regenLabel.querySelector('.regen-value');
+        if (valEl) {
+          valEl.textContent = `+${speechState.gains[id.replace('orb','').toLowerCase()].toFixed(3)}/s`;
+        }
+        if (id === 'orbInsight' && iconEl) {
+          const icon = seasonIcons[speechState.seasonIndex];
+          iconEl.textContent = icon;
           regenLabel.onmouseenter = e => {
             showTooltip(`Base: ${speechState.insightRegenBase.toFixed(3)}<br>Current: ${speechState.gains.insight.toFixed(3)}`, e.clientX + 10, e.clientY + 10);
           };
           regenLabel.onmouseleave = hideTooltip;
-          const icon = seasonIcons[speechState.seasonIndex];
-          regenLabel.firstChild.textContent = icon;
         }
+        regenLabel.style.display = 'flex';
       } else {
         regenLabel.style.display = 'none';
       }
@@ -771,7 +780,9 @@ export function tickSpeech(delta) {
   if (speechState.weather) regen *= speechState.weather.multiplier;
   speechState.gains.insight = regen;
   ins.current = Math.min(ins.max, ins.current + regen * dt);
-  if (!speechState.upgrades.clarividence.unlocked && ins.current >= 300) {
+  // Unlock clarividence once the player demonstrates basic insight control
+  // by accumulating at least 50 insight.
+  if (!speechState.upgrades.clarividence.unlocked && ins.current >= 50) {
     speechState.upgrades.clarividence.unlocked = true;
     renderUpgrades();
   }

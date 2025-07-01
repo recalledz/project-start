@@ -12,7 +12,7 @@ The phrase builder has been replaced with a simpler construct mechanic. The **Co
 ### Starting Construct – Murmur
 
 - Unlocked from the start.
-- Costs: 2 Insight
+- Costs: 25 Insight
 - Produces: 1 Sound and 1 Voice XP
 - When slotted, Murmur converts Insight into Sound automatically.
 
@@ -20,7 +20,7 @@ The phrase builder has been replaced with a simpler construct mechanic. The **Co
 
 | Invocation           | Recipe (to Discover)      | Cost to Use           | Cooldown | Type        | Effect Summary                                        |
 | -------------------- | ------------------------- | --------------------- | -------- | ----------- | ----------------------------------------------------- |
-| **Murmur**           | —                         | 2 Insight             | 0s       | Generator   | +1 Sound, +1 Voice XP                                 |
+| **Murmur**           | —                         | 25 Insight            | 0s       | Generator   | +1 Sound, +1 Voice XP                                 |
 | **Echo of Mind**     | Sound + Insight           | 4 Insight             | 5s       | Generator   | +1 Thought over 5s (decaying)                         |
 | **Clarity Pulse**    | Thought + Insight         | 2 Insight + 1 Thought | 30s      | Buff        | +1% Sound & Insight regen/sec for 30s                 |
 | **Symbol Seed**      | Sound + Thought           | 2 Sound + 2 Thought   | 10s      | Generator   | After 10s of draining, produces +1 Structure          |
