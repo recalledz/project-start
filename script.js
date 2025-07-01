@@ -489,6 +489,7 @@ function setupTabHandlers() {
         refreshCore();
         showTab(playerTab);
         setActiveTabButton(playerTabButton);
+        if (playerSpeechSubTabButton) playerSpeechSubTabButton.click();
       }
     },
     {

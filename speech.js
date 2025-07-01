@@ -3,36 +3,57 @@ import { coreState, refreshCore } from './core.js';
 
 // Core state for the Constructs system. Orbs and upgrades from the
 // previous speech implementation remain intact.
+// Insight regeneration constants
+const R_MAX = 0.125;
+const MIDPOINT = 1000;
+const K = 200;
+
+// Seasonal cycle configuration
+const SEASON_LENGTH_DAYS = 13;
+const seasons = [
+  { name: 'Verdantia', multiplier: 1.20 },
+  { name: 'Solara', multiplier: 1.35 },
+  { name: 'Aurelia', multiplier: 0.90 },
+  { name: 'Bruma', multiplier: 0.70 }
+];
+const seasonIcons = ['\uD83C\uDF31', '\u2600\uFE0F', '\uD83C\uDF42', '\u2744\uFE0F'];
+const seasonClasses = ['spring','summer','autumn','winter'];
+
 export const speechState = {
   orbs: {
     body: { current: 0, max: 10 },
-    insight: { current: 0, max: 110 },
+    insight: { current: 0, max: 2000, regen: R_MAX },
     will: { current: 0, max: 10 }
   },
   resources: {
-    insight: { current: 0, max: 10, regen: 0.1, unlocked: true },
     sound: { current: 0, max: 10, regen: 0, unlocked: true },
     thought: { current: 0, max: 10, regen: 0, unlocked: false },
     structure: { current: 0, max: 10, regen: 0, unlocked: false }
   },
   gains: {
     body: 0,
-    insight: 0.2,
+    insight: 0,
     will: 0
   },
   upgrades: {
-    cohere: { level: 0, baseCost: 2 },
+    cohere: { level: 0, costFunc: lvl => Math.round(10 * Math.pow(1.12, lvl)) },
     vocalMaturity: { level: 0, baseCost: 2, unlocked: false },
     capacityBoost: { level: 0, baseCost: { insight: 10 }, unlocked: false },
     expandMind: {
       level: 0,
       unlocked: true,
       costFunc: lvl => ({ insight: 2 * Math.pow(lvl + 1, 2) })
-    }
+    },
+    clarividence: { level: 0, baseCost: 300, unlocked: false }
   },
   voiceXp: 0,
   voiceLevel: 1,
   memorySlots: 2,
+  seasonIndex: 0,
+  seasonDay: 0,
+  seasonTimer: 0,
+  weather: null,
+  insightRegenBase: 0,
   activeConstructs: ['Murmur'],
   savedConstructs: ['Murmur'],
   activeBuffs: {},
@@ -40,6 +61,9 @@ export const speechState = {
   constructUnlocked: true,
   pot: []
 };
+
+// use the same object for the insight resource and orb
+speechState.resources.insight = speechState.orbs.insight;
 
 // Basic construct recipe list. Additional constructs can be appended
 // later through unlocks or upgrades.
@@ -50,7 +74,7 @@ const recipes = [
     output: { sound: 1 },
     xp: 1,
     unlocked: true,
-    cooldown: 0
+    cooldown: 1
   },
   {
     name: 'Echo of Mind',
@@ -171,7 +195,7 @@ export function initSpeech() {
           <div id="orbInsightContainer" class="orb-container">
             <div id="orbInsight" class="speech-orb"><div class="orb-fill"></div></div>
             <div id="orbInsightValue" class="orb-value"></div>
-            <div id="orbInsightRegen" class="orb-regen"></div>
+            <div id="orbInsightRegen" class="orb-regen"><span></span></div>
           </div>
           <div id="orbBodyContainer" class="orb-container" style="display:none">
             <div id="orbBody" class="speech-orb"><div class="orb-fill"></div></div>
@@ -196,9 +220,10 @@ export function initSpeech() {
       </div>
     </div>
     <div id="constructToggle" class="construct-toggle">❮</div>
-    <div id="constructHotbar" class="phrase-hotbar"></div>
-    <div id="constructPanel" class="construct-panel">
+    <div id="constructHotbar" class="construct-hotbar"></div>
+    <div id="modalConstructorPanel" class="modal-constructor-panel">
       <div class="construct-header">
+        <span class="construct-title">Modal Panel Constructor</span>
         <button id="closeConstructBtn" class="cast-button">❌</button>
       </div>
       <div class="construct-tab constructor-view">
@@ -206,11 +231,11 @@ export function initSpeech() {
         <div id="resourceButtons" class="resource-buttons"></div>
         <button id="performConstruct" class="cast-button construct-button">Construct</button>
         <div id="memorySlotsDisplay" class="memory-slots"></div>
-        <div id="constructCards" class="built-phrases"></div>
+        <div id="constructCards" class="built-constructs"></div>
       </div>
     </div>
   `;
-  panel = container.querySelector('#constructPanel');
+  panel = container.querySelector('#modalConstructorPanel');
   container.querySelector('#constructToggle').addEventListener('click', togglePanel);
   panel.querySelector('#closeConstructBtn').addEventListener('click', togglePanel);
   panel.querySelector('#performConstruct').addEventListener('click', performConstruct);
@@ -221,6 +246,7 @@ export function initSpeech() {
   renderUpgrades();
   renderConstructCards();
   renderHotbar();
+  renderSeasonBanner();
   if (window.lucide) lucide.createIcons({ icons: lucide.icons });
 }
 
@@ -334,6 +360,9 @@ function renderConstructCards() {
     if (speechState.activeConstructs.includes(c)) card.classList.add('active');
     card.addEventListener('click', () => toggleConstructActive(c));
     wrapper.appendChild(card);
+    const timer = document.createElement('div');
+    timer.className = 'cooldown-timer';
+    wrapper.appendChild(timer);
     const info = createConstructInfo(c);
     if (info) wrapper.appendChild(info);
     cont.appendChild(wrapper);
@@ -343,10 +372,10 @@ function renderConstructCards() {
 
 function createConstructCard(name) {
   const card = document.createElement('div');
-  card.className = 'phrase-card';
+  card.className = 'construct-card';
   card.dataset.name = name;
   const title = document.createElement('div');
-  title.className = 'phrase-word';
+  title.className = 'construct-name';
   title.textContent = name;
   card.appendChild(title);
   const recipe = recipes.find(r => r.name === name);
@@ -424,7 +453,7 @@ function castConstruct(name, el) {
     if (r) r.current = Math.min(r.max, r.current + amt);
   }
   speechState.voiceXp += def.xp || 0;
-  showPhraseCloud(name, el);
+  showConstructCloud(name, el);
   if (def.duration) {
     speechState.activeBuffs[name] = def.duration;
   } else {
@@ -445,7 +474,7 @@ function renderHotbar() {
   bar.innerHTML = '';
   speechState.activeConstructs.forEach(c => {
     const card = createConstructCard(c);
-    card.classList.add('hotbar-phrase');
+    card.classList.add('hotbar-construct');
     card.addEventListener('click', () => castConstruct(c, card));
     bar.appendChild(card);
   });
@@ -476,7 +505,23 @@ function renderOrbs() {
     const label = container.querySelector(`#${id}Value`);
     if (label) label.textContent = `${Math.floor(orb.current)}/${orb.max}`;
     const regenLabel = container.querySelector(`#${id}Regen`);
-    if (regenLabel) regenLabel.textContent = `${speechState.gains[id.replace('orb','').toLowerCase()].toFixed(1)}/s`;
+    if (regenLabel) {
+      if (speechState.upgrades.clarividence.level > 0) {
+        const valEl = regenLabel.querySelector('span');
+        if (valEl) valEl.textContent = `+${speechState.gains[id.replace('orb','').toLowerCase()].toFixed(3)}/s`;
+        regenLabel.style.display = 'flex';
+        if (id === 'orbInsight') {
+          regenLabel.onmouseenter = e => {
+            showTooltip(`Base: ${speechState.insightRegenBase.toFixed(3)}<br>Current: ${speechState.gains.insight.toFixed(3)}`, e.clientX + 10, e.clientY + 10);
+          };
+          regenLabel.onmouseleave = hideTooltip;
+          const icon = seasonIcons[speechState.seasonIndex];
+          regenLabel.firstChild.textContent = icon;
+        }
+      } else {
+        regenLabel.style.display = 'none';
+      }
+    }
   };
   update('orbBody', speechState.orbs.body);
   update('orbInsight', speechState.orbs.insight);
@@ -488,12 +533,24 @@ function renderOrbs() {
   window.dispatchEvent(new CustomEvent('orbs-changed'));
 }
 
+function renderSeasonBanner() {
+  const banner = document.getElementById('seasonBanner');
+  if (!banner) return;
+  const idx = speechState.seasonIndex;
+  const season = seasons[idx];
+  banner.textContent = season.name;
+  banner.className = `season-banner ${seasonClasses[idx]}`;
+  if (speechState.weather) {
+    banner.innerHTML = `${season.name}<span class="weather-icon">${speechState.weather.icon}</span>`;
+  }
+}
+
 function renderResources() {
   const panelRes = document.getElementById('secondaryResources');
   if (!panelRes) return;
   panelRes.innerHTML = '';
   Object.entries(speechState.resources).forEach(([key, res]) => {
-    if (res.unlocked === false) return;
+    if (key === 'insight' || res.unlocked === false) return;
     const box = document.createElement('div');
     box.className = 'resource-box';
     const header = document.createElement('div');
@@ -529,11 +586,18 @@ function getUpgradeCost(name) {
     return up.costFunc(up.level);
   }
   if (typeof up.baseCost === 'number') {
+    if (up.scale === 'linear') {
+      return Math.floor(up.baseCost + up.level);
+    }
     return Math.floor(up.baseCost * Math.pow(2, up.level));
   }
   const costs = {};
   for (const [k, v] of Object.entries(up.baseCost)) {
-    costs[k] = Math.floor(v * Math.pow(2, up.level));
+    if (up.scale === 'linear') {
+      costs[k] = Math.floor(v + up.level);
+    } else {
+      costs[k] = Math.floor(v * Math.pow(2, up.level));
+    }
   }
   return costs;
 }
@@ -556,7 +620,7 @@ function purchaseUpgrade(name) {
   }
   up.level += 1;
   if (name === 'cohere') {
-    speechState.gains.insight += 0.5;
+    // regen handled in tickSpeech based on upgrade level
   } else if (name === 'vocalMaturity') {
     speechState.voiceXp += 5;
   } else if (name === 'capacityBoost') {
@@ -587,10 +651,26 @@ export function renderUpgrades() {
   ['cohere','expandMind'].forEach(name => {
     const btn = document.createElement('button');
     const cost = getUpgradeCost(name);
-    btn.innerHTML = `${name} (${typeof cost === 'number' ? cost : Object.values(cost).join(',')})`;
+    const up = speechState.upgrades[name];
+    let costHtml = '';
+    if (typeof cost === 'number') {
+      costHtml = `<span class="icon-row"><span><i data-lucide="${resourceIcons.insight}"></i> ${cost}</span></span>`;
+    } else {
+      costHtml = `<span class="icon-row">` +
+        Object.entries(cost).map(([r,a]) => `<span><i data-lucide="${resourceIcons[r] || 'package'}"></i> ${a}</span>`).join(' ') +
+        `</span>`;
+    }
+    btn.innerHTML = `<span class="upg-info"><span class="upg-name">${name}</span><span class="upgrade-level">Lv.${up.level}</span></span>${costHtml}`;
     btn.addEventListener('click', () => purchaseUpgrade(name));
     coreGroup.appendChild(btn);
   });
+  if (speechState.upgrades.clarividence.unlocked && speechState.upgrades.clarividence.level === 0) {
+    const btn = document.createElement('button');
+    const cost = getUpgradeCost('clarividence');
+    btn.innerHTML = `<span class="upg-info"><span class="upg-name">clarividence</span></span><span class="icon-row"><span><i data-lucide="${resourceIcons.insight}"></i> ${cost}</span></span>`;
+    btn.addEventListener('click', () => purchaseUpgrade('clarividence'));
+    coreGroup.appendChild(btn);
+  }
   if (speechState.upgrades.vocalMaturity.unlocked || speechState.failCount >= 5) {
     const vocal = document.createElement('div');
     vocal.className = 'upgrade-group';
@@ -624,23 +704,32 @@ function tickActiveConstructs(dt) {
 
 function updateCooldownOverlays() {
   if (!container) return;
-  const cards = container.querySelectorAll('.phrase-card[data-name]');
+  const cards = container.querySelectorAll('.construct-card[data-name]');
   cards.forEach(card => {
     const name = card.dataset.name;
     const def = recipes.find(r => r.name === name);
-    if (!def || !def.cooldown) return;
-    const remaining = speechState.cooldowns[name] || 0;
-    const ratio = 1 - remaining / def.cooldown;
+    if (!def) return;
+    const remaining = def.cooldown ? (speechState.cooldowns[name] || 0) : 0;
+    const ratio = def.cooldown ? 1 - remaining / def.cooldown : 1;
     const overlay = card.querySelector('.cooldown-overlay');
     if (overlay) overlay.style.setProperty('--cooldown', ratio);
+    const affordable = Object.entries(def.input || {}).every(([res, amt]) => {
+      const r = speechState.resources[res];
+      return r && r.current >= amt;
+    });
+    const ready = remaining === 0 && affordable;
     card.classList.toggle('onCooldown', remaining > 0);
+    card.classList.toggle('available', ready);
+    card.classList.toggle('unavailable', !ready);
+    const timer = card.parentElement.querySelector('.cooldown-timer');
+    if (timer) timer.textContent = remaining > 0 ? `${remaining.toFixed(1)}s` : '';
   });
 }
 
 export function tickSpeech(delta) {
   if (!container) return;
   const dt = delta / 1000;
-  ['insight', 'body', 'will'].forEach(k => {
+  ['body', 'will'].forEach(k => {
     const orb = speechState.orbs[k];
     const rate = speechState.gains[k];
     if (rate > 0) {
@@ -651,20 +740,54 @@ export function tickSpeech(delta) {
       }
     }
   });
+  speechState.seasonTimer += dt;
+  if (speechState.seasonTimer >= 1) {
+    speechState.seasonTimer -= 1;
+    speechState.seasonDay += 1;
+    if (speechState.weather) {
+      speechState.weather.days -= 1;
+      if (speechState.weather.days <= 0) speechState.weather = null;
+    } else if (Math.random() < 0.01) {
+      const type = Math.random() < 0.5 ? 'clear' : 'torment';
+      speechState.weather = {
+        type,
+        multiplier: type === 'clear' ? 1.25 : 0.5,
+        icon: type === 'clear' ? '\u2728' : '\uD83D\uDE2D',
+        days: 1
+      };
+      addLog(type === 'clear' ? 'Clear minded day!' : 'Torment sets in!', 'info');
+    }
+    if (speechState.seasonDay >= SEASON_LENGTH_DAYS) {
+      speechState.seasonDay = 0;
+      speechState.seasonIndex = (speechState.seasonIndex + 1) % seasons.length;
+    }
+  }
   const ins = speechState.resources.insight;
-  ins.current = Math.min(ins.max, ins.current + ins.regen * dt);
+  const seasonMult = seasons[speechState.seasonIndex].multiplier;
+  const baseRate = R_MAX / (1 + Math.exp((ins.current - MIDPOINT) / K));
+  const upgradeBonus = speechState.upgrades.cohere.level * R_MAX;
+  let regen = baseRate * seasonMult + upgradeBonus;
+  speechState.insightRegenBase = baseRate + upgradeBonus;
+  if (speechState.weather) regen *= speechState.weather.multiplier;
+  speechState.gains.insight = regen;
+  ins.current = Math.min(ins.max, ins.current + regen * dt);
+  if (!speechState.upgrades.clarividence.unlocked && ins.current >= 300) {
+    speechState.upgrades.clarividence.unlocked = true;
+    renderUpgrades();
+  }
   tickActiveConstructs(dt);
   updateCooldownOverlays();
   renderOrbs();
+  renderSeasonBanner();
   renderResources();
   refreshCore();
   renderXpBar();
 }
 
-function showPhraseCloud(text, target) {
+function showConstructCloud(text, target) {
   if (!container) return;
   const el = document.createElement('div');
-  el.className = 'phrase-cloud';
+  el.className = 'construct-cloud';
   el.textContent = text;
   const parent = target || container;
   parent.appendChild(el);

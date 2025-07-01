@@ -154,6 +154,7 @@ body.darkenshift-mode .tabsContainer button.active {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    text-align: center;
 
 }
 .imaginary-subtabs button:hover {
@@ -866,11 +867,11 @@ body.darkenshift-mode .tabsContainer button.active {
     pointer-events: none;
     border-radius: 50%;
 }
-.phrase-card.onCooldown {
+.construct-card.onCooldown {
     pointer-events: none;
     opacity: 0.6;
 }
-.phrase-card .cooldown-overlay {
+.construct-card .cooldown-overlay {
     border-radius: 4px;
 }
 
@@ -1504,6 +1505,7 @@ body.darkenshift-mode .tabsContainer button.active {
     text-shadow: 0 0 6px #000;
     box-shadow: 0 0 8px rgba(212, 175, 55, 0.5);
     transition: all 0.2s;
+    text-align: center;
 }
 .upgrade-subtabs button:hover {
     box-shadow: 0 0 12px rgba(212, 175, 55, 0.8);
@@ -1861,8 +1863,8 @@ body.darkenshift-mode .tabsContainer button.active {
     animation: fogFade 7s ease-in-out;
 }
 
-/* Floating phrase effect */
-.phrase-cloud {
+/* Floating construct effect */
+.construct-cloud {
     position: absolute;
     left: 50%;
     top: 40%;
@@ -1874,7 +1876,7 @@ body.darkenshift-mode .tabsContainer button.active {
     pointer-events: none;
     animation: cloud-rise 3s ease-out forwards;
 }
-.phrase-card .phrase-cloud {
+.construct-card .construct-cloud {
     top: 0;
 }
 
@@ -2144,6 +2146,7 @@ body.darkenshift-mode .tabsContainer button.active {
     transition: all 0.2s;
     color: #e0d0ff;
     background: #4b0082;
+    text-align: center;
 }
 .player-subtabs button.active {
     background: #b76eff;
@@ -2179,6 +2182,7 @@ body.darkenshift-mode .tabsContainer button.active {
     color: #e0d0ff;
     text-shadow: 0 0 6px #000;
     transition: all 0.2s;
+    text-align: center;
 }
 
 .stats-subtabs button.active {
@@ -2473,7 +2477,7 @@ body.darkenshift-mode .tabsContainer button.active {
     gap: 8px;
     align-items: center;
     margin-top: 0;
-    position: relative; /* allow floating phrase clouds */
+    position: relative; /* allow floating construct clouds */
     width: 100%;
     height: 100%;
     flex: 1;
@@ -2583,6 +2587,10 @@ body.darkenshift-mode .tabsContainer button.active {
     font-size: 0.6rem;
     text-align: center;
     color: #aaa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
 }
 
 .speech-orb {
@@ -2712,24 +2720,25 @@ body.darkenshift-mode .tabsContainer button.active {
 }
 
 
-.phrase-hotbar {
+.construct-hotbar {
     display: flex;
     gap: 6px;
     flex-wrap: wrap;
     justify-content: center;
 }
 
-.saved-phrases {
+.saved-constructs {
     display: flex;
     gap: 4px;
     flex-wrap: wrap;
     justify-content: center;
 }
 
-.phrase-card {
+.construct-card {
     position: relative;
     display: flex;
     flex-direction: column;
+    align-items: center;
     min-height: 64px;
     padding: 4px 8px 8px;
     border: 1px solid #555;
@@ -2739,13 +2748,13 @@ body.darkenshift-mode .tabsContainer button.active {
     background: #111;
     color: #eee;
 }
-.phrase-card.active {
+.construct-card.active {
     box-shadow: 0 0 6px #ffd27d;
 }
-.phrase-card:hover {
+.construct-card:hover {
     box-shadow: 0 0 6px #999;
 }
-.phrase-card .phrase-bar {
+.construct-card .construct-bar {
     position: absolute;
     bottom: 0;
     left: 0;
@@ -2753,20 +2762,21 @@ body.darkenshift-mode .tabsContainer button.active {
     height: 3px;
     background-size: 200% 100%;
 }
-.phrase-card:hover .phrase-bar {
-    animation: phrase-bar-slide 3s linear infinite;
+.construct-card:hover .construct-bar {
+    animation: construct-bar-slide 3s linear infinite;
 }
 
-@keyframes phrase-bar-slide {
+@keyframes construct-bar-slide {
     from { background-position: 0% 0; }
     to { background-position: 100% 0; }
 }
 
-.phrase-word {
+.construct-name {
     line-height: 1;
     display: block;
     font-weight: bold;
     text-shadow: 0 0 4px #000;
+    text-align: center;
 }
 
 .memory-slots {
@@ -2789,7 +2799,7 @@ body.darkenshift-mode .tabsContainer button.active {
     box-shadow: 0 0 4px #88f;
 }
 
-.construct-panel {
+.modal-constructor-panel {
     position: absolute;
     inset: 0;
     margin: 0;
@@ -2822,12 +2832,24 @@ body.darkenshift-mode .tabsContainer button.active {
     overflow-y: auto;
 }
 
-.construct-panel.open {
+.construct-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.construct-title {
+    font-weight: bold;
+    text-align: center;
+    flex: 1;
+}
+
+.modal-constructor-panel.open {
     transform: translateX(0);
     opacity: 1;
 }
 
-.construct-panel.close-right {
+.modal-constructor-panel.close-right {
     transform: translateX(100%);
 }
 
@@ -2899,7 +2921,7 @@ body.darkenshift-mode .tabsContainer button.active {
     flex: 0 0 auto;
 }
 
-.built-phrases {
+.built-constructs {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
@@ -2907,9 +2929,9 @@ body.darkenshift-mode .tabsContainer button.active {
     overflow-y: auto;
     flex: 1;
     justify-content: center;
-    align-items: flex-start;
+    align-items: center;
 }
-.construct-panel .phrase-card {
+.modal-constructor-panel .construct-card {
     width: 80px;
 }
 
@@ -2921,7 +2943,7 @@ body.darkenshift-mode .tabsContainer button.active {
     transform: none;
 }
 
-.hotbar-phrase {
+.hotbar-construct {
     font-size: 0.75rem;
     min-height: 60px;
 }
@@ -2978,10 +3000,31 @@ body.darkenshift-mode .tabsContainer button.active {
     box-shadow: 0 0 6px rgba(183, 110, 255, 0.5);
     transition: all 0.2s;
     width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
 }
 .speech-upgrades button:hover {
     box-shadow: 0 0 12px rgba(183, 110, 255, 0.8);
     color: #fff4b3;
+}
+.speech-upgrades .icon-row {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+.speech-upgrades .icon-row i {
+    width: 12px;
+    height: 12px;
+}
+.speech-upgrades .upg-info {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+.speech-upgrades .upgrade-level {
+    opacity: 0.8;
 }
 .speech-upgrades .section-title {
     margin-top: 8px;
@@ -3179,6 +3222,12 @@ body.darkenshift-mode .tabsContainer button.active {
     margin: 4px;
 }
 
+.cooldown-timer {
+    font-size: 0.65rem;
+    height: 14px;
+    text-align: center;
+}
+
 .construct-info {
     font-size: 0.65rem;
     text-align: center;
@@ -3208,4 +3257,18 @@ body.darkenshift-mode .tabsContainer button.active {
     width: 12px;
     height: 12px;
 }
+
+.season-banner {
+    text-align: center;
+    font-weight: bold;
+    font-size: 0.75rem;
+    padding: 2px 0;
+    border-radius: 4px;
+    margin-bottom: 4px;
+}
+.season-banner.spring { background: #4caf50; }
+.season-banner.summer { background: #d4af37; color: #000; }
+.season-banner.autumn { background: #e09028; }
+.season-banner.winter { background: #3399ff; }
+.season-banner .weather-icon { margin-left: 4px; }
 
