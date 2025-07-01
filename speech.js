@@ -6,11 +6,10 @@ import { coreState, refreshCore } from './core.js';
 export const speechState = {
   orbs: {
     body: { current: 0, max: 10 },
-    insight: { current: 0, max: 110 },
+    insight: { current: 0, max: 10, regen: 0.1 },
     will: { current: 0, max: 10 }
   },
   resources: {
-    insight: { current: 0, max: 10, regen: 0.1, unlocked: true },
     sound: { current: 0, max: 10, regen: 0, unlocked: true },
     thought: { current: 0, max: 10, regen: 0, unlocked: false },
     structure: { current: 0, max: 10, regen: 0, unlocked: false }
@@ -40,6 +39,9 @@ export const speechState = {
   constructUnlocked: true,
   pot: []
 };
+
+// use the same object for the insight resource and orb
+speechState.resources.insight = speechState.orbs.insight;
 
 // Basic construct recipe list. Additional constructs can be appended
 // later through unlocks or upgrades.
@@ -496,7 +498,7 @@ function renderResources() {
   if (!panelRes) return;
   panelRes.innerHTML = '';
   Object.entries(speechState.resources).forEach(([key, res]) => {
-    if (res.unlocked === false) return;
+    if (key === 'insight' || res.unlocked === false) return;
     const box = document.createElement('div');
     box.className = 'resource-box';
     const header = document.createElement('div');
@@ -647,12 +649,19 @@ function updateCooldownOverlays() {
   cards.forEach(card => {
     const name = card.dataset.name;
     const def = recipes.find(r => r.name === name);
-    if (!def || !def.cooldown) return;
-    const remaining = speechState.cooldowns[name] || 0;
-    const ratio = 1 - remaining / def.cooldown;
+    if (!def) return;
+    const remaining = def.cooldown ? (speechState.cooldowns[name] || 0) : 0;
+    const ratio = def.cooldown ? 1 - remaining / def.cooldown : 1;
     const overlay = card.querySelector('.cooldown-overlay');
     if (overlay) overlay.style.setProperty('--cooldown', ratio);
+    const affordable = Object.entries(def.input || {}).every(([res, amt]) => {
+      const r = speechState.resources[res];
+      return r && r.current >= amt;
+    });
+    const ready = remaining === 0 && affordable;
     card.classList.toggle('onCooldown', remaining > 0);
+    card.classList.toggle('available', ready);
+    card.classList.toggle('unavailable', !ready);
     const timer = card.parentElement.querySelector('.cooldown-timer');
     if (timer) timer.textContent = remaining > 0 ? `${remaining.toFixed(1)}s` : '';
   });

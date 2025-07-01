@@ -870,6 +870,13 @@ body.darkenshift-mode .tabsContainer button.active {
     pointer-events: none;
     opacity: 0.6;
 }
+.phrase-card.unavailable {
+    pointer-events: none;
+    opacity: 0.5;
+}
+.phrase-card.available:not(.onCooldown) {
+    box-shadow: 0 0 6px #7fd9ff;
+}
 .phrase-card .cooldown-overlay {
     border-radius: 4px;
 }
