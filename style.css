@@ -2739,11 +2739,11 @@ body.darkenshift-mode .tabsContainer button.active {
     display: flex;
     flex-direction: column;
     align-items: center;
-    min-height: 64px;
-    padding: 4px 8px 8px;
+    min-height: 48px;
+    padding: 3px 6px 6px;
     border: 1px solid #555;
     border-radius: 4px;
-    font-size: 1.08rem;
+    font-size: 0.9rem;
     cursor: pointer;
     background: #111;
     color: #eee;
@@ -2783,7 +2783,7 @@ body.darkenshift-mode .tabsContainer button.active {
     display: flex;
     gap: 4px;
     justify-content: center;
-    margin-bottom: 4px;
+    margin-bottom: 6px;
 }
 
 .memory-slot {
@@ -2797,6 +2797,12 @@ body.darkenshift-mode .tabsContainer button.active {
 .memory-slot.filled {
     background: #88f;
     box-shadow: 0 0 4px #88f;
+}
+
+.construct-requirements {
+    font-size: 0.55rem;
+    text-align: center;
+    margin-bottom: 4px;
 }
 
 .modal-constructor-panel {
@@ -2926,13 +2932,14 @@ body.darkenshift-mode .tabsContainer button.active {
     flex-wrap: wrap;
     gap: 10px;
     padding: 6px;
+    margin-top: 6px;
     overflow-y: auto;
     flex: 1;
     justify-content: center;
     align-items: center;
 }
 .modal-constructor-panel .construct-card {
-    width: 80px;
+    width: 60px;
 }
 
 .speech-panel.construct-mode .speech-orbs {
@@ -2945,7 +2952,7 @@ body.darkenshift-mode .tabsContainer button.active {
 
 .hotbar-construct {
     font-size: 0.75rem;
-    min-height: 60px;
+    min-height: 48px;
 }
 
 .cast-button {
@@ -3209,7 +3216,7 @@ body.darkenshift-mode .tabsContainer button.active {
 }
 .construct-effect,
 .construct-cost {
-    font-size: 0.65rem;
+    font-size: 0.55rem;
     text-align: center;
 }
 
@@ -3217,7 +3224,7 @@ body.darkenshift-mode .tabsContainer button.active {
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 80px;
+    width: 60px;
     gap: 2px;
     margin: 4px;
 }
@@ -3229,7 +3236,7 @@ body.darkenshift-mode .tabsContainer button.active {
 }
 
 .construct-info {
-    font-size: 0.65rem;
+    font-size: 0.55rem;
     text-align: center;
     display: flex;
     flex-direction: column;
@@ -3237,8 +3244,8 @@ body.darkenshift-mode .tabsContainer button.active {
 }
 
 .construct-info i {
-    width: 12px;
-    height: 12px;
+    width: 10px;
+    height: 10px;
 }
 
 .construct-icons {
@@ -3246,7 +3253,7 @@ body.darkenshift-mode .tabsContainer button.active {
     flex-direction: column;
     align-items: center;
     gap: 2px;
-    font-size: 0.65rem;
+    font-size: 0.55rem;
 }
 .construct-icons .icon-row {
     display: flex;
@@ -3254,8 +3261,8 @@ body.darkenshift-mode .tabsContainer button.active {
     align-items: center;
 }
 .construct-icons i {
-    width: 12px;
-    height: 12px;
+    width: 10px;
+    height: 10px;
 }
 
 .season-banner {

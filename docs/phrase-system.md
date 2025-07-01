@@ -21,7 +21,9 @@ The phrase builder has been replaced with a simpler construct mechanic. The **Co
 | Invocation           | Recipe (to Discover)      | Cost to Use           | Cooldown | Type        | Effect Summary                                        |
 | -------------------- | ------------------------- | --------------------- | -------- | ----------- | ----------------------------------------------------- |
 | **Murmur**           | —                         | 25 Insight            | 0s       | Generator   | +1 Sound, +1 Voice XP                                 |
-| **Echo of Mind**     | Sound + Insight           | 4 Insight             | 5s       | Generator   | +1 Thought over 5s (decaying)                         |
+| **Echo of Mind**     | Sound + Insight           | 4 Insight             | 5s       | Generator   | +1 Thought over 5s (decaying) *(Requires Voice Lv.3 to use)* |
 | **Clarity Pulse**    | Thought + Insight         | 2 Insight + 1 Thought | 30s      | Buff        | +1% Sound & Insight regen/sec for 30s                 |
 | **Symbol Seed**      | Sound + Thought           | 2 Sound + 2 Thought   | 10s      | Generator   | After 10s of draining, produces +1 Structure          |
 | **Mental Construct** | Thought + Insight + Sound | 30 Insight + 5 Sound  | 60s      | Buff        | Auto-cast any construct in slots for 60 seconds if possible, checking each second |
+
+*Crafting **Echo of Mind** additionally requires accumulating 1500 Insight and reaching Voice Level 3.*

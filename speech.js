@@ -29,7 +29,7 @@ export const speechState = {
     will: { current: 0, max: 10 }
   },
   resources: {
-    sound: { current: 0, max: 10, regen: 0, unlocked: true },
+    sound: { current: 0, max: 100, regen: 0, unlocked: true },
     thought: { current: 0, max: 10, regen: 0, unlocked: false },
     structure: { current: 0, max: 10, regen: 0, unlocked: false }
   },
@@ -86,6 +86,7 @@ const recipes = [
     output: { thought: 1 },
     xp: 1,
     unlocked: true,
+    requirements: { voiceLevel: 3, insight: 1500 },
     duration: 5,
     cooldown: 5
   },
@@ -237,6 +238,7 @@ export function initSpeech() {
         <div id="resourceButtons" class="resource-buttons"></div>
         <button id="performConstruct" class="cast-button construct-button">Construct</button>
         <div id="memorySlotsDisplay" class="memory-slots"></div>
+        <div id="constructRequirements" class="construct-requirements"></div>
         <div id="constructCards" class="built-constructs"></div>
       </div>
     </div>
@@ -283,6 +285,7 @@ function renderPot() {
   if (!pot) return;
   pot.textContent = speechState.pot.length ? speechState.pot.join(' + ') : '⚗️';
   updateConstructButtonValidity();
+  renderConstructRequirements();
 }
 
 function updateConstructButtonValidity() {
@@ -293,6 +296,28 @@ function updateConstructButtonValidity() {
                 speechState.pot.length <= 3 &&
                 unique.size === speechState.pot.length;
   btn.classList.toggle('invalid', !valid);
+}
+
+function renderConstructRequirements() {
+  const reqEl = panel.querySelector('#constructRequirements');
+  if (!reqEl) return;
+  reqEl.textContent = '';
+  reqEl.style.display = 'none';
+  const counts = {};
+  speechState.pot.forEach(r => {
+    counts[r] = (counts[r] || 0) + 1;
+  });
+  const recipe = recipes.find(r => r.unlocked && Object.entries(r.input).every(([k,v]) => counts[k] >= v));
+  if (!recipe || !recipe.requirements) return;
+  const reqs = [];
+  if (recipe.requirements.voiceLevel) {
+    reqs.push(`Voice Lv.${recipe.requirements.voiceLevel}`);
+  }
+  if (recipe.requirements.insight) {
+    reqs.push(`${recipe.requirements.insight} Insight`);
+  }
+  reqEl.textContent = `Requires: ${reqs.join(' & ')}`;
+  reqEl.style.display = 'block';
 }
 
 function renderResourcesUI() {
@@ -318,7 +343,18 @@ function performConstruct() {
   const recipe = recipes.find(r => r.unlocked && Object.entries(r.input).every(([k,v]) => counts[k] >= v));
   speechState.pot = [];
   renderPot();
+  renderConstructRequirements();
   if (!recipe) return;
+  if (recipe.requirements) {
+    if (recipe.requirements.voiceLevel && speechState.voiceLevel < recipe.requirements.voiceLevel) {
+      addLog(`Requires Voice Lv.${recipe.requirements.voiceLevel}`, 'error');
+      return;
+    }
+    if (recipe.requirements.insight && speechState.resources.insight.current < recipe.requirements.insight) {
+      addLog(`Requires ${recipe.requirements.insight} Insight`, 'error');
+      return;
+    }
+  }
   for (const [res, amt] of Object.entries(recipe.input)) {
     if (!speechState.resources[res] || speechState.resources[res].current < amt) return;
   }
@@ -446,6 +482,10 @@ function toggleConstructActive(name) {
 function castConstruct(name, el) {
   const def = recipes.find(r => r.name === name);
   if (!def) return;
+  if (def.requirements && def.requirements.voiceLevel && speechState.voiceLevel < def.requirements.voiceLevel) {
+    addLog(`Requires Voice Lv.${def.requirements.voiceLevel}`, 'error');
+    return;
+  }
   if (speechState.cooldowns[name] > 0) return;
   for (const [res, amt] of Object.entries(def.input)) {
     const r = speechState.resources[res];
@@ -758,11 +798,12 @@ export function tickSpeech(delta) {
       if (speechState.weather.days <= 0) speechState.weather = null;
     } else if (Math.random() < 0.01) {
       const type = Math.random() < 0.5 ? 'clear' : 'torment';
+      const duration = 180 + Math.floor(Math.random() * 121); // 3-5 minutes
       speechState.weather = {
         type,
         multiplier: type === 'clear' ? 1.25 : 0.5,
         icon: type === 'clear' ? '\u2728' : '\uD83D\uDE2D',
-        days: 1
+        days: duration
       };
       addLog(type === 'clear' ? 'Clear minded day!' : 'Torment sets in!', 'info');
     }
