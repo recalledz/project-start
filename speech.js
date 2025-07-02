@@ -29,7 +29,7 @@ export const speechState = {
     will: { current: 0, max: 10 }
   },
   resources: {
-    sound: { current: 0, max: 100, regen: 0, unlocked: true },
+    sound: { current: 0, max: 200, regen: 0, unlocked: true },
     thought: { current: 0, max: 10, regen: 0, unlocked: false },
     structure: { current: 0, max: 10, regen: 0, unlocked: false }
   },
@@ -49,8 +49,11 @@ export const speechState = {
     },
     clarividence: { level: 0, baseCost: 300, unlocked: false }
   },
-  voiceXp: 0,
-  voiceLevel: 1,
+  skills: {
+    voice: { xp: 0, level: 0 },
+    mind: { xp: 0, level: 0 }
+  },
+  mindSlotAwarded: false,
   memorySlots: 2,
   seasonIndex: 0,
   seasonDay: 0,
@@ -62,7 +65,9 @@ export const speechState = {
   activeBuffs: {},
   cooldowns: {},
   constructUnlocked: true,
-  pot: []
+  pot: [],
+  constructPotency: {},
+  disciples: []
 };
 
 // use the same object for the insight resource and orb
@@ -77,6 +82,7 @@ const recipes = [
     input: { insight: 25 },
     output: { sound: 1 },
     xp: 1,
+    tags: ['voice'],
     unlocked: true,
     cooldown: 1
   },
@@ -85,6 +91,7 @@ const recipes = [
     input: { sound: 1, insight: 1 },
     output: { thought: 1 },
     xp: 1,
+    tags: ['voice','mind'],
     unlocked: true,
     requirements: { voiceLevel: 3, insight: 1500 },
     duration: 5,
@@ -118,8 +125,22 @@ const recipes = [
     type: 'buff',
     duration: 60,
     cooldown: 60
+  },
+  {
+    name: 'Calling',
+    input: { sound: 200 },
+    output: {},
+    xp: 0,
+    tags: ['voice'],
+    unlocked: true,
+    cooldown: 300
   }
 ];
+
+// initialize potency for each construct
+recipes.forEach(r => {
+  speechState.constructPotency[r.name] = r.potency || 1.0;
+});
 
 const resourceIcons = {
   insight: 'star',
@@ -130,11 +151,55 @@ const resourceIcons = {
   will: 'flame'
 };
 
+function xpRequired(level) {
+  return Math.round(50 * Math.pow(1.2, level));
+}
+
+function getSkillProgress(xp) {
+  let total = 0;
+  let level = 0;
+  let next = xpRequired(level);
+  while (xp >= total + next) {
+    total += next;
+    level += 1;
+    next = xpRequired(level);
+  }
+  const progress = (xp - total) / next;
+  return { level, progress, next };
+}
+
+function awardXp(amount, tags) {
+  if (!tags || tags.length === 0) return;
+  const split = amount / tags.length;
+  tags.forEach(tag => {
+    const skill = speechState.skills[tag];
+    if (skill) {
+      skill.xp += split;
+      const progress = getSkillProgress(skill.xp);
+      if (progress.level > skill.level) {
+        const gained = progress.level - skill.level;
+        skill.level = progress.level;
+        if (tag === 'voice') {
+          const mult = Math.pow(1.05, gained);
+          Object.keys(speechState.constructPotency).forEach(k => {
+            speechState.constructPotency[k] *= mult;
+          });
+        }
+        if (tag === 'mind' && progress.level >= 1 && !speechState.mindSlotAwarded) {
+          speechState.memorySlots += 1;
+          speechState.mindSlotAwarded = true;
+        }
+      }
+    }
+  });
+}
+
 // Per-tick effects for active constructs. These are simplified
 // implementations to demonstrate the new constructs in action.
 const constructEffects = {
   Murmur(dt) {
-    const amount = dt; // 1 insight -> 1 sound per second
+    const pot = speechState.constructPotency['Murmur'] || 1;
+    const amount = dt * pot; // 1 insight -> sound per second scaled
     const ins = speechState.resources.insight;
     const snd = speechState.resources.sound;
     if (ins.current >= amount) {
@@ -145,7 +210,8 @@ const constructEffects = {
   'Echo of Mind'(dt) {
     const ins = speechState.resources.insight;
     const th = speechState.resources.thought;
-    const amount = dt * 0.2; // slower rate
+    const pot = speechState.constructPotency['Echo of Mind'] || 1;
+    const amount = dt * 0.2 * pot; // slower rate
     if (ins.current >= amount) {
       ins.current -= amount;
       th.current = Math.min(th.max, th.current + amount);
@@ -153,7 +219,8 @@ const constructEffects = {
     }
   },
   'Clarity Pulse'(dt) {
-    const bonus = 0.01 * dt; // 1% regen per second
+    const pot = speechState.constructPotency['Clarity Pulse'] || 1;
+    const bonus = 0.01 * dt * pot; // regen scaled by potency
     speechState.resources.insight.current = Math.min(
       speechState.resources.insight.max,
       speechState.resources.insight.current + bonus
@@ -167,11 +234,12 @@ const constructEffects = {
     const th = speechState.resources.thought;
     const snd = speechState.resources.sound;
     const str = speechState.resources.structure;
+    const pot = speechState.constructPotency['Symbol Seed'] || 1;
     const drain = dt * 0.1;
     if (th.current >= drain && snd.current >= drain) {
       th.current -= drain;
       snd.current -= drain;
-      str.current = Math.min(str.max, str.current + drain);
+      str.current = Math.min(str.max, str.current + drain * pot);
       str.unlocked = true;
     }
   },
@@ -183,6 +251,18 @@ const constructEffects = {
         const effect = constructEffects[c];
         if (effect) effect(dt);
       });
+  },
+  'Calling'() {
+    const callPower = speechState.constructPotency['Calling'] || 1;
+    const targetIdx = speechState.disciples.length + 1;
+    const reqPower = Math.pow(1.8, targetIdx - 1);
+    const chance = Math.max(0.05, Math.min(1, callPower / reqPower));
+    if (Math.random() < chance) {
+      speechState.disciples.push({ id: targetIdx });
+      addLog('A new Disciple has answered your call!', 'info');
+    } else {
+      addLog('Your call went unanswered.', 'info');
+    }
   }
 };
 
@@ -346,7 +426,7 @@ function performConstruct() {
   renderConstructRequirements();
   if (!recipe) return;
   if (recipe.requirements) {
-    if (recipe.requirements.voiceLevel && speechState.voiceLevel < recipe.requirements.voiceLevel) {
+    if (recipe.requirements.voiceLevel && speechState.skills.voice.level < recipe.requirements.voiceLevel) {
       addLog(`Requires Voice Lv.${recipe.requirements.voiceLevel}`, 'error');
       return;
     }
@@ -365,7 +445,7 @@ function performConstruct() {
     const r = speechState.resources[res];
     if (r) r.current = Math.min(r.max, r.current + amt);
   }
-  speechState.voiceXp += recipe.xp;
+  awardXp(recipe.xp, recipe.tags || ['voice']);
   addConstruct(recipe.name);
   renderResourcesUI();
   renderXpBar();
@@ -482,8 +562,13 @@ function toggleConstructActive(name) {
 function castConstruct(name, el) {
   const def = recipes.find(r => r.name === name);
   if (!def) return;
-  if (def.requirements && def.requirements.voiceLevel && speechState.voiceLevel < def.requirements.voiceLevel) {
+  const voiceSkill = speechState.skills.voice;
+  if (def.requirements && def.requirements.voiceLevel && voiceSkill.level < def.requirements.voiceLevel) {
     addLog(`Requires Voice Lv.${def.requirements.voiceLevel}`, 'error');
+    return;
+  }
+  if (def.requirements && def.requirements.insight && speechState.resources.insight.current < def.requirements.insight) {
+    addLog(`Requires ${def.requirements.insight} Insight`, 'error');
     return;
   }
   if (speechState.cooldowns[name] > 0) return;
@@ -498,7 +583,7 @@ function castConstruct(name, el) {
     const r = speechState.resources[res];
     if (r) r.current = Math.min(r.max, r.current + amt);
   }
-  speechState.voiceXp += def.xp || 0;
+  awardXp(def.xp || 0, def.tags || ['voice']);
   showConstructCloud(name, el);
   if (def.duration) {
     speechState.activeBuffs[name] = def.duration;
@@ -530,10 +615,11 @@ function renderXpBar() {
   const barFill = container.querySelector('.speech-xp-fill');
   const lvlEl = container.querySelector('#voiceLevel');
   if (!barFill || !lvlEl) return;
-  speechState.voiceLevel = Math.floor(speechState.voiceXp / 10) + 1;
-  const pct = Math.min(1, (speechState.voiceXp % 10) / 10);
-  barFill.style.width = `${pct * 100}%`;
-  lvlEl.textContent = `Voice Lv.${speechState.voiceLevel}`;
+  const skill = speechState.skills.voice;
+  const prog = getSkillProgress(skill.xp);
+  skill.level = prog.level;
+  barFill.style.width = `${(prog.progress * 100).toFixed(1)}%`;
+  lvlEl.textContent = `Voice Lv.${prog.level}`;
 }
 
 function renderOrbs() {
@@ -651,6 +737,19 @@ function getUpgradeCost(name) {
   return costs;
 }
 
+function canAfford(cost) {
+  if (typeof cost === 'number') {
+    return speechState.orbs.insight.current >= cost;
+  }
+  for (const [k, v] of Object.entries(cost)) {
+    const orb = speechState.orbs[k];
+    const res = speechState.resources[k];
+    const have = orb ? orb.current : res ? res.current : 0;
+    if (have < v) return false;
+  }
+  return true;
+}
+
 function purchaseUpgrade(name) {
   const up = speechState.upgrades[name];
   const cost = getUpgradeCost(name);
@@ -671,7 +770,7 @@ function purchaseUpgrade(name) {
   if (name === 'cohere') {
     // regen handled in tickSpeech based on upgrade level
   } else if (name === 'vocalMaturity') {
-    speechState.voiceXp += 5;
+    awardXp(5, ['voice']);
   } else if (name === 'capacityBoost') {
     speechState.memorySlots += 1;
   } else if (name === 'expandMind') {
@@ -703,12 +802,20 @@ export function renderUpgrades() {
     const up = speechState.upgrades[name];
     let costHtml = '';
     if (typeof cost === 'number') {
-      costHtml = `<span class="icon-row"><span><i data-lucide="${resourceIcons.insight}"></i> ${cost}</span></span>`;
+      const have = speechState.orbs.insight.current;
+      const cls = have >= cost ? '' : 'cost-missing';
+      costHtml = `<span class="icon-row"><span class="${cls}"><i data-lucide="${resourceIcons.insight}"></i> ${cost}</span></span>`;
     } else {
       costHtml = `<span class="icon-row">` +
-        Object.entries(cost).map(([r,a]) => `<span><i data-lucide="${resourceIcons[r] || 'package'}"></i> ${a}</span>`).join(' ') +
+        Object.entries(cost).map(([r,a]) => {
+          const have = (speechState.orbs[r]?.current ?? speechState.resources[r]?.current ?? 0);
+          const cls = have >= a ? '' : 'cost-missing';
+          return `<span class="${cls}"><i data-lucide="${resourceIcons[r] || 'package'}"></i> ${a}</span>`;
+        }).join(' ') +
         `</span>`;
     }
+    const affordable = canAfford(cost);
+    btn.classList.toggle('unaffordable', !affordable);
     btn.innerHTML = `<span class="upg-info"><span class="upg-name">${name}</span><span class="upgrade-level">Lv.${up.level}</span></span>${costHtml}`;
     btn.addEventListener('click', () => purchaseUpgrade(name));
     coreGroup.appendChild(btn);
@@ -716,7 +823,9 @@ export function renderUpgrades() {
   if (speechState.upgrades.clarividence.unlocked && speechState.upgrades.clarividence.level === 0) {
     const btn = document.createElement('button');
     const cost = getUpgradeCost('clarividence');
-    btn.innerHTML = `<span class="upg-info"><span class="upg-name">clarividence</span></span><span class="icon-row"><span><i data-lucide="${resourceIcons.insight}"></i> ${cost}</span></span>`;
+    const cls = speechState.orbs.insight.current >= cost ? '' : 'cost-missing';
+    btn.innerHTML = `<span class="upg-info"><span class="upg-name">clarividence</span></span><span class="icon-row"><span class="${cls}"><i data-lucide="${resourceIcons.insight}"></i> ${cost}</span></span>`;
+    btn.classList.toggle('unaffordable', !canAfford(cost));
     btn.addEventListener('click', () => purchaseUpgrade('clarividence'));
     coreGroup.appendChild(btn);
   }
@@ -726,7 +835,9 @@ export function renderUpgrades() {
     panelUp.appendChild(vocal);
     const btn = document.createElement('button');
     const cost = getUpgradeCost('vocalMaturity');
-    btn.innerHTML = `vocalMaturity (${cost})`;
+    const cls = speechState.orbs.insight.current >= cost ? '' : 'cost-missing';
+    btn.innerHTML = `<span class="icon-row"><span class="${cls}"><i data-lucide="${resourceIcons.insight}"></i> ${cost}</span></span>`;
+    btn.classList.toggle('unaffordable', !canAfford(cost));
     btn.addEventListener('click', () => purchaseUpgrade('vocalMaturity'));
     vocal.appendChild(btn);
   }

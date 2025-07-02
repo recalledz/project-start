@@ -3025,6 +3025,12 @@ body.darkenshift-mode .tabsContainer button.active {
     width: 12px;
     height: 12px;
 }
+.speech-upgrades .cost-missing {
+    color: #ff6b6b;
+}
+.speech-upgrades button.unaffordable {
+    opacity: 0.6;
+}
 .speech-upgrades .upg-info {
     display: flex;
     gap: 4px;
