@@ -128,11 +128,12 @@ const recipes = [
   },
   {
     name: 'Calling',
-    input: { sound: 200 },
+    input: { sound: 100 },
     output: {},
     xp: 0,
     tags: ['voice'],
-    unlocked: true,
+    unlocked: false,
+    requirements: { sound: 100 },
     cooldown: 300
   }
 ];
@@ -940,6 +941,12 @@ export function tickSpeech(delta) {
   if (!speechState.upgrades.clarividence.unlocked && ins.current >= 50) {
     speechState.upgrades.clarividence.unlocked = true;
     renderUpgrades();
+  }
+  const call = recipes.find(r => r.name === 'Calling');
+  if (call && !call.unlocked && speechState.resources.sound.current >= 100) {
+    call.unlocked = true;
+    addLog('Calling construct unlocked!', 'info');
+    renderConstructCards();
   }
   tickActiveConstructs(dt);
   updateCooldownOverlays();

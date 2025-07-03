@@ -165,6 +165,8 @@ const sectState = {
   taskTimers: { gatherFruits: 0 }
 };
 
+const lifeCore = { real: false };
+
 const barUpgrades = {
   damage: { level: 0, progress: 0, points: 0, multiplier: 1 },
   maxHp: { level: 0, progress: 0, points: 0, multiplier: 1 }
@@ -2617,7 +2619,8 @@ Object.entries(upgrades).map(([k, u]) => [k, u.unlocked])
     unlockedJokers: unlockedJokers.map(j => j.id),
     playerStats,
     worldProgress,
-    barUpgrades
+    barUpgrades,
+    lifeCore
   };
 
 try {
@@ -2651,6 +2654,10 @@ Object.assign(playerStats, state.playerStats || {});
       if (!worldProgress[id]) worldProgress[id] = data;
       else Object.assign(worldProgress[id], data);
     });
+  }
+
+  if (state.lifeCore) {
+    Object.assign(lifeCore, state.lifeCore);
   }
 
   if (state.barUpgrades) {
