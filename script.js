@@ -159,7 +159,7 @@ const systems = {
   manaUnlocked: false
 };
 
-const sectState = {
+export const sectState = {
   fruits: 0,
   discipleTasks: {}, // map disciple id -> current task
   taskTimers: { gatherFruits: 0 },

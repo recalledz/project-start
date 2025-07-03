@@ -1,5 +1,6 @@
 import addLog from './log.js';
 import { coreState, refreshCore } from './core.js';
+import { sectState } from './script.js';
 
 // Core state for the Constructs system. Orbs and upgrades from the
 // previous speech implementation remain intact.
@@ -47,7 +48,12 @@ export const speechState = {
       unlocked: true,
       costFunc: lvl => ({ insight: 2 * Math.pow(lvl + 1, 2) })
     },
-    clarividence: { level: 0, baseCost: 300, unlocked: false }
+    clarividence: { level: 0, baseCost: 300, unlocked: false },
+    idleChatter: {
+      level: 0,
+      baseCost: { sound: 200, thought: 10 },
+      unlocked: true
+    }
   },
   skills: {
     voice: { xp: 0, level: 0 },
@@ -818,7 +824,7 @@ export function renderUpgrades() {
   const coreGroup = document.createElement('div');
   coreGroup.className = 'upgrade-group';
   panelUp.appendChild(coreGroup);
-  ['cohere','expandMind'].forEach(name => {
+  ['cohere','expandMind','idleChatter'].forEach(name => {
     const btn = document.createElement('button');
     const cost = getUpgradeCost(name);
     const up = speechState.upgrades[name];
@@ -953,9 +959,17 @@ export function tickSpeech(delta) {
   const seasonMult = seasons[speechState.seasonIndex].multiplier;
   const baseRate = R_MAX / (1 + Math.exp((ins.current - MIDPOINT) / K));
   const upgradeBonus = speechState.upgrades.cohere.level * R_MAX;
-  let regen = baseRate * seasonMult + upgradeBonus;
-  speechState.insightRegenBase = baseRate + upgradeBonus;
+  const idleCount =
+    speechState.upgrades.idleChatter.level > 0
+      ? speechState.disciples.filter(
+          d => (sectState.discipleTasks[d.id] || 'Idle') === 'Idle'
+        ).length
+      : 0;
+  const idleMult = 1 + idleCount * 0.05;
+  const baseTotal = (baseRate + upgradeBonus) * idleMult;
+  let regen = baseTotal * seasonMult;
   if (speechState.weather) regen *= speechState.weather.multiplier;
+  speechState.insightRegenBase = baseTotal;
   speechState.gains.insight = regen;
   ins.current = Math.min(ins.max, ins.current + regen * dt);
   // Unlock clarividence once the player demonstrates basic insight control
