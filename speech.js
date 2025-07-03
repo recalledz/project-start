@@ -260,6 +260,9 @@ const constructEffects = {
     if (Math.random() < chance) {
       speechState.disciples.push({ id: targetIdx });
       addLog('A new Disciple has answered your call!', 'info');
+      document.dispatchEvent(
+        new CustomEvent('disciple-gained', { detail: { count: speechState.disciples.length } })
+      );
     } else {
       addLog('Your call went unanswered.', 'info');
     }

@@ -3185,6 +3185,31 @@ body.darkenshift-mode .tabsContainer button.active {
     border-collapse: collapse;
     width: 100%;
 }
+.player-sect-panel {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    gap: 6px;
+    padding: 6px;
+    overflow-y: auto;
+}
+.sect-orbs {
+    position: relative;
+    height: 40px;
+}
+.disciple-orb {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 0 6px rgba(255, 255, 255, 0.9);
+    animation: sectPulse 2s infinite alternate;
+}
+@keyframes sectPulse {
+    from { transform: scale(1); opacity: 0.8; }
+    to { transform: scale(1.3); opacity: 1; }
+}
 .tags-guide th,
 .tags-guide td {
     border: 1px solid #888;

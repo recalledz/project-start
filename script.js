@@ -20,7 +20,7 @@ import {
 import {
   initStarChart
 } from "./starChart.js"; // optional star chart tab
-import { initSpeech, tickSpeech } from "./speech.js";
+import { initSpeech, tickSpeech, speechState } from "./speech.js";
 import { Jobs, assignJob, getAvailableJobs, renderJobAssignments, renderJobCarousel } from "./jobs.js"; // job definitions
 import RateTracker from "./utils/rateTracker.js";
 import { formatNumber } from "./utils/numberFormat.js";
@@ -157,6 +157,12 @@ const stats = { ...BASE_STATS };
 
 const systems = {
   manaUnlocked: false
+};
+
+const sectState = {
+  fruits: 0,
+  disciplesAssigned: { gatherFruits: 0 },
+  taskTimers: { gatherFruits: 0 }
 };
 
 const barUpgrades = {
@@ -423,6 +429,10 @@ let playerSpeechSubTabButton;
 let playerSpeechPanel;
 let playerLexiconSubTabButton;
 let playerLexiconPanel;
+let playerSectPanel;
+let sectDisciplesDisplay;
+let sectTaskPanel;
+let sectTabUnlocked = false;
 let statsOverviewSubTabButton;
 let statsEconomySubTabButton;
 let statsOverviewContainer;
@@ -577,6 +587,9 @@ function initTabs() {
   playerSpeechPanel = document.querySelector('.player-speech-panel');
   playerLexiconSubTabButton = document.querySelector('.playerLexiconSubTabButton');
   playerLexiconPanel = document.querySelector('.player-lexicon-panel');
+  playerSectPanel = document.querySelector('.player-sect-panel');
+  sectDisciplesDisplay = document.getElementById('sectDisciples');
+  sectTaskPanel = document.getElementById('sectTaskPanel');
   statsOverviewSubTabButton = document.querySelector('.statsOverviewSubTabButton');
   statsEconomySubTabButton = document.querySelector('.statsEconomySubTabButton');
   statsOverviewContainer = document.getElementById('statsOverviewContainer');
@@ -631,6 +644,7 @@ function initTabs() {
       if (playerCorePanel) playerCorePanel.style.display = "flex";
       if (playerSpeechPanel) playerSpeechPanel.style.display = "none";
       if (playerLexiconPanel) playerLexiconPanel.style.display = 'none';
+      if (playerSectPanel) playerSectPanel.style.display = 'none';
       playerCoreSubTabButton.classList.add("active");
       if (playerSpeechSubTabButton) playerSpeechSubTabButton.classList.remove("active");
       if (playerLexiconSubTabButton) playerLexiconSubTabButton.classList.remove('active');
@@ -640,6 +654,7 @@ function initTabs() {
       if (playerCorePanel) playerCorePanel.style.display = 'none';
       if (playerSpeechPanel) playerSpeechPanel.style.display = 'flex';
       if (playerLexiconPanel) playerLexiconPanel.style.display = 'none';
+      if (playerSectPanel) playerSectPanel.style.display = 'none';
       playerSpeechSubTabButton.classList.add('active');
       if (playerCoreSubTabButton) playerCoreSubTabButton.classList.remove('active');
       if (playerLexiconSubTabButton) playerLexiconSubTabButton.classList.remove('active');
@@ -648,7 +663,13 @@ function initTabs() {
     playerLexiconSubTabButton.addEventListener('click', () => {
       if (playerCorePanel) playerCorePanel.style.display = 'none';
       if (playerSpeechPanel) playerSpeechPanel.style.display = 'none';
-      if (playerLexiconPanel) playerLexiconPanel.style.display = 'flex';
+      if (sectTabUnlocked) {
+        if (playerSectPanel) playerSectPanel.style.display = 'flex';
+        if (playerLexiconPanel) playerLexiconPanel.style.display = 'none';
+      } else {
+        if (playerLexiconPanel) playerLexiconPanel.style.display = 'flex';
+        if (playerSectPanel) playerSectPanel.style.display = 'none';
+      }
       playerLexiconSubTabButton.classList.add('active');
       if (playerCoreSubTabButton) playerCoreSubTabButton.classList.remove('active');
       if (playerSpeechSubTabButton) playerSpeechSubTabButton.classList.remove('active');
@@ -821,6 +842,68 @@ function tickBarProgress(delta) {
   });
 }
 
+function tickSect(delta) {
+  if (!sectTabUnlocked) return;
+  const dt = delta / 1000;
+  const assigned = sectState.disciplesAssigned.gatherFruits;
+  if (assigned > 0) {
+    sectState.taskTimers.gatherFruits += dt * assigned;
+    const produced = Math.floor(sectState.taskTimers.gatherFruits / 5);
+    if (produced > 0) {
+      sectState.taskTimers.gatherFruits -= produced * 5;
+      sectState.fruits += produced;
+      updateSectDisplay();
+    }
+  }
+}
+
+function updateSectDisplay() {
+  if (!sectTabUnlocked || !playerSectPanel) return;
+  const total = speechState.disciples.length;
+  const assigned = sectState.disciplesAssigned.gatherFruits;
+  if (sectDisciplesDisplay)
+    sectDisciplesDisplay.textContent = `Disciples: ${total - assigned} / ${total}`;
+
+  const orbs = document.getElementById('sectOrbs');
+  if (orbs) {
+    orbs.innerHTML = '';
+    for (let i = 0; i < total; i++) {
+      const orb = document.createElement('div');
+      orb.className = 'disciple-orb';
+      orb.style.left = `${10 + (i % 5) * 20}px`;
+      orb.style.top = `${10 + Math.floor(i / 5) * 20}px`;
+      orbs.appendChild(orb);
+    }
+  }
+
+  if (sectTaskPanel) {
+    sectTaskPanel.innerHTML = '';
+    const row = document.createElement('div');
+    row.className = 'sect-task';
+    const info = document.createElement('div');
+    info.innerHTML = '<strong>Gather Fruits</strong><br><em>Fruits of the wild void, nourishing the thought-body. Without them, your disciples will fade.</em>';
+    row.appendChild(info);
+    const assignedLabel = document.createElement('div');
+    assignedLabel.textContent = `Assigned: ${assigned}`;
+    row.appendChild(assignedLabel);
+    const btn = document.createElement('button');
+    btn.textContent = 'Assign to Gather Fruits';
+    btn.addEventListener('click', () => {
+      const total = speechState.disciples.length;
+      const assigned = sectState.disciplesAssigned.gatherFruits;
+      if (assigned < total) {
+        sectState.disciplesAssigned.gatherFruits += 1;
+        updateSectDisplay();
+      }
+    });
+    row.appendChild(btn);
+    const fruits = document.createElement('div');
+    fruits.textContent = `Fruits: ${sectState.fruits}`;
+    row.appendChild(fruits);
+    sectTaskPanel.appendChild(row);
+  }
+}
+
 //=========card tab==========
 
 function renderMiniCard(card) {
@@ -954,10 +1037,19 @@ document.addEventListener("DOMContentLoaded", () => {
   initTabs();
   window.addEventListener('location-discovered', e => addDiscoveredLocation(e.detail.name));
   loadGame();
+  updateSectDisplay();
   initVignetteToggles();
   if (window.lucide) lucide.createIcons({ icons: lucide.icons });
   initCore();
   initSpeech();
+  document.addEventListener('disciple-gained', e => {
+    if (!sectTabUnlocked && e.detail.count >= 1) {
+      sectTabUnlocked = true;
+      if (playerLexiconSubTabButton) playerLexiconSubTabButton.textContent = 'Sect';
+      addLog('A presence stirs. The first disciple has heard the Calling.', 'info');
+    }
+    updateSectDisplay();
+  });
   window.addEventListener('core-mind-upgrade', () => {
     stats.maxMana += 10;
     updateManaBar();
@@ -2746,6 +2838,7 @@ if (currentEnemy) {
   // passive progress for bar upgrades
   tickBarProgress(deltaTime);
   tickSpeech(deltaTime);
+  tickSect(deltaTime);
   requestAnimationFrame(gameLoop);
 }
 
