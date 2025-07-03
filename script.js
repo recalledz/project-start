@@ -162,7 +162,8 @@ const systems = {
 const sectState = {
   fruits: 0,
   discipleTasks: {}, // map disciple id -> current task
-  taskTimers: { gatherFruits: 0 }
+  taskTimers: { gatherFruits: 0 },
+  discipleProgress: {} // map disciple id -> progress seconds in current cycle
 };
 
 const FRUIT_CYCLE_SECONDS = 319; // walk 200m out/back, gather and deposit
@@ -880,16 +881,45 @@ function tickBarProgress(delta) {
 function tickSect(delta) {
   if (!sectTabUnlocked) return;
   const dt = delta / 1000;
-  const assigned = Object.values(sectState.discipleTasks).filter(t => t === 'Gather Fruit').length;
-  if (assigned > 0) {
-    sectState.taskTimers.gatherFruits += dt * assigned;
-    const cycles = Math.floor(sectState.taskTimers.gatherFruits / FRUIT_CYCLE_SECONDS);
-    if (cycles > 0) {
-      sectState.taskTimers.gatherFruits -= cycles * FRUIT_CYCLE_SECONDS;
-      sectState.fruits += cycles * FRUIT_CYCLE_AMOUNT;
-      updateSectDisplay();
+  speechState.disciples.forEach(d => {
+    const task = sectState.discipleTasks[d.id];
+    if (task === 'Gather Fruit') {
+      if (!sectState.discipleProgress[d.id]) sectState.discipleProgress[d.id] = 0;
+      sectState.discipleProgress[d.id] += dt;
+      if (sectState.discipleProgress[d.id] >= FRUIT_CYCLE_SECONDS) {
+        const cycles = Math.floor(sectState.discipleProgress[d.id] / FRUIT_CYCLE_SECONDS);
+        sectState.discipleProgress[d.id] -= cycles * FRUIT_CYCLE_SECONDS;
+        sectState.fruits += cycles * FRUIT_CYCLE_AMOUNT;
+        updateSectDisplay();
+      }
+    } else {
+      sectState.discipleProgress[d.id] = 0;
     }
-  }
+  });
+  updateTaskProgressDisplay();
+}
+
+function updateTaskProgressDisplay() {
+  if (!colonyTasksPanel) return;
+  speechState.disciples.forEach(d => {
+    const wrapper = document.getElementById(`disciple-task-${d.id}`);
+    if (!wrapper) return;
+    const fill = wrapper.querySelector('.disciple-progress-fill');
+    const label = wrapper.querySelector('.disciple-progress-label');
+    const taskName = sectState.discipleTasks[d.id] || 'Idle';
+    if (taskName !== 'Gather Fruit') {
+      if (fill) fill.style.width = '0%';
+      if (label) label.textContent = '';
+      return;
+    }
+    const progress = sectState.discipleProgress[d.id] || 0;
+    const phaseLength = FRUIT_CYCLE_SECONDS / 4;
+    const phase = Math.floor(progress / phaseLength) % 4;
+    const pct = ((progress % phaseLength) / phaseLength) * 100;
+    const phaseNames = ['Travelling', 'Gathering', 'Hauling', 'Storing'];
+    if (fill) fill.style.width = `${pct}%`;
+    if (label) label.textContent = phaseNames[phase];
+  });
 }
 
 function updateSectDisplay() {
@@ -1001,7 +1031,7 @@ function renderColonyTasks() {
     const label = document.createElement('div');
     label.textContent = `Disciple #${d.id}`;
     const select = document.createElement('select');
-    ['Idle','Gather Fruit','Haul','Rest','Custom'].forEach(t => {
+    ['Idle', 'Gather Fruit'].forEach(t => {
       const opt = document.createElement('option');
       opt.value = t;
       opt.textContent = t;
@@ -1012,10 +1042,27 @@ function renderColonyTasks() {
       sectState.discipleTasks[d.id] = select.value;
       updateSectDisplay();
     });
+
+    const taskInfo = document.createElement('div');
+    taskInfo.className = 'disciple-task-info';
+    taskInfo.id = `disciple-task-${d.id}`;
+
+    const bar = document.createElement('div');
+    bar.className = 'disciple-progress';
+    const fill = document.createElement('div');
+    fill.className = 'disciple-progress-fill';
+    const text = document.createElement('div');
+    text.className = 'disciple-progress-label';
+    bar.appendChild(fill);
+    bar.appendChild(text);
+    taskInfo.appendChild(bar);
+
     row.appendChild(label);
     row.appendChild(select);
+    row.appendChild(taskInfo);
     colonyTasksPanel.appendChild(row);
   });
+  updateTaskProgressDisplay();
 }
 
 function renderColonyInfo() {
