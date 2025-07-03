@@ -3425,3 +3425,11 @@ body.darkenshift-mode .tabsContainer button.active {
 .season-banner.winter { background: #3399ff; }
 .season-banner .weather-icon { margin-left: 4px; }
 
+/* Mobile adjustments */
+@media (max-width: 600px) {
+  .sect-orb { width: 30px; height: 30px; }
+  .disciple-orb { width: 12px; height: 12px; }
+  .sect-disciple { width: 12px; height: 12px; font-size: 8px; }
+  .sect-basket { width: 20px; height: 15px; }
+  #sectTaskPanel .sect-task { width: 100%; flex-direction: column; gap: 4px; }
+}

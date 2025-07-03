@@ -889,11 +889,18 @@ function updateSectDisplay() {
   const orbs = document.getElementById('sectOrbs');
   if (orbs) {
     orbs.innerHTML = '';
-    const positions = [
-      { cls: 'insight', left: '50%', top: '5%' },
-      { cls: 'body', left: '15%', top: '70%' },
-      { cls: 'will', left: '85%', top: '70%' }
-    ];
+    const mobile = window.innerWidth <= 600;
+    const positions = mobile
+      ? [
+          { cls: 'insight', left: '50%', top: '10%' },
+          { cls: 'body', left: '20%', top: '70%' },
+          { cls: 'will', left: '80%', top: '70%' }
+        ]
+      : [
+          { cls: 'insight', left: '50%', top: '5%' },
+          { cls: 'body', left: '15%', top: '70%' },
+          { cls: 'will', left: '85%', top: '70%' }
+        ];
     positions.forEach(p => {
       const orb = document.createElement('div');
       orb.className = `sect-orb ${p.cls}`;
@@ -980,10 +987,30 @@ function moveDisciple(el) {
   el.style.transform = `translate(${x}px, ${y}px)`;
 }
 
+function moveDiscipleGather(el) {
+  const cont = el.parentElement;
+  if (!cont) return;
+  const gatherX = Math.random() * Math.max(cont.clientWidth - 20, 0);
+  const gatherY = Math.random() * Math.max(cont.clientHeight - 40, 0) * 0.5;
+  el.style.transform = `translate(${gatherX}px, ${gatherY}px)`;
+  setTimeout(() => {
+    const basket = document.getElementById('sectBasket');
+    if (!basket) return;
+    const bx = basket.offsetLeft + basket.offsetWidth / 2 - 8;
+    const by = basket.offsetTop + basket.offsetHeight / 2 - 8;
+    el.style.transform = `translate(${bx}px, ${by}px)`;
+  }, 1500);
+}
+
 function startDiscipleMovement() {
   if (discipleMoveInterval) return;
   discipleMoveInterval = setInterval(() => {
-    Object.values(sectDiscipleEls).forEach(moveDisciple);
+    const assigned = sectState.disciplesAssigned.gatherFruits;
+    speechState.disciples.forEach((d, idx) => {
+      const el = sectDiscipleEls[d.id];
+      if (!el) return;
+      if (idx < assigned) moveDiscipleGather(el); else moveDisciple(el);
+    });
   }, 3000);
 }
 
@@ -2760,6 +2787,10 @@ Object.assign(playerStats, state.playerStats || {});
   if (state.speechState) {
     const { upgrades: savedUpgrades, ...restSpeech } = state.speechState;
     Object.assign(speechState, restSpeech);
+    if (speechState.weather && speechState.weather.days !== undefined) {
+      speechState.weather.duration = speechState.weather.days;
+      delete speechState.weather.days;
+    }
     if (savedUpgrades) {
       Object.entries(savedUpgrades).forEach(([name, data]) => {
         if (speechState.upgrades[name]) {

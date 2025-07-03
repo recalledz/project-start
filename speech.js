@@ -929,17 +929,14 @@ export function tickSpeech(delta) {
     document.dispatchEvent(new CustomEvent('day-passed', {
       detail: { day: speechState.seasonDay, season: speechState.seasonIndex }
     }));
-    if (speechState.weather) {
-      speechState.weather.days -= 1;
-      if (speechState.weather.days <= 0) speechState.weather = null;
-    } else if (Math.random() < 0.01) {
+    if (!speechState.weather && Math.random() < 0.01) {
       const type = Math.random() < 0.5 ? 'clear' : 'torment';
       const duration = 180 + Math.floor(Math.random() * 121); // 3-5 minutes
       speechState.weather = {
         type,
         multiplier: type === 'clear' ? 1.25 : 0.5,
         icon: type === 'clear' ? '\u2728' : '\uD83D\uDE2D',
-        days: duration
+        duration
       };
       addLog(type === 'clear' ? 'Clear minded day!' : 'Torment sets in!', 'info');
     }
@@ -947,6 +944,10 @@ export function tickSpeech(delta) {
       speechState.seasonDay = 0;
       speechState.seasonIndex = (speechState.seasonIndex + 1) % seasons.length;
     }
+  }
+  if (speechState.weather) {
+    speechState.weather.duration -= dt;
+    if (speechState.weather.duration <= 0) speechState.weather = null;
   }
   const ins = speechState.resources.insight;
   const seasonMult = seasons[speechState.seasonIndex].multiplier;
