@@ -161,7 +161,7 @@ const systems = {
 
 const sectState = {
   fruits: 0,
-  disciplesAssigned: { gatherFruits: 0 },
+  discipleTasks: {}, // map disciple id -> current task
   taskTimers: { gatherFruits: 0 }
 };
 
@@ -438,7 +438,12 @@ let playerSectPanel;
 let sectDisciplesDisplay;
 let sectResourcesDisplay;
 let sectUpkeepDisplay;
-let sectTaskPanel;
+let colonyTasksPanel;
+let colonyInfoPanel;
+let colonyResourcesPanel;
+let colonyTasksTabButton;
+let colonyInfoTabButton;
+let colonyResourcesTabButton;
 let sectDisciplesContainer;
 const sectDiscipleEls = {};
 let discipleMoveInterval;
@@ -561,6 +566,13 @@ function showTab(tab) {
   if (tab) tab.style.display = "";
 }
 
+function showColonyTab(name) {
+  if (!colonyTasksPanel || !colonyInfoPanel || !colonyResourcesPanel) return;
+  colonyTasksPanel.style.display = name === 'tasks' ? 'flex' : 'none';
+  colonyInfoPanel.style.display = name === 'info' ? 'flex' : 'none';
+  colonyResourcesPanel.style.display = name === 'resources' ? 'flex' : 'none';
+}
+
 
 function initTabs() {
   if (typeof document === 'undefined') return;
@@ -602,12 +614,21 @@ function initTabs() {
   sectResourcesDisplay = document.getElementById('sectResources');
   sectUpkeepDisplay = document.getElementById('sectUpkeep');
   sectDisciplesContainer = document.getElementById('sectDisciplesContainer');
-  sectTaskPanel = document.getElementById('sectTaskPanel');
+  colonyTasksPanel = document.getElementById('colonyTasksPanel');
+  colonyInfoPanel = document.getElementById('colonyInfoPanel');
+  colonyResourcesPanel = document.getElementById('colonyResourcesPanel');
+  colonyTasksTabButton = document.getElementById('colonyTasksTabBtn');
+  colonyInfoTabButton = document.getElementById('colonyInfoTabBtn');
+  colonyResourcesTabButton = document.getElementById('colonyResourcesTabBtn');
   statsOverviewSubTabButton = document.querySelector('.statsOverviewSubTabButton');
   statsEconomySubTabButton = document.querySelector('.statsEconomySubTabButton');
   statsOverviewContainer = document.getElementById('statsOverviewContainer');
   statsEconomyContainer = document.getElementById('statsEconomyContainer');
   setupTabHandlers();
+
+  if (colonyTasksTabButton) colonyTasksTabButton.addEventListener('click', () => showColonyTab('tasks'));
+  if (colonyInfoTabButton) colonyInfoTabButton.addEventListener('click', () => showColonyTab('info'));
+  if (colonyResourcesTabButton) colonyResourcesTabButton.addEventListener('click', () => showColonyTab('resources'));
 
 
   if (worldSubTabButton) {
@@ -859,7 +880,7 @@ function tickBarProgress(delta) {
 function tickSect(delta) {
   if (!sectTabUnlocked) return;
   const dt = delta / 1000;
-  const assigned = sectState.disciplesAssigned.gatherFruits;
+  const assigned = Object.values(sectState.discipleTasks).filter(t => t === 'Gather Fruit').length;
   if (assigned > 0) {
     sectState.taskTimers.gatherFruits += dt * assigned;
     const cycles = Math.floor(sectState.taskTimers.gatherFruits / FRUIT_CYCLE_SECONDS);
@@ -874,7 +895,7 @@ function tickSect(delta) {
 function updateSectDisplay() {
   if (!sectTabUnlocked || !playerSectPanel) return;
   const total = speechState.disciples.length;
-  const assigned = sectState.disciplesAssigned.gatherFruits;
+  const assigned = Object.values(sectState.discipleTasks).filter(t => t === 'Gather Fruit').length;
   if (sectDisciplesDisplay)
     sectDisciplesDisplay.textContent = `Disciples: ${total - assigned} / ${total}`;
   if (sectResourcesDisplay)
@@ -930,51 +951,9 @@ function updateSectDisplay() {
     startDiscipleMovement();
   }
 
-  if (sectTaskPanel) {
-    sectTaskPanel.innerHTML = '';
-    const row = document.createElement('div');
-    row.className = 'sect-task';
-    const icon = document.createElement('i');
-    icon.dataset.lucide = 'leaf';
-    icon.className = 'task-icon';
-    icon.style.color = 'green';
-    row.appendChild(icon);
-    const info = document.createElement('div');
-    info.textContent = 'Task: Gather Fruits';
-    row.appendChild(info);
-    const assignedLabel = document.createElement('div');
-    assignedLabel.textContent = `Assigned: ${assigned}`;
-    row.appendChild(assignedLabel);
-    const desc = document.createElement('div');
-    desc.className = 'task-desc';
-    desc.textContent = 'Essential for survival';
-    row.appendChild(desc);
-    const addBtn = document.createElement('button');
-    addBtn.textContent = '+';
-    addBtn.addEventListener('click', () => {
-      const total = speechState.disciples.length;
-      const assigned = sectState.disciplesAssigned.gatherFruits;
-      if (assigned < total) {
-        sectState.disciplesAssigned.gatherFruits += 1;
-        updateSectDisplay();
-        triggerOrbFlash();
-      }
-    });
-    row.appendChild(addBtn);
-
-    const removeBtn = document.createElement('button');
-    removeBtn.textContent = '-';
-    removeBtn.addEventListener('click', () => {
-      const assigned = sectState.disciplesAssigned.gatherFruits;
-      if (assigned > 0) {
-        sectState.disciplesAssigned.gatherFruits -= 1;
-        updateSectDisplay();
-      }
-    });
-    row.appendChild(removeBtn);
-    sectTaskPanel.appendChild(row);
-    if (window.lucide) lucide.createIcons({ icons: lucide.icons });
-  }
+  if (colonyTasksPanel) renderColonyTasks();
+  if (colonyInfoPanel) renderColonyInfo();
+  if (colonyResourcesPanel) renderColonyResources();
 }
 
 function moveDisciple(el) {
@@ -1005,13 +984,71 @@ function moveDiscipleGather(el) {
 function startDiscipleMovement() {
   if (discipleMoveInterval) return;
   discipleMoveInterval = setInterval(() => {
-    const assigned = sectState.disciplesAssigned.gatherFruits;
-    speechState.disciples.forEach((d, idx) => {
+    speechState.disciples.forEach(d => {
       const el = sectDiscipleEls[d.id];
       if (!el) return;
-      if (idx < assigned) moveDiscipleGather(el); else moveDisciple(el);
+      const task = sectState.discipleTasks[d.id];
+      if (task === 'Gather Fruit') moveDiscipleGather(el); else moveDisciple(el);
     });
   }, 3000);
+}
+
+function renderColonyTasks() {
+  colonyTasksPanel.innerHTML = '';
+  speechState.disciples.forEach(d => {
+    const row = document.createElement('div');
+    row.className = 'task-entry';
+    const label = document.createElement('div');
+    label.textContent = `Disciple #${d.id}`;
+    const select = document.createElement('select');
+    ['Idle','Gather Fruit','Haul','Rest','Custom'].forEach(t => {
+      const opt = document.createElement('option');
+      opt.value = t;
+      opt.textContent = t;
+      select.appendChild(opt);
+    });
+    select.value = sectState.discipleTasks[d.id] || 'Idle';
+    select.addEventListener('change', () => {
+      sectState.discipleTasks[d.id] = select.value;
+      updateSectDisplay();
+    });
+    row.appendChild(label);
+    row.appendChild(select);
+    colonyTasksPanel.appendChild(row);
+  });
+}
+
+function renderColonyInfo() {
+  colonyInfoPanel.innerHTML = '';
+  speechState.disciples.forEach(d => {
+    const details = document.createElement('details');
+    const summary = document.createElement('summary');
+    summary.textContent = `Disciple #${d.id}`;
+    details.appendChild(summary);
+    const task = document.createElement('div');
+    task.textContent = `Current Task: ${sectState.discipleTasks[d.id] || 'Idle'}`;
+    const power = document.createElement('div');
+    power.textContent = 'Invoke Power: 1.00';
+    const stamina = document.createElement('div');
+    stamina.textContent = 'Stamina: 100/100';
+    details.appendChild(task);
+    details.appendChild(power);
+    details.appendChild(stamina);
+    colonyInfoPanel.appendChild(details);
+  });
+}
+
+function renderColonyResources() {
+  colonyResourcesPanel.innerHTML = '';
+  const fruits = document.createElement('div');
+  fruits.textContent = `Fruits: ${sectState.fruits}`;
+  const sound = document.createElement('div');
+  sound.textContent = 'Sound: 0';
+  const insight = document.createElement('div');
+  insight.textContent = 'Insight: 0';
+  colonyResourcesPanel.appendChild(fruits);
+  colonyResourcesPanel.appendChild(sound);
+  colonyResourcesPanel.appendChild(insight);
 }
 
 function triggerOrbFlash() {
@@ -1178,6 +1215,7 @@ document.addEventListener("DOMContentLoaded", () => {
     updateManaBar();
   });
   showDeckListView();
+  showColonyTab('tasks');
   Object.values(upgrades).forEach(u => u.effect({ stats, pDeck, stageData, systems }));
   renderPurchasedUpgrades();
   // Start or resume the game after loading
