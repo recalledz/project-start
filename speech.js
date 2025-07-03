@@ -9,10 +9,10 @@ const MIDPOINT = 1000;
 const K = 200;
 
 // Seasonal cycle configuration
-// Each "day" in the season ticker currently represents one real second. To
-// ensure that every season lasts at least ten minutes, set the length to
-// 600 days (600 seconds).
-const SEASON_LENGTH_DAYS = 600;
+// A full in-game day lasts 10 real minutes (600 seconds). Each season spans
+// 28 of these days, so a complete season cycle takes 16,800 seconds.
+export const DAY_LENGTH_SECONDS = 600;
+export const SEASON_LENGTH_DAYS = 28;
 const seasons = [
   { name: 'Verdantia', multiplier: 1.20 },
   { name: 'Solara', multiplier: 1.35 },
@@ -541,14 +541,32 @@ function createConstructInfo(name) {
   if (!recipe) return null;
   const info = document.createElement('div');
   info.className = 'construct-info';
-  const effect = document.createElement('div');
-  effect.className = 'construct-effect';
-  effect.textContent = `${Object.entries(recipe.output).map(([k,v]) => `${v} ${k}`).join(', ')}`;
+  if (Object.keys(recipe.output).length) {
+    const effect = document.createElement('div');
+    effect.className = 'construct-effect';
+    effect.textContent = `Effect: ${Object.entries(recipe.output)
+      .map(([k, v]) => `+${v} ${k}`)
+      .join(', ')}`;
+    info.appendChild(effect);
+  }
   const cost = document.createElement('div');
   cost.className = 'construct-cost';
-  cost.textContent = `${Object.entries(recipe.input).map(([k,v]) => `${v} ${k}`).join(', ')}`;
-  info.appendChild(effect);
+  cost.textContent = `Cost: ${Object.entries(recipe.input)
+    .map(([k, v]) => `${v} ${k}`)
+    .join(', ')}`;
   info.appendChild(cost);
+  if (recipe.duration) {
+    const dur = document.createElement('div');
+    dur.className = 'construct-duration';
+    dur.textContent = `Duration: ${recipe.duration}s`;
+    info.appendChild(dur);
+  }
+  if (recipe.cooldown) {
+    const cd = document.createElement('div');
+    cd.className = 'construct-cooldown';
+    cd.textContent = `Cooldown: ${recipe.cooldown}s`;
+    info.appendChild(cd);
+  }
   return info;
 }
 
@@ -905,9 +923,12 @@ export function tickSpeech(delta) {
     }
   });
   speechState.seasonTimer += dt;
-  if (speechState.seasonTimer >= 1) {
-    speechState.seasonTimer -= 1;
+  if (speechState.seasonTimer >= DAY_LENGTH_SECONDS) {
+    speechState.seasonTimer -= DAY_LENGTH_SECONDS;
     speechState.seasonDay += 1;
+    document.dispatchEvent(new CustomEvent('day-passed', {
+      detail: { day: speechState.seasonDay, season: speechState.seasonIndex }
+    }));
     if (speechState.weather) {
       speechState.weather.days -= 1;
       if (speechState.weather.days <= 0) speechState.weather = null;

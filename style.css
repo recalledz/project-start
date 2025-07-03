@@ -2930,7 +2930,7 @@ body.darkenshift-mode .tabsContainer button.active {
 .built-constructs {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 15px;
     padding: 6px;
     margin-top: 6px;
     overflow-y: auto;
@@ -3193,22 +3193,132 @@ body.darkenshift-mode .tabsContainer button.active {
     padding: 6px;
     overflow-y: auto;
 }
+.sect-disciples-container,
+.sect-task-panel {
+    flex: 1;
+    position: relative;
+    border: 1px solid #555;
+}
+.sect-resources {
+    text-align: center;
+    margin-bottom: 4px;
+}
+.sect-upkeep {
+    text-align: center;
+    margin-bottom: 4px;
+    font-size: 0.75rem;
+}
+.sect-task-panel {
+    overflow-y: auto;
+    padding: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: flex-start;
+}
+.sect-disciples {
+    text-align: center;
+    margin-bottom: 4px;
+}
 .sect-orbs {
     position: relative;
-    height: 40px;
+    height: 100%;
 }
 .disciple-orb {
     position: absolute;
-    width: 12px;
-    height: 12px;
+    width: 16px;
+    height: 16px;
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.9);
     box-shadow: 0 0 6px rgba(255, 255, 255, 0.9);
     animation: sectPulse 2s infinite alternate;
 }
+.sect-orb {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    opacity: 0.9;
+    box-shadow: 0 0 6px rgba(255, 255, 255, 0.8);
+    animation: sectGlow 3s infinite alternate;
+}
+.sect-orb.flash {
+    animation: sectGlow 3s infinite alternate, sectGlowFlash 0.5s;
+}
+.sect-orb.insight { background: rgba(127,217,255,0.6); }
+.sect-orb.body { background: rgba(255,100,100,0.6); }
+.sect-orb.will { background: rgba(255,163,127,0.6); }
+.sect-basket {
+    position: absolute;
+    width: 30px;
+    height: 20px;
+    background: #845;
+    border-radius: 0 0 8px 8px;
+    left: 50%;
+    bottom: 50%;
+    transform: translate(-50%, 50%);
+}
+.sect-disciple {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.9);
+    color: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    pointer-events: none;
+    transition: transform 3s;
+}
+.sect-task {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid #555;
+    padding: 4px;
+}
+.sect-task button {
+    margin-left: 0;
+    background: #6aff8f;
+    color: #000;
+    width: auto;
+    border: none;
+    padding: 2px 6px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: box-shadow 0.2s;
+}
+.sect-task button:hover {
+    box-shadow: 0 0 4px #6aff8f;
+}
+.sect-task .task-desc {
+    font-size: 0.65rem;
+    opacity: 0.8;
+}
+#sectTaskPanel .sect-task {
+    width: 20%;
+    font-size: 0.75rem;
+}
+.sect-task .task-icon {
+    width: 16px;
+    height: 16px;
+}
 @keyframes sectPulse {
     from { transform: scale(1); opacity: 0.8; }
     to { transform: scale(1.3); opacity: 1; }
+}
+@keyframes sectGlow {
+    from { transform: scale(1); box-shadow: 0 0 6px rgba(255,255,255,0.8); }
+    to { transform: scale(1.1); box-shadow: 0 0 12px rgba(255,255,255,1); }
+}
+@keyframes sectGlowFlash {
+    from { box-shadow: 0 0 12px rgba(255,255,255,1); }
+    to { box-shadow: 0 0 24px rgba(255,255,255,1); }
 }
 .tags-guide th,
 .tags-guide td {
@@ -3250,14 +3360,19 @@ body.darkenshift-mode .tabsContainer button.active {
     font-size: 0.55rem;
     text-align: center;
 }
+.construct-duration,
+.construct-cooldown {
+    font-size: 0.55rem;
+    text-align: center;
+}
 
 .construct-card-wrapper {
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 60px;
-    gap: 2px;
-    margin: 4px;
+    width: 80px;
+    gap: 4px;
+    margin: 8px;
 }
 
 .cooldown-timer {

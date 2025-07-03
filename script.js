@@ -20,7 +20,7 @@ import {
 import {
   initStarChart
 } from "./starChart.js"; // optional star chart tab
-import { initSpeech, tickSpeech, speechState } from "./speech.js";
+import { initSpeech, tickSpeech, speechState, DAY_LENGTH_SECONDS } from "./speech.js";
 import { Jobs, assignJob, getAvailableJobs, renderJobAssignments, renderJobCarousel } from "./jobs.js"; // job definitions
 import RateTracker from "./utils/rateTracker.js";
 import { formatNumber } from "./utils/numberFormat.js";
@@ -164,6 +164,9 @@ const sectState = {
   disciplesAssigned: { gatherFruits: 0 },
   taskTimers: { gatherFruits: 0 }
 };
+
+const FRUIT_CYCLE_SECONDS = 319; // walk 200m out/back, gather and deposit
+const FRUIT_CYCLE_AMOUNT = 10;
 
 const lifeCore = { real: false };
 
@@ -433,7 +436,12 @@ let playerLexiconSubTabButton;
 let playerLexiconPanel;
 let playerSectPanel;
 let sectDisciplesDisplay;
+let sectResourcesDisplay;
+let sectUpkeepDisplay;
 let sectTaskPanel;
+let sectDisciplesContainer;
+const sectDiscipleEls = {};
+let discipleMoveInterval;
 let sectTabUnlocked = false;
 let statsOverviewSubTabButton;
 let statsEconomySubTabButton;
@@ -591,6 +599,9 @@ function initTabs() {
   playerLexiconPanel = document.querySelector('.player-lexicon-panel');
   playerSectPanel = document.querySelector('.player-sect-panel');
   sectDisciplesDisplay = document.getElementById('sectDisciples');
+  sectResourcesDisplay = document.getElementById('sectResources');
+  sectUpkeepDisplay = document.getElementById('sectUpkeep');
+  sectDisciplesContainer = document.getElementById('sectDisciplesContainer');
   sectTaskPanel = document.getElementById('sectTaskPanel');
   statsOverviewSubTabButton = document.querySelector('.statsOverviewSubTabButton');
   statsEconomySubTabButton = document.querySelector('.statsEconomySubTabButton');
@@ -668,6 +679,7 @@ function initTabs() {
       if (sectTabUnlocked) {
         if (playerSectPanel) playerSectPanel.style.display = 'flex';
         if (playerLexiconPanel) playerLexiconPanel.style.display = 'none';
+        startDiscipleMovement();
       } else {
         if (playerLexiconPanel) playerLexiconPanel.style.display = 'flex';
         if (playerSectPanel) playerSectPanel.style.display = 'none';
@@ -850,10 +862,10 @@ function tickSect(delta) {
   const assigned = sectState.disciplesAssigned.gatherFruits;
   if (assigned > 0) {
     sectState.taskTimers.gatherFruits += dt * assigned;
-    const produced = Math.floor(sectState.taskTimers.gatherFruits / 5);
-    if (produced > 0) {
-      sectState.taskTimers.gatherFruits -= produced * 5;
-      sectState.fruits += produced;
+    const cycles = Math.floor(sectState.taskTimers.gatherFruits / FRUIT_CYCLE_SECONDS);
+    if (cycles > 0) {
+      sectState.taskTimers.gatherFruits -= cycles * FRUIT_CYCLE_SECONDS;
+      sectState.fruits += cycles * FRUIT_CYCLE_AMOUNT;
       updateSectDisplay();
     }
   }
@@ -865,45 +877,122 @@ function updateSectDisplay() {
   const assigned = sectState.disciplesAssigned.gatherFruits;
   if (sectDisciplesDisplay)
     sectDisciplesDisplay.textContent = `Disciples: ${total - assigned} / ${total}`;
+  if (sectResourcesDisplay)
+    sectResourcesDisplay.textContent = `Fruits: ${sectState.fruits}`;
+  if (sectUpkeepDisplay) {
+    const remaining = Math.max(0, DAY_LENGTH_SECONDS - speechState.seasonTimer);
+    const mm = String(Math.floor(remaining / 60)).padStart(2, '0');
+    const ss = String(Math.floor(remaining % 60)).padStart(2, '0');
+    sectUpkeepDisplay.textContent = `Upkeep: 20 fruit/disciple per day (next in ${mm}:${ss})`;
+  }
 
   const orbs = document.getElementById('sectOrbs');
   if (orbs) {
     orbs.innerHTML = '';
-    for (let i = 0; i < total; i++) {
+    const positions = [
+      { cls: 'insight', left: '50%', top: '5%' },
+      { cls: 'body', left: '15%', top: '70%' },
+      { cls: 'will', left: '85%', top: '70%' }
+    ];
+    positions.forEach(p => {
       const orb = document.createElement('div');
-      orb.className = 'disciple-orb';
-      orb.style.left = `${10 + (i % 5) * 20}px`;
-      orb.style.top = `${10 + Math.floor(i / 5) * 20}px`;
+      orb.className = `sect-orb ${p.cls}`;
+      orb.style.left = p.left;
+      orb.style.top = p.top;
       orbs.appendChild(orb);
-    }
+    });
+  }
+
+  if (sectDisciplesContainer) {
+    speechState.disciples.forEach(d => {
+      if (!sectDiscipleEls[d.id]) {
+        const el = document.createElement('div');
+        el.className = 'sect-disciple';
+        el.textContent = d.id;
+        sectDiscipleEls[d.id] = el;
+        sectDisciplesContainer.appendChild(el);
+        moveDisciple(el);
+      }
+    });
+    Object.keys(sectDiscipleEls).forEach(id => {
+      if (!speechState.disciples.find(d => d.id == id)) {
+        sectDiscipleEls[id].remove();
+        delete sectDiscipleEls[id];
+      }
+    });
+    startDiscipleMovement();
   }
 
   if (sectTaskPanel) {
     sectTaskPanel.innerHTML = '';
     const row = document.createElement('div');
     row.className = 'sect-task';
+    const icon = document.createElement('i');
+    icon.dataset.lucide = 'leaf';
+    icon.className = 'task-icon';
+    icon.style.color = 'green';
+    row.appendChild(icon);
     const info = document.createElement('div');
-    info.innerHTML = '<strong>Gather Fruits</strong><br><em>Fruits of the wild void, nourishing the thought-body. Without them, your disciples will fade.</em>';
+    info.textContent = 'Task: Gather Fruits';
     row.appendChild(info);
     const assignedLabel = document.createElement('div');
     assignedLabel.textContent = `Assigned: ${assigned}`;
     row.appendChild(assignedLabel);
-    const btn = document.createElement('button');
-    btn.textContent = 'Assign to Gather Fruits';
-    btn.addEventListener('click', () => {
+    const desc = document.createElement('div');
+    desc.className = 'task-desc';
+    desc.textContent = 'Essential for survival';
+    row.appendChild(desc);
+    const addBtn = document.createElement('button');
+    addBtn.textContent = '+';
+    addBtn.addEventListener('click', () => {
       const total = speechState.disciples.length;
       const assigned = sectState.disciplesAssigned.gatherFruits;
       if (assigned < total) {
         sectState.disciplesAssigned.gatherFruits += 1;
         updateSectDisplay();
+        triggerOrbFlash();
       }
     });
-    row.appendChild(btn);
-    const fruits = document.createElement('div');
-    fruits.textContent = `Fruits: ${sectState.fruits}`;
-    row.appendChild(fruits);
+    row.appendChild(addBtn);
+
+    const removeBtn = document.createElement('button');
+    removeBtn.textContent = '-';
+    removeBtn.addEventListener('click', () => {
+      const assigned = sectState.disciplesAssigned.gatherFruits;
+      if (assigned > 0) {
+        sectState.disciplesAssigned.gatherFruits -= 1;
+        updateSectDisplay();
+      }
+    });
+    row.appendChild(removeBtn);
     sectTaskPanel.appendChild(row);
+    if (window.lucide) lucide.createIcons({ icons: lucide.icons });
   }
+}
+
+function moveDisciple(el) {
+  const cont = el.parentElement;
+  if (!cont) return;
+  const maxX = Math.max(cont.clientWidth - 20, 0);
+  const maxY = Math.max(cont.clientHeight - 20, 0);
+  const x = Math.random() * maxX;
+  const y = Math.random() * maxY;
+  el.style.transform = `translate(${x}px, ${y}px)`;
+}
+
+function startDiscipleMovement() {
+  if (discipleMoveInterval) return;
+  discipleMoveInterval = setInterval(() => {
+    Object.values(sectDiscipleEls).forEach(moveDisciple);
+  }, 3000);
+}
+
+function triggerOrbFlash() {
+  const orbs = document.querySelectorAll('#sectOrbs .sect-orb');
+  orbs.forEach(o => {
+    o.classList.add('flash');
+    setTimeout(() => o.classList.remove('flash'), 500);
+  });
 }
 
 //=========card tab==========
@@ -1044,6 +1133,11 @@ document.addEventListener("DOMContentLoaded", () => {
   if (window.lucide) lucide.createIcons({ icons: lucide.icons });
   initCore();
   initSpeech();
+  document.addEventListener('day-passed', () => {
+    const cost = 20 * speechState.disciples.length;
+    sectState.fruits = Math.max(0, sectState.fruits - cost);
+    updateSectDisplay();
+  });
   document.addEventListener('disciple-gained', e => {
     if (!sectTabUnlocked && e.detail.count >= 1) {
       sectTabUnlocked = true;
@@ -2620,7 +2714,10 @@ Object.entries(upgrades).map(([k, u]) => [k, u.unlocked])
     playerStats,
     worldProgress,
     barUpgrades,
-    lifeCore
+    lifeCore,
+    speechState,
+    sectState,
+    sectTabUnlocked
   };
 
 try {
@@ -2658,6 +2755,30 @@ Object.assign(playerStats, state.playerStats || {});
 
   if (state.lifeCore) {
     Object.assign(lifeCore, state.lifeCore);
+  }
+
+  if (state.speechState) {
+    const { upgrades: savedUpgrades, ...restSpeech } = state.speechState;
+    Object.assign(speechState, restSpeech);
+    if (savedUpgrades) {
+      Object.entries(savedUpgrades).forEach(([name, data]) => {
+        if (speechState.upgrades[name]) {
+          Object.assign(speechState.upgrades[name], data);
+        } else {
+          speechState.upgrades[name] = data;
+        }
+      });
+    }
+  }
+
+  if (state.sectState) {
+    Object.assign(sectState, state.sectState);
+  }
+
+  if (state.sectTabUnlocked ||
+      (speechState.disciples && speechState.disciples.length > 0)) {
+    sectTabUnlocked = true;
+    if (playerLexiconSubTabButton) playerLexiconSubTabButton.textContent = 'Sect';
   }
 
   if (state.barUpgrades) {
@@ -2742,6 +2863,7 @@ updateUpgradeButtons();
   updateRedrawButton();
 
   updateWorldTabNotification();
+  updateSectDisplay();
 
 addLog("Game loaded!",
 "info");
