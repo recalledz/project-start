@@ -66,7 +66,7 @@ export const speechState = {
   seasonTimer: 0,
   weather: null,
   insightRegenBase: 0,
-  activeConstructs: ['Murmur'],
+  activeConstructs: [],
   savedConstructs: ['Murmur'],
   activeBuffs: {},
   cooldowns: {},
@@ -576,6 +576,14 @@ function createConstructInfo(name) {
   return info;
 }
 
+function getConstructEffect(name) {
+  const recipe = recipes.find(r => r.name === name);
+  if (!recipe || !Object.keys(recipe.output).length) return null;
+  return Object.entries(recipe.output)
+    .map(([k, v]) => `+${v} ${k}`)
+    .join(', ');
+}
+
 function toggleConstructActive(name) {
   const idx = speechState.activeConstructs.indexOf(name);
   if (idx >= 0) {
@@ -632,10 +640,20 @@ function renderHotbar() {
   if (!bar) return;
   bar.innerHTML = '';
   speechState.activeConstructs.forEach(c => {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'construct-card-wrapper';
     const card = createConstructCard(c);
     card.classList.add('hotbar-construct');
     card.addEventListener('click', () => castConstruct(c, card));
-    bar.appendChild(card);
+    wrapper.appendChild(card);
+    const effectText = getConstructEffect(c);
+    if (effectText) {
+      const eff = document.createElement('div');
+      eff.className = 'construct-effect';
+      eff.textContent = effectText;
+      wrapper.appendChild(eff);
+    }
+    bar.appendChild(wrapper);
   });
 }
 

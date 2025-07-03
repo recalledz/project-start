@@ -2726,6 +2726,18 @@ body.darkenshift-mode .tabsContainer button.active {
     flex-wrap: wrap;
     justify-content: center;
 }
+.construct-hotbar .construct-card-wrapper {
+    margin: 4px;
+    width: 80px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+.construct-hotbar .construct-effect {
+    font-size: 0.55rem;
+    text-align: center;
+}
 
 .saved-constructs {
     display: flex;

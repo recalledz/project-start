@@ -447,7 +447,7 @@ let colonyInfoTabButton;
 let colonyResourcesTabButton;
 let sectDisciplesContainer;
 const sectDiscipleEls = {};
-const discipleGatherState = {};
+const discipleGatherPhase = {};
 let discipleMoveInterval;
 let sectTabUnlocked = false;
 let statsOverviewSubTabButton;
@@ -997,34 +997,42 @@ function moveDisciple(el) {
   el.style.transform = `translate(${x}px, ${y}px)`;
 }
 
-function moveDiscipleGather(id, el) {
-  if (discipleGatherState[id]) return;
-  discipleGatherState[id] = true;
+function updateDiscipleGather(id, el) {
   const cont = el.parentElement;
-  if (!cont) { discipleGatherState[id] = false; return; }
+  if (!cont) return;
   const basket = document.getElementById('sectBasket');
-  if (!basket) { discipleGatherState[id] = false; return; }
+  if (!basket) return;
+
+  const progress = sectState.discipleProgress[id] || 0;
+  const phaseLength = FRUIT_CYCLE_SECONDS / 4;
+  const phase = Math.floor(progress / phaseLength) % 4;
+
+  if (discipleGatherPhase[id] === phase) return;
+  discipleGatherPhase[id] = phase;
+
   const bx = basket.offsetLeft + basket.offsetWidth / 2 - 8;
   const by = basket.offsetTop + basket.offsetHeight / 2 - 8;
   const outsideX = -40;
   const outsideY = cont.clientHeight * 0.5;
 
-  // Travel to fruits
-  el.style.opacity = '1';
-  el.style.transform = `translate(${outsideX}px, ${outsideY}px)`;
-  setTimeout(() => {
-    // Performing gathering (out of view)
-    el.style.opacity = '0';
-    setTimeout(() => {
-      // Hauling back
+  switch (phase) {
+    case 0: // travelling out
+      el.style.opacity = '1';
+      el.style.transform = `translate(${outsideX}px, ${outsideY}px)`;
+      break;
+    case 1: // gathering (stay outside, hidden)
+      el.style.opacity = '0';
+      el.style.transform = `translate(${outsideX}px, ${outsideY}px)`;
+      break;
+    case 2: // hauling back
       el.style.opacity = '1';
       el.style.transform = `translate(${bx}px, ${by}px)`;
-      setTimeout(() => {
-        // Storing at basket
-        discipleGatherState[id] = false;
-      }, 1500);
-    }, 1500);
-  }, 1500);
+      break;
+    case 3: // storing at basket
+      el.style.opacity = '1';
+      el.style.transform = `translate(${bx}px, ${by}px)`;
+      break;
+  }
 }
 
 function startDiscipleMovement() {
@@ -1034,7 +1042,7 @@ function startDiscipleMovement() {
       const el = sectDiscipleEls[d.id];
       if (!el) return;
       const task = sectState.discipleTasks[d.id];
-      if (task === 'Gather Fruit') moveDiscipleGather(d.id, el); else moveDisciple(el);
+      if (task === 'Gather Fruit') updateDiscipleGather(d.id, el); else moveDisciple(el);
     });
   }, 3000);
 }
@@ -1056,6 +1064,7 @@ function renderColonyTasks() {
     select.value = sectState.discipleTasks[d.id] || 'Idle';
     select.addEventListener('change', () => {
       sectState.discipleTasks[d.id] = select.value;
+      discipleGatherPhase[d.id] = -1;
       updateSectDisplay();
     });
 
