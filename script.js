@@ -447,6 +447,7 @@ let colonyInfoTabButton;
 let colonyResourcesTabButton;
 let sectDisciplesContainer;
 const sectDiscipleEls = {};
+const discipleGatherState = {};
 let discipleMoveInterval;
 let sectTabUnlocked = false;
 let statsOverviewSubTabButton;
@@ -996,18 +997,33 @@ function moveDisciple(el) {
   el.style.transform = `translate(${x}px, ${y}px)`;
 }
 
-function moveDiscipleGather(el) {
+function moveDiscipleGather(id, el) {
+  if (discipleGatherState[id]) return;
+  discipleGatherState[id] = true;
   const cont = el.parentElement;
-  if (!cont) return;
-  const gatherX = Math.random() * Math.max(cont.clientWidth - 20, 0);
-  const gatherY = Math.random() * Math.max(cont.clientHeight - 40, 0) * 0.5;
-  el.style.transform = `translate(${gatherX}px, ${gatherY}px)`;
+  if (!cont) { discipleGatherState[id] = false; return; }
+  const basket = document.getElementById('sectBasket');
+  if (!basket) { discipleGatherState[id] = false; return; }
+  const bx = basket.offsetLeft + basket.offsetWidth / 2 - 8;
+  const by = basket.offsetTop + basket.offsetHeight / 2 - 8;
+  const outsideX = -40;
+  const outsideY = cont.clientHeight * 0.5;
+
+  // Travel to fruits
+  el.style.opacity = '1';
+  el.style.transform = `translate(${outsideX}px, ${outsideY}px)`;
   setTimeout(() => {
-    const basket = document.getElementById('sectBasket');
-    if (!basket) return;
-    const bx = basket.offsetLeft + basket.offsetWidth / 2 - 8;
-    const by = basket.offsetTop + basket.offsetHeight / 2 - 8;
-    el.style.transform = `translate(${bx}px, ${by}px)`;
+    // Performing gathering (out of view)
+    el.style.opacity = '0';
+    setTimeout(() => {
+      // Hauling back
+      el.style.opacity = '1';
+      el.style.transform = `translate(${bx}px, ${by}px)`;
+      setTimeout(() => {
+        // Storing at basket
+        discipleGatherState[id] = false;
+      }, 1500);
+    }, 1500);
   }, 1500);
 }
 
@@ -1018,7 +1034,7 @@ function startDiscipleMovement() {
       const el = sectDiscipleEls[d.id];
       if (!el) return;
       const task = sectState.discipleTasks[d.id];
-      if (task === 'Gather Fruit') moveDiscipleGather(el); else moveDisciple(el);
+      if (task === 'Gather Fruit') moveDiscipleGather(d.id, el); else moveDisciple(el);
     });
   }, 3000);
 }
