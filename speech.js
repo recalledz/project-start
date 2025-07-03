@@ -946,7 +946,7 @@ export function tickSpeech(delta) {
   if (call && !call.unlocked && speechState.resources.sound.current >= 100) {
     call.unlocked = true;
     addLog('Calling construct unlocked!', 'info');
-    renderConstructCards();
+    addConstruct('Calling');
   }
   tickActiveConstructs(dt);
   updateCooldownOverlays();
