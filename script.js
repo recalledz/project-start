@@ -620,6 +620,8 @@ function showColonyTab(name) {
     colonyInfoPanel.style.display = 'flex';
     colonyResourcesPanel.style.display = 'flex';
     colonyBuildPanel.style.display = 'none';
+    renderDiscipleList();
+    renderDiscipleDetails();
     if (colonyTasksTabButton) colonyTasksTabButton.classList.remove('active');
     if (colonyInfoTabButton) colonyInfoTabButton.classList.add('active');
     if (colonyResourcesTabButton) colonyResourcesTabButton.classList.remove('active');
@@ -1020,7 +1022,7 @@ function updateSectDisplay() {
     const remaining = Math.max(0, DAY_LENGTH_SECONDS - speechState.seasonTimer);
     const mm = String(Math.floor(remaining / 60)).padStart(2, '0');
     const ss = String(Math.floor(remaining % 60)).padStart(2, '0');
-    sectUpkeepDisplay.textContent = `Upkeep: 20 fruit/disciple per day (next in ${mm}:${ss})`;
+    sectUpkeepDisplay.textContent = `Upkeep: 1 fruit/disciple per day (next in ${mm}:${ss})`;
   }
 
   const orbs = document.getElementById('sectOrbs');
@@ -1307,8 +1309,63 @@ function renderColonyBuildPanel() {
       cost.textContent = `Cost: ${b.cost} Pine Logs`;
       row.appendChild(cost);
     }
-    colonyBuildPanel.appendChild(row);
+  colonyBuildPanel.appendChild(row);
   });
+}
+
+function renderDiscipleList() {
+  if (!colonyInfoPanel) return;
+  colonyInfoPanel.innerHTML = '';
+  speechState.disciples.forEach(d => {
+    const row = document.createElement('div');
+    row.className = 'task-entry';
+    if (d.id === selectedDiscipleId) row.classList.add('selected');
+    row.textContent = d.name || `Disciple ${d.id}`;
+    row.addEventListener('click', () => {
+      selectedDiscipleId = d.id;
+      renderDiscipleList();
+      renderDiscipleDetails();
+    });
+    colonyInfoPanel.appendChild(row);
+  });
+}
+
+function renderDiscipleDetails() {
+  if (!colonyResourcesPanel) return;
+  colonyResourcesPanel.innerHTML = '';
+  const d = speechState.disciples.find(x => x.id === selectedDiscipleId);
+  if (!d) {
+    colonyResourcesPanel.textContent = 'Select a disciple';
+    return;
+  }
+
+  const stats = [
+    { label: 'Health', color: '#a33', value: d.health, max: 10 },
+    { label: 'Stamina', color: '#cc3', value: d.stamina, max: 10 },
+    { label: 'Hunger', color: '#cc3', value: d.hunger, max: 20 }
+  ];
+
+  stats.forEach(s => {
+    const wrapper = document.createElement('div');
+    wrapper.textContent = `${s.label} ${s.value}/${s.max}`;
+    const bar = document.createElement('div');
+    bar.className = 'disciple-progress';
+    const fill = document.createElement('div');
+    fill.className = 'disciple-progress-fill';
+    fill.style.background = s.color;
+    fill.style.width = `${(s.value / s.max) * 100}%`;
+    bar.appendChild(fill);
+    wrapper.appendChild(bar);
+    colonyResourcesPanel.appendChild(wrapper);
+  });
+
+  const power = document.createElement('div');
+  power.textContent = `Construct Power: ${d.power}`;
+  colonyResourcesPanel.appendChild(power);
+
+  const attrs = document.createElement('div');
+  attrs.innerHTML = `Strength ${d.strength}<br>Dexterity ${d.dexterity}<br>Intelligence ${d.intelligence}`;
+  colonyResourcesPanel.appendChild(attrs);
 }
 
 function triggerOrbFlash() {
@@ -1459,9 +1516,25 @@ document.addEventListener("DOMContentLoaded", () => {
   initCore();
   initSpeech();
   document.addEventListener('day-passed', () => {
-    const cost = 20 * speechState.disciples.length;
-    sectState.fruits = Math.max(0, sectState.fruits - cost);
+    speechState.disciples.forEach(d => {
+      if (sectState.fruits > 0) {
+        sectState.fruits--;
+        d.hunger = 20;
+      } else {
+        d.hunger = Math.max(0, d.hunger - 1);
+        if (d.hunger === 0) {
+          d.health = Math.max(0, d.health - 5);
+          if (d.health === 0) {
+            sectState.discipleTasks[d.id] = 'Idle';
+            d.incapacitated = true;
+          }
+        }
+      }
+    });
     updateSectDisplay();
+    if (colonyResourcesPanel && colonyResourcesPanel.style.display !== 'none') {
+      renderDiscipleDetails();
+    }
   });
   document.addEventListener('disciple-gained', e => {
     if (!sectTabUnlocked && e.detail.count >= 1) {
@@ -1470,6 +1543,10 @@ document.addEventListener("DOMContentLoaded", () => {
       addLog('A presence stirs. The first disciple has heard the Calling.', 'info');
     }
     updateSectDisplay();
+    if (colonyInfoTabButton && colonyInfoTabButton.classList.contains('active')) {
+      renderDiscipleList();
+      renderDiscipleDetails();
+    }
   });
   window.addEventListener('core-mind-upgrade', () => {
     stats.maxMana += 10;
@@ -3101,6 +3178,21 @@ Object.assign(playerStats, state.playerStats || {});
         } else {
           speechState.upgrades[name] = data;
         }
+      });
+    }
+
+    // ensure disciples have required stats when loading older saves
+    if (Array.isArray(speechState.disciples)) {
+      speechState.disciples.forEach(d => {
+        if (d.health === undefined) d.health = 10;
+        if (d.stamina === undefined) d.stamina = 10;
+        if (d.hunger === undefined) d.hunger = 20;
+        if (d.power === undefined) d.power = 1;
+        if (d.strength === undefined) d.strength = 1;
+        if (d.dexterity === undefined) d.dexterity = 1;
+        if (d.intelligence === undefined) d.intelligence = 1;
+        if (d.incapacitated === undefined) d.incapacitated = false;
+        if (!d.name) d.name = `Disciple ${d.id}`;
       });
     }
   }

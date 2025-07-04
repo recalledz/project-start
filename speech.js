@@ -265,7 +265,18 @@ const constructEffects = {
     const reqPower = Math.pow(1.8, targetIdx - 1);
     const chance = Math.max(0.05, Math.min(1, callPower / reqPower));
     if (Math.random() < chance) {
-      speechState.disciples.push({ id: targetIdx });
+      speechState.disciples.push({
+        id: targetIdx,
+        name: `Disciple ${targetIdx}`,
+        health: 10,
+        stamina: 10,
+        hunger: 20,
+        power: 1,
+        strength: 1,
+        dexterity: 1,
+        intelligence: 1,
+        incapacitated: false
+      });
       addLog('A new Disciple has answered your call!', 'info');
       document.dispatchEvent(
         new CustomEvent('disciple-gained', { detail: { count: speechState.disciples.length } })
@@ -782,6 +793,7 @@ function renderResources() {
   });
   if (window.lucide) lucide.createIcons({ icons: lucide.icons });
   window.dispatchEvent(new CustomEvent('resources-changed'));
+  updateUpgradeAffordability();
 }
 
 function getUpgradeCost(name) {
@@ -817,6 +829,31 @@ function canAfford(cost) {
     if (have < v) return false;
   }
   return true;
+}
+
+function updateUpgradeAffordability() {
+  const panelUp = document.getElementById('speechUpgrades');
+  if (!panelUp) return;
+  const buttons = panelUp.querySelectorAll('button[data-upgrade]');
+  buttons.forEach(btn => {
+    const name = btn.dataset.upgrade;
+    const cost = getUpgradeCost(name);
+    const affordable = canAfford(cost);
+    btn.classList.toggle('unaffordable', !affordable);
+    const spans = btn.querySelectorAll('.icon-row span');
+    if (typeof cost === 'number') {
+      const have = speechState.orbs.insight.current;
+      spans.forEach(span => span.classList.toggle('cost-missing', have < cost));
+    } else {
+      const entries = Object.entries(cost);
+      spans.forEach((span, idx) => {
+        const [res, amt] = entries[idx] || [];
+        const have =
+          (speechState.orbs[res]?.current ?? speechState.resources[res]?.current ?? 0);
+        span.classList.toggle('cost-missing', have < amt);
+      });
+    }
+  });
 }
 
 function purchaseUpgrade(name) {
@@ -867,6 +904,7 @@ export function renderUpgrades() {
   panelUp.appendChild(coreGroup);
   ['cohere','expandMind','idleChatter'].forEach(name => {
     const btn = document.createElement('button');
+    btn.dataset.upgrade = name;
     const cost = getUpgradeCost(name);
     const up = speechState.upgrades[name];
     let costHtml = '';
@@ -891,6 +929,7 @@ export function renderUpgrades() {
   });
   if (speechState.upgrades.clarividence.unlocked && speechState.upgrades.clarividence.level === 0) {
     const btn = document.createElement('button');
+    btn.dataset.upgrade = 'clarividence';
     const cost = getUpgradeCost('clarividence');
     const cls = speechState.orbs.insight.current >= cost ? '' : 'cost-missing';
     btn.innerHTML = `<span class="upg-info"><span class="upg-name">clarividence</span></span><span class="icon-row"><span class="${cls}"><i data-lucide="${resourceIcons.insight}"></i> ${cost}</span></span>`;
@@ -903,6 +942,7 @@ export function renderUpgrades() {
     vocal.className = 'upgrade-group';
     panelUp.appendChild(vocal);
     const btn = document.createElement('button');
+    btn.dataset.upgrade = 'vocalMaturity';
     const cost = getUpgradeCost('vocalMaturity');
     const cls = speechState.orbs.insight.current >= cost ? '' : 'cost-missing';
     btn.innerHTML = `<span class="icon-row"><span class="${cls}"><i data-lucide="${resourceIcons.insight}"></i> ${cost}</span></span>`;
