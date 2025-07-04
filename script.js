@@ -1061,25 +1061,52 @@ function tickSect(delta) {
 
 function updateTaskProgressDisplay() {
   if (!colonyTasksPanel) return;
+  const researcherCount = speechState.disciples.filter(
+    d => sectState.discipleTasks[d.id] === 'Research'
+  ).length;
+  const researchRate = researcherCount * 4;
+  const researchProg = sectState.researchProgress % 500;
+  const researchPct = (researchProg / 500) * 100;
+  const researchTime = researchRate > 0 ? (500 - researchProg) / researchRate : 0;
+
+  const buildKey = sectState.currentBuild;
+  const buildData = buildKey ? BUILDINGS[buildKey] : null;
+  const builderCount = speechState.disciples.filter(
+    d => sectState.discipleTasks[d.id] === 'Building'
+  ).length;
+  const buildPct = buildData ? sectState.buildProgress * 100 : 0;
+  const buildTime = buildData && builderCount > 0
+    ? ((1 - sectState.buildProgress) * buildData.time) / builderCount
+    : 0;
   speechState.disciples.forEach(d => {
     const wrapper = document.getElementById(`disciple-task-${d.id}`);
     if (!wrapper) return;
     const fill = wrapper.querySelector('.disciple-progress-fill');
     const label = wrapper.querySelector('.disciple-progress-label');
     const taskName = sectState.discipleTasks[d.id] || 'Idle';
-    if (taskName !== 'Gather Fruit' && taskName !== 'Log Pine') {
+    if (taskName === 'Gather Fruit' || taskName === 'Log Pine') {
+      const progress = sectState.discipleProgress[d.id] || 0;
+      const cycleSeconds =
+        taskName === 'Gather Fruit' ? FRUIT_CYCLE_SECONDS : PINE_LOG_CYCLE_SECONDS;
+      const phaseLength = cycleSeconds / 4;
+      const phase = Math.floor(progress / phaseLength) % 4;
+      const pct = ((progress % phaseLength) / phaseLength) * 100;
+      const phaseNames = ['Travelling', 'Gathering', 'Hauling', 'Storing'];
+      if (fill) fill.style.width = `${pct}%`;
+      if (label) label.textContent = phaseNames[phase];
+    } else if (taskName === 'Research') {
+      if (fill) fill.style.width = `${researchPct}%`;
+      if (label)
+        label.textContent = `Next RP: ${researchRate > 0 ? researchTime.toFixed(1) : '∞'}s`;
+    } else if (taskName === 'Building') {
+      if (fill) fill.style.width = `${buildPct}%`;
+      if (label && buildData)
+        label.textContent = `${buildData.name} ${builderCount > 0 ? buildTime.toFixed(1) : '∞'}s`;
+      else if (label) label.textContent = '';
+    } else {
       if (fill) fill.style.width = '0%';
       if (label) label.textContent = '';
-      return;
     }
-    const progress = sectState.discipleProgress[d.id] || 0;
-    const cycleSeconds = taskName === 'Gather Fruit' ? FRUIT_CYCLE_SECONDS : PINE_LOG_CYCLE_SECONDS;
-    const phaseLength = cycleSeconds / 4;
-    const phase = Math.floor(progress / phaseLength) % 4;
-    const pct = ((progress % phaseLength) / phaseLength) * 100;
-    const phaseNames = ['Travelling', 'Gathering', 'Hauling', 'Storing'];
-    if (fill) fill.style.width = `${pct}%`;
-    if (label) label.textContent = phaseNames[phase];
   });
 }
 
@@ -1384,9 +1411,17 @@ function renderColonyBuildPanel() {
     btn.addEventListener('click', () => startBuilding(key));
     row.appendChild(btn);
     if (sectState.currentBuild === key) {
-      const prog = document.createElement('div');
-      prog.textContent = `Progress: ${(sectState.buildProgress * 100).toFixed(0)}%`;
-      row.appendChild(prog);
+      const bar = document.createElement('div');
+      bar.className = 'disciple-progress';
+      const fill = document.createElement('div');
+      fill.className = 'disciple-progress-fill';
+      fill.style.width = `${(sectState.buildProgress * 100).toFixed(0)}%`;
+      const text = document.createElement('div');
+      text.className = 'disciple-progress-label';
+      text.textContent = `${(sectState.buildProgress * 100).toFixed(0)}%`;
+      bar.appendChild(fill);
+      bar.appendChild(text);
+      row.appendChild(bar);
     } else {
       const cost = document.createElement('div');
       cost.textContent = `Cost: ${b.cost} Pine Logs`;
@@ -1402,6 +1437,25 @@ function renderColonyResearchPanel() {
   const pts = document.createElement('div');
   pts.textContent = `Research Points: ${sectState.researchPoints}`;
   colonyResearchPanel.appendChild(pts);
+
+  const bar = document.createElement('div');
+  bar.className = 'research-progress';
+  const fill = document.createElement('div');
+  fill.className = 'research-progress-fill';
+  const prog = sectState.researchProgress % 500;
+  fill.style.width = `${(prog / 500) * 100}%`;
+  bar.appendChild(fill);
+  colonyResearchPanel.appendChild(bar);
+
+  const researchers = speechState.disciples.filter(
+    d => sectState.discipleTasks[d.id] === 'Research'
+  ).length;
+  const rate = researchers * 4;
+  const time = rate > 0 ? ((500 - prog) / rate).toFixed(1) : '∞';
+  const info = document.createElement('div');
+  info.className = 'research-progress-info';
+  info.textContent = `Insight Rate: ${rate}/s | Next RP in ${time}s`;
+  colonyResearchPanel.appendChild(info);
   if (!systems.chantingHallUnlocked) {
     const btn = document.createElement('button');
     btn.textContent = 'Unlock Chanting Halls (3 RP)';
@@ -3314,6 +3368,7 @@ Object.assign(playerStats, state.playerStats || {});
 
   if (state.sectState) {
     Object.assign(sectState, state.sectState);
+    sectState.researchProgress = 0; // progress is not persisted
   }
 
   if (state.sectTabUnlocked ||

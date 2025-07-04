@@ -3569,3 +3569,32 @@ body.darkenshift-mode .tabsContainer button.active {
     background: #6b5b95;
     transition: width 0.3s ease;
 }
+
+/* Research progress bar shown in the research panel */
+.research-progress {
+    position: relative;
+    width: 100%;
+    max-width: 200px;
+    height: 10px;
+    background: #222;
+    border: 1px solid #555;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 4px;
+}
+
+.research-progress-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #6da9d2, #1e3a5f);
+    transition: width 0.3s ease;
+}
+
+.research-progress-info {
+    font-size: 0.7rem;
+    margin-top: 2px;
+    text-align: center;
+}
