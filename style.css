@@ -3206,7 +3206,7 @@ body.darkenshift-mode .tabsContainer button.active {
     flex: 1;
     gap: 6px;
     padding: 6px;
-    overflow-y: auto;
+    overflow: hidden;
 }
 .sect-disciples-container {
     flex: 1;
@@ -3232,11 +3232,26 @@ body.darkenshift-mode .tabsContainer button.active {
 .colony-tabs {
     display: flex;
     gap: 2px;
+    margin-bottom: 6px;
 }
 .colony-tabs button {
+    width: 32px;
+    height: 32px;
+    padding: 2px;
+    font-size: 1rem;
+}
+
+.colony-main {
     flex: 1;
-    padding: 4px 6px;
-    font-size: 0.5rem;
+    display: flex;
+    gap: 6px;
+}
+
+.colony-side {
+    width: 200px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
 }
 .colony-panel {
     flex: 1;
@@ -3349,7 +3364,7 @@ body.darkenshift-mode .tabsContainer button.active {
     transition: transform 3s;
 }
 #colonyTasksPanel .task-entry {
-    width: 20%;
+    width: 100%;
     font-size: 0.75rem;
 }
 @keyframes sectPulse {

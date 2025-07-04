@@ -238,22 +238,24 @@
           <div id="tagGuide" class="tags-guide"></div>
         </div>
         <div class="player-sect-panel" style="display:none;">
-          <div id="sectDisciplesContainer" class="sect-disciples-container">
-            <div id="sectDisciples" class="sect-disciples"></div>
-            <div id="sectResources" class="sect-resources"></div>
-            <div id="sectUpkeep" class="sect-upkeep"></div>
-            <div class="sect-orbs" id="sectOrbs"></div>
-            <div id="sectBasket" class="sect-basket"></div>
+          <div class="colony-tabs">
+            <button id="colonyTasksTabBtn">👤</button>
+            <button id="colonyInfoTabBtn">ℹ️</button>
+            <button id="colonyResourcesTabBtn">🍎</button>
           </div>
-          <div class="colony-container">
-            <div class="colony-tabs">
-              <button id="colonyTasksTabBtn">Tasks</button>
-              <button id="colonyInfoTabBtn">Info</button>
-              <button id="colonyResourcesTabBtn">Resources</button>
+          <div class="colony-main">
+            <div id="sectDisciplesContainer" class="sect-disciples-container">
+              <div id="sectDisciples" class="sect-disciples"></div>
+              <div id="sectResources" class="sect-resources"></div>
+              <div id="sectUpkeep" class="sect-upkeep"></div>
+              <div class="sect-orbs" id="sectOrbs"></div>
+              <div id="sectBasket" class="sect-basket"></div>
             </div>
-            <div id="colonyTasksPanel" class="colony-panel"></div>
-            <div id="colonyInfoPanel" class="colony-panel" style="display:none;"></div>
-            <div id="colonyResourcesPanel" class="colony-panel" style="display:none;"></div>
+            <div class="colony-side">
+              <div id="colonyTasksPanel" class="colony-panel"></div>
+              <div id="colonyInfoPanel" class="colony-panel" style="display:none;"></div>
+              <div id="colonyResourcesPanel" class="colony-panel" style="display:none;"></div>
+            </div>
           </div>
         </div>
       </div>
