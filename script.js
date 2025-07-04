@@ -157,7 +157,9 @@ const stats = { ...BASE_STATS };
 
 const systems = {
   manaUnlocked: false,
-  buildingUnlocked: false
+  buildingUnlocked: false,
+  researchUnlocked: false,
+  chantingHallUnlocked: false
 };
 
 export const sectState = {
@@ -167,7 +169,9 @@ export const sectState = {
   taskTimers: { gatherFruits: 0 },
   discipleProgress: {}, // map disciple id -> progress seconds in current cycle
   discipleSkills: {}, // map disciple id -> skill levels per task
-  buildings: { pineShack: 0, researchTable: 0 },
+  buildings: { pineShack: 0, researchTable: 0, chantingHall: 0 },
+  researchPoints: 0,
+  researchProgress: 0,
   currentBuild: null,
   buildProgress: 0
 };
@@ -199,7 +203,8 @@ function getTaskSkillProgress(xp) {
 
 const BUILDINGS = {
   pineShack: { name: 'Pine Shack', cost: 30, time: 600, max: 1 },
-  researchTable: { name: 'Research Table', cost: 15, time: 300, max: 1, requires: 'pineShack' }
+  researchTable: { name: 'Research Table', cost: 15, time: 300, max: 1, requires: 'pineShack' },
+  chantingHall: { name: 'Chanting Hall', cost: 50, time: 600, max: 1, requires: 'researchTable' }
 };
 
 const lifeCore = { real: false };
@@ -476,10 +481,12 @@ let colonyTasksPanel;
 let colonyInfoPanel;
 let colonyResourcesPanel;
 let colonyBuildPanel;
+let colonyResearchPanel;
 let colonyTasksTabButton;
 let colonyInfoTabButton;
 let colonyResourcesTabButton;
 let colonyBuildTabButton;
+let colonyResearchTabButton;
 let sectDisciplesContainer;
 let selectedDiscipleId = null;
 const sectDiscipleEls = {};
@@ -611,30 +618,37 @@ function showColonyTab(name) {
     colonyInfoPanel.style.display = 'flex';
     colonyResourcesPanel.style.display = 'none';
     colonyBuildPanel.style.display = 'none';
+    if (colonyResearchPanel) colonyResearchPanel.style.display = 'none';
     if (colonyTasksTabButton) colonyTasksTabButton.classList.add('active');
     if (colonyInfoTabButton) colonyInfoTabButton.classList.remove('active');
     if (colonyResourcesTabButton) colonyResourcesTabButton.classList.remove('active');
     if (colonyBuildTabButton) colonyBuildTabButton.classList.remove('active');
+    if (colonyResearchTabButton) colonyResearchTabButton.classList.remove('active');
   } else if (name === 'info') {
     colonyTasksPanel.style.display = 'none';
     colonyInfoPanel.style.display = 'flex';
     colonyResourcesPanel.style.display = 'flex';
     colonyBuildPanel.style.display = 'none';
+    if (colonyResearchPanel) colonyResearchPanel.style.display = 'none';
     renderDiscipleList();
     renderDiscipleDetails();
     if (colonyTasksTabButton) colonyTasksTabButton.classList.remove('active');
     if (colonyInfoTabButton) colonyInfoTabButton.classList.add('active');
     if (colonyResourcesTabButton) colonyResourcesTabButton.classList.remove('active');
     if (colonyBuildTabButton) colonyBuildTabButton.classList.remove('active');
+    if (colonyResearchTabButton) colonyResearchTabButton.classList.remove('active');
   } else if (name === 'resources') {
     colonyTasksPanel.style.display = 'none';
     colonyInfoPanel.style.display = 'none';
     colonyResourcesPanel.style.display = 'flex';
     colonyBuildPanel.style.display = 'none';
+    if (colonyResearchPanel) colonyResearchPanel.style.display = 'none';
+    renderColonyResources();
     if (colonyTasksTabButton) colonyTasksTabButton.classList.remove('active');
     if (colonyInfoTabButton) colonyInfoTabButton.classList.remove('active');
     if (colonyResourcesTabButton) colonyResourcesTabButton.classList.add('active');
     if (colonyBuildTabButton) colonyBuildTabButton.classList.remove('active');
+    if (colonyResearchTabButton) colonyResearchTabButton.classList.remove('active');
   } else if (name === 'build') {
     colonyTasksPanel.style.display = 'none';
     colonyInfoPanel.style.display = 'none';
@@ -645,6 +659,21 @@ function showColonyTab(name) {
     if (colonyInfoTabButton) colonyInfoTabButton.classList.remove('active');
     if (colonyResourcesTabButton) colonyResourcesTabButton.classList.remove('active');
     if (colonyBuildTabButton) colonyBuildTabButton.classList.add('active');
+    if (colonyResearchTabButton) colonyResearchTabButton.classList.remove('active');
+  } else if (name === 'research') {
+    colonyTasksPanel.style.display = 'none';
+    colonyInfoPanel.style.display = 'none';
+    colonyResourcesPanel.style.display = 'none';
+    colonyBuildPanel.style.display = 'none';
+    if (colonyResearchPanel) {
+      colonyResearchPanel.style.display = 'flex';
+      renderColonyResearchPanel();
+    }
+    if (colonyTasksTabButton) colonyTasksTabButton.classList.remove('active');
+    if (colonyInfoTabButton) colonyInfoTabButton.classList.remove('active');
+    if (colonyResourcesTabButton) colonyResourcesTabButton.classList.remove('active');
+    if (colonyBuildTabButton) colonyBuildTabButton.classList.remove('active');
+    if (colonyResearchTabButton) colonyResearchTabButton.classList.add('active');
   }
 }
 
@@ -693,21 +722,25 @@ function initTabs() {
   colonyInfoPanel = document.getElementById('colonyInfoPanel');
   colonyResourcesPanel = document.getElementById('colonyResourcesPanel');
   colonyBuildPanel = document.getElementById('colonyBuildPanel');
+  colonyResearchPanel = document.getElementById('colonyResearchPanel');
   colonyTasksTabButton = document.getElementById('colonyTasksTabBtn');
   colonyInfoTabButton = document.getElementById('colonyInfoTabBtn');
   colonyResourcesTabButton = document.getElementById('colonyResourcesTabBtn');
   colonyBuildTabButton = document.getElementById('colonyBuildTabBtn');
+  colonyResearchTabButton = document.getElementById('colonyResearchTabBtn');
   statsOverviewSubTabButton = document.querySelector('.statsOverviewSubTabButton');
   statsEconomySubTabButton = document.querySelector('.statsEconomySubTabButton');
   statsOverviewContainer = document.getElementById('statsOverviewContainer');
   statsEconomyContainer = document.getElementById('statsEconomyContainer');
   if (colonyBuildTabButton) colonyBuildTabButton.style.display = systems.buildingUnlocked ? '' : 'none';
+  if (colonyResearchTabButton) colonyResearchTabButton.style.display = systems.researchUnlocked ? '' : 'none';
   setupTabHandlers();
 
   if (colonyTasksTabButton) colonyTasksTabButton.addEventListener('click', () => showColonyTab('tasks'));
   if (colonyInfoTabButton) colonyInfoTabButton.addEventListener('click', () => showColonyTab('info'));
   if (colonyResourcesTabButton) colonyResourcesTabButton.addEventListener('click', () => showColonyTab('resources'));
   if (colonyBuildTabButton) colonyBuildTabButton.addEventListener('click', () => showColonyTab('build'));
+  if (colonyResearchTabButton) colonyResearchTabButton.addEventListener('click', () => showColonyTab('research'));
 
 
   if (worldSubTabButton) {
@@ -973,11 +1006,40 @@ function tickSect(delta) {
         else sectState.pineLogs += cycles * cycleAmount;
         checkBuildingUnlock();
         if (!sectState.discipleSkills[d.id]) {
-          sectState.discipleSkills[d.id] = { 'Idle': 0, 'Gather Fruit': 0, 'Log Pine': 0, 'Building': 0 };
+          sectState.discipleSkills[d.id] = { 'Idle': 0, 'Gather Fruit': 0, 'Log Pine': 0, 'Building': 0, 'Research': 0, 'Chant': 0 };
         }
         sectState.discipleSkills[d.id][task] += cycles;
         updateSectDisplay();
       }
+    } else if (task === 'Research') {
+      const spend = Math.min(speechState.resources.insight.current, 4 * dt);
+      speechState.resources.insight.current -= spend;
+      sectState.researchProgress += spend;
+      if (sectState.researchProgress >= 500) {
+        const pts = Math.floor(sectState.researchProgress / 500);
+        sectState.researchProgress -= pts * 500;
+        sectState.researchPoints += pts;
+        if (!systems.researchUnlocked) {
+          systems.researchUnlocked = true;
+          if (colonyResearchTabButton) colonyResearchTabButton.style.display = '';
+        }
+        if (colonyResearchPanel && colonyResearchPanel.style.display !== 'none') {
+          renderColonyResearchPanel();
+        }
+      }
+    } else if (task === 'Chant') {
+      if (!sectState.discipleProgress[d.id]) sectState.discipleProgress[d.id] = 0;
+      sectState.discipleProgress[d.id] += dt;
+      if (sectState.discipleProgress[d.id] >= 3) {
+        sectState.discipleProgress[d.id] -= 3;
+        const constructs = speechState.activeConstructs;
+        if (constructs.length > 0) {
+          const idx = Math.floor(Math.random() * constructs.length);
+          castConstruct(constructs[idx], null, 0.5);
+        }
+      }
+      const spend = Math.min(speechState.resources.insight.current, dt);
+      speechState.resources.insight.current -= spend;
     } else {
       sectState.discipleProgress[d.id] = 0;
     }
@@ -1183,7 +1245,10 @@ function renderColonyInfo() {
   }
   const taskList = document.createElement('div');
   taskList.className = 'disciple-skill-list';
-  ['Idle', 'Gather Fruit', 'Log Pine', 'Building'].forEach(t => {
+  const tasks = ['Idle', 'Gather Fruit', 'Log Pine', 'Building'];
+  if (sectState.buildings.researchTable > 0) tasks.push('Research');
+  if (sectState.buildings.chantingHall > 0) tasks.push('Chant');
+  tasks.forEach(t => {
     const option = document.createElement('div');
     option.className = 'disciple-skill-option';
 
@@ -1192,7 +1257,9 @@ function renderColonyInfo() {
         Idle: 0,
         'Gather Fruit': 0,
         'Log Pine': 0,
-        Building: 0
+        Building: 0,
+        'Research': 0,
+        'Chant': 0
       };
     const prog = getTaskSkillProgress(skills[t] || 0);
 
@@ -1237,10 +1304,13 @@ function renderColonyResources() {
   sound.textContent = 'Sound: 0';
   const insight = document.createElement('div');
   insight.textContent = 'Insight: 0';
+  const research = document.createElement('div');
+  research.textContent = `Research Points: ${sectState.researchPoints}`;
   colonyResourcesPanel.appendChild(fruits);
   colonyResourcesPanel.appendChild(logs);
   colonyResourcesPanel.appendChild(sound);
   colonyResourcesPanel.appendChild(insight);
+  colonyResourcesPanel.appendChild(research);
   checkBuildingUnlock();
 }
 
@@ -1258,6 +1328,7 @@ function startBuilding(key) {
   if (sectState.buildings[key] >= b.max) return;
   if (sectState.currentBuild) return;
   if (b.requires && sectState.buildings[b.requires] < b.max) return;
+  if (key === 'chantingHall' && !systems.chantingHallUnlocked) return;
   sectState.pineLogs -= b.cost;
   sectState.currentBuild = key;
   sectState.buildProgress = 0;
@@ -1293,6 +1364,7 @@ function renderColonyBuildPanel() {
   colonyBuildPanel.innerHTML = '';
   Object.entries(BUILDINGS).forEach(([key, b]) => {
     if (b.requires && sectState.buildings[b.requires] < b.max) return;
+    if (key === 'chantingHall' && !systems.chantingHallUnlocked) return;
     const row = document.createElement('div');
     const btn = document.createElement('button');
     const built = sectState.buildings[key] || 0;
@@ -1311,6 +1383,28 @@ function renderColonyBuildPanel() {
     }
   colonyBuildPanel.appendChild(row);
   });
+}
+
+function renderColonyResearchPanel() {
+  if (!colonyResearchPanel) return;
+  colonyResearchPanel.innerHTML = '';
+  const pts = document.createElement('div');
+  pts.textContent = `Research Points: ${sectState.researchPoints}`;
+  colonyResearchPanel.appendChild(pts);
+  if (!systems.chantingHallUnlocked) {
+    const btn = document.createElement('button');
+    btn.textContent = 'Unlock Chanting Halls (3 RP)';
+    btn.disabled = sectState.researchPoints < 3;
+    btn.addEventListener('click', () => {
+      if (sectState.researchPoints >= 3) {
+        sectState.researchPoints -= 3;
+        systems.chantingHallUnlocked = true;
+        renderColonyResearchPanel();
+        renderColonyBuildPanel();
+      }
+    });
+    colonyResearchPanel.appendChild(btn);
+  }
 }
 
 function renderDiscipleList() {
@@ -1364,7 +1458,7 @@ function renderDiscipleDetails() {
   colonyResourcesPanel.appendChild(power);
 
   const attrs = document.createElement('div');
-  attrs.innerHTML = `Strength ${d.strength}<br>Dexterity ${d.dexterity}<br>Intelligence ${d.intelligence}`;
+  attrs.innerHTML = `Strength ${d.strength}<br>Dexterity ${d.dexterity}<br>Intelligence ${d.intelligence}<br>Endurance ${d.endurance}`;
   colonyResourcesPanel.appendChild(attrs);
 }
 
@@ -1510,6 +1604,9 @@ document.addEventListener("DOMContentLoaded", () => {
   window.addEventListener('location-discovered', e => addDiscoveredLocation(e.detail.name));
   loadGame();
   checkBuildingUnlock();
+  if (systems.researchUnlocked && colonyResearchTabButton) {
+    colonyResearchTabButton.style.display = '';
+  }
   updateSectDisplay();
   initVignetteToggles();
   if (window.lucide) lucide.createIcons({ icons: lucide.icons });
@@ -3190,6 +3287,7 @@ Object.assign(playerStats, state.playerStats || {});
         if (d.power === undefined) d.power = 1;
         if (d.strength === undefined) d.strength = 1;
         if (d.dexterity === undefined) d.dexterity = 1;
+        if (d.endurance === undefined) d.endurance = 1;
         if (d.intelligence === undefined) d.intelligence = 1;
         if (d.incapacitated === undefined) d.incapacitated = false;
         if (!d.name) d.name = `Disciple ${d.id}`;

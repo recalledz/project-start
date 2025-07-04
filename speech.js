@@ -274,6 +274,7 @@ const constructEffects = {
         power: 1,
         strength: 1,
         dexterity: 1,
+        endurance: 1,
         intelligence: 1,
         incapacitated: false
       });
@@ -629,7 +630,7 @@ function toggleConstructActive(name) {
   renderHotbar();
 }
 
-function castConstruct(name, el) {
+function castConstruct(name, el, powerMult = 1) {
   const def = recipes.find(r => r.name === name);
   if (!def) return;
   const voiceSkill = speechState.skills.voice;
@@ -656,10 +657,10 @@ function castConstruct(name, el) {
   awardXp(def.xp || 0, def.tags || ['voice']);
   showConstructCloud(name, el);
   if (def.duration) {
-    speechState.activeBuffs[name] = def.duration;
+    speechState.activeBuffs[name] = { time: def.duration, mult: powerMult };
   } else {
     const effect = constructEffects[name];
-    if (effect) effect(1);
+    if (effect) effect(1 * powerMult);
   }
   if (def.cooldown) {
     speechState.cooldowns[name] = def.cooldown;
@@ -962,10 +963,11 @@ function tickActiveConstructs(dt) {
   // Constructs no longer auto-cast when slotted. Only active buffs
   // from previously cast constructs are processed each tick.
   for (const name of Object.keys(speechState.activeBuffs)) {
+    const data = speechState.activeBuffs[name];
     const effect = constructEffects[name];
-    if (effect) effect(dt);
-    speechState.activeBuffs[name] -= dt;
-    if (speechState.activeBuffs[name] <= 0) delete speechState.activeBuffs[name];
+    if (effect) effect(dt * (data.mult || 1));
+    data.time -= dt;
+    if (data.time <= 0) delete speechState.activeBuffs[name];
   }
   for (const name of Object.keys(speechState.cooldowns)) {
     speechState.cooldowns[name] = Math.max(0, speechState.cooldowns[name] - dt);

@@ -3247,7 +3247,7 @@ body.darkenshift-mode .tabsContainer button.active {
     width: 24px;
     height: 24px;
     padding: 2px;
-    font-size: 1rem;
+    font-size: 0.75rem;
     background: none;
     border: none;
     color: inherit;
@@ -3286,6 +3286,7 @@ body.darkenshift-mode .tabsContainer button.active {
     display: none;
     flex-direction: column;
     gap: 6px;
+    font-size: 0.75rem;
 }
 .task-entry {
     display: flex;
@@ -3379,8 +3380,8 @@ body.darkenshift-mode .tabsContainer button.active {
 }
 .sect-shack {
     position: absolute;
-    width: 10px;
-    height: 8px;
+    width: 30px;
+    height: 24px;
     background: #654321;
     border: 1px solid #432200;
     left: 50%;
@@ -3533,7 +3534,7 @@ body.darkenshift-mode .tabsContainer button.active {
   .disciple-orb { width: 12px; height: 12px; }
   .sect-disciple { width: 3px; height: 3px; font-size: 0; }
   .sect-basket { width: 6px; height: 4px; }
-  .sect-shack { width: 8px; height: 6px; }
+  .sect-shack { width: 24px; height: 18px; }
 #colonyTasksPanel .task-entry { width: 100%; flex-direction: column; gap: 4px; }
 }
 
