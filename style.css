@@ -135,18 +135,20 @@ body.darkenshift-mode .tabsContainer button.active {
     color: #06070c;
     box-shadow: inset 0 0 8px var(--core-glow), 0 0 12px var(--core-accent);
 }
+
 .imaginary-subtabs {
     display: flex;
-    gap: 12px;
-    padding: 10px;
+    gap: 6px;
+    padding: 5px;
 
 }
 .imaginary-subtabs button {
     background: rgba(0,0,0,0.4);
     color: #d4af37;
     border: 3px solid #d4af37;
-    padding: 8px 14px;
-    border-radius: 8px;
+    padding: 4px 7px;
+    border-radius: 4px;
+    font-size: 0.5rem;
     font-weight: bold;
     text-shadow: 0 0 6px #000;
     box-shadow: 0 0 8px rgba(212,175,55,0.5);
@@ -1491,7 +1493,7 @@ body.darkenshift-mode .tabsContainer button.active {
 
 .upgrade-subtabs {
     display: flex;
-    gap: 6px;
+    gap: 3px;
 }
 
 .upgrade-subtabs button {
@@ -1499,8 +1501,9 @@ body.darkenshift-mode .tabsContainer button.active {
     background: rgba(0, 0, 0, 0.4);
     color: #d4af37;
     border: 3px solid #d4af37;
-    padding: 8px 14px;
-    border-radius: 8px;
+    padding: 4px 7px;
+    border-radius: 4px;
+    font-size: 0.5rem;
     font-weight: bold;
     text-shadow: 0 0 6px #000;
     box-shadow: 0 0 8px rgba(212, 175, 55, 0.5);
@@ -2133,14 +2136,14 @@ body.darkenshift-mode .tabsContainer button.active {
 
 .player-subtabs {
     display: flex;
-    gap: 6px;
+    gap: 3px;
 }
 .player-subtabs button {
     width: 100%;
     border: 2px solid #b76eff;
-    padding: 6px 10px;
-    border-radius: 6px;
-    font-size: 0.8rem;
+    padding: 3px 5px;
+    border-radius: 3px;
+    font-size: 0.4rem;
     font-weight: bold;
     text-shadow: 0 0 6px #000;
     transition: all 0.2s;
@@ -2168,16 +2171,16 @@ body.darkenshift-mode .tabsContainer button.active {
 
 .stats-subtabs {
     display: flex;
-    gap: 6px;
-    margin-bottom: 6px;
+    gap: 3px;
+    margin-bottom: 3px;
 }
 
 .stats-subtabs button {
     flex: 1;
     border: 2px solid #b76eff;
-    padding: 4px 6px;
-    border-radius: 6px;
-    font-size: 0.8rem;
+    padding: 2px 3px;
+    border-radius: 3px;
+    font-size: 0.4rem;
     background: #4b0082;
     color: #e0d0ff;
     text-shadow: 0 0 6px #000;
@@ -3228,10 +3231,12 @@ body.darkenshift-mode .tabsContainer button.active {
 }
 .colony-tabs {
     display: flex;
-    gap: 4px;
+    gap: 2px;
 }
 .colony-tabs button {
     flex: 1;
+    padding: 4px 6px;
+    font-size: 0.5rem;
 }
 .colony-panel {
     flex: 1;
