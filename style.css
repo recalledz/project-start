@@ -3240,6 +3240,9 @@ body.darkenshift-mode .tabsContainer button.active {
     padding: 2px;
     font-size: 1rem;
 }
+.colony-tabs button.active {
+    background: #444;
+}
 
 .colony-main {
     flex: 1;
@@ -3248,9 +3251,8 @@ body.darkenshift-mode .tabsContainer button.active {
 }
 
 .colony-side {
-    width: 200px;
+    width: 380px;
     display: flex;
-    flex-direction: column;
     gap: 6px;
 }
 .colony-panel {
@@ -3269,6 +3271,9 @@ body.darkenshift-mode .tabsContainer button.active {
     gap: 6px;
     border: 1px solid #555;
     padding: 4px;
+}
+.task-entry.selected {
+    background: #333;
 }
 .disciple-task-info {
     flex: 1;

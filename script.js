@@ -448,9 +448,9 @@ let colonyTasksPanel;
 let colonyInfoPanel;
 let colonyResourcesPanel;
 let colonyTasksTabButton;
-let colonyInfoTabButton;
 let colonyResourcesTabButton;
 let sectDisciplesContainer;
+let selectedDiscipleId = null;
 const sectDiscipleEls = {};
 const discipleGatherPhase = {};
 let discipleMoveInterval;
@@ -575,9 +575,19 @@ function showTab(tab) {
 
 function showColonyTab(name) {
   if (!colonyTasksPanel || !colonyInfoPanel || !colonyResourcesPanel) return;
-  colonyTasksPanel.style.display = name === 'tasks' ? 'flex' : 'none';
-  colonyInfoPanel.style.display = name === 'info' ? 'flex' : 'none';
-  colonyResourcesPanel.style.display = name === 'resources' ? 'flex' : 'none';
+  if (name === 'tasks') {
+    colonyTasksPanel.style.display = 'flex';
+    colonyInfoPanel.style.display = 'flex';
+    colonyResourcesPanel.style.display = 'none';
+    if (colonyTasksTabButton) colonyTasksTabButton.classList.add('active');
+    if (colonyResourcesTabButton) colonyResourcesTabButton.classList.remove('active');
+  } else if (name === 'resources') {
+    colonyTasksPanel.style.display = 'none';
+    colonyInfoPanel.style.display = 'none';
+    colonyResourcesPanel.style.display = 'flex';
+    if (colonyTasksTabButton) colonyTasksTabButton.classList.remove('active');
+    if (colonyResourcesTabButton) colonyResourcesTabButton.classList.add('active');
+  }
 }
 
 
@@ -625,7 +635,6 @@ function initTabs() {
   colonyInfoPanel = document.getElementById('colonyInfoPanel');
   colonyResourcesPanel = document.getElementById('colonyResourcesPanel');
   colonyTasksTabButton = document.getElementById('colonyTasksTabBtn');
-  colonyInfoTabButton = document.getElementById('colonyInfoTabBtn');
   colonyResourcesTabButton = document.getElementById('colonyResourcesTabBtn');
   statsOverviewSubTabButton = document.querySelector('.statsOverviewSubTabButton');
   statsEconomySubTabButton = document.querySelector('.statsEconomySubTabButton');
@@ -634,7 +643,6 @@ function initTabs() {
   setupTabHandlers();
 
   if (colonyTasksTabButton) colonyTasksTabButton.addEventListener('click', () => showColonyTab('tasks'));
-  if (colonyInfoTabButton) colonyInfoTabButton.addEventListener('click', () => showColonyTab('info'));
   if (colonyResourcesTabButton) colonyResourcesTabButton.addEventListener('click', () => showColonyTab('resources'));
 
 
@@ -1062,6 +1070,13 @@ function renderColonyTasks() {
   speechState.disciples.forEach(d => {
     const row = document.createElement('div');
     row.className = 'task-entry';
+    if (d.id === selectedDiscipleId) row.classList.add('selected');
+    row.addEventListener('click', e => {
+      if (e.target.tagName === 'SELECT') return;
+      selectedDiscipleId = d.id;
+      renderColonyTasks();
+      renderColonyInfo();
+    });
     const label = document.createElement('div');
     label.textContent = `Disciple #${d.id}`;
     const select = document.createElement('select');
@@ -1102,22 +1117,23 @@ function renderColonyTasks() {
 
 function renderColonyInfo() {
   colonyInfoPanel.innerHTML = '';
-  speechState.disciples.forEach(d => {
-    const details = document.createElement('details');
-    const summary = document.createElement('summary');
-    summary.textContent = `Disciple #${d.id}`;
-    details.appendChild(summary);
-    const task = document.createElement('div');
-    task.textContent = `Current Task: ${sectState.discipleTasks[d.id] || 'Idle'}`;
-    const power = document.createElement('div');
-    power.textContent = 'Invoke Power: 1.00';
-    const stamina = document.createElement('div');
-    stamina.textContent = 'Stamina: 100/100';
-    details.appendChild(task);
-    details.appendChild(power);
-    details.appendChild(stamina);
-    colonyInfoPanel.appendChild(details);
-  });
+  const d = speechState.disciples.find(x => x.id === selectedDiscipleId);
+  if (!d) {
+    colonyInfoPanel.textContent = 'Select a disciple';
+    return;
+  }
+  const header = document.createElement('div');
+  header.textContent = `Disciple #${d.id}`;
+  const task = document.createElement('div');
+  task.textContent = `Current Task: ${sectState.discipleTasks[d.id] || 'Idle'}`;
+  const power = document.createElement('div');
+  power.textContent = 'Invoke Power: 1.00';
+  const stamina = document.createElement('div');
+  stamina.textContent = 'Stamina: 100/100';
+  colonyInfoPanel.appendChild(header);
+  colonyInfoPanel.appendChild(task);
+  colonyInfoPanel.appendChild(power);
+  colonyInfoPanel.appendChild(stamina);
 }
 
 function renderColonyResources() {
