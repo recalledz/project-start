@@ -133,7 +133,7 @@ const recipes = [
     cooldown: 60
   },
   {
-    name: 'Calling',
+    name: 'The Calling',
     input: { sound: 100 },
     output: {},
     xp: 0,
@@ -259,8 +259,8 @@ const constructEffects = {
         if (effect) effect(dt);
       });
   },
-  'Calling'() {
-    const callPower = speechState.constructPotency['Calling'] || 1;
+  'The Calling'() {
+    const callPower = speechState.constructPotency['The Calling'] || 1;
     const targetIdx = speechState.disciples.length + 1;
     const reqPower = Math.pow(1.8, targetIdx - 1);
     const chance = Math.max(0.05, Math.min(1, callPower / reqPower));
@@ -465,7 +465,12 @@ function performConstruct() {
 function addConstruct(name) {
   if (!speechState.savedConstructs.includes(name)) {
     speechState.savedConstructs.push(name);
-    if (speechState.activeConstructs.length < speechState.memorySlots) {
+    const def = recipes.find(r => r.name === name);
+    if (
+      def &&
+      def.type === 'buff' &&
+      speechState.activeConstructs.length < speechState.memorySlots
+    ) {
       speechState.activeConstructs.push(name);
     }
   }
@@ -547,7 +552,20 @@ function createConstructInfo(name) {
   if (!recipe) return null;
   const info = document.createElement('div');
   info.className = 'construct-info';
-  if (Object.keys(recipe.output).length) {
+  if (name === 'The Calling') {
+    const effect = document.createElement('div');
+    effect.className = 'construct-effect';
+    effect.textContent = 'Effect: call for another faithful follower';
+    info.appendChild(effect);
+    const callPower = speechState.constructPotency['The Calling'] || 1;
+    const targetIdx = speechState.disciples.length + 1;
+    const reqPower = Math.pow(1.8, targetIdx - 1);
+    const chance = Math.max(0.05, Math.min(1, callPower / reqPower));
+    const chanceEl = document.createElement('div');
+    chanceEl.className = 'construct-chance';
+    chanceEl.textContent = `Chance: ${(chance * 100).toFixed(0)}%`;
+    info.appendChild(chanceEl);
+  } else if (Object.keys(recipe.output).length) {
     const effect = document.createElement('div');
     effect.className = 'construct-effect';
     effect.textContent = `Effect: ${Object.entries(recipe.output)
@@ -578,13 +596,18 @@ function createConstructInfo(name) {
 
 function getConstructEffect(name) {
   const recipe = recipes.find(r => r.name === name);
-  if (!recipe || !Object.keys(recipe.output).length) return null;
+  if (!recipe) return null;
+  if (name === 'The Calling') {
+    return 'call for another faithful follower';
+  }
+  if (!Object.keys(recipe.output).length) return null;
   return Object.entries(recipe.output)
     .map(([k, v]) => `+${v} ${k}`)
     .join(', ');
 }
 
 function toggleConstructActive(name) {
+  const def = recipes.find(r => r.name === name);
   const idx = speechState.activeConstructs.indexOf(name);
   if (idx >= 0) {
     speechState.activeConstructs.splice(idx, 1);
@@ -896,6 +919,8 @@ function renderGains() {
 }
 
 function tickActiveConstructs(dt) {
+  // Constructs no longer auto-cast when slotted. Only active buffs
+  // from previously cast constructs are processed each tick.
   for (const name of Object.keys(speechState.activeBuffs)) {
     const effect = constructEffects[name];
     if (effect) effect(dt);
@@ -996,11 +1021,11 @@ export function tickSpeech(delta) {
     speechState.upgrades.clarividence.unlocked = true;
     renderUpgrades();
   }
-  const call = recipes.find(r => r.name === 'Calling');
+  const call = recipes.find(r => r.name === 'The Calling');
   if (call && !call.unlocked && speechState.resources.sound.current >= 100) {
     call.unlocked = true;
-    addLog('Calling construct unlocked!', 'info');
-    addConstruct('Calling');
+    addLog('The Calling construct unlocked!', 'info');
+    addConstruct('The Calling');
   }
   tickActiveConstructs(dt);
   updateCooldownOverlays();

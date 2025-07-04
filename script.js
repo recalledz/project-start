@@ -156,23 +156,51 @@ const BASE_STATS = {
 const stats = { ...BASE_STATS };
 
 const systems = {
-  manaUnlocked: false
+  manaUnlocked: false,
+  buildingUnlocked: false
 };
 
 export const sectState = {
   fruits: 0,
-  logs: 0,
+  pineLogs: 0,
   discipleTasks: {}, // map disciple id -> current task
   taskTimers: { gatherFruits: 0 },
-  discipleProgress: {} // map disciple id -> progress seconds in current cycle
+  discipleProgress: {}, // map disciple id -> progress seconds in current cycle
+  discipleSkills: {}, // map disciple id -> skill levels per task
+  buildings: { pineShack: 0, researchTable: 0 },
+  currentBuild: null,
+  buildProgress: 0
 };
 
 // Each disciple can gather fruit three times per day.
 // Seconds per cycle is 200, so disciples repeat the cycle every ~3.3 minutes.
 const FRUIT_CYCLE_SECONDS = 200;
 const FRUIT_CYCLE_AMOUNT = 10;
-const LOG_CYCLE_SECONDS = 215;
-const LOG_CYCLE_AMOUNT = 10;
+const PINE_LOG_CYCLE_SECONDS = 215;
+const PINE_LOG_CYCLE_AMOUNT = 10;
+
+// XP progression for disciple tasks
+function taskXpRequired(level) {
+  return Math.round(50 * Math.pow(1.2, level));
+}
+
+function getTaskSkillProgress(xp) {
+  let total = 0;
+  let level = 0;
+  let next = taskXpRequired(level);
+  while (xp >= total + next) {
+    total += next;
+    level += 1;
+    next = taskXpRequired(level);
+  }
+  const progress = (xp - total) / next;
+  return { level, progress, next };
+}
+
+const BUILDINGS = {
+  pineShack: { name: 'Pine Shack', cost: 30, time: 600, max: 1 },
+  researchTable: { name: 'Research Table', cost: 15, time: 300, max: 1, requires: 'pineShack' }
+};
 
 const lifeCore = { real: false };
 
@@ -447,8 +475,11 @@ let sectUpkeepDisplay;
 let colonyTasksPanel;
 let colonyInfoPanel;
 let colonyResourcesPanel;
+let colonyBuildPanel;
 let colonyTasksTabButton;
+let colonyInfoTabButton;
 let colonyResourcesTabButton;
+let colonyBuildTabButton;
 let sectDisciplesContainer;
 let selectedDiscipleId = null;
 const sectDiscipleEls = {};
@@ -574,19 +605,44 @@ function showTab(tab) {
 }
 
 function showColonyTab(name) {
-  if (!colonyTasksPanel || !colonyInfoPanel || !colonyResourcesPanel) return;
+  if (!colonyTasksPanel || !colonyInfoPanel || !colonyResourcesPanel || !colonyBuildPanel) return;
   if (name === 'tasks') {
     colonyTasksPanel.style.display = 'flex';
     colonyInfoPanel.style.display = 'flex';
     colonyResourcesPanel.style.display = 'none';
+    colonyBuildPanel.style.display = 'none';
     if (colonyTasksTabButton) colonyTasksTabButton.classList.add('active');
+    if (colonyInfoTabButton) colonyInfoTabButton.classList.remove('active');
     if (colonyResourcesTabButton) colonyResourcesTabButton.classList.remove('active');
+    if (colonyBuildTabButton) colonyBuildTabButton.classList.remove('active');
+  } else if (name === 'info') {
+    colonyTasksPanel.style.display = 'none';
+    colonyInfoPanel.style.display = 'flex';
+    colonyResourcesPanel.style.display = 'flex';
+    colonyBuildPanel.style.display = 'none';
+    if (colonyTasksTabButton) colonyTasksTabButton.classList.remove('active');
+    if (colonyInfoTabButton) colonyInfoTabButton.classList.add('active');
+    if (colonyResourcesTabButton) colonyResourcesTabButton.classList.remove('active');
+    if (colonyBuildTabButton) colonyBuildTabButton.classList.remove('active');
   } else if (name === 'resources') {
     colonyTasksPanel.style.display = 'none';
     colonyInfoPanel.style.display = 'none';
     colonyResourcesPanel.style.display = 'flex';
+    colonyBuildPanel.style.display = 'none';
     if (colonyTasksTabButton) colonyTasksTabButton.classList.remove('active');
+    if (colonyInfoTabButton) colonyInfoTabButton.classList.remove('active');
     if (colonyResourcesTabButton) colonyResourcesTabButton.classList.add('active');
+    if (colonyBuildTabButton) colonyBuildTabButton.classList.remove('active');
+  } else if (name === 'build') {
+    colonyTasksPanel.style.display = 'none';
+    colonyInfoPanel.style.display = 'none';
+    colonyResourcesPanel.style.display = 'none';
+    colonyBuildPanel.style.display = 'flex';
+    renderColonyBuildPanel();
+    if (colonyTasksTabButton) colonyTasksTabButton.classList.remove('active');
+    if (colonyInfoTabButton) colonyInfoTabButton.classList.remove('active');
+    if (colonyResourcesTabButton) colonyResourcesTabButton.classList.remove('active');
+    if (colonyBuildTabButton) colonyBuildTabButton.classList.add('active');
   }
 }
 
@@ -634,16 +690,22 @@ function initTabs() {
   colonyTasksPanel = document.getElementById('colonyTasksPanel');
   colonyInfoPanel = document.getElementById('colonyInfoPanel');
   colonyResourcesPanel = document.getElementById('colonyResourcesPanel');
+  colonyBuildPanel = document.getElementById('colonyBuildPanel');
   colonyTasksTabButton = document.getElementById('colonyTasksTabBtn');
+  colonyInfoTabButton = document.getElementById('colonyInfoTabBtn');
   colonyResourcesTabButton = document.getElementById('colonyResourcesTabBtn');
+  colonyBuildTabButton = document.getElementById('colonyBuildTabBtn');
   statsOverviewSubTabButton = document.querySelector('.statsOverviewSubTabButton');
   statsEconomySubTabButton = document.querySelector('.statsEconomySubTabButton');
   statsOverviewContainer = document.getElementById('statsOverviewContainer');
   statsEconomyContainer = document.getElementById('statsEconomyContainer');
+  if (colonyBuildTabButton) colonyBuildTabButton.style.display = systems.buildingUnlocked ? '' : 'none';
   setupTabHandlers();
 
   if (colonyTasksTabButton) colonyTasksTabButton.addEventListener('click', () => showColonyTab('tasks'));
+  if (colonyInfoTabButton) colonyInfoTabButton.addEventListener('click', () => showColonyTab('info'));
   if (colonyResourcesTabButton) colonyResourcesTabButton.addEventListener('click', () => showColonyTab('resources'));
+  if (colonyBuildTabButton) colonyBuildTabButton.addEventListener('click', () => showColonyTab('build'));
 
 
   if (worldSubTabButton) {
@@ -897,16 +959,21 @@ function tickSect(delta) {
   const dt = delta / 1000;
   speechState.disciples.forEach(d => {
     const task = sectState.discipleTasks[d.id];
-    if (task === 'Gather Fruit' || task === 'Log Wood') {
+    if (task === 'Gather Fruit' || task === 'Log Pine') {
       if (!sectState.discipleProgress[d.id]) sectState.discipleProgress[d.id] = 0;
       sectState.discipleProgress[d.id] += dt;
-      const cycleSeconds = task === 'Gather Fruit' ? FRUIT_CYCLE_SECONDS : LOG_CYCLE_SECONDS;
-      const cycleAmount = task === 'Gather Fruit' ? FRUIT_CYCLE_AMOUNT : LOG_CYCLE_AMOUNT;
+      const cycleSeconds = task === 'Gather Fruit' ? FRUIT_CYCLE_SECONDS : PINE_LOG_CYCLE_SECONDS;
+      const cycleAmount = task === 'Gather Fruit' ? FRUIT_CYCLE_AMOUNT : PINE_LOG_CYCLE_AMOUNT;
       if (sectState.discipleProgress[d.id] >= cycleSeconds) {
         const cycles = Math.floor(sectState.discipleProgress[d.id] / cycleSeconds);
         sectState.discipleProgress[d.id] -= cycles * cycleSeconds;
         if (task === 'Gather Fruit') sectState.fruits += cycles * cycleAmount;
-        else sectState.logs += cycles * cycleAmount;
+        else sectState.pineLogs += cycles * cycleAmount;
+        checkBuildingUnlock();
+        if (!sectState.discipleSkills[d.id]) {
+          sectState.discipleSkills[d.id] = { 'Idle': 0, 'Gather Fruit': 0, 'Log Pine': 0, 'Building': 0 };
+        }
+        sectState.discipleSkills[d.id][task] += cycles;
         updateSectDisplay();
       }
     } else {
@@ -914,6 +981,7 @@ function tickSect(delta) {
     }
   });
   updateTaskProgressDisplay();
+  tickBuilding(dt);
 }
 
 function updateTaskProgressDisplay() {
@@ -924,13 +992,13 @@ function updateTaskProgressDisplay() {
     const fill = wrapper.querySelector('.disciple-progress-fill');
     const label = wrapper.querySelector('.disciple-progress-label');
     const taskName = sectState.discipleTasks[d.id] || 'Idle';
-    if (taskName !== 'Gather Fruit' && taskName !== 'Log Wood') {
+    if (taskName !== 'Gather Fruit' && taskName !== 'Log Pine') {
       if (fill) fill.style.width = '0%';
       if (label) label.textContent = '';
       return;
     }
     const progress = sectState.discipleProgress[d.id] || 0;
-    const cycleSeconds = taskName === 'Gather Fruit' ? FRUIT_CYCLE_SECONDS : LOG_CYCLE_SECONDS;
+    const cycleSeconds = taskName === 'Gather Fruit' ? FRUIT_CYCLE_SECONDS : PINE_LOG_CYCLE_SECONDS;
     const phaseLength = cycleSeconds / 4;
     const phase = Math.floor(progress / phaseLength) % 4;
     const pct = ((progress % phaseLength) / phaseLength) * 100;
@@ -947,7 +1015,7 @@ function updateSectDisplay() {
   if (sectDisciplesDisplay)
     sectDisciplesDisplay.textContent = `Disciples: ${total - assigned} / ${total}`;
   if (sectResourcesDisplay)
-    sectResourcesDisplay.textContent = `Fruits: ${sectState.fruits} | Logs: ${sectState.logs}`;
+    sectResourcesDisplay.textContent = `Fruits: ${sectState.fruits} | Pine Logs: ${sectState.pineLogs}`;
   if (sectUpkeepDisplay) {
     const remaining = Math.max(0, DAY_LENGTH_SECONDS - speechState.seasonTimer);
     const mm = String(Math.floor(remaining / 60)).padStart(2, '0');
@@ -1059,7 +1127,7 @@ function startDiscipleMovement() {
       const el = sectDiscipleEls[d.id];
       if (!el) return;
       const task = sectState.discipleTasks[d.id];
-      if (task === 'Gather Fruit' || task === 'Log Wood') updateDiscipleGather(d.id, el);
+      if (task === 'Gather Fruit' || task === 'Log Pine') updateDiscipleGather(d.id, el);
       else moveDisciple(el);
     });
   }, 3000);
@@ -1071,27 +1139,16 @@ function renderColonyTasks() {
     const row = document.createElement('div');
     row.className = 'task-entry';
     if (d.id === selectedDiscipleId) row.classList.add('selected');
-    row.addEventListener('click', e => {
-      if (e.target.tagName === 'SELECT') return;
+    row.addEventListener('click', () => {
       selectedDiscipleId = d.id;
       renderColonyTasks();
       renderColonyInfo();
     });
     const label = document.createElement('div');
     label.textContent = `Disciple #${d.id}`;
-    const select = document.createElement('select');
-    ['Idle', 'Gather Fruit', 'Log Wood'].forEach(t => {
-      const opt = document.createElement('option');
-      opt.value = t;
-      opt.textContent = t;
-      select.appendChild(opt);
-    });
-    select.value = sectState.discipleTasks[d.id] || 'Idle';
-    select.addEventListener('change', () => {
-      sectState.discipleTasks[d.id] = select.value;
-      discipleGatherPhase[d.id] = -1;
-      updateSectDisplay();
-    });
+    const taskName = document.createElement('div');
+    taskName.className = 'disciple-task-name';
+    taskName.textContent = sectState.discipleTasks[d.id] || 'Idle';
 
     const taskInfo = document.createElement('div');
     taskInfo.className = 'disciple-task-info';
@@ -1108,7 +1165,7 @@ function renderColonyTasks() {
     taskInfo.appendChild(bar);
 
     row.appendChild(label);
-    row.appendChild(select);
+    row.appendChild(taskName);
     row.appendChild(taskInfo);
     colonyTasksPanel.appendChild(row);
   });
@@ -1122,26 +1179,58 @@ function renderColonyInfo() {
     colonyInfoPanel.textContent = 'Select a disciple';
     return;
   }
-  const header = document.createElement('div');
-  header.textContent = `Disciple #${d.id}`;
-  const task = document.createElement('div');
-  task.textContent = `Current Task: ${sectState.discipleTasks[d.id] || 'Idle'}`;
-  const power = document.createElement('div');
-  power.textContent = 'Invoke Power: 1.00';
-  const stamina = document.createElement('div');
-  stamina.textContent = 'Stamina: 100/100';
-  colonyInfoPanel.appendChild(header);
-  colonyInfoPanel.appendChild(task);
-  colonyInfoPanel.appendChild(power);
-  colonyInfoPanel.appendChild(stamina);
+  const taskList = document.createElement('div');
+  taskList.className = 'disciple-skill-list';
+  ['Idle', 'Gather Fruit', 'Log Pine', 'Building'].forEach(t => {
+    const option = document.createElement('div');
+    option.className = 'disciple-skill-option';
+
+    const skills =
+      sectState.discipleSkills[d.id] || {
+        Idle: 0,
+        'Gather Fruit': 0,
+        'Log Pine': 0,
+        Building: 0
+      };
+    const prog = getTaskSkillProgress(skills[t] || 0);
+
+    const label = document.createElement('div');
+    label.className = 'disciple-skill-label';
+    label.textContent = `${t} (Lv ${prog.level})`;
+
+    const bar = document.createElement('div');
+    bar.className = 'disciple-skill-progress';
+    const fill = document.createElement('div');
+    fill.className = 'disciple-skill-progress-fill';
+    fill.style.width = `${Math.floor(prog.progress * 100)}%`;
+    bar.appendChild(fill);
+
+    option.appendChild(label);
+    option.appendChild(bar);
+
+    option.addEventListener('click', () => {
+      sectState.discipleTasks[d.id] = t;
+      discipleGatherPhase[d.id] = -1;
+      renderColonyTasks();
+      renderColonyInfo();
+      updateSectDisplay();
+    });
+
+    taskList.appendChild(option);
+  });
+
+  colonyInfoPanel.appendChild(taskList);
 }
 
 function renderColonyResources() {
   colonyResourcesPanel.innerHTML = '';
+  if (sectDisciplesDisplay) colonyResourcesPanel.appendChild(sectDisciplesDisplay);
+  if (sectResourcesDisplay) colonyResourcesPanel.appendChild(sectResourcesDisplay);
+  if (sectUpkeepDisplay) colonyResourcesPanel.appendChild(sectUpkeepDisplay);
   const fruits = document.createElement('div');
   fruits.textContent = `Fruits: ${sectState.fruits}`;
   const logs = document.createElement('div');
-  logs.textContent = `Logs: ${sectState.logs}`;
+  logs.textContent = `Pine Logs: ${sectState.pineLogs}`;
   const sound = document.createElement('div');
   sound.textContent = 'Sound: 0';
   const insight = document.createElement('div');
@@ -1150,6 +1239,76 @@ function renderColonyResources() {
   colonyResourcesPanel.appendChild(logs);
   colonyResourcesPanel.appendChild(sound);
   colonyResourcesPanel.appendChild(insight);
+  checkBuildingUnlock();
+}
+
+function checkBuildingUnlock() {
+  if (!systems.buildingUnlocked && sectState.pineLogs >= 10) {
+    systems.buildingUnlocked = true;
+    if (colonyBuildTabButton) colonyBuildTabButton.style.display = '';
+  }
+}
+
+function startBuilding(key) {
+  const b = BUILDINGS[key];
+  if (!b) return;
+  if (sectState.pineLogs < b.cost) return;
+  if (sectState.buildings[key] >= b.max) return;
+  if (sectState.currentBuild) return;
+  if (b.requires && sectState.buildings[b.requires] < b.max) return;
+  sectState.pineLogs -= b.cost;
+  sectState.currentBuild = key;
+  sectState.buildProgress = 0;
+  renderColonyResources();
+  renderColonyBuildPanel();
+}
+
+function tickBuilding(dt) {
+  if (!sectState.currentBuild) return;
+  const builders = speechState.disciples.filter(d => {
+    const t = sectState.discipleTasks[d.id];
+    return !t || t === 'Idle' || t === 'Building';
+  }).length;
+  if (builders === 0) return;
+  const b = BUILDINGS[sectState.currentBuild];
+  sectState.buildProgress += (dt * builders) / b.time;
+  if (sectState.buildProgress >= 1) {
+    sectState.buildings[sectState.currentBuild]++;
+    sectState.currentBuild = null;
+    sectState.buildProgress = 0;
+    if (sectState.buildings.pineShack >= 1) {
+      const basket = document.getElementById('sectBasket');
+      const shack = document.getElementById('sectShack');
+      if (basket) basket.style.display = 'none';
+      if (shack) shack.style.display = 'block';
+    }
+    renderColonyBuildPanel();
+  }
+}
+
+function renderColonyBuildPanel() {
+  if (!colonyBuildPanel) return;
+  colonyBuildPanel.innerHTML = '';
+  Object.entries(BUILDINGS).forEach(([key, b]) => {
+    if (b.requires && sectState.buildings[b.requires] < b.max) return;
+    const row = document.createElement('div');
+    const btn = document.createElement('button');
+    const built = sectState.buildings[key] || 0;
+    btn.textContent = `${b.name} (${built}/${b.max})`;
+    btn.disabled = built >= b.max || sectState.currentBuild;
+    btn.addEventListener('click', () => startBuilding(key));
+    row.appendChild(btn);
+    if (sectState.currentBuild === key) {
+      const prog = document.createElement('div');
+      prog.textContent = `Progress: ${(sectState.buildProgress * 100).toFixed(0)}%`;
+      row.appendChild(prog);
+    } else {
+      const cost = document.createElement('div');
+      cost.textContent = `Cost: ${b.cost} Pine Logs`;
+      row.appendChild(cost);
+    }
+    colonyBuildPanel.appendChild(row);
+  });
 }
 
 function triggerOrbFlash() {
@@ -1293,6 +1452,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initTabs();
   window.addEventListener('location-discovered', e => addDiscoveredLocation(e.detail.name));
   loadGame();
+  checkBuildingUnlock();
   updateSectDisplay();
   initVignetteToggles();
   if (window.lucide) lucide.createIcons({ icons: lucide.icons });
@@ -2923,13 +3083,17 @@ Object.assign(playerStats, state.playerStats || {});
     Object.assign(lifeCore, state.lifeCore);
   }
 
-  if (state.speechState) {
-    const { upgrades: savedUpgrades, ...restSpeech } = state.speechState;
-    Object.assign(speechState, restSpeech);
-    if (speechState.weather && speechState.weather.days !== undefined) {
-      speechState.weather.duration = speechState.weather.days;
-      delete speechState.weather.days;
-    }
+    if (state.speechState) {
+      const { upgrades: savedUpgrades, ...restSpeech } = state.speechState;
+      Object.assign(speechState, restSpeech);
+      // ensure the insight orb and resource reference the same object
+      if (speechState.orbs && speechState.orbs.insight) {
+        speechState.resources.insight = speechState.orbs.insight;
+      }
+      if (speechState.weather && speechState.weather.days !== undefined) {
+        speechState.weather.duration = speechState.weather.days;
+        delete speechState.weather.days;
+      }
     if (savedUpgrades) {
       Object.entries(savedUpgrades).forEach(([name, data]) => {
         if (speechState.upgrades[name]) {

@@ -2754,7 +2754,8 @@ body.darkenshift-mode .tabsContainer button.active {
     display: flex;
     flex-direction: column;
     align-items: center;
-    min-height: 48px;
+    width: 80px;
+    height: 90px;
     padding: 3px 6px 6px;
     border: 1px solid #555;
     border-radius: 4px;
@@ -2851,6 +2852,7 @@ body.darkenshift-mode .tabsContainer button.active {
     display: flex;
     flex-direction: column;
     overflow-y: auto;
+    align-items: center; /* center construct cards */
 }
 
 .construct-header {
@@ -2952,9 +2954,10 @@ body.darkenshift-mode .tabsContainer button.active {
     flex: 1;
     justify-content: center;
     align-items: center;
+    align-content: center;
 }
 .modal-constructor-panel .construct-card {
-    width: 60px;
+    width: 80px;
 }
 
 .speech-panel.construct-mode .speech-orbs {
@@ -3210,8 +3213,10 @@ body.darkenshift-mode .tabsContainer button.active {
 }
 .sect-disciples-container {
     flex: 1;
-    position: relative;
+    position: absolute;
+    inset: 0;
     border: 1px solid #555;
+    box-sizing: border-box;
 }
 .sect-resources {
     text-align: center;
@@ -3230,30 +3235,48 @@ body.darkenshift-mode .tabsContainer button.active {
     gap: 6px;
 }
 .colony-tabs {
+    position: absolute;
+    top: 2px;
+    left: 2px;
     display: flex;
     gap: 2px;
-    margin-bottom: 6px;
+    z-index: 10;
+    margin: 0;
 }
 .colony-tabs button {
-    width: 32px;
-    height: 32px;
+    width: 24px;
+    height: 24px;
     padding: 2px;
     font-size: 1rem;
+    background: none;
+    border: none;
+    color: inherit;
 }
 .colony-tabs button.active {
-    background: #444;
+    outline: 1px solid #555;
+}
+#colonyTasksTabBtn {
+    color: #fff;
 }
 
 .colony-main {
     flex: 1;
     display: flex;
+    flex-direction: column;
     gap: 6px;
 }
 
+.colony-map {
+    flex: 1;
+    width: 100%;
+    position: relative;
+}
+
 .colony-side {
-    width: 380px;
+    width: 100%;
     display: flex;
     gap: 6px;
+    flex: 1;
 }
 .colony-panel {
     flex: 1;
@@ -3275,6 +3298,9 @@ body.darkenshift-mode .tabsContainer button.active {
 .task-entry.selected {
     background: #333;
 }
+.disciple-task-name {
+    min-width: 80px;
+}
 .disciple-task-info {
     flex: 1;
     display: flex;
@@ -3284,7 +3310,7 @@ body.darkenshift-mode .tabsContainer button.active {
 .disciple-progress {
     position: relative;
     width: 120px;
-    height: 6px;
+    height: 12px;
     background: #222;
     border: 1px solid #555;
     border-radius: 4px;
@@ -3343,28 +3369,39 @@ body.darkenshift-mode .tabsContainer button.active {
 .sect-orb.will { background: rgba(255,163,127,0.6); }
 .sect-basket {
     position: absolute;
-    width: 30px;
-    height: 20px;
+    width: 8px;
+    height: 6px;
     background: #845;
     border-radius: 0 0 8px 8px;
     left: 50%;
     bottom: 50%;
     transform: translate(-50%, 50%);
 }
+.sect-shack {
+    position: absolute;
+    width: 10px;
+    height: 8px;
+    background: #654321;
+    border: 1px solid #432200;
+    left: 50%;
+    bottom: 50%;
+    transform: translate(-50%, 50%);
+    display: none;
+}
 .sect-disciple {
     position: absolute;
     left: 0;
     top: 0;
-    width: 16px;
-    height: 16px;
+    width: 5px;
+    height: 5px;
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.9);
-    box-shadow: 0 0 8px rgba(255, 255, 255, 0.9);
+    box-shadow: 0 0 4px rgba(255, 255, 255, 0.9);
     color: #000;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 10px;
+    font-size: 0;
     pointer-events: none;
     transition: transform 3s;
 }
@@ -3425,7 +3462,8 @@ body.darkenshift-mode .tabsContainer button.active {
     text-align: center;
 }
 .construct-duration,
-.construct-cooldown {
+.construct-cooldown,
+.construct-chance {
     font-size: 0.55rem;
     text-align: center;
 }
@@ -3454,8 +3492,8 @@ body.darkenshift-mode .tabsContainer button.active {
 }
 
 .construct-info i {
-    width: 10px;
-    height: 10px;
+    width: 8px;
+    height: 8px;
 }
 
 .construct-icons {
@@ -3471,8 +3509,8 @@ body.darkenshift-mode .tabsContainer button.active {
     align-items: center;
 }
 .construct-icons i {
-    width: 10px;
-    height: 10px;
+    width: 8px;
+    height: 8px;
 }
 
 .season-banner {
@@ -3493,7 +3531,40 @@ body.darkenshift-mode .tabsContainer button.active {
 @media (max-width: 600px) {
   .sect-orb { width: 30px; height: 30px; }
   .disciple-orb { width: 12px; height: 12px; }
-  .sect-disciple { width: 12px; height: 12px; font-size: 8px; }
-  .sect-basket { width: 20px; height: 15px; }
-  #colonyTasksPanel .task-entry { width: 100%; flex-direction: column; gap: 4px; }
+  .sect-disciple { width: 3px; height: 3px; font-size: 0; }
+  .sect-basket { width: 6px; height: 4px; }
+  .sect-shack { width: 8px; height: 6px; }
+#colonyTasksPanel .task-entry { width: 100%; flex-direction: column; gap: 4px; }
+}
+
+.disciple-skill-list {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    height: 100%;
+    gap: 6px;
+}
+.disciple-skill-option {
+    display: flex;
+    flex-direction: column;
+    width: 120px;
+    cursor: pointer;
+}
+.disciple-skill-label { font-size: 0.75rem; }
+.disciple-skill-progress {
+    position: relative;
+    width: 100%;
+    height: 8px;
+    background: #222;
+    border: 1px solid #555;
+    border-radius: 4px;
+    overflow: hidden;
+}
+.disciple-skill-progress-fill {
+    position: absolute;
+    top: 0; left: 0; bottom: 0;
+    width: 0%;
+    background: #6b5b95;
+    transition: width 0.3s ease;
 }
