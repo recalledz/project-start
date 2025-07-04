@@ -204,6 +204,8 @@ function getTaskSkillProgress(xp) {
 }
 
 
+
+
 const BUILDINGS = {
   pineShack: { name: 'Pine Shack', cost: 30, time: 600, max: 1 },
   researchTable: { name: 'Research Table', cost: 15, time: 300, max: 1, requires: 'pineShack' },
@@ -1005,8 +1007,13 @@ function tickSect(delta) {
       if (sectState.discipleProgress[d.id] >= cycleSeconds) {
         const cycles = Math.floor(sectState.discipleProgress[d.id] / cycleSeconds);
         sectState.discipleProgress[d.id] -= cycles * cycleSeconds;
-        if (task === 'Gather Fruit') sectState.fruits += cycles * cycleAmount;
-        else sectState.pineLogs += cycles * cycleAmount;
+        const skillXp = (sectState.discipleSkills[d.id]?.[task] || 0);
+        const lvl = getTaskSkillProgress(skillXp).level;
+        const yieldMult = 1 + 0.02 * lvl;
+        if (task === 'Gather Fruit')
+          sectState.fruits += cycles * cycleAmount * yieldMult;
+        else
+          sectState.pineLogs += cycles * cycleAmount * yieldMult;
         checkBuildingUnlock();
         if (!sectState.discipleSkills[d.id]) {
           sectState.discipleSkills[d.id] = {
@@ -1027,9 +1034,14 @@ function tickSect(delta) {
       speechState.resources.insight.current -= spend;
       sectState.researchProgress += spend;
       if (sectState.researchProgress >= 500) {
-        const pts = Math.floor(sectState.researchProgress / 500);
-        sectState.researchProgress -= pts * 500;
+        const xp = sectState.discipleSkills[d.id]?.['Research'] || 0;
+        const lvl = getTaskSkillProgress(xp).level;
+        const ptsBase = Math.floor(sectState.researchProgress / 500);
+        sectState.researchProgress -= ptsBase * 500;
+        const pts = Math.floor(ptsBase * (1 + 0.02 * lvl));
         sectState.researchPoints += pts;
+        sectState.discipleSkills[d.id]['Research'] =
+          (sectState.discipleSkills[d.id]['Research'] || 0) + ptsBase;
         if (!systems.researchUnlocked) {
           systems.researchUnlocked = true;
           if (colonyResearchTabButton) colonyResearchTabButton.style.display = '';
@@ -1046,7 +1058,11 @@ function tickSect(delta) {
         const constructs = speechState.activeConstructs;
         if (constructs.length > 0) {
           const idx = Math.floor(Math.random() * constructs.length);
-          castConstruct(constructs[idx], null, 0.5);
+          const xp = sectState.discipleSkills[d.id]?.['Chant'] || 0;
+          const lvl = getTaskSkillProgress(xp).level;
+          const pot = 0.5 * (1 + 0.02 * lvl);
+          castConstruct(constructs[idx], null, pot);
+          sectState.discipleSkills[d.id]['Chant'] = xp + 1;
         }
       }
       const spend = Math.min(speechState.resources.insight.current, dt);
@@ -1376,13 +1392,19 @@ function startBuilding(key) {
 
 function tickBuilding(dt) {
   if (!sectState.currentBuild) return;
-  const builders = speechState.disciples.filter(d => {
+  let speed = 0;
+  speechState.disciples.forEach(d => {
     const t = sectState.discipleTasks[d.id];
-    return !t || t === 'Idle' || t === 'Building';
-  }).length;
-  if (builders === 0) return;
+    if (!t || t === 'Idle' || t === 'Building') {
+      const xp = sectState.discipleSkills[d.id]?.['Building'] || 0;
+      const lvl = getTaskSkillProgress(xp).level;
+      speed += 1 + 0.02 * lvl;
+      sectState.discipleSkills[d.id]['Building'] = xp + dt;
+    }
+  });
+  if (speed === 0) return;
   const b = BUILDINGS[sectState.currentBuild];
-  sectState.buildProgress += (dt * builders) / b.time;
+  sectState.buildProgress += (dt * speed) / b.time;
   if (sectState.buildProgress >= 1) {
     sectState.buildings[sectState.currentBuild]++;
     sectState.currentBuild = null;
@@ -3146,9 +3168,9 @@ location.reload();
 
 // Player auto-attack; deals combined damage to the current enemy
 function attack() {
-if (!currentEnemy) return;
+  if (!currentEnemy) return;
 
-currentEnemy.takeDamage(stats.pDamage);
+  currentEnemy.takeDamage(stats.pDamage);
 
 stageData.dealerLifeCurrent = currentEnemy.currentHp;
 
