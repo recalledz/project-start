@@ -26,6 +26,7 @@ import RateTracker from "./utils/rateTracker.js";
 import { formatNumber } from "./utils/numberFormat.js";
 import { runAnimation } from "./utils/animation.js";
 import { initCore, refreshCore } from './core.js';
+import { attributes, strengthXpMultiplier } from './attributes.js';
 import { createOverlay } from './ui/overlay.js';
 import { showRestartScreen } from './ui/restartOverlay.js';
 import { calculateKillXp, XP_EFFICIENCY } from './utils/xp.js';
@@ -154,6 +155,7 @@ const BASE_STATS = {
 
 // Persistent player stats affecting combat and rewards
 const stats = { ...BASE_STATS };
+stats.cardSlots = BASE_STATS.cardSlots + attributes.Strength.inventorySlots;
 
 const systems = {
   manaUnlocked: false,
@@ -200,6 +202,7 @@ function getTaskSkillProgress(xp) {
   const progress = (xp - total) / next;
   return { level, progress, next };
 }
+
 
 const BUILDINGS = {
   pineShack: { name: 'Pine Shack', cost: 30, time: 600, max: 1 },
@@ -1006,9 +1009,17 @@ function tickSect(delta) {
         else sectState.pineLogs += cycles * cycleAmount;
         checkBuildingUnlock();
         if (!sectState.discipleSkills[d.id]) {
-          sectState.discipleSkills[d.id] = { 'Idle': 0, 'Gather Fruit': 0, 'Log Pine': 0, 'Building': 0, 'Research': 0, 'Chant': 0 };
+          sectState.discipleSkills[d.id] = {
+            'Idle': 0,
+            'Gather Fruit': 0,
+            'Log Pine': 0,
+            'Building': 0,
+            'Research': 0,
+            'Chant': 0
+          };
         }
-        sectState.discipleSkills[d.id][task] += cycles;
+        const mult = strengthXpMultiplier(task);
+        sectState.discipleSkills[d.id][task] += cycles * mult;
         updateSectDisplay();
       }
     } else if (task === 'Research') {
@@ -2996,6 +3007,7 @@ function respawnPlayer() {
   enemyAttackProgress = 0;
   playerStats.hasDied = false;
   Object.assign(stats, BASE_STATS);
+  stats.cardSlots = BASE_STATS.cardSlots + attributes.Strength.inventorySlots;
   cash = 0;
   chips = 0;
   resetCashRates(cash);
@@ -3166,8 +3178,13 @@ function updatePlayerStats() {
     stats.points += card.value;
   }
 
-stats.pDamage *= stats.damageMultiplier * stats.damageBuffMultiplier;
-renderPlayerStats(stats);
+  stats.pDamage *=
+    stats.damageMultiplier *
+    stats.damageBuffMultiplier *
+    attributes.Strength.meleeDamageMultiplier;
+
+  stats.cardSlots = BASE_STATS.cardSlots + attributes.Strength.inventorySlots;
+  renderPlayerStats(stats);
 }
 
 //=========save/load functions===========
