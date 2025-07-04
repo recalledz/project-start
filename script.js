@@ -161,13 +161,18 @@ const systems = {
 
 export const sectState = {
   fruits: 0,
+  logs: 0,
   discipleTasks: {}, // map disciple id -> current task
   taskTimers: { gatherFruits: 0 },
   discipleProgress: {} // map disciple id -> progress seconds in current cycle
 };
 
-const FRUIT_CYCLE_SECONDS = 319; // walk 200m out/back, gather and deposit
+// Each disciple can gather fruit three times per day.
+// Seconds per cycle is 200, so disciples repeat the cycle every ~3.3 minutes.
+const FRUIT_CYCLE_SECONDS = 200;
 const FRUIT_CYCLE_AMOUNT = 10;
+const LOG_CYCLE_SECONDS = 215;
+const LOG_CYCLE_AMOUNT = 10;
 
 const lifeCore = { real: false };
 
@@ -884,13 +889,16 @@ function tickSect(delta) {
   const dt = delta / 1000;
   speechState.disciples.forEach(d => {
     const task = sectState.discipleTasks[d.id];
-    if (task === 'Gather Fruit') {
+    if (task === 'Gather Fruit' || task === 'Log Wood') {
       if (!sectState.discipleProgress[d.id]) sectState.discipleProgress[d.id] = 0;
       sectState.discipleProgress[d.id] += dt;
-      if (sectState.discipleProgress[d.id] >= FRUIT_CYCLE_SECONDS) {
-        const cycles = Math.floor(sectState.discipleProgress[d.id] / FRUIT_CYCLE_SECONDS);
-        sectState.discipleProgress[d.id] -= cycles * FRUIT_CYCLE_SECONDS;
-        sectState.fruits += cycles * FRUIT_CYCLE_AMOUNT;
+      const cycleSeconds = task === 'Gather Fruit' ? FRUIT_CYCLE_SECONDS : LOG_CYCLE_SECONDS;
+      const cycleAmount = task === 'Gather Fruit' ? FRUIT_CYCLE_AMOUNT : LOG_CYCLE_AMOUNT;
+      if (sectState.discipleProgress[d.id] >= cycleSeconds) {
+        const cycles = Math.floor(sectState.discipleProgress[d.id] / cycleSeconds);
+        sectState.discipleProgress[d.id] -= cycles * cycleSeconds;
+        if (task === 'Gather Fruit') sectState.fruits += cycles * cycleAmount;
+        else sectState.logs += cycles * cycleAmount;
         updateSectDisplay();
       }
     } else {
@@ -908,13 +916,14 @@ function updateTaskProgressDisplay() {
     const fill = wrapper.querySelector('.disciple-progress-fill');
     const label = wrapper.querySelector('.disciple-progress-label');
     const taskName = sectState.discipleTasks[d.id] || 'Idle';
-    if (taskName !== 'Gather Fruit') {
+    if (taskName !== 'Gather Fruit' && taskName !== 'Log Wood') {
       if (fill) fill.style.width = '0%';
       if (label) label.textContent = '';
       return;
     }
     const progress = sectState.discipleProgress[d.id] || 0;
-    const phaseLength = FRUIT_CYCLE_SECONDS / 4;
+    const cycleSeconds = taskName === 'Gather Fruit' ? FRUIT_CYCLE_SECONDS : LOG_CYCLE_SECONDS;
+    const phaseLength = cycleSeconds / 4;
     const phase = Math.floor(progress / phaseLength) % 4;
     const pct = ((progress % phaseLength) / phaseLength) * 100;
     const phaseNames = ['Travelling', 'Gathering', 'Hauling', 'Storing'];
@@ -926,11 +935,11 @@ function updateTaskProgressDisplay() {
 function updateSectDisplay() {
   if (!sectTabUnlocked || !playerSectPanel) return;
   const total = speechState.disciples.length;
-  const assigned = Object.values(sectState.discipleTasks).filter(t => t === 'Gather Fruit').length;
+  const assigned = Object.values(sectState.discipleTasks).filter(t => t && t !== 'Idle').length;
   if (sectDisciplesDisplay)
     sectDisciplesDisplay.textContent = `Disciples: ${total - assigned} / ${total}`;
   if (sectResourcesDisplay)
-    sectResourcesDisplay.textContent = `Fruits: ${sectState.fruits}`;
+    sectResourcesDisplay.textContent = `Fruits: ${sectState.fruits} | Logs: ${sectState.logs}`;
   if (sectUpkeepDisplay) {
     const remaining = Math.max(0, DAY_LENGTH_SECONDS - speechState.seasonTimer);
     const mm = String(Math.floor(remaining / 60)).padStart(2, '0');
@@ -1042,7 +1051,8 @@ function startDiscipleMovement() {
       const el = sectDiscipleEls[d.id];
       if (!el) return;
       const task = sectState.discipleTasks[d.id];
-      if (task === 'Gather Fruit') updateDiscipleGather(d.id, el); else moveDisciple(el);
+      if (task === 'Gather Fruit' || task === 'Log Wood') updateDiscipleGather(d.id, el);
+      else moveDisciple(el);
     });
   }, 3000);
 }
@@ -1055,7 +1065,7 @@ function renderColonyTasks() {
     const label = document.createElement('div');
     label.textContent = `Disciple #${d.id}`;
     const select = document.createElement('select');
-    ['Idle', 'Gather Fruit'].forEach(t => {
+    ['Idle', 'Gather Fruit', 'Log Wood'].forEach(t => {
       const opt = document.createElement('option');
       opt.value = t;
       opt.textContent = t;
@@ -1114,11 +1124,14 @@ function renderColonyResources() {
   colonyResourcesPanel.innerHTML = '';
   const fruits = document.createElement('div');
   fruits.textContent = `Fruits: ${sectState.fruits}`;
+  const logs = document.createElement('div');
+  logs.textContent = `Logs: ${sectState.logs}`;
   const sound = document.createElement('div');
   sound.textContent = 'Sound: 0';
   const insight = document.createElement('div');
   insight.textContent = 'Insight: 0';
   colonyResourcesPanel.appendChild(fruits);
+  colonyResourcesPanel.appendChild(logs);
   colonyResourcesPanel.appendChild(sound);
   colonyResourcesPanel.appendChild(insight);
 }

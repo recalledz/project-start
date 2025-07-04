@@ -3258,7 +3258,7 @@ body.darkenshift-mode .tabsContainer button.active {
 }
 .disciple-progress {
     position: relative;
-    width: 80px;
+    width: 120px;
     height: 6px;
     background: #222;
     border: 1px solid #555;
