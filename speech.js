@@ -1,6 +1,6 @@
 import addLog from './log.js';
 import { coreState, refreshCore } from './core.js';
-import { sectState } from './script.js';
+import { sectState, addSkillXp, getSkillLevel, TASK_XP_TABLE } from './script.js';
 
 // Core state for the Constructs system. Orbs and upgrades from the
 // previous speech implementation remain intact.
@@ -630,7 +630,7 @@ function toggleConstructActive(name) {
   renderHotbar();
 }
 
-function castConstruct(name, el, powerMult = 1) {
+function castConstruct(name, el, powerMult = 1, sourceId = null) {
   const def = recipes.find(r => r.name === name);
   if (!def) return;
   const voiceSkill = speechState.skills.voice;
@@ -662,8 +662,25 @@ function castConstruct(name, el, powerMult = 1) {
     const effect = constructEffects[name];
     if (effect) effect(1 * powerMult);
   }
+  let constructLevel = 0;
+  if (sourceId !== null) {
+    if (!sectState.discipleSkills[sourceId]) {
+      sectState.discipleSkills[sourceId] = {
+        Idle: 0,
+        'Gather Fruit': 0,
+        'Log Pine': 0,
+        'Building': 0,
+        'Research': 0,
+        'Chant': 0,
+        'Constructing': 0
+      };
+    }
+    constructLevel = getSkillLevel(sectState.discipleSkills[sourceId].Constructing || 0);
+    addSkillXp(sourceId, 'Constructing', TASK_XP_TABLE.Constructing);
+  }
   if (def.cooldown) {
-    speechState.cooldowns[name] = def.cooldown;
+    const cd = def.cooldown * (1 - constructLevel * 0.02);
+    speechState.cooldowns[name] = cd;
   }
   renderResources();
   renderXpBar();
