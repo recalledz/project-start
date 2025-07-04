@@ -877,6 +877,37 @@ body.darkenshift-mode .tabsContainer button.active {
     border-radius: 4px;
 }
 
+.intone-meter {
+    display: grid;
+    grid-template-columns: repeat(15, 1fr);
+    gap: 1px;
+    width: 100%;
+    height: 4px;
+    margin-top: 2px;
+}
+.intone-seg {
+    background: #333;
+}
+.intone-seg.filled {
+    background: #7f7;
+}
+.intone-seg.marker {
+    background: #666;
+}
+.intone-timer {
+    position: absolute;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.6);
+    font-size: 0.8rem;
+    pointer-events: none;
+}
+.mult-badge {
+    margin-left: 4px;
+}
+
 .dCard_ability.green {
     background: #d0f0d0;
     border-color: #5cb85c;

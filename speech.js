@@ -73,7 +73,11 @@ export const speechState = {
   constructUnlocked: true,
   pot: [],
   constructPotency: {},
-  disciples: []
+  disciples: [],
+  murmurCasts: 0,
+  intonePresses: 0,
+  intoneTimer: 0,
+  intoneIdle: 0
 };
 
 // use the same object for the insight resource and orb
@@ -133,6 +137,13 @@ const recipes = [
     cooldown: 60
   },
   {
+    name: 'Intone',
+    input: {},
+    output: {},
+    xp: 0,
+    unlocked: false
+  },
+  {
     name: 'The Calling',
     input: { sound: 100 },
     output: {},
@@ -173,6 +184,15 @@ function getSkillProgress(xp) {
   }
   const progress = (xp - total) / next;
   return { level, progress, next };
+}
+
+function getIntoneMultiplier() {
+  if (speechState.intoneTimer > 0) return 3.0;
+  const p = speechState.intonePresses;
+  if (p >= 15) return 3.0;
+  if (p >= 10) return 2.0;
+  if (p >= 5) return 1.5;
+  return 1.0;
 }
 
 function awardXp(amount, tags) {
@@ -259,6 +279,16 @@ const constructEffects = {
         if (effect) effect(dt);
       });
   },
+  Intone() {
+    if (speechState.intoneTimer > 0) return;
+    if (speechState.intonePresses < 15) {
+      speechState.intonePresses += 1;
+    }
+    speechState.intoneIdle = 0;
+    if (speechState.intonePresses >= 15) {
+      speechState.intoneTimer = 30;
+    }
+  },
   'The Calling'() {
     const callPower = speechState.constructPotency['The Calling'] || 1;
     const targetIdx = speechState.disciples.length + 1;
@@ -303,7 +333,7 @@ export function initSpeech() {
             <div id="orbInsight" class="speech-orb"><div class="orb-fill"></div></div>
             <div id="orbInsightValue" class="orb-value"></div>
             <div id="orbInsightRegen" class="orb-regen">
-              <span class="season-icon"></span><span class="regen-value"></span>
+              <span class="season-icon"></span><span class="regen-value"></span><span id="intoneMultiplier" class="mult-badge"></span>
             </div>
           </div>
           <div id="orbBodyContainer" class="orb-container" style="display:none">
@@ -548,6 +578,20 @@ function createConstructCard(name) {
     });
     iconCont.appendChild(costRow);
     card.appendChild(iconCont);
+    if (name === 'Intone') {
+      const meter = document.createElement('div');
+      meter.className = 'intone-meter';
+      for (let i = 0; i < 15; i++) {
+        const seg = document.createElement('div');
+        seg.className = 'intone-seg';
+        if (i === 4 || i === 9) seg.classList.add('marker');
+        meter.appendChild(seg);
+      }
+      card.appendChild(meter);
+      const timer = document.createElement('div');
+      timer.className = 'intone-timer';
+      card.appendChild(timer);
+    }
     if (recipe.cooldown) {
       const overlay = document.createElement('div');
       overlay.className = 'cooldown-overlay';
@@ -577,6 +621,11 @@ function createConstructInfo(name) {
     chanceEl.className = 'construct-chance';
     chanceEl.textContent = `Chance: ${(chance * 100).toFixed(0)}%`;
     info.appendChild(chanceEl);
+  } else if (name === 'Intone') {
+    const effect = document.createElement('div');
+    effect.className = 'construct-effect';
+    effect.textContent = 'Effect: tap repeatedly to boost Insight regen';
+    info.appendChild(effect);
   } else if (Object.keys(recipe.output).length) {
     const effect = document.createElement('div');
     effect.className = 'construct-effect';
@@ -611,6 +660,9 @@ function getConstructEffect(name) {
   if (!recipe) return null;
   if (name === 'The Calling') {
     return 'call for another faithful follower';
+  }
+  if (name === 'Intone') {
+    return 'press repeatedly to charge';
   }
   if (!Object.keys(recipe.output).length) return null;
   return Object.entries(recipe.output)
@@ -653,6 +705,15 @@ function castConstruct(name, el, powerMult = 1) {
   for (const [res, amt] of Object.entries(def.output)) {
     const r = speechState.resources[res];
     if (r) r.current = Math.min(r.max, r.current + amt);
+  }
+  if (name === 'Murmur') {
+    speechState.murmurCasts += 1;
+    const intone = recipes.find(r => r.name === 'Intone');
+    if (intone && !intone.unlocked && speechState.murmurCasts >= 10) {
+      intone.unlocked = true;
+      addLog('Intone construct unlocked!', 'info');
+      addConstruct('Intone');
+    }
   }
   awardXp(def.xp || 0, def.tags || ['voice']);
   showConstructCloud(name, el);
@@ -999,9 +1060,48 @@ function updateCooldownOverlays() {
   });
 }
 
+function updateIntoneUI() {
+  if (!container) return;
+  const card = container.querySelector('.construct-card[data-name="Intone"]');
+  if (card) {
+    const meter = card.querySelectorAll('.intone-seg');
+    meter.forEach((seg, idx) => {
+      const filled = speechState.intoneTimer > 0 || speechState.intonePresses > idx;
+      seg.classList.toggle('filled', filled);
+    });
+    const timer = card.querySelector('.intone-timer');
+    if (timer) {
+      if (speechState.intoneTimer > 0) {
+        timer.style.display = 'flex';
+        timer.textContent = `${Math.ceil(speechState.intoneTimer)}s`;
+      } else {
+        timer.style.display = 'none';
+      }
+    }
+  }
+  const badge = container.querySelector('#intoneMultiplier');
+  if (badge) {
+    const mult = getIntoneMultiplier();
+    badge.textContent = mult > 1 ? `×${mult.toFixed(1)}` : '';
+  }
+}
+
 export function tickSpeech(delta) {
   if (!container) return;
   const dt = delta / 1000;
+  if (speechState.intoneTimer > 0) {
+    speechState.intoneTimer = Math.max(0, speechState.intoneTimer - dt);
+    if (speechState.intoneTimer === 0) {
+      speechState.intonePresses = 0;
+    }
+  } else {
+    speechState.intoneIdle += dt;
+    if (speechState.intonePresses < 15 && speechState.intoneIdle >= 2) {
+      const dec = Math.floor(speechState.intoneIdle / 2);
+      speechState.intonePresses = Math.max(0, speechState.intonePresses - dec);
+      speechState.intoneIdle -= dec * 2;
+    }
+  }
   ['body', 'will'].forEach(k => {
     const orb = speechState.orbs[k];
     const rate = speechState.gains[k];
@@ -1054,6 +1154,7 @@ export function tickSpeech(delta) {
   const baseTotal = (baseRate + upgradeBonus) * idleMult;
   let regen = baseTotal * seasonMult;
   if (speechState.weather) regen *= speechState.weather.multiplier;
+  regen = Math.min(R_MAX, regen * getIntoneMultiplier());
   speechState.insightRegenBase = baseTotal;
   speechState.gains.insight = regen;
   ins.current = Math.min(ins.max, ins.current + regen * dt);
@@ -1071,6 +1172,7 @@ export function tickSpeech(delta) {
   }
   tickActiveConstructs(dt);
   updateCooldownOverlays();
+  updateIntoneUI();
   renderOrbs();
   renderSeasonBanner();
   renderResources();
