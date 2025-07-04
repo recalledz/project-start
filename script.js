@@ -239,6 +239,14 @@ let stageData = {
 const STAGE_KILL_REQUIREMENT = 10;
 const PROGRESS_CIRCUMFERENCE = 2 * Math.PI * 22;
 
+function applyEnduranceBonuses(d) {
+  d.maxStamina = 10 * (1 + 0.05 * d.endurance);
+  d.staminaRegen = (d.maxStamina * d.endurance) * 0.01;
+  d.maxHealth = 10 * d.endurance;
+  if (d.health > d.maxHealth) d.health = d.maxHealth;
+  if (d.stamina > d.maxStamina) d.stamina = d.maxStamina;
+}
+
 const xpEfficiency = XP_EFFICIENCY;
 
 let speakerEncounterPending = false;
@@ -993,6 +1001,10 @@ function tickSect(delta) {
   if (!sectTabUnlocked) return;
   const dt = delta / 1000;
   speechState.disciples.forEach(d => {
+    applyEnduranceBonuses(d);
+    if (d.staminaRegen) {
+      d.stamina = Math.min(d.maxStamina, d.stamina + d.staminaRegen * dt);
+    }
     const task = sectState.discipleTasks[d.id];
     if (task === 'Gather Fruit' || task === 'Log Pine') {
       if (!sectState.discipleProgress[d.id]) sectState.discipleProgress[d.id] = 0;
@@ -1008,7 +1020,11 @@ function tickSect(delta) {
         if (!sectState.discipleSkills[d.id]) {
           sectState.discipleSkills[d.id] = { 'Idle': 0, 'Gather Fruit': 0, 'Log Pine': 0, 'Building': 0, 'Research': 0, 'Chant': 0 };
         }
-        sectState.discipleSkills[d.id][task] += cycles;
+        let gain = cycles;
+        if (['Building', 'Defending', 'Combat'].includes(task)) {
+          gain *= 1 + 0.1 * d.endurance;
+        }
+        sectState.discipleSkills[d.id][task] += gain;
         updateSectDisplay();
       }
     } else if (task === 'Research') {
@@ -1434,8 +1450,8 @@ function renderDiscipleDetails() {
   }
 
   const stats = [
-    { label: 'Health', color: '#a33', value: d.health, max: 10 },
-    { label: 'Stamina', color: '#cc3', value: d.stamina, max: 10 },
+    { label: 'Health', color: '#a33', value: d.health, max: d.maxHealth },
+    { label: 'Stamina', color: '#cc3', value: d.stamina, max: d.maxStamina },
     { label: 'Hunger', color: '#cc3', value: d.hunger, max: 20 }
   ];
 
@@ -3283,6 +3299,9 @@ Object.assign(playerStats, state.playerStats || {});
       speechState.disciples.forEach(d => {
         if (d.health === undefined) d.health = 10;
         if (d.stamina === undefined) d.stamina = 10;
+        if (d.maxHealth === undefined) d.maxHealth = 10;
+        if (d.maxStamina === undefined) d.maxStamina = 10;
+        if (d.staminaRegen === undefined) d.staminaRegen = 0;
         if (d.hunger === undefined) d.hunger = 20;
         if (d.power === undefined) d.power = 1;
         if (d.strength === undefined) d.strength = 1;
@@ -3291,6 +3310,7 @@ Object.assign(playerStats, state.playerStats || {});
         if (d.intelligence === undefined) d.intelligence = 1;
         if (d.incapacitated === undefined) d.incapacitated = false;
         if (!d.name) d.name = `Disciple ${d.id}`;
+        applyEnduranceBonuses(d);
       });
     }
   }
