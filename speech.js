@@ -1191,8 +1191,8 @@ export function tickSpeech(delta) {
   const seasonMult = seasons[speechState.seasonIndex].multiplier;
   const baseRateRaw = R_MAX / (1 + Math.exp((ins.current - MIDPOINT) / K));
   const level = speechState.upgrades.cohere.level;
-  // Diminishing returns are stronger so Cohere doesn't reach full regen too quickly
-  const upgradeMult = level / (level + 5);
+  // provide baseline regen at level 0 while still tapering off with higher levels
+  const upgradeMult = (level + 1) / (level + 5);
   const idleCount =
     speechState.upgrades.idleChatter.level > 0
       ? speechState.disciples.filter(
