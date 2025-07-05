@@ -5,9 +5,11 @@ import { sectState } from './script.js';
 // Core state for the Constructs system. Orbs and upgrades from the
 // previous speech implementation remain intact.
 // Insight regeneration constants
-const R_MAX = 0.125;
-const MIDPOINT = 1000;
-const K = 200;
+// Tweaked to provide a faster early-game ramp while still tapering off
+// as Insight approaches its maximum value.
+const R_MAX = 0.5;      // cap per-second regen
+const MIDPOINT = 1000;  // inflection point of logistic curve
+const K = 150;          // controls steepness of taper
 
 // Seasonal cycle configuration
 // A full in-game day lasts 10 real minutes (600 seconds). Each season spans
