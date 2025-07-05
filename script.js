@@ -185,11 +185,16 @@ export const sectState = {
 };
 
 // Each disciple can gather fruit three times per day.
-// Seconds per cycle is 200, so disciples repeat the cycle every ~3.3 minutes.
+// Cycles last 200 seconds (~3.3 minutes).
 const FRUIT_CYCLE_SECONDS = 200;
 const FRUIT_CYCLE_AMOUNT = 10;
+// XP granted when a fruit gathering cycle completes.
+const FRUIT_XP_PER_CYCLE = 200;
+// Logging cycles take 215 seconds (~3.6 minutes).
 const PINE_LOG_CYCLE_SECONDS = 215;
 const PINE_LOG_CYCLE_AMOUNT = 10;
+// XP granted when a pine logging cycle completes.
+const PINE_LOG_XP_PER_CYCLE = 215;
 
 // XP progression for disciple tasks
 function taskXpRequired(level) {
@@ -1022,8 +1027,12 @@ function tickSect(delta) {
     if (task === 'Gather Fruit' || task === 'Log Pine') {
       if (!sectState.discipleProgress[d.id]) sectState.discipleProgress[d.id] = 0;
       sectState.discipleProgress[d.id] += dt;
-      const cycleSeconds = task === 'Gather Fruit' ? FRUIT_CYCLE_SECONDS : PINE_LOG_CYCLE_SECONDS;
-      const cycleAmount = task === 'Gather Fruit' ? FRUIT_CYCLE_AMOUNT : PINE_LOG_CYCLE_AMOUNT;
+      const cycleSeconds =
+        task === 'Gather Fruit' ? FRUIT_CYCLE_SECONDS : PINE_LOG_CYCLE_SECONDS;
+      const cycleAmount =
+        task === 'Gather Fruit' ? FRUIT_CYCLE_AMOUNT : PINE_LOG_CYCLE_AMOUNT;
+      const cycleXp =
+        task === 'Gather Fruit' ? FRUIT_XP_PER_CYCLE : PINE_LOG_XP_PER_CYCLE;
       if (sectState.discipleProgress[d.id] >= cycleSeconds) {
         const cycles = Math.floor(sectState.discipleProgress[d.id] / cycleSeconds);
         sectState.discipleProgress[d.id] -= cycles * cycleSeconds;
@@ -1050,7 +1059,7 @@ function tickSect(delta) {
           enduranceXpMultiplier(task) *
           dexterityXpMultiplier(task) *
           intelligenceXpMultiplier(task);
-        sectState.discipleSkills[d.id][task] += cycles * mult;
+        sectState.discipleSkills[d.id][task] += cycles * cycleXp * mult;
         updateSectDisplay();
       }
     } else if (task === 'Research') {

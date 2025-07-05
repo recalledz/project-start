@@ -83,6 +83,8 @@ Each task provides a small amount of skill XP whenever a work cycle is completed
 
 - **Gather Fruit** – `FRUIT_CYCLE_SECONDS = 200`
 - **Log Pine** – `PINE_LOG_CYCLE_SECONDS = 215`
+- **Fruit XP** – `FRUIT_XP_PER_CYCLE = 200`
+- **Logging XP** – `PINE_LOG_XP_PER_CYCLE = 215`
 - **Research** – progresses at 4 insight per second and requires `500` progress for 1 XP (125&nbsp;seconds)
 - **Chant** – awards 1 XP every 3 seconds
 - **Building** – grants XP each second while construction is underway
@@ -91,8 +93,8 @@ With these values, the default XP gain rates and example time to reach higher pr
 
 | Task | Base XP Rate | Lv. 1 (50 XP) | Lv. 5 (372 XP) |
 | --- | --- | --- | --- |
-| Gather Fruit | `0.005` XP/s | ~2h 46m | ~20h 40m |
-| Log Pine | `0.0047` XP/s | ~2h 59m | ~22h 13m |
+| Gather Fruit | `1` XP/s | ~50s | ~6m 12s |
+| Log Pine | `1` XP/s | ~50s | ~6m 12s |
 | Research | `0.008` XP/s | ~1h 44m | ~12h 55m |
 | Chant | `0.333` XP/s | ~2m 30s | ~18m 36s |
 | Building | `1` XP/s | ~50s | ~6m 12s |
