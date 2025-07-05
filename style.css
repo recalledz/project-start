@@ -3076,6 +3076,24 @@ body.darkenshift-mode .tabsContainer button.active {
 .speech-upgrades button.expanded .detail {
     display: flex;
 }
+.speech-upgrades .buy-btn {
+    align-self: flex-end;
+    padding: 2px 4px;
+    margin-top: 2px;
+    border: 1px solid #b76eff;
+    border-radius: 4px;
+    background: #321050;
+    cursor: pointer;
+    font-size: 0.7em;
+}
+.speech-upgrades .buy-btn:hover {
+    background: #b76eff;
+    color: #220044;
+}
+.speech-upgrades .buy-btn.disabled {
+    opacity: 0.6;
+    pointer-events: none;
+}
 .speech-upgrades button:hover {
     box-shadow: 0 0 12px rgba(183, 110, 255, 0.8);
     color: #fff4b3;
@@ -3614,6 +3632,27 @@ body.darkenshift-mode .tabsContainer button.active {
     width: 0%;
     background: #6b5b95;
     transition: width 0.3s ease;
+}
+
+/* Compact disciple info panel */
+.disciple-details {
+    font-size: 0.65rem;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.disciple-details .disciple-progress {
+    width: 100px;
+    height: 8px;
+}
+.disciple-details .disciple-progress-label {
+    font-size: 0.55rem;
+}
+.disciple-bonus-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-top: 4px;
 }
 
 /* Research progress bar shown in the research panel */

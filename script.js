@@ -1535,6 +1535,9 @@ function renderDiscipleDetails() {
     return;
   }
 
+  const container = document.createElement('div');
+  container.className = 'disciple-details';
+
   const stats = [
     { label: 'Health', color: '#a33', value: d.health, max: 10 },
     { label: 'Stamina', color: '#cc3', value: d.stamina, max: 10 },
@@ -1552,16 +1555,33 @@ function renderDiscipleDetails() {
     fill.style.width = `${(s.value / s.max) * 100}%`;
     bar.appendChild(fill);
     wrapper.appendChild(bar);
-    colonyResourcesPanel.appendChild(wrapper);
+    container.appendChild(wrapper);
   });
 
   const power = document.createElement('div');
   power.textContent = `Construct Power: ${d.power}`;
-  colonyResourcesPanel.appendChild(power);
+  container.appendChild(power);
 
   const attrs = document.createElement('div');
   attrs.innerHTML = `Strength ${d.strength}<br>Dexterity ${d.dexterity}<br>Intelligence ${d.intelligence}<br>Endurance ${d.endurance}`;
-  colonyResourcesPanel.appendChild(attrs);
+  container.appendChild(attrs);
+
+  const bonuses = document.createElement('div');
+  bonuses.className = 'disciple-bonus-list';
+
+  const skillMap = sectState.discipleSkills[d.id] || {};
+  const tasks = ['Gather Fruit', 'Log Pine', 'Building', 'Research', 'Chant'];
+  tasks.forEach(t => {
+    const xp = skillMap[t] || 0;
+    const lvl = getTaskSkillProgress(xp).level;
+    const mult = 1 + 0.02 * lvl;
+    const row = document.createElement('div');
+    row.textContent = `${t}: ×${mult.toFixed(2)}`;
+    bonuses.appendChild(row);
+  });
+
+  container.appendChild(bonuses);
+  colonyResourcesPanel.appendChild(container);
 }
 
 function triggerOrbFlash() {

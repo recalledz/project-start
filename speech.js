@@ -174,7 +174,12 @@ const resourceIcons = {
 };
 
 const upgradeDescriptions = {
-  cohere: 'Improves insight regeneration.',
+  cohere: level => {
+    const current = (R_MAX * (level / (level + 3))).toFixed(2);
+    const next = (R_MAX * ((level + 1) / (level + 4))).toFixed(2);
+    const inc = (next - current).toFixed(2);
+    return `Improves insight regeneration. Next +${inc}/s (now ${current}/s)`;
+  },
   expandMind: 'Increase max insight by 15% each level.',
   idleChatter: 'Bonus regen from idle disciples.',
   capacityBoost: 'Adds one memory slot.',
@@ -911,6 +916,8 @@ function updateUpgradeAffordability() {
     const cost = getUpgradeCost(name);
     const affordable = canAfford(cost);
     btn.classList.toggle('unaffordable', !affordable);
+    const buy = btn.querySelector('.buy-btn');
+    if (buy) buy.classList.toggle('disabled', !affordable);
     const spans = btn.querySelectorAll('.icon-row span');
     if (typeof cost === 'number') {
       const have = speechState.orbs.insight.current;
@@ -987,13 +994,20 @@ export function renderUpgrades() {
     }
     const affordable = canAfford(cost);
     btn.classList.toggle('unaffordable', !affordable);
-    btn.innerHTML = `<span class="upg-info"><span class="upg-name">${name}</span><span class="upgrade-level">Lv.${up.level}</span></span><div class="detail"><div class="cost">${costHtml}</div><div class="desc">${upgradeDescriptions[name] || ''}</div></div>`;
-    btn.addEventListener('click', () => {
+    const desc = typeof upgradeDescriptions[name] === 'function'
+      ? upgradeDescriptions[name](up.level)
+      : upgradeDescriptions[name] || '';
+    btn.innerHTML = `<span class="upg-info"><span class="upg-name">${name}</span><span class="upgrade-level">Lv.${up.level}</span></span><div class="detail"><div class="cost">${costHtml}</div><div class="desc">${desc}</div><span class="buy-btn">Buy</span></div>`;
+    btn.addEventListener('click', e => {
       if (!btn.classList.contains('expanded')) {
         btn.classList.add('expanded');
         return;
       }
-      purchaseUpgrade(name);
+      if (e.target.closest('.buy-btn')) {
+        purchaseUpgrade(name);
+      } else {
+        btn.classList.remove('expanded');
+      }
     });
     coreGroup.appendChild(btn);
   });
@@ -1002,14 +1016,18 @@ export function renderUpgrades() {
     btn.dataset.upgrade = 'clarividence';
     const cost = getUpgradeCost('clarividence');
     const cls = speechState.orbs.insight.current >= cost ? '' : 'cost-missing';
-    btn.innerHTML = `<span class="upg-info"><span class="upg-name">clarividence</span><span class="upgrade-level">Lv.0</span></span><div class="detail"><div class="cost"><span class="icon-row"><span class="${cls}"><i data-lucide="${resourceIcons.insight}"></i> ${cost}</span></span></div><div class="desc">${upgradeDescriptions.clarividence}</div></div>`;
     btn.classList.toggle('unaffordable', !canAfford(cost));
-    btn.addEventListener('click', () => {
+    btn.innerHTML = `<span class="upg-info"><span class="upg-name">clarividence</span><span class="upgrade-level">Lv.0</span></span><div class="detail"><div class="cost"><span class="icon-row"><span class="${cls}"><i data-lucide="${resourceIcons.insight}"></i> ${cost}</span></span></div><div class="desc">${upgradeDescriptions.clarividence}</div><span class="buy-btn">Buy</span></div>`;
+    btn.addEventListener('click', e => {
       if (!btn.classList.contains('expanded')) {
         btn.classList.add('expanded');
         return;
       }
-      purchaseUpgrade('clarividence');
+      if (e.target.closest('.buy-btn')) {
+        purchaseUpgrade('clarividence');
+      } else {
+        btn.classList.remove('expanded');
+      }
     });
     coreGroup.appendChild(btn);
   }
@@ -1021,14 +1039,18 @@ export function renderUpgrades() {
     btn.dataset.upgrade = 'vocalMaturity';
     const cost = getUpgradeCost('vocalMaturity');
     const cls = speechState.orbs.insight.current >= cost ? '' : 'cost-missing';
-    btn.innerHTML = `<span class="upg-info"><span class="upg-name">vocalMaturity</span><span class="upgrade-level">Lv.${speechState.upgrades.vocalMaturity.level}</span></span><div class="detail"><div class="cost"><span class="icon-row"><span class="${cls}"><i data-lucide="${resourceIcons.insight}"></i> ${cost}</span></span></div><div class="desc">${upgradeDescriptions.vocalMaturity}</div></div>`;
     btn.classList.toggle('unaffordable', !canAfford(cost));
-    btn.addEventListener('click', () => {
+    btn.innerHTML = `<span class="upg-info"><span class="upg-name">vocalMaturity</span><span class="upgrade-level">Lv.${speechState.upgrades.vocalMaturity.level}</span></span><div class="detail"><div class="cost"><span class="icon-row"><span class="${cls}"><i data-lucide="${resourceIcons.insight}"></i> ${cost}</span></span></div><div class="desc">${upgradeDescriptions.vocalMaturity}</div><span class="buy-btn">Buy</span></div>`;
+    btn.addEventListener('click', e => {
       if (!btn.classList.contains('expanded')) {
         btn.classList.add('expanded');
         return;
       }
-      purchaseUpgrade('vocalMaturity');
+      if (e.target.closest('.buy-btn')) {
+        purchaseUpgrade('vocalMaturity');
+      } else {
+        btn.classList.remove('expanded');
+      }
     });
     vocal.appendChild(btn);
   }
