@@ -26,7 +26,13 @@ import RateTracker from "./utils/rateTracker.js";
 import { formatNumber } from "./utils/numberFormat.js";
 import { runAnimation } from "./utils/animation.js";
 import { initCore, refreshCore } from './core.js';
-import { attributes, strengthXpMultiplier, enduranceXpMultiplier } from './attributes.js';
+import {
+  attributes,
+  strengthXpMultiplier,
+  enduranceXpMultiplier,
+  dexterityXpMultiplier,
+  intelligenceXpMultiplier
+} from './attributes.js';
 import { createOverlay } from './ui/overlay.js';
 import { showRestartScreen } from './ui/restartOverlay.js';
 import { calculateKillXp, XP_EFFICIENCY } from './utils/xp.js';
@@ -1039,7 +1045,11 @@ function tickSect(delta) {
             'Chant': 0
           };
         }
-        const mult = strengthXpMultiplier(task) * enduranceXpMultiplier(task);
+        const mult =
+          strengthXpMultiplier(task) *
+          enduranceXpMultiplier(task) *
+          dexterityXpMultiplier(task) *
+          intelligenceXpMultiplier(task);
         sectState.discipleSkills[d.id][task] += cycles * mult;
         updateSectDisplay();
       }

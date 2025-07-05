@@ -8,7 +8,7 @@ Each disciple starts with a set of personal attributes used by the colony interf
 
 - **Health**, **Stamina** and **Hunger** – short term needs capped at 10/10/20.
 - **Power** – base potency when invoking constructs on their own.
-- **Strength**, **Dexterity**, **Endurance** and **Intelligence** – broad talents that may influence future systems.
+- **Strength**, **Dexterity**, **Endurance** and **Intelligence** – broad talents that modify XP gains and construct potency.
 - **Incapacitated** – indicates if a disciple can no longer work.
 
 These stats are initialised when disciples are loaded or created in the game code:
@@ -43,7 +43,11 @@ function taskXpRequired(level) {
 When a disciple completes a work cycle – such as gathering fruit or logging pine – XP is awarded to that task. The game multiplies this XP by functions that depend on the player's own attributes:
 
 ```javascript
-const mult = strengthXpMultiplier(task) * enduranceXpMultiplier(task);
+const mult =
+  strengthXpMultiplier(task) *
+  enduranceXpMultiplier(task) *
+  dexterityXpMultiplier(task) *
+  intelligenceXpMultiplier(task);
 sectState.discipleSkills[d.id][task] += cycles * mult;
 ```
 
@@ -51,7 +55,7 @@ These multipliers are defined in `attributes.js`:
 
 ```javascript
 export function strengthXpMultiplier(task) {
-  const affected = ['Woodcutting', 'Log Pine', 'Mining', 'Smithing'];
+  const affected = ['Log Pine', 'Mining', 'Smithing'];
   return affected.includes(task) ? 1 + attributes.Strength.points * 0.1 : 1;
 }
 
@@ -59,6 +63,16 @@ export function enduranceXpMultiplier(task) {
   const affected = ['Building', 'Defending', 'Combat'];
   return affected.includes(task) ? 1 + attributes.Endurance.points * 0.1 : 1;
 }
+
+export function dexterityXpMultiplier(task) {
+  const affected = ['Woodcutting', 'Gather Fruit'];
+  return affected.includes(task) ? 1 + attributes.Dexterity.points * 0.1 : 1;
+}
+
+export function intelligenceXpMultiplier(task) {
+  const affected = ['Chant', 'Research'];
+  return affected.includes(task) ? 1 + attributes.Intelligence.points * 0.1 : 1;
+}
 ```
 
-Increasing your **Strength** attribute speeds up XP gain for woodcutting-related jobs such as **Log Pine**, while **Endurance** helps disciples learn faster when **Building** or defending. Other player attributes currently have no effect on disciple XP, but may do so in the future.
+Increasing **Strength** speeds up XP gain for mining, smithing, and logging jobs. **Dexterity** now boosts XP for woodcutting and gathering, while **Intelligence** grants extra XP when chanting or researching. **Endurance** continues to help disciples learn faster when building or defending.

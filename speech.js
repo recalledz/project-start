@@ -44,7 +44,9 @@ export const speechState = {
     will: 0
   },
   upgrades: {
-    cohere: { level: 0, costFunc: lvl => Math.round(10 * Math.pow(1.12, lvl)) },
+    // Cohere costs scale more steeply so high levels require larger insight
+    // investment. This keeps Cohere from overwhelming Intone's impact.
+    cohere: { level: 0, costFunc: lvl => Math.round(15 * Math.pow(1.2, lvl)) },
     vocalMaturity: { level: 0, baseCost: 2, unlocked: false },
     capacityBoost: { level: 0, baseCost: { insight: 10 }, unlocked: false },
     expandMind: {
@@ -175,8 +177,10 @@ const resourceIcons = {
 
 const upgradeDescriptions = {
   cohere: level => {
-    const current = (R_MAX * (level / (level + 3))).toFixed(2);
-    const next = (R_MAX * ((level + 1) / (level + 4))).toFixed(2);
+    // Cohere provides diminishing returns that taper off more sharply so
+    // Intone remains relevant even at high levels.
+    const current = (R_MAX * (level / (level + 5))).toFixed(2);
+    const next = (R_MAX * ((level + 1) / (level + 6))).toFixed(2);
     const inc = (next - current).toFixed(2);
     return `Improves insight regeneration. Next +${inc}/s (now ${current}/s)`;
   },
@@ -1187,7 +1191,8 @@ export function tickSpeech(delta) {
   const seasonMult = seasons[speechState.seasonIndex].multiplier;
   const baseRateRaw = R_MAX / (1 + Math.exp((ins.current - MIDPOINT) / K));
   const level = speechState.upgrades.cohere.level;
-  const upgradeMult = level / (level + 3); // diminishing returns per Cohere
+  // Diminishing returns are stronger so Cohere doesn't reach full regen too quickly
+  const upgradeMult = level / (level + 5);
   const idleCount =
     speechState.upgrades.idleChatter.level > 0
       ? speechState.disciples.filter(
