@@ -5,9 +5,10 @@ import { sectState } from './script.js';
 // Core state for the Constructs system. Orbs and upgrades from the
 // previous speech implementation remain intact.
 // Insight regeneration constants
-// Tweaked to provide a faster early-game ramp while still tapering off
-// as Insight approaches its maximum value.
-// Allow a higher maximum insight regeneration rate.
+// Insight regen now scales with the Cohere upgrade using a saturating
+// logistic curve. This starts near zero and gradually approaches `R_MAX`
+// with diminishing returns as more Cohere levels are purchased. The curve
+// still tapers off as Insight accumulates.
 const R_MAX = 6;        // cap per-second regen
 const MIDPOINT = 1000;  // inflection point of logistic curve
 const K = 150;          // controls steepness of taper
@@ -1145,8 +1146,9 @@ export function tickSpeech(delta) {
   }
   const ins = speechState.resources.insight;
   const seasonMult = seasons[speechState.seasonIndex].multiplier;
-  const baseRate = R_MAX / (1 + Math.exp((ins.current - MIDPOINT) / K));
-  const upgradeBonus = speechState.upgrades.cohere.level * R_MAX;
+  const baseRateRaw = R_MAX / (1 + Math.exp((ins.current - MIDPOINT) / K));
+  const level = speechState.upgrades.cohere.level;
+  const upgradeMult = level / (level + 3); // diminishing returns per Cohere
   const idleCount =
     speechState.upgrades.idleChatter.level > 0
       ? speechState.disciples.filter(
@@ -1154,7 +1156,7 @@ export function tickSpeech(delta) {
         ).length
       : 0;
   const idleMult = 1 + idleCount * 0.05;
-  const baseTotal = (baseRate + upgradeBonus) * idleMult;
+  const baseTotal = baseRateRaw * upgradeMult * idleMult;
   let regen = baseTotal * seasonMult;
   if (speechState.weather) regen *= speechState.weather.multiplier;
   regen = Math.min(R_MAX, regen * getIntoneMultiplier());
