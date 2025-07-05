@@ -2801,6 +2801,10 @@ body.darkenshift-mode .tabsContainer button.active {
 .construct-card:hover {
     box-shadow: 0 0 6px #999;
 }
+
+.construct-card.collapsed > *:not(.construct-name) {
+    display: none;
+}
 .construct-card .construct-bar {
     position: absolute;
     bottom: 0;
@@ -2978,7 +2982,7 @@ body.darkenshift-mode .tabsContainer button.active {
 .built-constructs {
     display: flex;
     flex-wrap: wrap;
-    gap: 15px;
+    gap: 8px;
     padding: 6px;
     margin-top: 6px;
     overflow: visible;
@@ -2988,7 +2992,9 @@ body.darkenshift-mode .tabsContainer button.active {
     align-content: center;
 }
 .modal-constructor-panel .construct-card {
-    width: 80px;
+    width: 60px;
+    height: 70px;
+    font-size: 0.7rem;
 }
 
 .speech-panel.construct-mode .speech-orbs {
@@ -3537,9 +3543,9 @@ body.darkenshift-mode .tabsContainer button.active {
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 80px;
+    width: 60px;
     gap: 4px;
-    margin: 8px;
+    margin: 6px;
 }
 
 .cooldown-timer {
@@ -3551,9 +3557,17 @@ body.darkenshift-mode .tabsContainer button.active {
 .construct-info {
     font-size: 0.55rem;
     text-align: center;
-    display: flex;
+    display: none;
     flex-direction: column;
     gap: 2px;
+}
+
+.construct-card-wrapper.expanded .construct-info {
+    display: flex;
+}
+
+.construct-card-wrapper.expanded .construct-card {
+    height: auto;
 }
 
 .construct-info i {

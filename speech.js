@@ -553,9 +553,15 @@ function renderConstructCards() {
   speechState.savedConstructs.forEach(c => {
     const wrapper = document.createElement('div');
     wrapper.className = 'construct-card-wrapper';
+    wrapper.dataset.name = c;
     const card = createConstructCard(c);
+    card.classList.add('collapsed');
     if (speechState.activeConstructs.includes(c)) card.classList.add('active');
-    card.addEventListener('click', () => toggleConstructActive(c));
+    card.addEventListener('click', () => {
+      toggleConstructActive(c);
+      wrapper.classList.toggle('expanded');
+      card.classList.toggle('collapsed');
+    });
     wrapper.appendChild(card);
     const timer = document.createElement('div');
     timer.className = 'cooldown-timer';
@@ -689,14 +695,23 @@ function getConstructEffect(name) {
 }
 
 function toggleConstructActive(name) {
-  const def = recipes.find(r => r.name === name);
   const idx = speechState.activeConstructs.indexOf(name);
   if (idx >= 0) {
     speechState.activeConstructs.splice(idx, 1);
   } else if (speechState.activeConstructs.length < speechState.memorySlots) {
     speechState.activeConstructs.push(name);
   }
-  renderConstructCards();
+  const slotCont = panel.querySelector('#memorySlotsDisplay');
+  if (slotCont) {
+    [...slotCont.children].forEach((slot, i) => {
+      slot.classList.toggle('filled', i < speechState.activeConstructs.length);
+    });
+  }
+  const cardEl = panel.querySelector(`.construct-card[data-name="${name}"]`);
+  if (cardEl) {
+    const active = speechState.activeConstructs.includes(name);
+    cardEl.classList.toggle('active', active);
+  }
   renderHotbar();
 }
 
