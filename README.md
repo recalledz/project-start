@@ -226,15 +226,13 @@ Built in collaboration with ChatGPT & Codex.
 
 📦 Installation
 
-Install Node.js and fetch the project's dependencies:
+Install Node.js and fetch the project's dependencies. Puppeteer attempts to
+download a bundled browser during installation, which may be blocked. Skip that
+download by setting an environment variable when installing:
 
 ```bash
-npm install
+PUPPETEER_SKIP_DOWNLOAD=1 npm install
 ```
-
-> **Note**: This step requires network access to download packages. If Puppeteer's
-> bundled browser fails to download, set `PUPPETEER_SKIP_DOWNLOAD=1` before
-> running `npm install`.
 
 🧪 Testing
 

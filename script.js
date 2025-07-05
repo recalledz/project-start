@@ -203,6 +203,19 @@ function getTaskSkillProgress(xp) {
   return { level, progress, next };
 }
 
+function ensureDiscipleSkills(id) {
+  if (!sectState.discipleSkills[id]) {
+    sectState.discipleSkills[id] = {
+      Idle: 0,
+      'Gather Fruit': 0,
+      'Log Pine': 0,
+      Building: 0,
+      Research: 0,
+      Chant: 0
+    };
+  }
+}
+
 
 
 
@@ -998,6 +1011,7 @@ function tickSect(delta) {
   if (!sectTabUnlocked) return;
   const dt = delta / 1000;
   speechState.disciples.forEach(d => {
+    ensureDiscipleSkills(d.id);
     const task = sectState.discipleTasks[d.id];
     if (task === 'Gather Fruit' || task === 'Log Pine') {
       if (!sectState.discipleProgress[d.id]) sectState.discipleProgress[d.id] = 0;
@@ -1396,7 +1410,8 @@ function tickBuilding(dt) {
   speechState.disciples.forEach(d => {
     const t = sectState.discipleTasks[d.id];
     if (!t || t === 'Idle' || t === 'Building') {
-      const xp = sectState.discipleSkills[d.id]?.['Building'] || 0;
+      ensureDiscipleSkills(d.id);
+      const xp = sectState.discipleSkills[d.id]['Building'];
       const lvl = getTaskSkillProgress(xp).level;
       speed += 1 + 0.02 * lvl;
       sectState.discipleSkills[d.id]['Building'] = xp + dt;
