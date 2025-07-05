@@ -48,7 +48,7 @@ Attributes and Stats:
 
 Strength: Increases power and HP; reduces attack speed and ability accuracy.
 
-Dexterity: Enhances ability accuracy, attack speed, and critical hits; decreases ability power.
+Dexterity: Enhances ability accuracy and critical hits; each point grants +5% attack speed, –5% cast time, and +10% XP on Dexterity tasks while slightly reducing ability power.
 
 Mind: Boosts ability power; reduces HP and strength.
 
@@ -167,7 +167,7 @@ Cards in the deck but not currently drawn gain only half of this XP.
 Attribute	Effects
 
 Strength	+Damage, +HP, -Attack Speed, -Ability Accuracy
-Dexterity	+Ability Accuracy, +Attack Speed, +Critical Hit Chance, -Ability Power
+Dexterity	+Ability Accuracy, +5% Attack Speed/pt, -5% Cast Time/pt, +10% XP/pt, -Ability Power
 Mind	+Ability Power, -HP, -Strength
 Chaos	+Critical Damage, +Ability Power
 Holy	-Cooldowns

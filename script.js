@@ -26,7 +26,7 @@ import RateTracker from "./utils/rateTracker.js";
 import { formatNumber } from "./utils/numberFormat.js";
 import { runAnimation } from "./utils/animation.js";
 import { initCore, refreshCore } from './core.js';
-import { attributes, strengthXpMultiplier, enduranceXpMultiplier } from './attributes.js';
+import { attributes, strengthXpMultiplier, enduranceXpMultiplier, dexterityXpMultiplier } from './attributes.js';
 import { createOverlay } from './ui/overlay.js';
 import { showRestartScreen } from './ui/restartOverlay.js';
 import { calculateKillXp, XP_EFFICIENCY } from './utils/xp.js';
@@ -1002,8 +1002,9 @@ function tickSect(delta) {
     if (task === 'Gather Fruit' || task === 'Log Pine') {
       if (!sectState.discipleProgress[d.id]) sectState.discipleProgress[d.id] = 0;
       sectState.discipleProgress[d.id] += dt;
-      const cycleSeconds = task === 'Gather Fruit' ? FRUIT_CYCLE_SECONDS : PINE_LOG_CYCLE_SECONDS;
+      const baseSeconds = task === 'Gather Fruit' ? FRUIT_CYCLE_SECONDS : PINE_LOG_CYCLE_SECONDS;
       const cycleAmount = task === 'Gather Fruit' ? FRUIT_CYCLE_AMOUNT : PINE_LOG_CYCLE_AMOUNT;
+      const cycleSeconds = baseSeconds / (1 + 0.05 * d.dexterity);
       if (sectState.discipleProgress[d.id] >= cycleSeconds) {
         const cycles = Math.floor(sectState.discipleProgress[d.id] / cycleSeconds);
         sectState.discipleProgress[d.id] -= cycles * cycleSeconds;
@@ -1025,7 +1026,7 @@ function tickSect(delta) {
             'Chant': 0
           };
         }
-        const mult = strengthXpMultiplier(task) * enduranceXpMultiplier(task);
+        const mult = strengthXpMultiplier(task) * enduranceXpMultiplier(task) * dexterityXpMultiplier(task);
         sectState.discipleSkills[d.id][task] += cycles * mult;
         updateSectDisplay();
       }
@@ -1053,8 +1054,9 @@ function tickSect(delta) {
     } else if (task === 'Chant') {
       if (!sectState.discipleProgress[d.id]) sectState.discipleProgress[d.id] = 0;
       sectState.discipleProgress[d.id] += dt;
-      if (sectState.discipleProgress[d.id] >= 3) {
-        sectState.discipleProgress[d.id] -= 3;
+      const castSeconds = 3 / (1 + 0.05 * d.dexterity);
+      if (sectState.discipleProgress[d.id] >= castSeconds) {
+        sectState.discipleProgress[d.id] -= castSeconds;
         const constructs = speechState.activeConstructs;
         if (constructs.length > 0) {
           const idx = Math.floor(Math.random() * constructs.length);
@@ -1062,7 +1064,8 @@ function tickSect(delta) {
           const lvl = getTaskSkillProgress(xp).level;
           const pot = 0.5 * (1 + 0.02 * lvl);
           castConstruct(constructs[idx], null, pot);
-          sectState.discipleSkills[d.id]['Chant'] = xp + 1;
+          const gain = 1 * dexterityXpMultiplier('Chant');
+          sectState.discipleSkills[d.id]['Chant'] = xp + gain;
         }
       }
       const spend = Math.min(speechState.resources.insight.current, dt);
@@ -1102,8 +1105,8 @@ function updateTaskProgressDisplay() {
     const taskName = sectState.discipleTasks[d.id] || 'Idle';
     if (taskName === 'Gather Fruit' || taskName === 'Log Pine') {
       const progress = sectState.discipleProgress[d.id] || 0;
-      const cycleSeconds =
-        taskName === 'Gather Fruit' ? FRUIT_CYCLE_SECONDS : PINE_LOG_CYCLE_SECONDS;
+      const baseSeconds = taskName === 'Gather Fruit' ? FRUIT_CYCLE_SECONDS : PINE_LOG_CYCLE_SECONDS;
+      const cycleSeconds = baseSeconds / (1 + 0.05 * d.dexterity);
       const phaseLength = cycleSeconds / 4;
       const phase = Math.floor(progress / phaseLength) % 4;
       const pct = ((progress % phaseLength) / phaseLength) * 100;

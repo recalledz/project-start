@@ -19,6 +19,15 @@ export const attributes = {
     get hpBonus() {
       return 10 * this.points;
     }
+  },
+  Dexterity: {
+    points: 0,
+    get attackSpeedMultiplier() {
+      return 1 + 0.05 * this.points;
+    },
+    get castTimeMultiplier() {
+      return Math.max(0, 1 - 0.05 * this.points);
+    }
   }
 };
 
@@ -38,4 +47,13 @@ export function addEndurance(points = 1) {
 export function enduranceXpMultiplier(task) {
   const affected = ['Building', 'Defending', 'Combat'];
   return affected.includes(task) ? 1 + attributes.Endurance.points * 0.1 : 1;
+}
+
+export function addDexterity(points = 1) {
+  attributes.Dexterity.points += points;
+}
+
+export function dexterityXpMultiplier(task) {
+  const affected = ['Gather Fruit', 'Log Pine'];
+  return affected.includes(task) ? 1 + attributes.Dexterity.points * 0.1 : 1;
 }
