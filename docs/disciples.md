@@ -76,3 +76,25 @@ export function intelligenceXpMultiplier(task) {
 ```
 
 Increasing **Strength** speeds up XP gain for mining, smithing, and logging jobs. **Dexterity** now boosts XP for woodcutting and gathering, while **Intelligence** grants extra XP when chanting or researching. **Endurance** continues to help disciples learn faster when building or defending.
+
+## XP Gain Rates
+
+Each task provides a small amount of skill XP whenever a work cycle is completed. The base cycle lengths are derived from constants in `script.js`:
+
+- **Gather Fruit** – `FRUIT_CYCLE_SECONDS = 200`
+- **Log Pine** – `PINE_LOG_CYCLE_SECONDS = 215`
+- **Research** – progresses at 4 insight per second and requires `500` progress for 1 XP (125&nbsp;seconds)
+- **Chant** – awards 1 XP every 3 seconds
+- **Building** – grants XP each second while construction is underway
+
+With these values, the default XP gain rates and example time to reach higher proficiency levels are approximately:
+
+| Task | Base XP Rate | Lv. 1 (50 XP) | Lv. 5 (372 XP) |
+| --- | --- | --- | --- |
+| Gather Fruit | `0.005` XP/s | ~2h 46m | ~20h 40m |
+| Log Pine | `0.0047` XP/s | ~2h 59m | ~22h 13m |
+| Research | `0.008` XP/s | ~1h 44m | ~12h 55m |
+| Chant | `0.333` XP/s | ~2m 30s | ~18m 36s |
+| Building | `1` XP/s | ~50s | ~6m 12s |
+
+These estimates assume no attribute bonuses and continuous work on the same task. Attribute points or upgrades will shorten the timelines further.
