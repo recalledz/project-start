@@ -7,7 +7,8 @@ import { sectState } from './script.js';
 // Insight regeneration constants
 // Tweaked to provide a faster early-game ramp while still tapering off
 // as Insight approaches its maximum value.
-const R_MAX = 0.5;      // cap per-second regen
+// Allow a higher maximum insight regeneration rate.
+const R_MAX = 6;        // cap per-second regen
 const MIDPOINT = 1000;  // inflection point of logistic curve
 const K = 150;          // controls steepness of taper
 
