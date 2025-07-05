@@ -20,7 +20,7 @@ import {
 import {
   initStarChart
 } from "./starChart.js"; // optional star chart tab
-import { initSpeech, tickSpeech, speechState, DAY_LENGTH_SECONDS } from "./speech.js";
+import { initSpeech, tickSpeech, speechState, DAY_LENGTH_SECONDS, castConstruct } from "./speech.js";
 import { Jobs, assignJob, getAvailableJobs, renderJobAssignments, renderJobCarousel } from "./jobs.js"; // job definitions
 import RateTracker from "./utils/rateTracker.js";
 import { formatNumber } from "./utils/numberFormat.js";
@@ -177,6 +177,7 @@ export const sectState = {
   taskTimers: { gatherFruits: 0 },
   discipleProgress: {}, // map disciple id -> progress seconds in current cycle
   discipleSkills: {}, // map disciple id -> skill levels per task
+  chantAssignments: {}, // map disciple id -> assigned construct
   buildings: { pineShack: 0, researchTable: 0, chantingHall: 0 },
   researchPoints: 0,
   researchProgress: 0,
@@ -1087,17 +1088,15 @@ function tickSect(delta) {
     } else if (task === 'Chant') {
       if (!sectState.discipleProgress[d.id]) sectState.discipleProgress[d.id] = 0;
       sectState.discipleProgress[d.id] += dt;
-      if (sectState.discipleProgress[d.id] >= 3) {
-        sectState.discipleProgress[d.id] -= 3;
-        const constructs = speechState.activeConstructs;
-        if (constructs.length > 0) {
-          const idx = Math.floor(Math.random() * constructs.length);
+      if (sectState.discipleProgress[d.id] >= 5) {
+        sectState.discipleProgress[d.id] -= 5;
+        const target = sectState.chantAssignments[d.id];
+        if (target) {
           const xp = sectState.discipleSkills[d.id]?.['Chant'] || 0;
           const lvl = getTaskSkillProgress(xp).level;
-          const pot = 0.5 * (1 + 0.02 * lvl);
-          castConstruct(constructs[idx], null, pot);
-          sectState.discipleSkills[d.id]['Chant'] =
-            xp + CHANT_XP_PER_CYCLE;
+          const pot = 0.3 * (1 + 0.02 * lvl) * attributes.Intelligence.constructPotencyMultiplier;
+          castConstruct(target, null, pot);
+          sectState.discipleSkills[d.id]['Chant'] = xp + CHANT_XP_PER_CYCLE;
         }
       }
       const spend = Math.min(speechState.resources.insight.current, dt);

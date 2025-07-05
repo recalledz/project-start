@@ -344,6 +344,7 @@ const constructEffects = {
 
 let container;
 let panel;
+let selectedChanter = null;
 
 export function initSpeech() {
   container = document.getElementById('speechPanel');
@@ -381,12 +382,15 @@ export function initSpeech() {
         <button id="closeConstructBtn" class="cast-button">❌</button>
       </div>
       <div class="construct-tab constructor-view">
-        <div id="constructPot" class="construct-pot">⚗️</div>
-        <div id="resourceButtons" class="resource-buttons"></div>
-        <button id="performConstruct" class="cast-button construct-button">Construct</button>
-        <div id="memorySlotsDisplay" class="memory-slots"></div>
-        <div id="constructRequirements" class="construct-requirements"></div>
-        <div id="constructCards" class="built-constructs"></div>
+        <div class="construct-left">
+          <div id="constructPot" class="construct-pot">⚗️</div>
+          <div id="resourceButtons" class="resource-buttons"></div>
+          <button id="performConstruct" class="cast-button construct-button">Construct</button>
+          <div id="memorySlotsDisplay" class="memory-slots"></div>
+          <div id="constructRequirements" class="construct-requirements"></div>
+          <div id="constructCards" class="built-constructs"></div>
+        </div>
+        <div id="constructDisciples" class="construct-disciples"></div>
       </div>
     </div>
   `;
@@ -405,9 +409,11 @@ export function initSpeech() {
   renderOrbs();
   renderUpgrades();
   renderConstructCards();
+  renderChantDisciples();
   renderHotbar();
   renderSeasonBanner();
   if (window.lucide) lucide.createIcons({ icons: lucide.icons });
+  document.addEventListener('disciple-gained', renderChantDisciples);
 }
 
 function togglePanel() {
@@ -570,9 +576,31 @@ function renderConstructCards() {
     wrapper.appendChild(timer);
     const info = createConstructInfo(c);
     if (info) wrapper.appendChild(info);
+    const assignedId = Object.entries(sectState.chantAssignments).find(([id, n]) => n === c)?.[0];
+    const assign = document.createElement('div');
+    assign.className = 'construct-assignment';
+    if (assignedId) {
+      const disc = speechState.disciples.find(x => x.id == assignedId);
+      assign.textContent = `Chanter: ${disc ? disc.name : assignedId}`;
+    } else {
+      assign.textContent = 'Assign';
+    }
+    assign.addEventListener('click', () => {
+      if (selectedChanter !== null) {
+        Object.keys(sectState.chantAssignments).forEach(k => {
+          if (k == selectedChanter) delete sectState.chantAssignments[k];
+        });
+        sectState.chantAssignments[selectedChanter] = c;
+        selectedChanter = null;
+        renderChantDisciples();
+        renderConstructCards();
+      }
+    });
+    wrapper.appendChild(assign);
     cont.appendChild(wrapper);
   });
   if (window.lucide) lucide.createIcons({ icons: lucide.icons });
+  renderChantDisciples();
 }
 
 function createConstructCard(name) {
@@ -627,6 +655,23 @@ function createConstructCard(name) {
     card.textContent = name;
   }
   return card;
+}
+
+function renderChantDisciples() {
+  const cont = panel.querySelector('#constructDisciples');
+  if (!cont) return;
+  cont.innerHTML = '';
+  speechState.disciples.forEach(d => {
+    const div = document.createElement('div');
+    div.className = 'chant-disciple';
+    div.textContent = d.name;
+    if (selectedChanter === d.id) div.classList.add('selected');
+    div.addEventListener('click', () => {
+      selectedChanter = selectedChanter === d.id ? null : d.id;
+      renderChantDisciples();
+    });
+    cont.appendChild(div);
+  });
 }
 
 function createConstructInfo(name) {
@@ -717,7 +762,7 @@ function toggleConstructActive(name) {
   renderHotbar();
 }
 
-function castConstruct(name, el, powerMult = 1) {
+export function castConstruct(name, el, powerMult = 1) {
   const def = recipes.find(r => r.name === name);
   if (!def) return;
   const voiceSkill = speechState.skills.voice;

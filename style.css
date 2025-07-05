@@ -2885,9 +2885,10 @@ body.darkenshift-mode .tabsContainer button.active {
 .constructor-view {
     flex: 1;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     overflow-y: auto;
-    align-items: center; /* center construct cards */
+    align-items: flex-start;
+    gap: 8px;
 }
 
 .construct-header {
@@ -2995,6 +2996,43 @@ body.darkenshift-mode .tabsContainer button.active {
     width: 60px;
     height: 70px;
     font-size: 0.7rem;
+}
+
+
+.construct-left {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.construct-disciples {
+    width: 120px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.chant-disciple {
+    border: 1px solid #555;
+    background: #222;
+    padding: 4px;
+    cursor: pointer;
+    text-align: center;
+    font-size: 0.7rem;
+}
+
+.chant-disciple.selected {
+    background: #88f;
+    color: #000;
+}
+
+.construct-assignment {
+    font-size: 0.6rem;
+    text-align: center;
+    border: 1px solid #555;
+    margin-top: 2px;
+    cursor: pointer;
 }
 
 .speech-panel.construct-mode .speech-orbs {
