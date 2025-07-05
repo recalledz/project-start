@@ -1,6 +1,7 @@
 import addLog from './log.js';
 import { coreState, refreshCore } from './core.js';
 import { sectState } from './script.js';
+import { generateDiscipleAttributes } from './discipleAttributes.js';
 
 // Core state for the Constructs system. Orbs and upgrades from the
 // previous speech implementation remain intact.
@@ -317,6 +318,7 @@ const constructEffects = {
     const reqPower = Math.pow(1.8, targetIdx - 1);
     const chance = Math.max(0.05, Math.min(1, callPower / reqPower));
     if (Math.random() < chance) {
+      const bonus = generateDiscipleAttributes();
       speechState.disciples.push({
         id: targetIdx,
         name: `Disciple ${targetIdx}`,
@@ -324,10 +326,10 @@ const constructEffects = {
         stamina: 10,
         hunger: 20,
         power: 1,
-        strength: 1,
-        dexterity: 1,
-        endurance: 1,
-        intelligence: 1,
+        strength: 1 + bonus.strength,
+        dexterity: 1 + bonus.dexterity,
+        endurance: 1 + bonus.endurance,
+        intelligence: 1 + bonus.intelligence,
         incapacitated: false
       });
       addLog('A new Disciple has answered your call!', 'info');

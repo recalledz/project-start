@@ -30,6 +30,11 @@ if (Array.isArray(speechState.disciples)) {
 }
 ```
 
+Newly recruited disciples receive **3–5 additional attribute points**. These
+extra points are distributed across Strength, Dexterity, Endurance and
+Intelligence with diminishing chances to stack points on the same attribute.
+Gaining three points in a single stat is therefore possible but uncommon.
+
 ## Task Proficiency
 
 Disciples gain skill experience (XP) for the task they are performing. XP follows an exponential curve where the XP required for each level is `50 × 1.2^level`:
