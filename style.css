@@ -2981,7 +2981,7 @@ body.darkenshift-mode .tabsContainer button.active {
     gap: 15px;
     padding: 6px;
     margin-top: 6px;
-    overflow-y: auto;
+    overflow: visible;
     flex: 1;
     justify-content: center;
     align-items: center;
