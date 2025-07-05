@@ -191,6 +191,13 @@ const FRUIT_CYCLE_AMOUNT = 10;
 const PINE_LOG_CYCLE_SECONDS = 215;
 const PINE_LOG_CYCLE_AMOUNT = 10;
 
+// XP earned for disciple tasks
+const FRUIT_XP_PER_CYCLE = 25;
+const LOG_XP_PER_CYCLE = 25;
+const BUILD_XP_RATE = 0.1; // per second
+const RESEARCH_XP_PER_CYCLE = 20;
+const CHANT_XP_PER_CYCLE = 0.5;
+
 // XP progression for disciple tasks
 function taskXpRequired(level) {
   return Math.round(50 * Math.pow(1.2, level));
@@ -1050,7 +1057,9 @@ function tickSect(delta) {
           enduranceXpMultiplier(task) *
           dexterityXpMultiplier(task) *
           intelligenceXpMultiplier(task);
-        sectState.discipleSkills[d.id][task] += cycles * mult;
+        const baseXp =
+          task === 'Gather Fruit' ? FRUIT_XP_PER_CYCLE : LOG_XP_PER_CYCLE;
+        sectState.discipleSkills[d.id][task] += cycles * baseXp * mult;
         updateSectDisplay();
       }
     } else if (task === 'Research') {
@@ -1065,7 +1074,8 @@ function tickSect(delta) {
         const pts = Math.floor(ptsBase * (1 + 0.02 * lvl));
         sectState.researchPoints += pts;
         sectState.discipleSkills[d.id]['Research'] =
-          (sectState.discipleSkills[d.id]['Research'] || 0) + ptsBase;
+          (sectState.discipleSkills[d.id]['Research'] || 0) +
+          ptsBase * RESEARCH_XP_PER_CYCLE;
         if (!systems.researchUnlocked) {
           systems.researchUnlocked = true;
           if (colonyResearchTabButton) colonyResearchTabButton.style.display = '';
@@ -1086,7 +1096,8 @@ function tickSect(delta) {
           const lvl = getTaskSkillProgress(xp).level;
           const pot = 0.5 * (1 + 0.02 * lvl);
           castConstruct(constructs[idx], null, pot);
-          sectState.discipleSkills[d.id]['Chant'] = xp + 1;
+          sectState.discipleSkills[d.id]['Chant'] =
+            xp + CHANT_XP_PER_CYCLE;
         }
       }
       const spend = Math.min(speechState.resources.insight.current, dt);
@@ -1424,7 +1435,8 @@ function tickBuilding(dt) {
       const xp = sectState.discipleSkills[d.id]['Building'];
       const lvl = getTaskSkillProgress(xp).level;
       speed += 1 + 0.02 * lvl;
-      sectState.discipleSkills[d.id]['Building'] = xp + dt;
+      sectState.discipleSkills[d.id]['Building'] =
+        xp + BUILD_XP_RATE * dt;
     }
   });
   if (speed === 0) return;
