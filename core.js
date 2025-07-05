@@ -1,4 +1,4 @@
-import { speechState } from './speech.js';
+import { speechState, renderXpBar } from './speech.js';
 
 export const coreState = {
   coreLevel: 1,
@@ -103,8 +103,12 @@ const bodyPath = `M200 140
   bodyValEl = container.querySelector('#bodyValue');
   willValEl = container.querySelector('#willValue');
   if (window.lucide) lucide.createIcons({ icons: lucide.icons });
-  window.addEventListener('speech-xp-changed', renderCore);
+  window.addEventListener('speech-xp-changed', () => {
+    renderCore();
+    renderXpBar();
+  });
   renderCore();
+  renderXpBar();
 }
 
 

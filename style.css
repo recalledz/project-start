@@ -2285,10 +2285,10 @@ body.darkenshift-mode .tabsContainer button.active {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    font-size: 0.75rem;
+    font-size: 0.65rem;
     min-width: 160px;
-    flex: 0 0 25%;
-    max-width: 25%;
+    flex: 0 0 20%;
+    max-width: 20%;
     color: var(--core-text);
 }
 .core-resources, .core-upgrades {
@@ -3060,6 +3060,21 @@ body.darkenshift-mode .tabsContainer button.active {
     align-items: center;
     justify-content: space-between;
     gap: 4px;
+}
+.speech-upgrades button .detail {
+    display: none;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 0.7em;
+    width: 100%;
+    text-align: left;
+}
+.speech-upgrades button.expanded {
+    flex-direction: column;
+    align-items: flex-start;
+}
+.speech-upgrades button.expanded .detail {
+    display: flex;
 }
 .speech-upgrades button:hover {
     box-shadow: 0 0 12px rgba(183, 110, 255, 0.8);

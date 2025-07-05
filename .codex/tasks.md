@@ -1,4 +1,3 @@
-
 ## ✅ Completed Tasks
 - Initial card draw system implemented
 - Boss and enemy ability registry with cooldown logic
@@ -274,4 +273,14 @@
 - Cards render in `renderDealerCard()`.
 - Lucide icons are used for visual consistency.
 - All UI logic is JS-based; no framework.
+
+### Constructor UI Improvements
+
+- use lucide icons for resource buttons in constructor tab instead of text labels
+  - modify `renderResourcesUI` in `speech.js`
+  - display resource amounts via tooltip on hover
+- add collapsible sections in the constructor panel separating resources from saved constructs
+  - update markup in `speech.js` around `modal-constructor-panel`
+- highlight the `#constructToggle` arrow with a tooltip explaining it toggles the panel
+- implement a "Compact" view to hide memory slots and XP meter
 
