@@ -3594,6 +3594,11 @@ body.darkenshift-mode .tabsContainer button.active {
     transform: translate(-50%, 50%);
     display: none;
 }
+.location-icon {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    cursor: pointer;
+}
 .sect-disciple {
     position: absolute;
     left: 0;

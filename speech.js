@@ -32,6 +32,7 @@ const seasons = [
 ];
 const seasonIcons = ['\uD83C\uDF31', '\u2600\uFE0F', '\uD83C\uDF42', '\u2744\uFE0F'];
 const seasonClasses = ['spring','summer','autumn','winter'];
+const seasonTemps = [15, 25, 10, -5];
 
 export const speechState = {
   orbs: {
@@ -945,10 +946,13 @@ function renderSeasonBanner() {
   if (!banner) return;
   const idx = speechState.seasonIndex;
   const season = seasons[idx];
-  banner.textContent = season.name;
+  const day = speechState.seasonDay + 1;
+  const daysLeft = SEASON_LENGTH_DAYS - day;
+  const temp = seasonTemps[idx];
+  banner.textContent = `${season.name} Day ${day} (${daysLeft}d) ${temp}°C`;
   banner.className = `season-banner ${seasonClasses[idx]}`;
   if (speechState.weather) {
-    banner.innerHTML = `${season.name}<span class="weather-icon">${speechState.weather.icon}</span>`;
+    banner.innerHTML = `${season.name} Day ${day} (${daysLeft}d) ${temp}°C<span class="weather-icon">${speechState.weather.icon}</span>`;
   }
 }
 

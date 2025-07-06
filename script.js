@@ -168,7 +168,8 @@ export const systems = {
   buildingUnlocked: false,
   researchUnlocked: false,
   chantingHallUnlocked: false,
-  voiceOfThePeople: false
+  voiceOfThePeople: false,
+  explorationUnlocked: false
 };
 
 export const sectState = {
@@ -199,6 +200,14 @@ const LOG_XP_PER_CYCLE = 25;
 const BUILD_XP_RATE = 0.1; // per second
 const RESEARCH_XP_PER_CYCLE = 20;
 const CHANT_XP_PER_CYCLE = 0.5;
+const EXPLORATION_CYCLE_SECONDS = 150;
+
+const LOCATION_DEFS = [
+  { name: 'Firewood Grove', reqDistance: 100, baseChance: 0.2, x: '30%', y: '70%' },
+  { name: 'Crystal Cavern', reqDistance: 300, baseChance: 0.15, x: '70%', y: '40%' },
+  { name: 'Esoteric Dungeon', reqDistance: 100, baseChance: 1.0, x: '50%', y: '20%' },
+  { name: 'Ancient Ruins', reqDistance: 800, baseChance: 0.05, x: '80%', y: '10%' }
+];
 
 // XP progression for disciple tasks
 function taskXpRequired(level) {
@@ -226,7 +235,9 @@ function ensureDiscipleSkills(id) {
       'Log Pine': 0,
       Building: 0,
       Research: 0,
-      Chant: 0
+      Chant: 0,
+      Exploration: 0,
+      'Delve Dungeon': 0
     };
   }
 }
@@ -522,6 +533,7 @@ let colonyInfoTabButton;
 let colonyResourcesTabButton;
 let colonyBuildTabButton;
 let colonyResearchTabButton;
+let locationsPanelBtn;
 let sectDisciplesContainer;
 let selectedDiscipleId = null;
 let discipleInfoView = 'status';
@@ -550,6 +562,16 @@ function addDiscoveredLocation(name) {
     const row = document.createElement('div');
     row.textContent = name;
     locationListContainer.appendChild(row);
+  }
+  const map = document.getElementById('colonyMap');
+  const def = LOCATION_DEFS.find(l => l.name === name);
+  if (map && def) {
+    const icon = document.createElement('div');
+    icon.className = 'location-icon';
+    icon.textContent = '📍';
+    icon.style.left = def.x;
+    icon.style.top = def.y;
+    map.appendChild(icon);
   }
   if (locationTabButton && locationTabButton.style.display === 'none') {
     locationTabButton.style.display = '';
@@ -766,6 +788,7 @@ function initTabs() {
   colonyResourcesTabButton = document.getElementById('colonyResourcesTabBtn');
   colonyBuildTabButton = document.getElementById('colonyBuildTabBtn');
   colonyResearchTabButton = document.getElementById('colonyResearchTabBtn');
+  locationsPanelBtn = document.getElementById('locationsPanelBtn');
   statsOverviewSubTabButton = document.querySelector('.statsOverviewSubTabButton');
   statsEconomySubTabButton = document.querySelector('.statsEconomySubTabButton');
   statsOverviewContainer = document.getElementById('statsOverviewContainer');
@@ -803,6 +826,11 @@ function initTabs() {
 
   if (deckViewBtn) deckViewBtn.addEventListener('click', showDeckListView);
   if (jokerViewBtn) jokerViewBtn.addEventListener('click', showJokerView);
+  if (locationsPanelBtn)
+    locationsPanelBtn.addEventListener('click', () => {
+      showTab(locationTab);
+      setActiveTabButton(locationTabButton);
+    });
   if (jobsViewBtn) jobsViewBtn.addEventListener('click', () => {
     showJobsView();
     renderJobAssignments(deckJobsContainer, pDeck);
@@ -1128,6 +1156,27 @@ function tickSect(delta) {
       }
       const spend = Math.min(speechState.resources.insight.current, dt);
       speechState.resources.insight.current -= spend;
+    } else if (task === 'Exploration') {
+      if (!sectState.discipleProgress[d.id]) sectState.discipleProgress[d.id] = 0;
+      sectState.discipleProgress[d.id] += dt;
+      if (sectState.discipleProgress[d.id] >= EXPLORATION_CYCLE_SECONDS) {
+        sectState.discipleProgress[d.id] -= EXPLORATION_CYCLE_SECONDS;
+        const maxDistance = d.stamina * 10;
+        const seasonBonus = speechState.seasonIndex === 0 ? 0.05 : speechState.seasonIndex === 3 ? -0.05 : 0;
+        const eligible = LOCATION_DEFS.filter(l => !discoveredLocations.includes(l.name) && l.reqDistance <= maxDistance);
+        shuffleArray(eligible);
+        let found = null;
+        eligible.forEach(loc => {
+          if (found) return;
+          let chance = loc.baseChance + (d.endurance - 1) * 0.01 + seasonBonus;
+          if (Math.random() < chance) {
+            addDiscoveredLocation(loc.name);
+            found = loc.name;
+          }
+        });
+        if (found) addLog(`Discovered ${found}!`, 'good');
+        else addLog('No discovery this trip.', 'info');
+      }
     } else {
       sectState.discipleProgress[d.id] = 0;
     }
@@ -1196,6 +1245,12 @@ function updateTaskProgressDisplay() {
       if (label && buildData)
         label.textContent = `${buildData.name} ${builderCount > 0 ? buildTime.toFixed(1) : '∞'}s`;
       else if (label) label.textContent = '';
+      if (rateEl) rateEl.textContent = '';
+    } else if (taskName === 'Exploration') {
+      const progress = sectState.discipleProgress[d.id] || 0;
+      const pct = (progress / EXPLORATION_CYCLE_SECONDS) * 100;
+      if (fill) fill.style.width = `${pct}%`;
+      if (label) label.textContent = 'Exploring';
       if (rateEl) rateEl.textContent = '';
     } else {
       if (fill) fill.style.width = '0%';
@@ -1400,6 +1455,8 @@ function renderColonyInfo() {
   const tasks = ['Idle', 'Gather Fruit', 'Log Pine', 'Building'];
   if (sectState.buildings.researchTable > 0) tasks.push('Research');
   if (sectState.buildings.chantingHall > 0) tasks.push('Chant');
+  if (systems.explorationUnlocked) tasks.push('Exploration');
+  if (discoveredLocations.includes('Esoteric Dungeon')) tasks.push('Delve Dungeon');
   tasks.forEach(t => {
     const option = document.createElement('div');
     option.className = 'disciple-skill-option';
@@ -1612,6 +1669,20 @@ function renderColonyResearchPanel() {
         sectState.researchPoints -= 5;
         systems.voiceOfThePeople = true;
         addLog('Research complete: Voice of the People', 'good');
+        renderColonyResearchPanel();
+      }
+    });
+    colonyResearchPanel.appendChild(btn);
+  }
+  if (!systems.explorationUnlocked) {
+    const btn = document.createElement('button');
+    btn.textContent = 'Foreseers Research (10 RP)';
+    btn.disabled = sectState.researchPoints < 10;
+    btn.addEventListener('click', () => {
+      if (sectState.researchPoints >= 10) {
+        sectState.researchPoints -= 10;
+        systems.explorationUnlocked = true;
+        addLog('Research complete: Foreseers', 'good');
         renderColonyResearchPanel();
       }
     });
