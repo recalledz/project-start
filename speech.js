@@ -92,7 +92,7 @@ speechState.resources.insight = speechState.orbs.insight;
 
 // Basic construct recipe list. Additional constructs can be appended
 // later through unlocks or upgrades.
-const recipes = [
+export const recipes = [
   {
     name: 'Murmur',
     // Increased cost to make early insight management more meaningful
@@ -603,7 +603,7 @@ function renderConstructCards() {
   renderChantDisciples();
 }
 
-function createConstructCard(name) {
+export function createConstructCard(name) {
   const card = document.createElement('div');
   card.className = 'construct-card';
   card.dataset.name = name;
@@ -674,7 +674,7 @@ function renderChantDisciples() {
   });
 }
 
-function createConstructInfo(name) {
+export function createConstructInfo(name) {
   const recipe = recipes.find(r => r.name === name);
   if (!recipe) return null;
   const info = document.createElement('div');

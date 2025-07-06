@@ -20,7 +20,7 @@ import {
 import {
   initStarChart
 } from "./starChart.js"; // optional star chart tab
-import { initSpeech, tickSpeech, speechState, DAY_LENGTH_SECONDS, castConstruct } from "./speech.js";
+import { initSpeech, tickSpeech, speechState, DAY_LENGTH_SECONDS, castConstruct, createConstructCard, createConstructInfo, recipes } from "./speech.js";
 import { Jobs, assignJob, getAvailableJobs, renderJobAssignments, renderJobCarousel } from "./jobs.js"; // job definitions
 import RateTracker from "./utils/rateTracker.js";
 import { formatNumber } from "./utils/numberFormat.js";
@@ -505,7 +505,9 @@ let playerSpeechSubTabButton;
 let playerSpeechPanel;
 let playerLexiconSubTabButton;
 let playerLexiconPanel;
+let playerSectSubTabButton;
 let playerSectPanel;
+let constructLexiconContainer;
 let sectDisciplesDisplay;
 let sectResourcesDisplay;
 let sectUpkeepDisplay;
@@ -745,7 +747,9 @@ function initTabs() {
   playerSpeechPanel = document.querySelector('.player-speech-panel');
   playerLexiconSubTabButton = document.querySelector('.playerLexiconSubTabButton');
   playerLexiconPanel = document.querySelector('.player-lexicon-panel');
+  playerSectSubTabButton = document.querySelector('.playerSectSubTabButton');
   playerSectPanel = document.querySelector('.player-sect-panel');
+  constructLexiconContainer = document.getElementById('constructLexicon');
   sectDisciplesDisplay = document.getElementById('sectDisciples');
   sectResourcesDisplay = document.getElementById('sectResources');
   sectUpkeepDisplay = document.getElementById('sectUpkeep');
@@ -766,6 +770,7 @@ function initTabs() {
   statsEconomyContainer = document.getElementById('statsEconomyContainer');
   if (colonyBuildTabButton) colonyBuildTabButton.style.display = systems.buildingUnlocked ? '' : 'none';
   if (colonyResearchTabButton) colonyResearchTabButton.style.display = systems.researchUnlocked ? '' : 'none';
+  if (playerSectSubTabButton) playerSectSubTabButton.style.display = sectTabUnlocked ? '' : 'none';
   setupTabHandlers();
 
   if (colonyTasksTabButton) colonyTasksTabButton.addEventListener('click', () => showColonyTab('tasks'));
@@ -841,17 +846,24 @@ function initTabs() {
     playerLexiconSubTabButton.addEventListener('click', () => {
       if (playerCorePanel) playerCorePanel.style.display = 'none';
       if (playerSpeechPanel) playerSpeechPanel.style.display = 'none';
-      if (sectTabUnlocked) {
-        if (playerSectPanel) playerSectPanel.style.display = 'flex';
-        if (playerLexiconPanel) playerLexiconPanel.style.display = 'none';
-        startDiscipleMovement();
-      } else {
-        if (playerLexiconPanel) playerLexiconPanel.style.display = 'flex';
-        if (playerSectPanel) playerSectPanel.style.display = 'none';
-      }
+      if (playerLexiconPanel) playerLexiconPanel.style.display = 'flex';
+      if (playerSectPanel) playerSectPanel.style.display = 'none';
       playerLexiconSubTabButton.classList.add('active');
       if (playerCoreSubTabButton) playerCoreSubTabButton.classList.remove('active');
       if (playerSpeechSubTabButton) playerSpeechSubTabButton.classList.remove('active');
+      if (playerSectSubTabButton) playerSectSubTabButton.classList.remove('active');
+    });
+  if (playerSectSubTabButton)
+    playerSectSubTabButton.addEventListener('click', () => {
+      if (playerCorePanel) playerCorePanel.style.display = 'none';
+      if (playerSpeechPanel) playerSpeechPanel.style.display = 'none';
+      if (playerLexiconPanel) playerLexiconPanel.style.display = 'none';
+      if (playerSectPanel) playerSectPanel.style.display = 'flex';
+      startDiscipleMovement();
+      playerSectSubTabButton.classList.add('active');
+      if (playerCoreSubTabButton) playerCoreSubTabButton.classList.remove('active');
+      if (playerSpeechSubTabButton) playerSpeechSubTabButton.classList.remove('active');
+      if (playerLexiconSubTabButton) playerLexiconSubTabButton.classList.remove('active');
     });
   if (statsOverviewSubTabButton)
     statsOverviewSubTabButton.addEventListener('click', () => {
@@ -1755,6 +1767,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (window.lucide) lucide.createIcons({ icons: lucide.icons });
   initCore();
   initSpeech();
+  renderConstructLexicon();
   document.addEventListener('day-passed', () => {
     speechState.disciples.forEach(d => {
       if (sectState.fruits > 0) {
@@ -1779,7 +1792,7 @@ document.addEventListener("DOMContentLoaded", () => {
   document.addEventListener('disciple-gained', e => {
     if (!sectTabUnlocked && e.detail.count >= 1) {
       sectTabUnlocked = true;
-      if (playerLexiconSubTabButton) playerLexiconSubTabButton.textContent = 'Sect';
+      if (playerSectSubTabButton) playerSectSubTabButton.style.display = '';
       addLog('A presence stirs. The first disciple has heard the Calling.', 'info');
     }
     updateSectDisplay();
@@ -1947,6 +1960,30 @@ function renderEconomyStats() {
   const dRow = document.createElement('div');
   dRow.textContent = `Avg Cash/sec (24h): ${dayRate.toFixed(2)}`;
   statsEconomyContainer.append(hRow, dRow);
+}
+
+function renderConstructLexicon() {
+  if (!constructLexiconContainer) return;
+  constructLexiconContainer.innerHTML = '';
+  recipes.forEach(r => {
+    const wrap = document.createElement('div');
+    wrap.className = 'construct-card-wrapper';
+    const card = createConstructCard(r.name);
+    wrap.appendChild(card);
+    const info = document.createElement('div');
+    info.className = 'construct-info';
+    const type = document.createElement('div');
+    type.textContent = `Type: ${r.type || 'n/a'}`;
+    info.appendChild(type);
+    if (r.cooldown)
+      info.appendChild(Object.assign(document.createElement('div'), { textContent: `Cooldown: ${r.cooldown}s` }));
+    info.appendChild(Object.assign(document.createElement('div'), { textContent: `XP: ${r.xp || 0}` }));
+    if (r.tags && r.tags.length)
+      info.appendChild(Object.assign(document.createElement('div'), { textContent: `Tags: ${r.tags.join(', ')}` }));
+    wrap.appendChild(info);
+    constructLexiconContainer.appendChild(wrap);
+  });
+  if (window.lucide) lucide.createIcons({ icons: lucide.icons });
 }
 
 function renderAbilityIcons(abilities, showCooldown = false) {
@@ -3452,7 +3489,7 @@ Object.assign(playerStats, state.playerStats || {});
   if (state.sectTabUnlocked ||
       (speechState.disciples && speechState.disciples.length > 0)) {
     sectTabUnlocked = true;
-    if (playerLexiconSubTabButton) playerLexiconSubTabButton.textContent = 'Sect';
+    if (playerSectSubTabButton) playerSectSubTabButton.style.display = '';
   }
 
   if (state.barUpgrades) {

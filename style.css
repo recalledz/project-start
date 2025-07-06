@@ -2992,6 +2992,9 @@ body.darkenshift-mode .tabsContainer button.active {
     align-items: center;
     align-content: center;
 }
+.construct-lexicon {
+    justify-content: center;
+}
 .modal-constructor-panel .construct-card {
     width: 60px;
     height: 70px;
@@ -3295,6 +3298,20 @@ body.darkenshift-mode .tabsContainer button.active {
 .playerLexiconSubTabButton.active {
     background: #32a852;
     box-shadow: inset 0 0 8px #fff8c6, 0 0 12px #32a852;
+    color: #220000;
+}
+
+.playerSectSubTabButton {
+    background: linear-gradient(60deg, #b03060, #701040, #b03060);
+    background-size: 200% 100%;
+    border-color: #b03060;
+    box-shadow: 0 0 8px rgba(176, 48, 96, 0.5);
+    color: #ffe0e0;
+}
+
+.playerSectSubTabButton.active {
+    background: #b03060;
+    box-shadow: inset 0 0 8px #fff8c6, 0 0 12px #b03060;
     color: #220000;
 }
 
