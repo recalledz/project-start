@@ -441,7 +441,14 @@ function addResourceToPot(name) {
 function renderPot() {
   const pot = container.querySelector('#constructPot');
   if (!pot) return;
-  pot.textContent = speechState.pot.length ? speechState.pot.join(' + ') : '⚗️';
+  if (speechState.pot.length) {
+    pot.innerHTML = speechState.pot
+      .map(r => `<i data-lucide="${resourceIcons[r] || 'package'}"></i>`)
+      .join(' ');
+    if (window.lucide) lucide.createIcons({ icons: lucide.icons });
+  } else {
+    pot.textContent = '⚗️';
+  }
   updateConstructButtonValidity();
   renderConstructRequirements();
 }
@@ -661,17 +668,28 @@ function renderChantDisciples() {
   const cont = panel.querySelector('#constructDisciples');
   if (!cont) return;
   cont.innerHTML = '';
-  speechState.disciples.forEach(d => {
+  const chanters = speechState.disciples.filter(
+    d => sectState.discipleTasks[d.id] === 'Chant'
+  );
+  const available = chanters.filter(d => !sectState.chantAssignments[d.id]);
+  const header = document.createElement('div');
+  header.className = 'chant-header';
+  header.textContent = `Chanters ${available.length}/${chanters.length}`;
+  cont.appendChild(header);
+  const list = document.createElement('div');
+  list.className = 'chant-orbs';
+  available.forEach(d => {
     const div = document.createElement('div');
     div.className = 'chant-disciple';
-    div.textContent = d.name;
+    div.textContent = d.id;
     if (selectedChanter === d.id) div.classList.add('selected');
     div.addEventListener('click', () => {
       selectedChanter = selectedChanter === d.id ? null : d.id;
       renderChantDisciples();
     });
-    cont.appendChild(div);
+    list.appendChild(div);
   });
+  cont.appendChild(list);
 }
 
 export function createConstructInfo(name) {

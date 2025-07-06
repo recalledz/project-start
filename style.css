@@ -2285,10 +2285,10 @@ body.darkenshift-mode .tabsContainer button.active {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    font-size: 0.65rem;
-    min-width: 160px;
-    flex: 0 0 20%;
-    max-width: 20%;
+    font-size: 0.52rem; /* reduced by ~20% */
+    min-width: 128px; /* reduced by ~20% */
+    flex: 0 0 16%;
+    max-width: 16%;
     color: var(--core-text);
 }
 .core-resources, .core-upgrades {
@@ -2861,6 +2861,7 @@ body.darkenshift-mode .tabsContainer button.active {
     inset: 0;
     margin: 0;
     padding: 8px;
+    font-size: 0.8rem;
     box-sizing: border-box;
     background: linear-gradient(#11131c, #0e0f1a);
     border: 1px solid #4a4a60;
@@ -3010,24 +3011,38 @@ body.darkenshift-mode .tabsContainer button.active {
 }
 
 .construct-disciples {
-    width: 120px;
+    width: 96px; /* reduced by ~20% */
     display: flex;
     flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+.chant-header {
+    font-size: 0.7rem;
+    text-align: center;
+}
+
+.chant-orbs {
+    display: flex;
     gap: 4px;
+    flex-wrap: wrap;
+    justify-content: center;
 }
 
 .chant-disciple {
-    border: 1px solid #555;
-    background: #222;
-    padding: 4px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 0 4px rgba(255, 255, 255, 0.9);
     cursor: pointer;
-    text-align: center;
-    font-size: 0.7rem;
+    font-size: 0;
 }
 
 .chant-disciple.selected {
     background: #88f;
-    color: #000;
+    box-shadow: 0 0 6px #88f;
 }
 
 .construct-assignment {
