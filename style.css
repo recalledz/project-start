@@ -2996,6 +2996,17 @@ body.darkenshift-mode .tabsContainer button.active {
 .construct-lexicon {
     justify-content: center;
 }
+.construct-lexicon .construct-card-wrapper {
+    flex-direction: row;
+    align-items: flex-start;
+    width: auto;
+}
+.construct-lexicon .construct-info {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    margin-left: 6px;
+}
 .modal-constructor-panel .construct-card {
     width: 60px;
     height: 70px;
