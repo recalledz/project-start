@@ -1,7 +1,8 @@
 import addLog from './log.js';
 import { coreState, refreshCore } from './core.js';
-import { sectState } from './script.js';
+import { sectState, systems } from './script.js';
 import { generateDiscipleAttributes } from './discipleAttributes.js';
+import { createOverlay } from './ui/overlay.js';
 
 // Core state for the Constructs system. Orbs and upgrades from the
 // previous speech implementation remain intact.
@@ -11,8 +12,12 @@ import { generateDiscipleAttributes } from './discipleAttributes.js';
 // with diminishing returns as more Cohere levels are purchased. The curve
 // still tapers off as Insight accumulates.
 const R_MAX = 6;        // cap per-second regen
-const MIDPOINT = 1000;  // inflection point of logistic curve
+const BASE_MIDPOINT = 1000;  // default inflection point
 const K = 150;          // controls steepness of taper
+
+function getInsightMidpoint() {
+  return systems.voiceOfThePeople ? 1500 : BASE_MIDPOINT;
+}
 
 // Seasonal cycle configuration
 // A full in-game day lasts 10 real minutes (600 seconds). Each season spans
@@ -54,6 +59,11 @@ export const speechState = {
       level: 0,
       unlocked: true,
       costFunc: lvl => ({ insight: 2 * Math.pow(lvl + 1, 2) })
+    },
+    soundExpansion: {
+      level: 0,
+      unlocked: true,
+      costFunc: lvl => ({ sound: 25 + lvl * 4 })
     },
     clarividence: { level: 0, baseCost: 300, unlocked: false },
     idleChatter: {
@@ -171,7 +181,7 @@ const resourceIcons = {
   insight: 'star',
   sound: 'volume-2',
   thought: 'activity',
-  structure: 'cube',
+  structure: 'box',
   body: 'heart',
   will: 'flame'
 };
@@ -186,6 +196,7 @@ const upgradeDescriptions = {
     return `Improves insight regeneration. Next +${inc}/s (now ${current}/s)`;
   },
   expandMind: 'Increase max insight by 15% each level.',
+  soundExpansion: 'Raises sound capacity; Lv.2 grants an extra slot.',
   idleChatter: 'Bonus regen from idle disciples.',
   capacityBoost: 'Adds one memory slot.',
   clarividence: 'Reveals hidden constructs.',
@@ -210,17 +221,18 @@ function getSkillProgress(xp) {
 }
 
 function getIntoneMultiplier() {
-  if (speechState.intoneTimer > 0) return 3.0;
+  if (speechState.intoneTimer > 0) return 2.0;
   const p = speechState.intonePresses;
-  if (p >= 15) return 3.0;
-  if (p >= 10) return 2.0;
-  if (p >= 5) return 1.5;
+  if (p >= 15) return 2.0;
+  if (p >= 10) return 1.5;
+  if (p >= 5) return 1.2;
   return 1.0;
 }
 
 function awardXp(amount, tags) {
   if (!tags || tags.length === 0) return;
   const split = amount / tags.length;
+  const prevSlots = speechState.memorySlots;
   tags.forEach(tag => {
     const skill = speechState.skills[tag];
     if (skill) {
@@ -242,6 +254,9 @@ function awardXp(amount, tags) {
       }
     }
   });
+  if (speechState.memorySlots !== prevSlots) {
+    renderConstructCards();
+  }
 }
 
 // Per-tick effects for active constructs. These are simplified
@@ -330,14 +345,18 @@ const constructEffects = {
         dexterity: 1 + bonus.dexterity,
         endurance: 1 + bonus.endurance,
         intelligence: 1 + bonus.intelligence,
-        incapacitated: false
+        incapacitated: false,
+        inventorySlots: 10,
+        inventory: {}
       });
       addLog('A new Disciple has answered your call!', 'info');
+      if (lastConstructTarget) showConstructCloud('+1', lastConstructTarget);
       document.dispatchEvent(
         new CustomEvent('disciple-gained', { detail: { count: speechState.disciples.length } })
       );
     } else {
       addLog('Your call went unanswered.', 'info');
+      if (lastConstructTarget) showConstructCloud('Failed', lastConstructTarget, 'red');
     }
   }
 };
@@ -345,6 +364,7 @@ const constructEffects = {
 let container;
 let panel;
 let selectedChanter = null;
+let lastConstructTarget = null;
 
 export function initSpeech() {
   container = document.getElementById('speechPanel');
@@ -382,15 +402,19 @@ export function initSpeech() {
         <button id="closeConstructBtn" class="cast-button">❌</button>
       </div>
       <div class="construct-tab constructor-view">
-        <div class="construct-left">
+        <div class="constructor-container">
           <div id="constructPot" class="construct-pot">⚗️</div>
           <div id="resourceButtons" class="resource-buttons"></div>
           <button id="performConstruct" class="cast-button construct-button">Construct</button>
-          <div id="memorySlotsDisplay" class="memory-slots"></div>
           <div id="constructRequirements" class="construct-requirements"></div>
+        </div>
+        <div class="card-construct-container">
+          <div class="slots-and-disciples">
+            <div id="memorySlotsDisplay" class="memory-slots"></div>
+            <div id="constructDisciples" class="construct-disciples"></div>
+          </div>
           <div id="constructCards" class="built-constructs"></div>
         </div>
-        <div id="constructDisciples" class="construct-disciples"></div>
       </div>
     </div>
   `;
@@ -413,6 +437,8 @@ export function initSpeech() {
   renderHotbar();
   renderSeasonBanner();
   if (window.lucide) lucide.createIcons({ icons: lucide.icons });
+  const insightOrbEl = container.querySelector('#orbInsight');
+  if (insightOrbEl) insightOrbEl.addEventListener('click', openInsightRegenPopup);
   document.addEventListener('disciple-gained', renderChantDisciples);
 }
 
@@ -599,6 +625,10 @@ function renderConstructCards() {
         });
         sectState.chantAssignments[selectedChanter] = c;
         selectedChanter = null;
+        renderChantDisciples();
+        renderConstructCards();
+      } else if (assignedId) {
+        delete sectState.chantAssignments[assignedId];
         renderChantDisciples();
         renderConstructCards();
       }
@@ -814,6 +844,7 @@ export function castConstruct(name, el, powerMult = 1) {
     }
   }
   awardXp(def.xp || 0, def.tags || ['voice']);
+  lastConstructTarget = el;
   showConstructCloud(name, el);
   if (def.duration) {
     speechState.activeBuffs[name] = { time: def.duration, mult: powerMult };
@@ -821,6 +852,7 @@ export function castConstruct(name, el, powerMult = 1) {
     const effect = constructEffects[name];
     if (effect) effect(1 * powerMult);
   }
+  lastConstructTarget = null;
   if (def.cooldown) {
     speechState.cooldowns[name] = def.cooldown;
   }
@@ -1021,6 +1053,7 @@ function updateUpgradeAffordability() {
 function purchaseUpgrade(name) {
   const up = speechState.upgrades[name];
   const cost = getUpgradeCost(name);
+  const prevSlots = speechState.memorySlots;
   if (typeof cost === 'number') {
     if (speechState.orbs.insight.current < cost) return;
     speechState.orbs.insight.current -= cost;
@@ -1043,11 +1076,19 @@ function purchaseUpgrade(name) {
     speechState.memorySlots += 1;
   } else if (name === 'expandMind') {
     speechState.orbs.insight.max = Math.round(speechState.orbs.insight.max * 1.15);
+  } else if (name === 'soundExpansion') {
+    speechState.resources.sound.max += 25;
+    if (up.level === 2) {
+      speechState.memorySlots += 1;
+    }
   }
   renderUpgrades();
   renderGains();
   renderOrbs();
   renderResources();
+  if (speechState.memorySlots !== prevSlots) {
+    renderConstructCards();
+  }
 }
 
 export function renderUpgrades() {
@@ -1057,7 +1098,7 @@ export function renderUpgrades() {
   const coreGroup = document.createElement('div');
   coreGroup.className = 'upgrade-group';
   panelUp.appendChild(coreGroup);
-  ['cohere','expandMind','idleChatter'].forEach(name => {
+  ['cohere','expandMind','soundExpansion','idleChatter'].forEach(name => {
     const btn = document.createElement('button');
     btn.dataset.upgrade = name;
     const cost = getUpgradeCost(name);
@@ -1269,7 +1310,7 @@ export function tickSpeech(delta) {
   const ins = speechState.resources.insight;
   const startInsight = ins.current;
   const seasonMult = seasons[speechState.seasonIndex].multiplier;
-  const baseRateRaw = R_MAX / (1 + Math.exp((ins.current - MIDPOINT) / K));
+  const baseRateRaw = R_MAX / (1 + Math.exp((ins.current - getInsightMidpoint()) / K));
   const level = speechState.upgrades.cohere.level;
   // provide baseline regen at level 0 while still tapering off with higher levels
   const upgradeMult = (level + 1) / (level + 5);
@@ -1283,7 +1324,7 @@ export function tickSpeech(delta) {
   const baseTotal = baseRateRaw * upgradeMult * idleMult;
   let regen = baseTotal * seasonMult;
   if (speechState.weather) regen *= speechState.weather.multiplier;
-  regen = Math.min(R_MAX, regen * getIntoneMultiplier());
+  regen = Math.min(R_MAX, regen) * getIntoneMultiplier();
   speechState.insightRegenBase = baseTotal;
   ins.current = Math.min(ins.max, ins.current + regen * dt);
   // Unlock clarividence once the player demonstrates basic insight control
@@ -1300,7 +1341,6 @@ export function tickSpeech(delta) {
   }
   tickActiveConstructs(dt);
   ins.current = Math.min(ins.max, Math.max(0, ins.current));
-  speechState.gains.insight = (ins.current - startInsight) / dt;
   updateCooldownOverlays();
   updateIntoneUI();
   renderOrbs();
@@ -1310,12 +1350,105 @@ export function tickSpeech(delta) {
   renderXpBar();
 }
 
-function showConstructCloud(text, target) {
+function showConstructCloud(text, target, color) {
   if (!container) return;
   const el = document.createElement('div');
   el.className = 'construct-cloud';
   el.textContent = text;
+  if (color) el.style.color = color;
   const parent = target || container;
   parent.appendChild(el);
   setTimeout(() => el.remove(), 3000);
 }
+
+export function openInsightRegenPopup() {
+  const overlay = createOverlay({ className: 'insight-regen-overlay' });
+  const box = overlay.box;
+  const header = document.createElement('h2');
+  header.textContent = 'Insight Regeneration';
+  box.appendChild(header);
+
+  const info = document.createElement('p');
+  info.className = 'insight-info';
+  info.textContent =
+    `Base insight regeneration follows a logistic curve that slows as your` +
+    ` total insight rises. At ${getInsightMidpoint()} insight the base rate is half of its` +
+    ` ${R_MAX}/s maximum before multipliers.`;
+  box.appendChild(info);
+
+  const list = document.createElement('div');
+  list.className = 'insight-regen-list';
+
+  const ins = speechState.resources.insight;
+  const season = seasons[speechState.seasonIndex];
+  const baseRateRaw = R_MAX / (1 + Math.exp((ins.current - getInsightMidpoint()) / K));
+  const level = speechState.upgrades.cohere.level;
+  const upgradeMult = (level + 1) / (level + 5);
+  const idleCount =
+    speechState.upgrades.idleChatter.level > 0
+      ? speechState.disciples.filter(
+          d => (sectState.discipleTasks[d.id] || 'Idle') === 'Idle'
+        ).length
+      : 0;
+  const idleMult = 1 + idleCount * 0.05;
+  const seasonMult = season.multiplier;
+  const weatherMult = speechState.weather ? speechState.weather.multiplier : 1;
+  const intoneMult = getIntoneMultiplier();
+  const researcherCount = speechState.disciples.filter(
+    d => sectState.discipleTasks[d.id] === 'Research'
+  ).length;
+  const chanterCount = speechState.disciples.filter(
+    d => sectState.discipleTasks[d.id] === 'Chant'
+  ).length;
+
+  // Compare against the level 0 baseline so the display shows the
+  // actual boost rather than a sub-1 multiplier.
+  const baseMult = 1 / 5; // (level + 1)/(level + 5) when level = 0
+  const cohereContribution = upgradeMult / baseMult;
+  const rows = [
+    { label: 'Base Rate', value: `${baseRateRaw.toFixed(3)}/s` },
+    {
+      label: `Cohere Lv.${level}`,
+      value: `×${cohereContribution.toFixed(2)}`,
+    },
+  ];
+  if (idleCount > 0) {
+    rows.push({ label: `Idle Disciples (${idleCount})`, value: `×${idleMult.toFixed(2)}` });
+  }
+  rows.push({ label: `Season (${season.name})`, value: `×${seasonMult.toFixed(2)}` });
+  if (speechState.weather) {
+    rows.push({ label: `Weather (${speechState.weather.type})`, value: `×${weatherMult.toFixed(2)}` });
+  }
+  rows.push({ label: 'Intone', value: `×${intoneMult.toFixed(2)}` });
+  if (researcherCount > 0) {
+    rows.push({
+      label: `Research (${researcherCount})`,
+      value: `-${(researcherCount * 4).toFixed(3)}/s`
+    });
+  }
+  if (chanterCount > 0) {
+    rows.push({
+      label: `Chant (${chanterCount})`,
+      value: `-${chanterCount.toFixed(3)}/s`
+    });
+  }
+
+  rows.forEach(r => {
+    const row = document.createElement('div');
+    const isNeg =
+      r.value.startsWith('-') ||
+      (r.value.startsWith('×') && parseFloat(r.value.slice(1)) < 1);
+    row.className = 'insight-row' + (isNeg ? ' negative' : '');
+    row.innerHTML = `<span>${r.label}</span><span>${r.value}</span>`;
+    list.appendChild(row);
+  });
+
+  const totalRow = document.createElement('div');
+  totalRow.className = 'insight-total';
+  totalRow.textContent = `Total: ${speechState.gains.insight.toFixed(3)}/s`;
+  list.appendChild(totalRow);
+
+  box.appendChild(list);
+  overlay.appendButton('Close', overlay.close);
+}
+

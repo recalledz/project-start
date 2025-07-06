@@ -605,6 +605,39 @@ body.darkenshift-mode .tabsContainer button.active {
     margin: 4px;
 }
 
+.insight-regen-overlay {
+    flex-direction: column;
+    gap: 8px;
+}
+
+.insight-info {
+    width: 100%;
+    text-align: center;
+    font-size: 0.85rem;
+}
+
+.insight-regen-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 0.9rem;
+}
+
+.insight-row {
+    display: flex;
+    justify-content: space-between;
+}
+
+.insight-row.negative {
+    color: #ff8888;
+}
+
+.insight-total {
+    margin-top: 4px;
+    text-align: center;
+    font-weight: bold;
+}
+
 .camp-box {
     display: flex;
     flex-direction: column;
@@ -3014,11 +3047,26 @@ body.darkenshift-mode .tabsContainer button.active {
 }
 
 
-.construct-left {
+.constructor-container {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.card-construct-container {
     flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
+    gap: 6px;
+}
+
+.slots-and-disciples {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    justify-content: center;
 }
 
 .construct-disciples {
@@ -3487,6 +3535,12 @@ body.darkenshift-mode .tabsContainer button.active {
     pointer-events: none;
     white-space: nowrap;
 }
+.disciple-task-rate {
+    min-width: 50px;
+    font-size: 0.7rem;
+    text-align: right;
+    color: #ddd;
+}
 .sect-disciples {
     text-align: center;
     margin-bottom: 4px;
@@ -3748,6 +3802,19 @@ body.darkenshift-mode .tabsContainer button.active {
     flex-direction: column;
     gap: 2px;
     margin-top: 4px;
+}
+
+.disciple-details-header {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.disciple-details-header button {
+    font-size: 0.6rem;
+    padding: 2px 4px;
+}
+.disciple-details-header button.active {
+    background: #444;
 }
 
 /* Research progress bar shown in the research panel */

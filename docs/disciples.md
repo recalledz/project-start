@@ -26,6 +26,8 @@ if (Array.isArray(speechState.disciples)) {
     if (d.intelligence === undefined) d.intelligence = 1;
     if (d.incapacitated === undefined) d.incapacitated = false;
     if (!d.name) d.name = `Disciple ${d.id}`;
+    if (d.inventorySlots === undefined) d.inventorySlots = 10;
+    if (!d.inventory) d.inventory = {};
   });
 }
 ```
@@ -33,6 +35,13 @@ if (Array.isArray(speechState.disciples)) {
 Newly recruited disciples receive **3–5 additional attribute points**. These
 extra points are distributed across Strength, Dexterity, Endurance and
 Intelligence with diminishing chances to stack points on the same attribute.
+
+## Inventory
+
+Each disciple carries resources in a personal inventory when gathering or logging. All followers begin with **10 slots**. As they gain more slots (for example through future upgrades) they can haul larger quantities per trip.
+
+The current inventory contents are shown in the colony interface when viewing a disciple's status. Empty slots are simply unused.
+
 Gaining three points in a single stat is therefore possible but uncommon.
 
 ## Task Proficiency
@@ -80,7 +89,46 @@ export function intelligenceXpMultiplier(task) {
 }
 ```
 
+
 Increasing **Strength** speeds up XP gain for mining, smithing, and logging jobs. **Dexterity** now boosts XP for woodcutting and gathering, while **Intelligence** grants extra XP when chanting or researching. **Endurance** continues to help disciples learn faster when building or defending.
+
+### Gathering Yield
+
+Proficiency does more than just award XP. For gathering tasks, every skill level
+increases the yield by **5%**, using the same logic as the game code:
+
+```javascript
+const yieldMult = 1 + 0.05 * level;
+const gatherAmt = Math.min(cycleAmount * yieldMult, disciple.inventorySlots);
+```
+
+The multiplier scales the base cycle amount but is capped by the disciple's
+available inventory slots. New recruits start with 10 slots, so the bonus may
+not be visible until they gain extra carrying capacity from Strength or other
+upgrades.
+
+If carrying capacity does limit the haul, the disciple finishes the trip as soon
+as their inventory is full. The effective cycle time becomes
+
+```javascript
+const cycleSeconds = baseSeconds * (gatherAmt / (cycleAmount * yieldMult));
+```
+
+where `baseSeconds` is `FRUIT_CYCLE_SECONDS` or `PINE_LOG_CYCLE_SECONDS`. This
+shorter cycle means high-proficiency disciples drop off loads more frequently
+even when the yield per cycle is capped by inventory.
+
+## Attribute Point Effects
+
+Beyond improving XP gain, each attribute provides passive bonuses based on the
+number of points invested:
+
+- **Strength** – increases melee damage by 5% per point and grants one extra
+  inventory slot for every 2 points.
+- **Endurance** – raises maximum stamina by 5% per point, improves stamina
+  regeneration by 1% per point and adds 10&nbsp;HP per point.
+- **Dexterity** – speeds up attack animations by 5% per point.
+- **Intelligence** – boosts the potency of constructs by 3% per point.
 
 ## XP Gain Rates
 

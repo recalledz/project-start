@@ -31,3 +31,7 @@ The phrase builder has been replaced with a simpler construct mechanic. The **Co
 
 *Using **Echo of Mind** now requires accumulating 1500 Insight in addition to reaching Voice Level 3.*
 *Voice skill levels follow an exponential XP curve starting at 50 XP with a 1.2× increase per level.*
+
+### Upgrades
+
+- **Sound Expansion** – costs 25 Sound for the first level and increases your maximum Sound by 25. The second level costs 50 Sound and grants an additional construct slot. Each further level costs 4 more Sound than the last.

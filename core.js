@@ -1,4 +1,4 @@
-import { speechState, renderXpBar } from './speech.js';
+import { speechState, renderXpBar, openInsightRegenPopup } from './speech.js';
 
 export const coreState = {
   coreLevel: 1,
@@ -76,6 +76,7 @@ const bodyPath = `M200 140
       window.showTooltip(`Insight: ${Math.floor(orb.current)}/${orb.max}`, e.pageX + 10, e.pageY + 10);
     });
     insightOrb.addEventListener('mouseleave', window.hideTooltip);
+    insightOrb.addEventListener('click', openInsightRegenPopup);
   }
   meditateBtn.addEventListener('click', toggleMeditation);
   meditateBtn.addEventListener('mouseenter', e => {
