@@ -202,6 +202,8 @@ const BUILD_XP_RATE = 0.1; // per second
 const RESEARCH_XP_PER_CYCLE = 20;
 const CHANT_XP_PER_CYCLE = 0.5;
 const EXPLORATION_CYCLE_SECONDS = 150;
+const EXPLORATION_STAMINA_COST = 1;
+const STAMINA_REGEN_RATE = 0.05; // per second
 
 const LOCATION_DEFS = [
   { name: 'Firewood Grove', reqDistance: 100, baseChance: 0.2, x: '30%', y: '70%' },
@@ -1091,6 +1093,12 @@ function tickSect(delta) {
   const dt = delta / 1000;
   speechState.disciples.forEach(d => {
     ensureDiscipleSkills(d.id);
+    // regenerate stamina while at the sect
+    const maxStamina = 10 * attributes.Endurance.staminaMultiplier;
+    if (d.stamina < maxStamina) {
+      const regen = STAMINA_REGEN_RATE * attributes.Endurance.staminaRegenMultiplier * dt;
+      d.stamina = Math.min(maxStamina, d.stamina + regen);
+    }
     const task = sectState.discipleTasks[d.id];
     if (task === 'Gather Fruit' || task === 'Log Pine') {
       if (!sectState.discipleProgress[d.id]) sectState.discipleProgress[d.id] = 0;
@@ -1179,25 +1187,35 @@ function tickSect(delta) {
       const spend = Math.min(speechState.resources.insight.current, dt);
       speechState.resources.insight.current -= spend;
     } else if (task === 'Exploration') {
-      if (!sectState.discipleProgress[d.id]) sectState.discipleProgress[d.id] = 0;
-      sectState.discipleProgress[d.id] += dt;
-      if (sectState.discipleProgress[d.id] >= EXPLORATION_CYCLE_SECONDS) {
-        sectState.discipleProgress[d.id] -= EXPLORATION_CYCLE_SECONDS;
-        const maxDistance = d.stamina * 10;
-        const seasonBonus = speechState.seasonIndex === 0 ? 0.05 : speechState.seasonIndex === 3 ? -0.05 : 0;
-        const eligible = LOCATION_DEFS.filter(l => !discoveredLocations.includes(l.name) && l.reqDistance <= maxDistance);
-        shuffleArray(eligible);
-        let found = null;
-        eligible.forEach(loc => {
-          if (found) return;
-          let chance = loc.baseChance + (d.endurance - 1) * 0.01 + seasonBonus;
-          if (Math.random() < chance) {
-            addDiscoveredLocation(loc.name);
-            found = loc.name;
+      if (d.stamina <= 0) {
+        sectState.discipleTasks[d.id] = 'Idle';
+        addLog(`${d.name} is exhausted and must rest.`, 'info');
+      } else {
+        if (!sectState.discipleProgress[d.id]) sectState.discipleProgress[d.id] = 0;
+        sectState.discipleProgress[d.id] += dt;
+        if (sectState.discipleProgress[d.id] >= EXPLORATION_CYCLE_SECONDS) {
+          sectState.discipleProgress[d.id] -= EXPLORATION_CYCLE_SECONDS;
+          const maxDistance = d.stamina * 10;
+          const seasonBonus = speechState.seasonIndex === 0 ? 0.05 : speechState.seasonIndex === 3 ? -0.05 : 0;
+          const eligible = LOCATION_DEFS.filter(l => !discoveredLocations.includes(l.name) && l.reqDistance <= maxDistance);
+          shuffleArray(eligible);
+          let found = null;
+          eligible.forEach(loc => {
+            if (found) return;
+            let chance = loc.baseChance + (d.endurance - 1) * 0.01 + seasonBonus;
+            if (Math.random() < chance) {
+              addDiscoveredLocation(loc.name);
+              found = loc.name;
+            }
+          });
+          if (found) addLog(`Discovered ${found}!`, 'good');
+          else addLog('No discovery this trip.', 'info');
+          d.stamina = Math.max(0, d.stamina - EXPLORATION_STAMINA_COST);
+          if (d.stamina <= 0) {
+            sectState.discipleTasks[d.id] = 'Idle';
+            addLog(`${d.name} is exhausted and must rest.`, 'info');
           }
-        });
-        if (found) addLog(`Discovered ${found}!`, 'good');
-        else addLog('No discovery this trip.', 'info');
+        }
       }
     } else {
       sectState.discipleProgress[d.id] = 0;
@@ -1507,8 +1525,13 @@ function renderColonyInfo() {
 
     option.appendChild(label);
     option.appendChild(bar);
+    if (t !== 'Idle' && d.stamina <= 0) option.classList.add('disabled');
 
     option.addEventListener('click', () => {
+      if (t !== 'Idle' && d.stamina <= 0) {
+        addLog(`${d.name} is too tired to work.`, 'info');
+        return;
+      }
       const prev = sectState.discipleTasks[d.id];
       sectState.discipleTasks[d.id] = t;
       discipleGatherPhase[d.id] = -1;

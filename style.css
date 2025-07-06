@@ -3770,6 +3770,10 @@ body.darkenshift-mode .tabsContainer button.active {
     width: 120px;
     cursor: pointer;
 }
+.disciple-skill-option.disabled {
+    opacity: 0.5;
+    cursor: default;
+}
 .disciple-skill-label { font-size: 0.75rem; }
 .disciple-skill-progress {
     position: relative;

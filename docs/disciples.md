@@ -44,6 +44,12 @@ The current inventory contents are shown in the colony interface when viewing a 
 
 Gaining three points in a single stat is therefore possible but uncommon.
 
+## Stamina
+
+Exploration consumes stamina. Each full excursion costs 1 stamina and disciples
+cannot be assigned new work until they recover. Stamina slowly regenerates over
+time based on their **Endurance** attribute.
+
 ## Task Proficiency
 
 Disciples gain skill experience (XP) for the task they are performing. XP follows an exponential curve where the XP required for each level is `50 × 1.2^level`:
