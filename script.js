@@ -37,6 +37,11 @@ import { createOverlay } from './ui/overlay.js';
 import { showRestartScreen } from './ui/restartOverlay.js';
 import { calculateKillXp, XP_EFFICIENCY } from './utils/xp.js';
 import {
+  getDiscipleMaxStamina,
+  regenDiscipleStamina,
+  consumeDiscipleStamina
+} from './discipleState.js';
+import {
   rollNewCardUpgrades,
   applyCardUpgrade,
   renderCardUpgrades,
@@ -1069,6 +1074,7 @@ function tickSect(delta) {
   const dt = delta / 1000;
   speechState.disciples.forEach(d => {
     ensureDiscipleSkills(d.id);
+    regenDiscipleStamina(d, dt);
     const task = sectState.discipleTasks[d.id];
     if (task === 'Gather Fruit' || task === 'Log Pine') {
       if (!sectState.discipleProgress[d.id]) sectState.discipleProgress[d.id] = 0;
@@ -1176,6 +1182,7 @@ function tickSect(delta) {
         });
         if (found) addLog(`Discovered ${found}!`, 'good');
         else addLog('No discovery this trip.', 'info');
+        consumeDiscipleStamina(d, 1);
       }
     } else {
       sectState.discipleProgress[d.id] = 0;
@@ -1758,7 +1765,7 @@ function buildDiscipleStatusView(d) {
   const body = document.createElement('div');
   const stats = [
     { label: 'Health', color: '#a33', value: d.health, max: 10 },
-    { label: 'Stamina', color: '#cc3', value: d.stamina, max: 10 },
+    { label: 'Stamina', color: '#cc3', value: d.stamina, max: getDiscipleMaxStamina(d) },
     { label: 'Hunger', color: '#cc3', value: d.hunger, max: 20 }
   ];
   stats.forEach(s => {
@@ -1810,7 +1817,7 @@ function buildDiscipleStatusView(d) {
       label: 'Endurance',
       value: d.endurance,
       effect:
-        `Stamina ×${(1 + 0.05 * (d.endurance - 1)).toFixed(2)}, ` +
+        `Stamina ×${(getDiscipleMaxStamina(d) / 10).toFixed(2)}, ` +
         `Regen ×${(1 + 0.01 * (d.endurance - 1)).toFixed(2)}, ` +
         `+${10 * (d.endurance - 1)} HP`,
       skills: 'Building, Defending & Combat'
@@ -1858,7 +1865,7 @@ function buildDiscipleCombatStatsView(d) {
   const body = document.createElement('div');
   const melee = (1 + 0.05 * (d.strength - 1)).toFixed(2);
   const attackSpeed = (1 + 0.05 * (d.dexterity - 1)).toFixed(2);
-  const stamina = (1 + 0.05 * (d.endurance - 1)).toFixed(2);
+  const stamina = (getDiscipleMaxStamina(d) / 10).toFixed(2);
   body.innerHTML =
     `Melee Damage ×${melee}<br>` +
     `Attack Speed ×${attackSpeed}<br>` +
@@ -3758,7 +3765,7 @@ Object.assign(playerStats, state.playerStats || {});
     if (Array.isArray(speechState.disciples)) {
       speechState.disciples.forEach(d => {
         if (d.health === undefined) d.health = 10;
-        if (d.stamina === undefined) d.stamina = 10;
+        if (d.stamina === undefined) d.stamina = getDiscipleMaxStamina(d);
         if (d.hunger === undefined) d.hunger = 20;
         if (d.power === undefined) d.power = 1;
         if (d.strength === undefined) d.strength = 1;

@@ -6,7 +6,7 @@ Disciples are followers recruited through **The Calling** construct. They live a
 
 Each disciple starts with a set of personal attributes used by the colony interface:
 
-- **Health**, **Stamina** and **Hunger** – short term needs capped at 10/10/20.
+- **Health**, **Stamina** and **Hunger** – short term needs. Health and Hunger are capped at 10 and 20; Stamina scales with Endurance.
 - **Power** – base potency when invoking constructs on their own.
 - **Strength**, **Dexterity**, **Endurance** and **Intelligence** – broad talents that modify XP gains and construct potency.
 - **Incapacitated** – indicates if a disciple can no longer work.
@@ -17,7 +17,7 @@ These stats are initialised when disciples are loaded or created in the game cod
 if (Array.isArray(speechState.disciples)) {
   speechState.disciples.forEach(d => {
     if (d.health === undefined) d.health = 10;
-    if (d.stamina === undefined) d.stamina = 10;
+    if (d.stamina === undefined) d.stamina = getDiscipleMaxStamina(d);
     if (d.hunger === undefined) d.hunger = 20;
     if (d.power === undefined) d.power = 1;
     if (d.strength === undefined) d.strength = 1;
