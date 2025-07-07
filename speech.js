@@ -257,6 +257,18 @@ const upgradeDescriptions = {
   vocalMaturity: 'Grants a burst of voice experience.'
 };
 
+// Effect summary strings used across UI views
+export const constructEffectText = {
+  'Murmur': 'Generates 1 Sound (+1 Voice XP)',
+  'Echo of Mind': 'Generates 1 Thought per second for 5s',
+  'Clarity Pulse': 'Gain 1% Insight per s',
+  'Symbol Seed': 'Gain 0.1 Structure per thought drained',
+  'Intone': 'Press repeatedly to charge; 1.2× at 5, 1.5× at 10, 2× at 15 for 30s',
+  'Mnemonic Rhythm': 'Grants ×2 XP to other constructs for 3s; +0.2× per potency',
+  'Mental Construct': 'Gain 0.1 elemental essence based on season',
+  'The Calling': 'Attempts to recruit a Disciple based on Calling potency'
+};
+
 function xpRequired(level) {
   return Math.round(50 * Math.pow(1.2, level));
 }
@@ -816,11 +828,14 @@ export function createConstructInfo(name) {
   if (!recipe) return null;
   const info = document.createElement('div');
   info.className = 'construct-info';
-  if (name === 'The Calling') {
+  const effText = getConstructEffect(name);
+  if (effText) {
     const effect = document.createElement('div');
     effect.className = 'construct-effect';
-    effect.textContent = 'Effect: call for another faithful follower';
+    effect.textContent = `Effect: ${effText}`;
     info.appendChild(effect);
+  }
+  if (name === 'The Calling') {
     const callPower = speechState.constructPotency['The Calling'] || 1;
     const targetIdx = speechState.disciples.length + 1;
     const reqPower = Math.pow(1.8, targetIdx - 1);
@@ -829,18 +844,6 @@ export function createConstructInfo(name) {
     chanceEl.className = 'construct-chance';
     chanceEl.textContent = `Chance: ${(chance * 100).toFixed(0)}%`;
     info.appendChild(chanceEl);
-  } else if (name === 'Intone') {
-    const effect = document.createElement('div');
-    effect.className = 'construct-effect';
-    effect.textContent = 'Effect: tap repeatedly to boost Insight regen';
-    info.appendChild(effect);
-  } else if (Object.keys(recipe.output).length) {
-    const effect = document.createElement('div');
-    effect.className = 'construct-effect';
-    effect.textContent = `Effect: ${Object.entries(recipe.output)
-      .map(([k, v]) => `+${v} ${k}`)
-      .join(', ')}`;
-    info.appendChild(effect);
   }
   const cost = document.createElement('div');
   cost.className = 'construct-cost';
@@ -864,15 +867,10 @@ export function createConstructInfo(name) {
   return info;
 }
 
-function getConstructEffect(name) {
+export function getConstructEffect(name) {
+  if (constructEffectText[name]) return constructEffectText[name];
   const recipe = recipes.find(r => r.name === name);
   if (!recipe) return null;
-  if (name === 'The Calling') {
-    return 'call for another faithful follower';
-  }
-  if (name === 'Intone') {
-    return 'press repeatedly to charge';
-  }
   if (!Object.keys(recipe.output).length) return null;
   return Object.entries(recipe.output)
     .map(([k, v]) => `+${v} ${k}`)

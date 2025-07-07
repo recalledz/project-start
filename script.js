@@ -2305,41 +2305,8 @@ function renderConstructLexicon() {
     wrap.className = 'construct-card-wrapper';
     const card = createConstructCard(r.name);
     wrap.appendChild(card);
-    const info = document.createElement('div');
-    info.className = 'construct-info';
-    const type = document.createElement('div');
-    type.textContent = `Type: ${r.type || 'n/a'}`;
-    info.appendChild(type);
-    if (r.cooldown)
-      info.appendChild(Object.assign(document.createElement('div'), { textContent: `Cooldown: ${r.cooldown}s` }));
-    if (r.tags && r.tags.length)
-      info.appendChild(Object.assign(document.createElement('div'), { textContent: `Tags: ${r.tags.join(', ')}` }));
-    if (r.requirements) {
-      const reqStr = Object.entries(r.requirements)
-        .map(([k, v]) => {
-          if (k === 'voiceLevel') return `Voice Lv.${v}`;
-          return `${v} ${k}`;
-        })
-        .join(', ');
-      info.appendChild(Object.assign(document.createElement('div'), { textContent: `Unlock: ${reqStr}` }));
-    }
-    const effect = (() => {
-      if (r.name === 'The Calling') return 'call for another faithful follower';
-      if (r.name === 'Intone') return 'press repeatedly to charge';
-      if (!Object.keys(r.output).length) return null;
-      return Object.entries(r.output)
-        .map(([k, v]) => `+${v} ${k}`)
-        .join(', ');
-    })();
-    if (effect) info.appendChild(Object.assign(document.createElement('div'), { textContent: `Effect: ${effect}` }));
-    if (Object.keys(r.output).length) {
-      const outStr = Object.entries(r.output)
-        .map(([k, v]) => `+${v} ${k}`)
-        .join(', ');
-      info.appendChild(Object.assign(document.createElement('div'), { textContent: `Generates: ${outStr}` }));
-    }
-    info.appendChild(Object.assign(document.createElement('div'), { textContent: `XP: ${r.xp || 0}` }));
-    wrap.appendChild(info);
+    const info = createConstructInfo(r.name);
+    if (info) wrap.appendChild(info);
     constructLexiconContainer.appendChild(wrap);
   });
   if (window.lucide) lucide.createIcons({ icons: lucide.icons });
