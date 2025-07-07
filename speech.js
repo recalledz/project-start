@@ -545,7 +545,7 @@ function renderConstructRequirements() {
   speechState.pot.forEach(r => {
     counts[r] = (counts[r] || 0) + 1;
   });
-  const recipe = recipes.find(r => r.unlocked && Object.entries(r.input).every(([k,v]) => counts[k] >= v));
+  const recipe = recipes.find(r => Object.entries(r.input).every(([k,v]) => counts[k] >= v));
   if (!recipe || !recipe.requirements) return;
   const reqs = [];
   if (recipe.requirements.voiceLevel) {
