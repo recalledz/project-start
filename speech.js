@@ -34,8 +34,6 @@ const seasonIcons = ['\uD83C\uDF31', '\u2600\uFE0F', '\uD83C\uDF42', '\u2744\uFE
 const seasonClasses = ['spring','summer','autumn','winter'];
 const seasonTemps = [15, 25, 10, -5];
 
-// Tags that grant construct experience when used
-const CONSTRUCT_XP_TAGS = ['voice', 'mind', 'invocation'];
 
 export const speechState = {
   orbs: {
@@ -123,58 +121,68 @@ export const recipes = [
     // Increased cost to make early insight management more meaningful
     input: { insight: 25 },
     output: { sound: 1 },
-    xp: 1,
-    tags: ['voice'],
+    xp: { voice: 1 },
+    tags: ['single-cast', 'generator'],
     unlocked: true,
-    cooldown: 1
+    cooldown: 1,
+    potency: 1
   },
   {
     name: 'Echo of Mind',
     input: { sound: 1, insight: 1 },
     output: { thought: 1 },
-    xp: 1,
-    tags: ['voice','mind'],
+    xp: { mind: 0.5, voice: 0.5 },
+    tags: ['single-cast', 'generator', 'duration'],
     unlocked: false,
     requirements: { voiceLevel: 3, insight: 1500 },
     castCost: { sound: 25, insight: 500 },
     duration: 5,
-    cooldown: 5
+    cooldown: 5,
+    potency: 1
   },
   {
     name: 'Clarity Pulse',
     input: { thought: 1, insight: 1 },
     output: {},
-    xp: 0,
+    xp: { mind: 1 },
+    tags: ['single-cast', 'buff', 'duration'],
     unlocked: true,
-    type: 'buff',
     duration: 30,
-    cooldown: 30
+    cooldown: 30,
+    potency: 1
   },
   {
     name: 'Symbol Seed',
     input: { sound: 1, thought: 1 },
     output: { structure: 1 },
-    xp: 1,
+    xp: {},
+    tags: ['duration', 'generator', 'drain'],
     unlocked: true,
-    duration: 10,
-    cooldown: 10
+    duration: 30,
+    cooldown: 30,
+    potency: 1
   },
   {
     name: 'Mental Construct',
     input: { sound: 1, thought: 1, insight: 1 },
     output: {},
-    xp: 0,
+    xp: { invocation: 1 },
+    tags: ['single-cast'],
     unlocked: true,
-    type: 'buff',
-    duration: 60,
-    cooldown: 60
+    requirements: { voiceLevel: 5, insight: 2300 },
+    castCost: { thought: 10, structure: 10, insight: 1000 },
+    cooldown: 10,
+    potency: 1
   },
   {
     name: 'Intone',
     input: {},
     output: {},
-    xp: 0,
-    unlocked: false
+    xp: {},
+    tags: ['buff'],
+    unlocked: false,
+    cooldown: 30,
+    potency: 1
   },
   {
     name: 'The Calling',
@@ -286,6 +294,12 @@ function awardXp(amount, tags) {
   }
 }
 
+function awardConstructXp(xpObj = {}) {
+  Object.entries(xpObj).forEach(([tag, amt]) => {
+    awardXp(amt, [tag]);
+  });
+}
+
 // Per-tick effects for active constructs. These are simplified
 // implementations to demonstrate the new constructs in action.
 const constructEffects = {
@@ -329,6 +343,7 @@ const constructEffects = {
       snd.current -= drain;
       str.current = Math.min(str.max, str.current + drain * pot);
       str.unlocked = true;
+      awardConstructXp({ mind: dt });
     }
   },
   'Mental Construct'(dt, pot = 1) {
@@ -580,8 +595,7 @@ function performConstruct() {
     const r = speechState.resources[res];
     if (r) r.current = Math.min(r.max, r.current + amt);
   }
-  const xpTags = (recipe.tags || []).filter(t => CONSTRUCT_XP_TAGS.includes(t));
-  xpTags.forEach(tag => awardXp(recipe.xp, [tag]));
+  awardConstructXp(recipe.xp);
   addConstruct(recipe.name);
   renderResourcesUI();
   renderXpBar();
@@ -594,7 +608,8 @@ function addConstruct(name) {
     const def = recipes.find(r => r.name === name);
     if (
       def &&
-      def.type === 'buff' &&
+      def.tags &&
+      def.tags.includes('buff') &&
       speechState.activeConstructs.length < speechState.memorySlots
     ) {
       speechState.activeConstructs.push(name);
@@ -872,9 +887,7 @@ export function castConstruct(name, el, powerMult = 1, caster = 'player') {
       addConstruct('Intone');
     }
   }
-  const xp = def.xp || 0;
-  const xpTags = (def.tags || []).filter(t => CONSTRUCT_XP_TAGS.includes(t));
-  xpTags.forEach(tag => awardXp(xp, [tag]));
+  awardConstructXp(def.xp);
   lastConstructTarget = el;
   showConstructCloud(name, el);
   const basePot = speechState.constructPotency[name] || 1;
