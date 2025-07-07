@@ -8,7 +8,7 @@ The phrase builder has been replaced with a simpler construct mechanic. The **Co
 - Recipes unlock as requirements are met.
 - Crafted cards appear below the pot and must be equipped to provide their effect.
 - Constructs may generate resources over time or provide buffs that modify production.
-- Each construct has a **Potency** starting at 1.0. Voice level-ups increase all potencies by 5%.
+- Each construct has a **Potency** starting at 1.0. Voice level-ups boost generator constructs by 5% per level when invoked by the Master.
 
 ### Starting Construct – Murmur
 

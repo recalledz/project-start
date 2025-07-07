@@ -2580,6 +2580,7 @@ body.darkenshift-mode .tabsContainer button.active {
     display: flex;
     flex-direction: column;
     align-items: center;
+    cursor: pointer;
     gap: 6px;
     width: 70%;
     margin: 0 auto;
@@ -2622,6 +2623,17 @@ body.darkenshift-mode .tabsContainer button.active {
     font-weight: 600;
     white-space: nowrap;
     color: #c785ff;
+}
+
+.speech-skill-detail {
+    display: none;
+    font-size: 0.75rem;
+    text-align: center;
+    color: #c785ff;
+}
+
+.speech-xp-container.expanded .speech-skill-detail {
+    display: block;
 }
 
 .capacity-display {

@@ -104,6 +104,12 @@ const bodyPath = `M200 140
   bodyValEl = container.querySelector('#bodyValue');
   willValEl = container.querySelector('#willValue');
   if (window.lucide) lucide.createIcons({ icons: lucide.icons });
+  const voicePanel = document.getElementById('voiceSkillPanel');
+  if (voicePanel) {
+    voicePanel.addEventListener('click', () => {
+      voicePanel.classList.toggle('expanded');
+    });
+  }
   window.addEventListener('speech-xp-changed', () => {
     renderCore();
     renderXpBar();

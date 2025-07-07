@@ -284,28 +284,22 @@ function awardXp(amount, tags) {
   const prevSlots = speechState.memorySlots;
   tags.forEach(tag => {
     const skill = speechState.skills[tag];
-    if (skill) {
-      skill.xp += split;
-      const progress = getSkillProgress(skill.xp);
-      if (progress.level > skill.level) {
-        const gained = progress.level - skill.level;
-        skill.level = progress.level;
-        if (tag === 'voice') {
-          const mult = Math.pow(1.05, gained);
-          Object.keys(speechState.constructPotency).forEach(k => {
-            speechState.constructPotency[k] *= mult;
-          });
+      if (skill) {
+        skill.xp += split;
+        const progress = getSkillProgress(skill.xp);
+        if (progress.level > skill.level) {
+          skill.level = progress.level;
+          if (tag === 'mind' && progress.level >= 1 && !speechState.mindSlotAwarded) {
+            speechState.memorySlots += 1;
+            speechState.mindSlotAwarded = true;
+          }
         }
-        if (tag === 'mind' && progress.level >= 1 && !speechState.mindSlotAwarded) {
-          speechState.memorySlots += 1;
-          speechState.mindSlotAwarded = true;
-        }
-      }
     }
   });
   if (speechState.memorySlots !== prevSlots) {
     renderConstructCards();
   }
+  window.dispatchEvent(new CustomEvent('speech-xp-changed'));
 }
 
 function awardConstructXp(xpObj = {}) {
@@ -918,7 +912,11 @@ export function castConstruct(name, el, powerMult = 1, caster = 'player') {
   showConstructCloud(name, el);
   const basePot = speechState.constructPotency[name] || 1;
   const levelPot = Math.pow(1.05, getConstructLevel(caster, name));
-  const finalMult = powerMult * basePot * levelPot;
+  let voiceMult = 1;
+  if (caster === 'player' && def.tags && def.tags.includes('generator')) {
+    voiceMult = Math.pow(1.05, speechState.skills.voice.level);
+  }
+  const finalMult = powerMult * basePot * levelPot * voiceMult;
   if (def.duration) {
     speechState.activeBuffs[name] = { time: def.duration, mult: finalMult };
   } else {
@@ -959,12 +957,18 @@ function renderHotbar() {
 export function renderXpBar() {
   const barFill = document.querySelector('#voiceSkillPanel .speech-xp-fill');
   const lvlEl = document.getElementById('voiceLevel');
+  const detailEl = document.getElementById('voiceDetail');
   if (!barFill || !lvlEl) return;
   const skill = speechState.skills.voice;
   const prog = getSkillProgress(skill.xp);
   skill.level = prog.level;
   barFill.style.width = `${(prog.progress * 100).toFixed(1)}%`;
   lvlEl.textContent = `Voice Lv.${prog.level}`;
+  if (detailEl) {
+    const bonus = (Math.pow(1.05, skill.level) - 1) * 100;
+    const xpToNext = Math.ceil((1 - prog.progress) * prog.next);
+    detailEl.textContent = `Bonus: +${bonus.toFixed(0)}% generator potency | ${xpToNext} XP to Lv.${skill.level + 1}`;
+  }
 }
 
 function renderOrbs() {
