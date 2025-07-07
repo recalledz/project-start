@@ -113,7 +113,11 @@ export const speechState = {
   murmurCasts: 0,
   intonePresses: 0,
   intoneTimer: 0,
-  intoneIdle: 0
+  intoneIdle: 0,
+  mnemonicTimer: 0,
+  mnemonicBeats: 0,
+  mnemonicPotency: 1,
+  murmurChain: 0
 };
 
 // use the same object for the insight resource and orb
@@ -190,6 +194,17 @@ export const recipes = [
     xp: {},
     tags: ['buff'],
     unlocked: false,
+    cooldown: 30,
+    potency: 1
+  },
+  {
+    name: 'Mnemonic Rhythm',
+    input: {},
+    output: {},
+    xp: {},
+    tags: ['buff'],
+    unlocked: false,
+    castCost: { sound: 50 },
     cooldown: 30,
     potency: 1
   },
@@ -302,9 +317,9 @@ function awardXp(amount, tags) {
   window.dispatchEvent(new CustomEvent('speech-xp-changed'));
 }
 
-function awardConstructXp(xpObj = {}) {
+function awardConstructXp(xpObj = {}, mult = 1) {
   Object.entries(xpObj).forEach(([tag, amt]) => {
-    awardXp(amt, [tag]);
+    awardXp(amt * mult, [tag]);
   });
 }
 
@@ -371,7 +386,14 @@ const constructEffects = {
     speechState.intoneIdle = 0;
     if (speechState.intonePresses >= 15) {
       speechState.intoneTimer = 30;
+      const rec = recipes.find(r => r.name === 'Intone');
+      if (rec && rec.cooldown) speechState.cooldowns['Intone'] = rec.cooldown;
     }
+  },
+  'Mnemonic Rhythm'(dt, pot = 1) {
+    speechState.mnemonicTimer = 3;
+    speechState.mnemonicBeats = 0;
+    speechState.mnemonicPotency = pot;
   },
   'The Calling'(dt, pot = speechState.constructPotency['The Calling'] || 1) {
     const callPower = pot;
@@ -739,6 +761,16 @@ export function createConstructCard(name) {
       const timer = document.createElement('div');
       timer.className = 'intone-timer';
       card.appendChild(timer);
+    } else if (name === 'Mnemonic Rhythm') {
+      const beats = document.createElement('div');
+      beats.className = 'mnemonic-beats';
+      card.appendChild(beats);
+      const bar = document.createElement('div');
+      bar.className = 'mnemonic-bar';
+      const fill = document.createElement('div');
+      fill.className = 'mnemonic-bar-fill';
+      bar.appendChild(fill);
+      card.appendChild(bar);
     }
     if (recipe.cooldown) {
       const overlay = document.createElement('div');
@@ -900,14 +932,28 @@ export function castConstruct(name, el, powerMult = 1, caster = 'player') {
   }
   if (name === 'Murmur') {
     speechState.murmurCasts += 1;
+    speechState.murmurChain += 1;
     const intone = recipes.find(r => r.name === 'Intone');
     if (intone && !intone.unlocked && speechState.murmurCasts >= 10) {
       intone.unlocked = true;
       addLog('Intone construct unlocked!', 'info');
       addConstruct('Intone');
     }
+  } else {
+    speechState.murmurChain = 0;
   }
-  awardConstructXp(def.xp);
+  const mnemonic = recipes.find(r => r.name === 'Mnemonic Rhythm');
+  if (mnemonic && !mnemonic.unlocked && speechState.murmurChain >= 3) {
+    mnemonic.unlocked = true;
+    addLog('Mnemonic Rhythm construct unlocked!', 'info');
+    addConstruct('Mnemonic Rhythm');
+  }
+  let xpMult = 1;
+  if (speechState.mnemonicTimer > 0 && name !== 'Mnemonic Rhythm') {
+    xpMult = 2 + 0.2 * (speechState.mnemonicPotency - 1);
+    speechState.mnemonicBeats += 1;
+  }
+  awardConstructXp(def.xp, xpMult);
   lastConstructTarget = el;
   showConstructCloud(name, el);
   const basePot = speechState.constructPotency[name] || 1;
@@ -924,7 +970,7 @@ export function castConstruct(name, el, powerMult = 1, caster = 'player') {
     if (effect) effect(1, finalMult);
   }
   lastConstructTarget = null;
-  if (def.cooldown) {
+  if (def.cooldown && name !== 'Intone') {
     speechState.cooldowns[name] = def.cooldown;
   }
   renderResources();
@@ -1338,6 +1384,22 @@ function updateIntoneUI() {
   }
 }
 
+function updateMnemonicUI() {
+  if (!container) return;
+  const card = container.querySelector('.construct-card[data-name="Mnemonic Rhythm"]');
+  if (!card) return;
+  const fill = card.querySelector('.mnemonic-bar-fill');
+  if (fill) {
+    const ratio = Math.max(0, Math.min(1, speechState.mnemonicTimer / 3));
+    fill.style.width = `${ratio * 100}%`;
+  }
+  const beats = card.querySelector('.mnemonic-beats');
+  if (beats) {
+    beats.textContent = speechState.mnemonicTimer > 0 ? speechState.mnemonicBeats : '';
+  }
+  card.classList.toggle('mnemonic-active', speechState.mnemonicTimer > 0);
+}
+
 export function tickSpeech(delta) {
   const hasUI = !!container;
   const dt = delta / 1000;
@@ -1352,6 +1414,12 @@ export function tickSpeech(delta) {
       const dec = Math.floor(speechState.intoneIdle / 2);
       speechState.intonePresses = Math.max(0, speechState.intonePresses - dec);
       speechState.intoneIdle -= dec * 2;
+    }
+  }
+  if (speechState.mnemonicTimer > 0) {
+    speechState.mnemonicTimer = Math.max(0, speechState.mnemonicTimer - dt);
+    if (speechState.mnemonicTimer === 0) {
+      speechState.mnemonicBeats = 0;
     }
   }
   ['body', 'will'].forEach(k => {
@@ -1498,6 +1566,7 @@ export function tickSpeech(delta) {
   if (hasUI) {
     updateCooldownOverlays();
     updateIntoneUI();
+    updateMnemonicUI();
     renderOrbs();
     renderSeasonBanner();
     renderResources();

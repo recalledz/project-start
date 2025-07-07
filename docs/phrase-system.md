@@ -27,6 +27,7 @@ The phrase builder has been replaced with a simpler construct mechanic. The **Co
 | **Clarity Pulse**    | Thought + Insight         | 20 Thought + 50 Sound                   | 30s      | Single-cast, Buff, Duration        | Gain 1% Insight per s *(Unlocks at Mind Lv.2, 1700 Insight)* |
 | **Symbol Seed**      | Sound + Thought           | Drains 1 Thought per second                   | 30s      | Duration, Generator, Drain         | Gain 0.1 Structure per thought drained *(Unlocks at Mind Lv.3, 2000 Insight)* |
 | **Intone**           | —                         | None                                          | 30s      | Buff                               | Press repeatedly to charge; 1.2× Insight at 5 presses, 1.5× at 10, 2× at 15 for 30s *(Unlocked after Murmur ×10)* |
+| **Mnemonic Rhythm**  | —                         | 50 Sound               | 30s      | Buff                               | Grants ×2 XP to other constructs for 3s; +0.2× per potency point *(Unlocked after Murmur ×3 in a row)* |
 | **Mental Construct** | Thought + Insight + Sound | 10 Thought + 10 Structure + 1000 Insight      | 10s      | Single-cast                        | Gain 0.1 elemental essence based on season *(Unlocks at Voice Lv.5 & Mind Lv.5, 2300 Insight)* |
 | **The Calling**     | —                         | 200 Sound                                    | 5m       | Action                               | Attempts to recruit a Disciple based on Calling potency |
 
