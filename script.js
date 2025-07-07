@@ -1207,7 +1207,7 @@ function tickSect(delta) {
       if (sectState.discipleProgress[d.id] >= EXPLORATION_CYCLE_SECONDS) {
         sectState.discipleProgress[d.id] -= EXPLORATION_CYCLE_SECONDS;
         const maxDistance = d.stamina * 10;
-        const seasonBonus = speechState.seasonIndex === 0 ? 0.05 : speechState.seasonIndex === 3 ? -0.05 : 0;
+        const seasonBonus = speechState.seasonIndex === 0 ? 0.05 : speechState.seasonIndex === 4 ? -0.05 : 0;
         const eligible = LOCATION_DEFS.filter(l => !discoveredLocations.includes(l.name) && l.reqDistance <= maxDistance);
         shuffleArray(eligible);
         let found = null;

@@ -22,11 +22,12 @@ The phrase builder has been replaced with a simpler construct mechanic. The **Co
 
 | Invocation           | Recipe (to Discover)      | Cost to Use                                   | Cooldown | Tags                                | Effect Summary                                        |
 | -------------------- | ------------------------- | -------------------------------------------- | -------- | ----------------------------------- | ----------------------------------------------------- |
-| **Murmur**           | —                         | 25 Insight                                    | 1s       | Single-cast, Generator             | +1 Sound, +1 Voice XP                                 |
-| **Echo of Mind**     | Sound + Insight           | 25 Sound + 500 Insight                        | 5s       | Single-cast, Generator, Duration   | +1 Thought over 5s *(Unlocks at Voice Lv.3 with 1500 Insight)* |
-| **Clarity Pulse**    | Thought + Insight         | 20 Thought + 50 Sound                         | 30s      | Single-cast, Buff, Duration        | +1% Insight regen/sec for 30s                         |
-| **Symbol Seed**      | Sound + Thought           | Drains 1 Thought per second                   | 30s      | Duration, Generator, Drain         | +0.1 Structure per thought drained                    |
-| **Mental Construct** | Thought + Insight + Sound | 10 Thought + 10 Structure + 1000 Insight      | 10s      | Single-cast                        | Temporarily enhances other constructs (essence gain TBD) |
+| **Murmur**           | —                         | 25 Insight                   | 1s       | Single-cast, Generator             | Generates 1 Sound *(+1 Voice XP)*                     |
+| **Echo of Mind**     | Sound + Insight           | 25 Sound + 500 Insight                   | 5s       | Single-cast, Generator, Duration   | Generates 1 Thought per second for 5s *(Unlocks at Voice Lv.3, 1500 Insight)* |
+| **Clarity Pulse**    | Thought + Insight         | 20 Thought + 50 Sound                   | 30s      | Single-cast, Buff, Duration        | Gain 1% Insight per s *(Unlocks at Mind Lv.2, 1700 Insight)* |
+| **Symbol Seed**      | Sound + Thought           | Drains 1 Thought per second                   | 30s      | Duration, Generator, Drain         | Gain 0.1 Structure per thought drained *(Unlocks at Mind Lv.3, 2000 Insight)* |
+| **Intone**           | —                         | None                                          | 30s      | Buff                               | Press repeatedly to charge; 1.2× Insight at 5 presses, 1.5× at 10, 2× at 15 for 30s *(Unlocked after Murmur ×10)* |
+| **Mental Construct** | Thought + Insight + Sound | 10 Thought + 10 Structure + 1000 Insight      | 10s      | Single-cast                        | Gain 0.1 elemental essence based on season *(Unlocks at Voice Lv.5 & Mind Lv.5, 2300 Insight)* |
 | **The Calling**     | —                         | 200 Sound                                    | 5m       | Action                               | Attempts to recruit a Disciple based on Calling potency |
 
 *Echo of Mind becomes available once you reach Voice Level 3 and have 1500 Insight saved up.*

@@ -26,13 +26,14 @@ export const DAY_LENGTH_SECONDS = 600;
 export const SEASON_LENGTH_DAYS = 28;
 const seasons = [
   { name: 'Verdantia', multiplier: 1.20 },
-  { name: 'Solara', multiplier: 1.35 },
+  { name: 'Solaria', multiplier: 1.35 },
+  { name: 'Aurora', multiplier: 1.10 },
   { name: 'Aurelia', multiplier: 0.90 },
   { name: 'Bruma', multiplier: 0.70 }
 ];
-const seasonIcons = ['\uD83C\uDF31', '\u2600\uFE0F', '\uD83C\uDF42', '\u2744\uFE0F'];
-const seasonClasses = ['spring','summer','autumn','winter'];
-const seasonTemps = [15, 25, 10, -5];
+const seasonIcons = ['\uD83C\uDF31', '\u2600\uFE0F', '\u2728', '\uD83C\uDF42', '\u2744\uFE0F'];
+const seasonClasses = ['spring','summer','aurora','autumn','winter'];
+const seasonTemps = [15, 25, 20, 10, -5];
 
 
 export const speechState = {
@@ -44,7 +45,12 @@ export const speechState = {
   resources: {
     sound: { current: 0, max: 200, regen: 0, unlocked: true },
     thought: { current: 0, max: 10, regen: 0, unlocked: false },
-    structure: { current: 0, max: 10, regen: 0, unlocked: false }
+    structure: { current: 0, max: 10, regen: 0, unlocked: false },
+    woodEssence: { current: 0, max: 10, regen: 0, unlocked: false },
+    fireEssence: { current: 0, max: 10, regen: 0, unlocked: false },
+    earthEssence: { current: 0, max: 10, regen: 0, unlocked: false },
+    summerEssence: { current: 0, max: 10, regen: 0, unlocked: false },
+    waterEssence: { current: 0, max: 10, regen: 0, unlocked: false }
   },
   gains: {
     body: 0,
@@ -146,7 +152,9 @@ export const recipes = [
     output: {},
     xp: { mind: 1 },
     tags: ['single-cast', 'buff', 'duration'],
-    unlocked: true,
+    unlocked: false,
+    requirements: { mindLevel: 2, insight: 1700 },
+    castCost: { thought: 20, sound: 50 },
     duration: 30,
     cooldown: 30,
     potency: 1
@@ -157,7 +165,8 @@ export const recipes = [
     output: { structure: 1 },
     xp: {},
     tags: ['duration', 'generator', 'drain'],
-    unlocked: true,
+    unlocked: false,
+    requirements: { mindLevel: 3, insight: 2000 },
     duration: 30,
     cooldown: 30,
     potency: 1
@@ -168,8 +177,8 @@ export const recipes = [
     output: {},
     xp: { invocation: 1 },
     tags: ['single-cast'],
-    unlocked: true,
-    requirements: { voiceLevel: 5, insight: 2300 },
+    unlocked: false,
+    requirements: { voiceLevel: 5, mindLevel: 5, insight: 2300 },
     castCost: { thought: 10, structure: 10, insight: 1000 },
     cooldown: 10,
     potency: 1
@@ -207,7 +216,12 @@ const resourceIcons = {
   thought: 'activity',
   structure: 'box',
   body: 'heart',
-  will: 'flame'
+  will: 'flame',
+  woodEssence: 'leaf',
+  fireEssence: 'flame',
+  earthEssence: 'mountain',
+  summerEssence: 'sun',
+  waterEssence: 'droplet'
 };
 
 const upgradeDescriptions = {
@@ -315,7 +329,7 @@ const constructEffects = {
   'Echo of Mind'(dt, pot = speechState.constructPotency['Echo of Mind'] || 1) {
     const ins = speechState.resources.insight;
     const th = speechState.resources.thought;
-    const amount = dt * 0.2 * pot; // slower rate
+    const amount = dt * pot;
     if (ins.current >= amount) {
       ins.current -= amount;
       th.current = Math.min(th.max, th.current + amount);
@@ -323,37 +337,37 @@ const constructEffects = {
     }
   },
   'Clarity Pulse'(dt, pot = speechState.constructPotency['Clarity Pulse'] || 1) {
-    const bonus = 0.01 * dt * pot; // regen scaled by potency
+    const bonus = 0.01 * dt * pot;
     speechState.resources.insight.current = Math.min(
       speechState.resources.insight.max,
       speechState.resources.insight.current + bonus
     );
-    speechState.resources.sound.current = Math.min(
-      speechState.resources.sound.max,
-      speechState.resources.sound.current + bonus
-    );
   },
   'Symbol Seed'(dt, pot = speechState.constructPotency['Symbol Seed'] || 1) {
     const th = speechState.resources.thought;
-    const snd = speechState.resources.sound;
     const str = speechState.resources.structure;
-    const drain = dt * 0.1;
-    if (th.current >= drain && snd.current >= drain) {
+    const drain = dt * 1;
+    if (th.current >= drain) {
       th.current -= drain;
-      snd.current -= drain;
-      str.current = Math.min(str.max, str.current + drain * pot);
+      str.current = Math.min(str.max, str.current + drain * 0.1 * pot);
       str.unlocked = true;
       awardConstructXp({ mind: dt });
     }
   },
   'Mental Construct'(dt, pot = 1) {
-    // doubles effects of other constructs while active
-    speechState.activeConstructs
-      .filter(c => c !== 'Mental Construct')
-      .forEach(c => {
-        const effect = constructEffects[c];
-        if (effect) effect(dt, pot);
-      });
+    const gain = 0.1 * pot;
+    const season = seasons[speechState.seasonIndex].name;
+    let key = '';
+    if (season === 'Verdantia') key = 'woodEssence';
+    else if (season === 'Solaria') key = 'fireEssence';
+    else if (season === 'Aurora') key = 'earthEssence';
+    else if (season === 'Aurelia') key = 'summerEssence';
+    else key = 'waterEssence';
+    const res = speechState.resources[key];
+    if (res) {
+      res.current = Math.min(res.max, res.current + gain);
+      res.unlocked = true;
+    }
   },
   Intone(dt, pot = 1) {
     if (speechState.intoneTimer > 0) return;
@@ -543,6 +557,9 @@ function renderConstructRequirements() {
   if (recipe.requirements.voiceLevel) {
     reqs.push(`Voice Lv.${recipe.requirements.voiceLevel}`);
   }
+  if (recipe.requirements.mindLevel) {
+    reqs.push(`Mind Lv.${recipe.requirements.mindLevel}`);
+  }
   if (recipe.requirements.insight) {
     reqs.push(`${recipe.requirements.insight} Insight`);
   }
@@ -578,6 +595,10 @@ function performConstruct() {
   if (recipe.requirements) {
     if (recipe.requirements.voiceLevel && speechState.skills.voice.level < recipe.requirements.voiceLevel) {
       addLog(`Requires Voice Lv.${recipe.requirements.voiceLevel}`, 'error');
+      return;
+    }
+    if (recipe.requirements.mindLevel && speechState.skills.mind.level < recipe.requirements.mindLevel) {
+      addLog(`Requires Mind Lv.${recipe.requirements.mindLevel}`, 'error');
       return;
     }
     if (recipe.requirements.insight && speechState.resources.insight.current < recipe.requirements.insight) {
@@ -857,8 +878,13 @@ export function castConstruct(name, el, powerMult = 1, caster = 'player') {
   const def = recipes.find(r => r.name === name);
   if (!def) return;
   const voiceSkill = speechState.skills.voice;
+  const mindSkill = speechState.skills.mind;
   if (def.requirements && def.requirements.voiceLevel && voiceSkill.level < def.requirements.voiceLevel) {
     addLog(`Requires Voice Lv.${def.requirements.voiceLevel}`, 'error');
+    return;
+  }
+  if (def.requirements && def.requirements.mindLevel && mindSkill.level < def.requirements.mindLevel) {
+    addLog(`Requires Mind Lv.${def.requirements.mindLevel}`, 'error');
     return;
   }
   if (def.requirements && def.requirements.insight && speechState.resources.insight.current < def.requirements.insight) {
@@ -1402,6 +1428,55 @@ export function tickSpeech(delta) {
       addConstruct('Echo of Mind');
     } else if (!speechState.savedConstructs.includes('Echo of Mind')) {
       speechState.savedConstructs.push('Echo of Mind');
+    }
+  }
+  const pulse = recipes.find(r => r.name === 'Clarity Pulse');
+  if (
+    pulse &&
+    !pulse.unlocked &&
+    speechState.skills.mind.level >= 2 &&
+    ins.current >= 1700
+  ) {
+    pulse.unlocked = true;
+    delete pulse.requirements;
+    addLog('Clarity Pulse construct unlocked!', 'info');
+    if (hasUI) {
+      addConstruct('Clarity Pulse');
+    } else if (!speechState.savedConstructs.includes('Clarity Pulse')) {
+      speechState.savedConstructs.push('Clarity Pulse');
+    }
+  }
+  const seed = recipes.find(r => r.name === 'Symbol Seed');
+  if (
+    seed &&
+    !seed.unlocked &&
+    speechState.skills.mind.level >= 3 &&
+    ins.current >= 2000
+  ) {
+    seed.unlocked = true;
+    delete seed.requirements;
+    addLog('Symbol Seed construct unlocked!', 'info');
+    if (hasUI) {
+      addConstruct('Symbol Seed');
+    } else if (!speechState.savedConstructs.includes('Symbol Seed')) {
+      speechState.savedConstructs.push('Symbol Seed');
+    }
+  }
+  const mental = recipes.find(r => r.name === 'Mental Construct');
+  if (
+    mental &&
+    !mental.unlocked &&
+    speechState.skills.voice.level >= 5 &&
+    speechState.skills.mind.level >= 5 &&
+    ins.current >= 2300
+  ) {
+    mental.unlocked = true;
+    delete mental.requirements;
+    addLog('Mental Construct unlocked!', 'info');
+    if (hasUI) {
+      addConstruct('Mental Construct');
+    } else if (!speechState.savedConstructs.includes('Mental Construct')) {
+      speechState.savedConstructs.push('Mental Construct');
     }
   }
   const call = recipes.find(r => r.name === 'The Calling');
