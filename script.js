@@ -37,6 +37,10 @@ import { createOverlay } from './ui/overlay.js';
 import { showRestartScreen } from './ui/restartOverlay.js';
 import { calculateKillXp, XP_EFFICIENCY } from './utils/xp.js';
 import {
+  calculateMaxStamina,
+  calculateStaminaRegen
+} from './utils/stamina.js';
+import {
   rollNewCardUpgrades,
   applyCardUpgrade,
   renderCardUpgrades,
@@ -168,7 +172,8 @@ export const systems = {
   buildingUnlocked: false,
   researchUnlocked: false,
   chantingHallUnlocked: false,
-  voiceOfThePeople: false
+  voiceOfThePeople: false,
+  explorationUnlocked: false
 };
 
 export const sectState = {
@@ -178,6 +183,7 @@ export const sectState = {
   taskTimers: { gatherFruits: 0 },
   discipleProgress: {}, // map disciple id -> progress seconds in current cycle
   discipleSkills: {}, // map disciple id -> skill levels per task
+  discipleConstructXp: {}, // map disciple id -> construct XP
   chantAssignments: {}, // map disciple id -> assigned construct
   buildings: { pineShack: 0, researchTable: 0, chantingHall: 0 },
   researchPoints: 0,
@@ -192,6 +198,7 @@ const FRUIT_CYCLE_SECONDS = 200;
 const FRUIT_CYCLE_AMOUNT = 10;
 const PINE_LOG_CYCLE_SECONDS = 215;
 const PINE_LOG_CYCLE_AMOUNT = 10;
+const DAILY_FRUIT_CONSUMPTION = 20; // fruits eaten by each disciple per day
 
 // XP earned for disciple tasks
 const FRUIT_XP_PER_CYCLE = 25;
@@ -199,6 +206,15 @@ const LOG_XP_PER_CYCLE = 25;
 const BUILD_XP_RATE = 0.1; // per second
 const RESEARCH_XP_PER_CYCLE = 20;
 const CHANT_XP_PER_CYCLE = 0.5;
+const EXPLORATION_CYCLE_SECONDS = 150;
+const STAMINA_DRAIN_PER_EXPLORATION = 1;
+
+const LOCATION_DEFS = [
+  { name: 'Firewood Grove', reqDistance: 100, baseChance: 0.2, x: '30%', y: '70%' },
+  { name: 'Crystal Cavern', reqDistance: 300, baseChance: 0.15, x: '70%', y: '40%' },
+  { name: 'Esoteric Dungeon', reqDistance: 100, baseChance: 1.0, x: '50%', y: '20%' },
+  { name: 'Ancient Ruins', reqDistance: 800, baseChance: 0.05, x: '80%', y: '10%' }
+];
 
 // XP progression for disciple tasks
 function taskXpRequired(level) {
@@ -226,9 +242,39 @@ function ensureDiscipleSkills(id) {
       'Log Pine': 0,
       Building: 0,
       Research: 0,
-      Chant: 0
+      Chant: 0,
+      Exploration: 0,
+      'Delve Dungeon': 0
     };
   }
+}
+
+function ensureDiscipleConstructXp(id) {
+  if (!sectState.discipleConstructXp[id]) {
+    sectState.discipleConstructXp[id] = {};
+  }
+}
+
+function calculateDailyFruitGain() {
+  let total = 0;
+  speechState.disciples.forEach(d => {
+    if (sectState.discipleTasks[d.id] === 'Gather Fruit') {
+      ensureDiscipleSkills(d.id);
+      ensureDiscipleConstructXp(d.id);
+      const xp = sectState.discipleSkills[d.id]['Gather Fruit'];
+      const lvl = getTaskSkillProgress(xp).level;
+      const yieldMult = 1 + 0.05 * lvl;
+      const gatherAmt = Math.min(
+        FRUIT_CYCLE_AMOUNT * yieldMult,
+        d.inventorySlots
+      );
+      const cycleSeconds =
+        FRUIT_CYCLE_SECONDS * (gatherAmt / (FRUIT_CYCLE_AMOUNT * yieldMult));
+      const perSecond = gatherAmt / cycleSeconds;
+      total += perSecond * DAY_LENGTH_SECONDS;
+    }
+  });
+  return total;
 }
 
 
@@ -522,6 +568,7 @@ let colonyInfoTabButton;
 let colonyResourcesTabButton;
 let colonyBuildTabButton;
 let colonyResearchTabButton;
+let locationsPanelBtn;
 let sectDisciplesContainer;
 let selectedDiscipleId = null;
 let discipleInfoView = 'status';
@@ -550,6 +597,16 @@ function addDiscoveredLocation(name) {
     const row = document.createElement('div');
     row.textContent = name;
     locationListContainer.appendChild(row);
+  }
+  const map = document.getElementById('colonyMap');
+  const def = LOCATION_DEFS.find(l => l.name === name);
+  if (map && def) {
+    const icon = document.createElement('div');
+    icon.className = 'location-icon';
+    icon.textContent = '📍';
+    icon.style.left = def.x;
+    icon.style.top = def.y;
+    map.appendChild(icon);
   }
   if (locationTabButton && locationTabButton.style.display === 'none') {
     locationTabButton.style.display = '';
@@ -766,6 +823,7 @@ function initTabs() {
   colonyResourcesTabButton = document.getElementById('colonyResourcesTabBtn');
   colonyBuildTabButton = document.getElementById('colonyBuildTabBtn');
   colonyResearchTabButton = document.getElementById('colonyResearchTabBtn');
+  locationsPanelBtn = document.getElementById('locationsPanelBtn');
   statsOverviewSubTabButton = document.querySelector('.statsOverviewSubTabButton');
   statsEconomySubTabButton = document.querySelector('.statsEconomySubTabButton');
   statsOverviewContainer = document.getElementById('statsOverviewContainer');
@@ -803,6 +861,11 @@ function initTabs() {
 
   if (deckViewBtn) deckViewBtn.addEventListener('click', showDeckListView);
   if (jokerViewBtn) jokerViewBtn.addEventListener('click', showJokerView);
+  if (locationsPanelBtn)
+    locationsPanelBtn.addEventListener('click', () => {
+      showTab(locationTab);
+      setActiveTabButton(locationTabButton);
+    });
   if (jobsViewBtn) jobsViewBtn.addEventListener('click', () => {
     showJobsView();
     renderJobAssignments(deckJobsContainer, pDeck);
@@ -1041,7 +1104,17 @@ function tickSect(delta) {
   const dt = delta / 1000;
   speechState.disciples.forEach(d => {
     ensureDiscipleSkills(d.id);
+    ensureDiscipleConstructXp(d.id);
+    const maxStamina = calculateMaxStamina(d.endurance);
+    const regenRate = calculateStaminaRegen(d.endurance);
+    d.stamina = Math.min(maxStamina, Math.max(0, d.stamina));
     const task = sectState.discipleTasks[d.id];
+    if (task === 'Exploration') {
+      // drain stamina once per completed cycle
+      if (!sectState.discipleProgress[d.id]) sectState.discipleProgress[d.id] = 0;
+    } else {
+      d.stamina = Math.min(maxStamina, d.stamina + regenRate * dt);
+    }
     if (task === 'Gather Fruit' || task === 'Log Pine') {
       if (!sectState.discipleProgress[d.id]) sectState.discipleProgress[d.id] = 0;
       sectState.discipleProgress[d.id] += dt;
@@ -1122,12 +1195,34 @@ function tickSect(delta) {
           const xp = sectState.discipleSkills[d.id]?.['Chant'] || 0;
           const lvl = getTaskSkillProgress(xp).level;
           const pot = 0.3 * (1 + 0.02 * lvl) * attributes.Intelligence.constructPotencyMultiplier;
-          castConstruct(target, null, pot);
+          castConstruct(target, null, pot, d.id);
           sectState.discipleSkills[d.id]['Chant'] = xp + CHANT_XP_PER_CYCLE;
         }
       }
       const spend = Math.min(speechState.resources.insight.current, dt);
       speechState.resources.insight.current -= spend;
+    } else if (task === 'Exploration') {
+      if (!sectState.discipleProgress[d.id]) sectState.discipleProgress[d.id] = 0;
+      sectState.discipleProgress[d.id] += dt;
+      if (sectState.discipleProgress[d.id] >= EXPLORATION_CYCLE_SECONDS) {
+        sectState.discipleProgress[d.id] -= EXPLORATION_CYCLE_SECONDS;
+        const maxDistance = d.stamina * 10;
+        const seasonBonus = speechState.seasonIndex === 0 ? 0.05 : speechState.seasonIndex === 3 ? -0.05 : 0;
+        const eligible = LOCATION_DEFS.filter(l => !discoveredLocations.includes(l.name) && l.reqDistance <= maxDistance);
+        shuffleArray(eligible);
+        let found = null;
+        eligible.forEach(loc => {
+          if (found) return;
+          let chance = loc.baseChance + (d.endurance - 1) * 0.01 + seasonBonus;
+          if (Math.random() < chance) {
+            addDiscoveredLocation(loc.name);
+            found = loc.name;
+          }
+        });
+        if (found) addLog(`Discovered ${found}!`, 'good');
+        else addLog('No discovery this trip.', 'info');
+        d.stamina = Math.max(0, d.stamina - STAMINA_DRAIN_PER_EXPLORATION);
+      }
     } else {
       sectState.discipleProgress[d.id] = 0;
     }
@@ -1197,6 +1292,12 @@ function updateTaskProgressDisplay() {
         label.textContent = `${buildData.name} ${builderCount > 0 ? buildTime.toFixed(1) : '∞'}s`;
       else if (label) label.textContent = '';
       if (rateEl) rateEl.textContent = '';
+    } else if (taskName === 'Exploration') {
+      const progress = sectState.discipleProgress[d.id] || 0;
+      const pct = (progress / EXPLORATION_CYCLE_SECONDS) * 100;
+      if (fill) fill.style.width = `${pct}%`;
+      if (label) label.textContent = 'Exploring';
+      if (rateEl) rateEl.textContent = '';
     } else {
       if (fill) fill.style.width = '0%';
       if (label) label.textContent = '';
@@ -1217,7 +1318,7 @@ function updateSectDisplay() {
     const remaining = Math.max(0, DAY_LENGTH_SECONDS - speechState.seasonTimer);
     const mm = String(Math.floor(remaining / 60)).padStart(2, '0');
     const ss = String(Math.floor(remaining % 60)).padStart(2, '0');
-    sectUpkeepDisplay.textContent = `Upkeep: 1 fruit/disciple per day (next in ${mm}:${ss})`;
+    sectUpkeepDisplay.textContent = `Upkeep: ${DAILY_FRUIT_CONSUMPTION} fruits/disciple per day (next in ${mm}:${ss})`;
   }
 
   const orbs = document.getElementById('sectOrbs');
@@ -1400,6 +1501,8 @@ function renderColonyInfo() {
   const tasks = ['Idle', 'Gather Fruit', 'Log Pine', 'Building'];
   if (sectState.buildings.researchTable > 0) tasks.push('Research');
   if (sectState.buildings.chantingHall > 0) tasks.push('Chant');
+  if (systems.explorationUnlocked) tasks.push('Exploration');
+  if (discoveredLocations.includes('Esoteric Dungeon')) tasks.push('Delve Dungeon');
   tasks.forEach(t => {
     const option = document.createElement('div');
     option.className = 'disciple-skill-option';
@@ -1463,6 +1566,13 @@ function renderColonyResources() {
   fruits.textContent = `Fruits: ${sectState.fruits}`;
   const logs = document.createElement('div');
   logs.textContent = `Pine Logs: ${sectState.pineLogs}`;
+  const dailyGain = calculateDailyFruitGain();
+  const dailyLoss = speechState.disciples.length * DAILY_FRUIT_CONSUMPTION;
+  const dailyNet = dailyGain - dailyLoss;
+  const foodRate = document.createElement('div');
+  const sign = dailyNet >= 0 ? '+' : '';
+  foodRate.textContent =
+    `Fruits/day: +${dailyGain.toFixed(1)} / -${dailyLoss} = ${sign}${dailyNet.toFixed(1)}`;
   const sound = document.createElement('div');
   sound.textContent = 'Sound: 0';
   const insight = document.createElement('div');
@@ -1471,6 +1581,7 @@ function renderColonyResources() {
   research.textContent = `Research Points: ${sectState.researchPoints}`;
   colonyResourcesPanel.appendChild(fruits);
   colonyResourcesPanel.appendChild(logs);
+  colonyResourcesPanel.appendChild(foodRate);
   colonyResourcesPanel.appendChild(sound);
   colonyResourcesPanel.appendChild(insight);
   colonyResourcesPanel.appendChild(research);
@@ -1506,6 +1617,7 @@ function tickBuilding(dt) {
     const t = sectState.discipleTasks[d.id];
     if (!t || t === 'Idle' || t === 'Building') {
       ensureDiscipleSkills(d.id);
+      ensureDiscipleConstructXp(d.id);
       const xp = sectState.discipleSkills[d.id]['Building'];
       const lvl = getTaskSkillProgress(xp).level;
       speed += 1 + 0.02 * lvl;
@@ -1617,6 +1729,20 @@ function renderColonyResearchPanel() {
     });
     colonyResearchPanel.appendChild(btn);
   }
+  if (!systems.explorationUnlocked) {
+    const btn = document.createElement('button');
+    btn.textContent = 'Foreseers Research (10 RP)';
+    btn.disabled = sectState.researchPoints < 10;
+    btn.addEventListener('click', () => {
+      if (sectState.researchPoints >= 10) {
+        sectState.researchPoints -= 10;
+        systems.explorationUnlocked = true;
+        addLog('Research complete: Foreseers', 'good');
+        renderColonyResearchPanel();
+      }
+    });
+    colonyResearchPanel.appendChild(btn);
+  }
 }
 
 function renderDiscipleList() {
@@ -1687,7 +1813,12 @@ function buildDiscipleStatusView(d) {
   const body = document.createElement('div');
   const stats = [
     { label: 'Health', color: '#a33', value: d.health, max: 10 },
-    { label: 'Stamina', color: '#cc3', value: d.stamina, max: 10 },
+    {
+      label: 'Stamina',
+      color: '#cc3',
+      value: d.stamina,
+      max: calculateMaxStamina(d.endurance)
+    },
     { label: 'Hunger', color: '#cc3', value: d.hunger, max: 20 }
   ];
   stats.forEach(s => {
@@ -1777,9 +1908,29 @@ function buildDiscipleLifeStatsView(d) {
   return body;
 }
 
-function buildDiscipleCastingStatsView() {
+function buildDiscipleCastingStatsView(d) {
   const body = document.createElement('div');
-  body.textContent = 'Casting stats not implemented.';
+  ensureDiscipleConstructXp(d.id);
+  const xpMap = sectState.discipleConstructXp[d.id];
+  Object.keys(speechState.constructPotency).forEach(name => {
+    const xp = xpMap[name] || 0;
+    const prog = getTaskSkillProgress(xp);
+    const mult = Math.pow(1.05, prog.level);
+    const row = document.createElement('div');
+    row.className = 'disciple-skill-option';
+    const label = document.createElement('div');
+    label.className = 'disciple-skill-label';
+    label.textContent = `${name} Lv ${prog.level} (×${mult.toFixed(2)})`;
+    const bar = document.createElement('div');
+    bar.className = 'disciple-skill-progress';
+    const fill = document.createElement('div');
+    fill.className = 'disciple-skill-progress-fill';
+    fill.style.width = `${Math.floor(prog.progress * 100)}%`;
+    bar.appendChild(fill);
+    row.appendChild(label);
+    row.appendChild(bar);
+    body.appendChild(row);
+  });
   return body;
 }
 
@@ -1951,8 +2102,8 @@ document.addEventListener("DOMContentLoaded", () => {
   renderConstructLexicon();
   document.addEventListener('day-passed', () => {
     speechState.disciples.forEach(d => {
-      if (sectState.fruits > 0) {
-        sectState.fruits--;
+      if (sectState.fruits >= DAILY_FRUIT_CONSUMPTION) {
+        sectState.fruits -= DAILY_FRUIT_CONSUMPTION;
         d.hunger = 20;
       } else {
         d.hunger = Math.max(0, d.hunger - 1);

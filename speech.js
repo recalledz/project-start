@@ -32,6 +32,10 @@ const seasons = [
 ];
 const seasonIcons = ['\uD83C\uDF31', '\u2600\uFE0F', '\uD83C\uDF42', '\u2744\uFE0F'];
 const seasonClasses = ['spring','summer','autumn','winter'];
+const seasonTemps = [15, 25, 10, -5];
+
+// Tags that grant construct experience when used
+const CONSTRUCT_XP_TAGS = ['voice', 'mind', 'invocation'];
 
 export const speechState = {
   orbs: {
@@ -65,6 +69,15 @@ export const speechState = {
       unlocked: true,
       costFunc: lvl => ({ sound: 25 + lvl * 4 })
     },
+    cognitiveLattice: {
+      level: 0,
+      unlocked: true,
+      costFunc: lvl => ({
+        sound: 50 + lvl * 10,
+        thought: 10 + lvl * 2,
+        structure: 5 + lvl
+      })
+    },
     clarividence: { level: 0, baseCost: 300, unlocked: false },
     idleChatter: {
       level: 0,
@@ -74,7 +87,8 @@ export const speechState = {
   },
   skills: {
     voice: { xp: 0, level: 0 },
-    mind: { xp: 0, level: 0 }
+    mind: { xp: 0, level: 0 },
+    invocation: { xp: 0, level: 0 }
   },
   mindSlotAwarded: false,
   memorySlots: 2,
@@ -90,6 +104,7 @@ export const speechState = {
   constructUnlocked: true,
   pot: [],
   constructPotency: {},
+  playerConstructXp: {},
   disciples: [],
   murmurCasts: 0,
   intonePresses: 0,
@@ -119,8 +134,9 @@ export const recipes = [
     output: { thought: 1 },
     xp: 1,
     tags: ['voice','mind'],
-    unlocked: true,
+    unlocked: false,
     requirements: { voiceLevel: 3, insight: 1500 },
+    castCost: { sound: 25, insight: 500 },
     duration: 5,
     cooldown: 5
   },
@@ -197,6 +213,7 @@ const upgradeDescriptions = {
   },
   expandMind: 'Increase max insight by 15% each level.',
   soundExpansion: 'Raises sound capacity; Lv.2 grants an extra slot.',
+  cognitiveLattice: 'Increase caps by +50 sound, +10 thought and +5 structure.',
   idleChatter: 'Bonus regen from idle disciples.',
   capacityBoost: 'Adds one memory slot.',
   clarividence: 'Reveals hidden constructs.',
@@ -227,6 +244,16 @@ function getIntoneMultiplier() {
   if (p >= 10) return 1.5;
   if (p >= 5) return 1.2;
   return 1.0;
+}
+
+
+
+function getConstructLevel(caster = 'player', name) {
+  const xp =
+    caster === 'player'
+      ? speechState.playerConstructXp[name] || 0
+      : sectState.discipleConstructXp[caster]?.[name] || 0;
+  return getSkillProgress(xp).level;
 }
 
 function awardXp(amount, tags) {
@@ -262,8 +289,7 @@ function awardXp(amount, tags) {
 // Per-tick effects for active constructs. These are simplified
 // implementations to demonstrate the new constructs in action.
 const constructEffects = {
-  Murmur(dt) {
-    const pot = speechState.constructPotency['Murmur'] || 1;
+  Murmur(dt, pot = speechState.constructPotency['Murmur'] || 1) {
     const amount = dt * pot; // 1 insight -> sound per second scaled
     const ins = speechState.resources.insight;
     const snd = speechState.resources.sound;
@@ -272,10 +298,9 @@ const constructEffects = {
       snd.current = Math.min(snd.max, snd.current + amount);
     }
   },
-  'Echo of Mind'(dt) {
+  'Echo of Mind'(dt, pot = speechState.constructPotency['Echo of Mind'] || 1) {
     const ins = speechState.resources.insight;
     const th = speechState.resources.thought;
-    const pot = speechState.constructPotency['Echo of Mind'] || 1;
     const amount = dt * 0.2 * pot; // slower rate
     if (ins.current >= amount) {
       ins.current -= amount;
@@ -283,8 +308,7 @@ const constructEffects = {
       th.unlocked = true;
     }
   },
-  'Clarity Pulse'(dt) {
-    const pot = speechState.constructPotency['Clarity Pulse'] || 1;
+  'Clarity Pulse'(dt, pot = speechState.constructPotency['Clarity Pulse'] || 1) {
     const bonus = 0.01 * dt * pot; // regen scaled by potency
     speechState.resources.insight.current = Math.min(
       speechState.resources.insight.max,
@@ -295,11 +319,10 @@ const constructEffects = {
       speechState.resources.sound.current + bonus
     );
   },
-  'Symbol Seed'(dt) {
+  'Symbol Seed'(dt, pot = speechState.constructPotency['Symbol Seed'] || 1) {
     const th = speechState.resources.thought;
     const snd = speechState.resources.sound;
     const str = speechState.resources.structure;
-    const pot = speechState.constructPotency['Symbol Seed'] || 1;
     const drain = dt * 0.1;
     if (th.current >= drain && snd.current >= drain) {
       th.current -= drain;
@@ -308,16 +331,16 @@ const constructEffects = {
       str.unlocked = true;
     }
   },
-  'Mental Construct'(dt) {
+  'Mental Construct'(dt, pot = 1) {
     // doubles effects of other constructs while active
     speechState.activeConstructs
       .filter(c => c !== 'Mental Construct')
       .forEach(c => {
         const effect = constructEffects[c];
-        if (effect) effect(dt);
+        if (effect) effect(dt, pot);
       });
   },
-  Intone() {
+  Intone(dt, pot = 1) {
     if (speechState.intoneTimer > 0) return;
     if (speechState.intonePresses < 15) {
       speechState.intonePresses += 1;
@@ -327,8 +350,8 @@ const constructEffects = {
       speechState.intoneTimer = 30;
     }
   },
-  'The Calling'() {
-    const callPower = speechState.constructPotency['The Calling'] || 1;
+  'The Calling'(dt, pot = speechState.constructPotency['The Calling'] || 1) {
+    const callPower = pot;
     const targetIdx = speechState.disciples.length + 1;
     const reqPower = Math.pow(1.8, targetIdx - 1);
     const chance = Math.max(0.05, Math.min(1, callPower / reqPower));
@@ -349,6 +372,7 @@ const constructEffects = {
         inventorySlots: 10,
         inventory: {}
       });
+      sectState.discipleConstructXp[targetIdx] = {};
       addLog('A new Disciple has answered your call!', 'info');
       if (lastConstructTarget) showConstructCloud('+1', lastConstructTarget);
       document.dispatchEvent(
@@ -556,7 +580,8 @@ function performConstruct() {
     const r = speechState.resources[res];
     if (r) r.current = Math.min(r.max, r.current + amt);
   }
-  awardXp(recipe.xp, recipe.tags || ['voice']);
+  const xpTags = (recipe.tags || []).filter(t => CONSTRUCT_XP_TAGS.includes(t));
+  xpTags.forEach(tag => awardXp(recipe.xp, [tag]));
   addConstruct(recipe.name);
   renderResourcesUI();
   renderXpBar();
@@ -575,8 +600,10 @@ function addConstruct(name) {
       speechState.activeConstructs.push(name);
     }
   }
-  renderConstructCards();
-  renderHotbar();
+  if (panel && container) {
+    renderConstructCards();
+    renderHotbar();
+  }
 }
 
 function renderConstructCards() {
@@ -755,7 +782,8 @@ export function createConstructInfo(name) {
   }
   const cost = document.createElement('div');
   cost.className = 'construct-cost';
-  cost.textContent = `Cost: ${Object.entries(recipe.input)
+  const cc = recipe.castCost || recipe.input;
+  cost.textContent = `Cost: ${Object.entries(cc)
     .map(([k, v]) => `${v} ${k}`)
     .join(', ')}`;
   info.appendChild(cost);
@@ -810,7 +838,7 @@ function toggleConstructActive(name) {
   renderHotbar();
 }
 
-export function castConstruct(name, el, powerMult = 1) {
+export function castConstruct(name, el, powerMult = 1, caster = 'player') {
   const def = recipes.find(r => r.name === name);
   if (!def) return;
   const voiceSkill = speechState.skills.voice;
@@ -823,11 +851,12 @@ export function castConstruct(name, el, powerMult = 1) {
     return;
   }
   if (speechState.cooldowns[name] > 0) return;
-  for (const [res, amt] of Object.entries(def.input)) {
+  const cost = def.castCost || def.input;
+  for (const [res, amt] of Object.entries(cost)) {
     const r = speechState.resources[res];
     if (!r || r.current < amt) return;
   }
-  for (const [res, amt] of Object.entries(def.input)) {
+  for (const [res, amt] of Object.entries(cost)) {
     speechState.resources[res].current -= amt;
   }
   for (const [res, amt] of Object.entries(def.output)) {
@@ -843,14 +872,19 @@ export function castConstruct(name, el, powerMult = 1) {
       addConstruct('Intone');
     }
   }
-  awardXp(def.xp || 0, def.tags || ['voice']);
+  const xp = def.xp || 0;
+  const xpTags = (def.tags || []).filter(t => CONSTRUCT_XP_TAGS.includes(t));
+  xpTags.forEach(tag => awardXp(xp, [tag]));
   lastConstructTarget = el;
   showConstructCloud(name, el);
+  const basePot = speechState.constructPotency[name] || 1;
+  const levelPot = Math.pow(1.05, getConstructLevel(caster, name));
+  const finalMult = powerMult * basePot * levelPot;
   if (def.duration) {
-    speechState.activeBuffs[name] = { time: def.duration, mult: powerMult };
+    speechState.activeBuffs[name] = { time: def.duration, mult: finalMult };
   } else {
     const effect = constructEffects[name];
-    if (effect) effect(1 * powerMult);
+    if (effect) effect(1, finalMult);
   }
   lastConstructTarget = null;
   if (def.cooldown) {
@@ -945,10 +979,13 @@ function renderSeasonBanner() {
   if (!banner) return;
   const idx = speechState.seasonIndex;
   const season = seasons[idx];
-  banner.textContent = season.name;
+  const day = speechState.seasonDay + 1;
+  const daysLeft = SEASON_LENGTH_DAYS - day;
+  const temp = seasonTemps[idx];
+  banner.textContent = `${season.name} Day ${day} (${daysLeft}d) ${temp}°C`;
   banner.className = `season-banner ${seasonClasses[idx]}`;
   if (speechState.weather) {
-    banner.innerHTML = `${season.name}<span class="weather-icon">${speechState.weather.icon}</span>`;
+    banner.innerHTML = `${season.name} Day ${day} (${daysLeft}d) ${temp}°C<span class="weather-icon">${speechState.weather.icon}</span>`;
   }
 }
 
@@ -1081,6 +1118,10 @@ function purchaseUpgrade(name) {
     if (up.level === 2) {
       speechState.memorySlots += 1;
     }
+  } else if (name === 'cognitiveLattice') {
+    speechState.resources.sound.max += 50;
+    speechState.resources.thought.max += 10;
+    speechState.resources.structure.max += 5;
   }
   renderUpgrades();
   renderGains();
@@ -1098,7 +1139,7 @@ export function renderUpgrades() {
   const coreGroup = document.createElement('div');
   coreGroup.className = 'upgrade-group';
   panelUp.appendChild(coreGroup);
-  ['cohere','expandMind','soundExpansion','idleChatter'].forEach(name => {
+  ['cohere','expandMind','soundExpansion','cognitiveLattice','idleChatter'].forEach(name => {
     const btn = document.createElement('button');
     btn.dataset.upgrade = name;
     const cost = getUpgradeCost(name);
@@ -1193,7 +1234,7 @@ function tickActiveConstructs(dt) {
   for (const name of Object.keys(speechState.activeBuffs)) {
     const data = speechState.activeBuffs[name];
     const effect = constructEffects[name];
-    if (effect) effect(dt * (data.mult || 1));
+    if (effect) effect(dt, data.mult || 1);
     data.time -= dt;
     if (data.time <= 0) delete speechState.activeBuffs[name];
   }
@@ -1214,7 +1255,8 @@ function updateCooldownOverlays() {
     const ratio = def.cooldown ? 1 - remaining / def.cooldown : 1;
     const overlay = card.querySelector('.cooldown-overlay');
     if (overlay) overlay.style.setProperty('--cooldown', ratio);
-    const affordable = Object.entries(def.input || {}).every(([res, amt]) => {
+    const cost = def.castCost || def.input || {};
+    const affordable = Object.entries(cost).every(([res, amt]) => {
       const r = speechState.resources[res];
       return r && r.current >= amt;
     });
@@ -1254,7 +1296,7 @@ function updateIntoneUI() {
 }
 
 export function tickSpeech(delta) {
-  if (!container) return;
+  const hasUI = !!container;
   const dt = delta / 1000;
   if (speechState.intoneTimer > 0) {
     speechState.intoneTimer = Math.max(0, speechState.intoneTimer - dt);
@@ -1331,23 +1373,45 @@ export function tickSpeech(delta) {
   // by accumulating at least 50 insight.
   if (!speechState.upgrades.clarividence.unlocked && ins.current >= 50) {
     speechState.upgrades.clarividence.unlocked = true;
-    renderUpgrades();
+    if (hasUI) renderUpgrades();
+  }
+  const echo = recipes.find(r => r.name === 'Echo of Mind');
+  if (
+    echo &&
+    !echo.unlocked &&
+    speechState.skills.voice.level >= 3 &&
+    ins.current >= 1500
+  ) {
+    echo.unlocked = true;
+    delete echo.requirements;
+    addLog('Echo of Mind construct unlocked!', 'info');
+    if (hasUI) {
+      addConstruct('Echo of Mind');
+    } else if (!speechState.savedConstructs.includes('Echo of Mind')) {
+      speechState.savedConstructs.push('Echo of Mind');
+    }
   }
   const call = recipes.find(r => r.name === 'The Calling');
   if (call && !call.unlocked && speechState.resources.sound.current >= 100) {
     call.unlocked = true;
     addLog('The Calling construct unlocked!', 'info');
-    addConstruct('The Calling');
+    if (hasUI) {
+      addConstruct('The Calling');
+    } else if (!speechState.savedConstructs.includes('The Calling')) {
+      speechState.savedConstructs.push('The Calling');
+    }
   }
   tickActiveConstructs(dt);
   ins.current = Math.min(ins.max, Math.max(0, ins.current));
-  updateCooldownOverlays();
-  updateIntoneUI();
-  renderOrbs();
-  renderSeasonBanner();
-  renderResources();
-  refreshCore();
-  renderXpBar();
+  if (hasUI) {
+    updateCooldownOverlays();
+    updateIntoneUI();
+    renderOrbs();
+    renderSeasonBanner();
+    renderResources();
+    refreshCore();
+    renderXpBar();
+  }
 }
 
 function showConstructCloud(text, target, color) {

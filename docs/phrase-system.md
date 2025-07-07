@@ -23,13 +23,13 @@ The phrase builder has been replaced with a simpler construct mechanic. The **Co
 | Invocation           | Recipe (to Discover)      | Cost to Use           | Cooldown | Type        | Effect Summary                                        |
 | -------------------- | ------------------------- | --------------------- | -------- | ----------- | ----------------------------------------------------- |
 | **Murmur**           | —                         | 25 Insight            | 0s       | Generator   | +1 Sound, +1 Voice XP                                 |
-| **Echo of Mind**     | Sound + Insight           | 4 Insight             | 5s       | Generator   | +1 Thought over 5s (decaying) *(Requires Voice Lv.3 and 1500 Insight to use)* |
+| **Echo of Mind**     | Sound + Insight           | 25 Sound + 500 Insight | 5s       | Generator   | +1 Thought over 5s (decaying) *(Unlocks at Voice Lv.3 with 1500 Insight)* |
 | **Clarity Pulse**    | Thought + Insight         | 2 Insight + 1 Thought | 30s      | Buff        | +1% Sound & Insight regen/sec for 30s                 |
 | **Symbol Seed**      | Sound + Thought           | 2 Sound + 2 Thought   | 10s      | Generator   | After 10s of draining, produces +1 Structure          |
 | **Mental Construct** | Thought + Insight + Sound | 30 Insight + 5 Sound  | 60s      | Buff        | Auto-cast any construct in slots for 60 seconds if possible, checking each second |
 | **The Calling**     | —                         | 200 Sound            | 5m       | Action      | Attempts to recruit a Disciple based on Calling potency |
 
-*Using **Echo of Mind** now requires accumulating 1500 Insight in addition to reaching Voice Level 3.*
+*Echo of Mind becomes available once you reach Voice Level 3 and have 1500 Insight saved up.*
 *Voice skill levels follow an exponential XP curve starting at 50 XP with a 1.2× increase per level.*
 
 ### Upgrades
