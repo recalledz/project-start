@@ -3140,10 +3140,11 @@ body.darkenshift-mode .tabsContainer button.active {
             transparent 20px
         ),
         radial-gradient(
-            circle at top center,
+            circle 150% at top center,
             var(--season-start),
             var(--season-end)
         );
+    background-blend-mode: screen;
     z-index: 0;
 }
 
