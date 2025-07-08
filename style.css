@@ -27,6 +27,8 @@ body {
     --core-accent: #7fafff;
     --core-text: #e0e0f0;
     --core-glow: rgba(127, 175, 255, 0.2);
+    --season-start: rgba(60,70,90,0.4);
+    --season-end: rgba(20,25,35,0.8);
 }
 
 body.darkenshift-mode {
@@ -910,6 +912,23 @@ body.darkenshift-mode .tabsContainer button.active {
     border-radius: 4px;
 }
 
+.cooldown-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: #333;
+    border-radius: 0 0 4px 4px;
+    overflow: hidden;
+}
+
+.cooldown-bar-fill {
+    height: 100%;
+    width: 0%;
+    background: var(--element-color, #ffd27d);
+}
+
 .intone-meter {
     display: grid;
     grid-template-columns: repeat(15, 1fr);
@@ -958,7 +977,7 @@ body.darkenshift-mode .tabsContainer button.active {
     pointer-events: none;
 }
 .construct-card.mnemonic-active {
-    box-shadow: 0 0 6px #ffd27d;
+    box-shadow: 0 0 6px var(--element-color, #ffd27d);
 }
 .mult-badge {
     margin-left: 4px;
@@ -2337,7 +2356,7 @@ body.darkenshift-mode .tabsContainer button.active {
     font-size: 0.8rem;
     min-width: 160px;
 }
-.speech-side-panel {
+.construct-side-panel {
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -2378,7 +2397,7 @@ body.darkenshift-mode .tabsContainer button.active {
 .core-level-text {
     margin-top: 4px;
 }
-.speech-level-display {
+.voice-level-display {
     text-align: center;
     font-size: 1.2rem;
     font-weight: 600;
@@ -2387,7 +2406,7 @@ body.darkenshift-mode .tabsContainer button.active {
     border-radius: 8px;
     box-shadow: 0 0 4px var(--core-glow);
 }
-.speech-level-display .speech-level-value {
+.voice-level-display .voice-level-value {
     color: #c785ff;
 }
 .core-resource-indicators {
@@ -2423,7 +2442,7 @@ body.darkenshift-mode .tabsContainer button.active {
 .resource-value.thought { color: #c785ff; }
 .resource-value.structure { color: #a97b5d; }
 
-.player-speech-panel {
+.player-construct-panel {
     display: flex;
     flex-direction: row;
     align-items: flex-start;
@@ -2446,7 +2465,7 @@ body.darkenshift-mode .tabsContainer button.active {
     gap: 6px;
     flex: 1;
 }
-.speech-main {
+.construct-main {
     display: flex;
     flex-direction: column;
     flex: 1;
@@ -2560,8 +2579,8 @@ body.darkenshift-mode .tabsContainer button.active {
     filter: drop-shadow(0 0 6px gold);
 }
 
-/* Speech system */
-.speech-panel {
+/* Construct system */
+.construct-panel {
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -2576,14 +2595,14 @@ body.darkenshift-mode .tabsContainer button.active {
     font-family: inherit;
 }
 
-.speech-top {
+.construct-top {
     display: flex;
     gap: 8px;
     width: 100%;
     margin-bottom: 30px;
 }
 
-.speech-top .orbs-section {
+.construct-top .orbs-section {
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -2591,7 +2610,7 @@ body.darkenshift-mode .tabsContainer button.active {
     gap: 6px;
 }
 
-.speech-top .xp-column {
+.construct-top .xp-column {
     flex: 0 0 25%;
     display: flex;
     flex-direction: column;
@@ -2599,7 +2618,7 @@ body.darkenshift-mode .tabsContainer button.active {
     gap: 6px;
 }
 
-.speech-xp-container {
+.voice-xp-container {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -2609,7 +2628,7 @@ body.darkenshift-mode .tabsContainer button.active {
     margin: 0 auto;
 }
 
-.speech-progress {
+.voice-progress {
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -2617,12 +2636,12 @@ body.darkenshift-mode .tabsContainer button.active {
     gap: 2px;
 }
 
-.speech-icon {
+.voice-icon {
     width: 16px;
     height: 16px;
 }
 
-.speech-xp-bar {
+.voice-xp-bar {
     position: relative;
     width: 100%;
     height: 10px;
@@ -2631,7 +2650,7 @@ body.darkenshift-mode .tabsContainer button.active {
     border-radius: 4px;
     box-shadow: 0 0 4px rgba(199, 133, 255, 0.4);
 }
-.speech-xp-fill {
+.voice-xp-fill {
     position: absolute;
     top: 0;
     left: 0;
@@ -2641,21 +2660,21 @@ body.darkenshift-mode .tabsContainer button.active {
     box-shadow: 0 0 6px #c785ff;
     transition: width 0.3s ease;
 }
-.speech-level {
+.voice-level {
     font-size: 0.8rem;
     font-weight: 600;
     white-space: nowrap;
     color: #c785ff;
 }
 
-.speech-skill-detail {
+.voice-skill-detail {
     display: none;
     font-size: 0.75rem;
     text-align: center;
     color: #c785ff;
 }
 
-.speech-xp-container.expanded .speech-skill-detail {
+.voice-xp-container.expanded .voice-skill-detail {
     display: block;
 }
 
@@ -2666,18 +2685,50 @@ body.darkenshift-mode .tabsContainer button.active {
     color: #f66;
 }
 
-.speech-orbs {
+.construct-orbs {
     display: flex;
     gap: 10px;
     transition: transform 0.3s ease-out;
+    position: relative; /* enable ambient shimmer */
 }
 
-.orb-container {
+.construct-orbs::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(120deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 50%, rgba(255,255,255,0.05) 100%);
+    background-size: 200% 200%;
+    animation: orb-shimmer 30s linear infinite;
+    pointer-events: none;
+    z-index: -1;
+}
+
+@keyframes orb-shimmer {
+    from { background-position: 0 0; }
+    to { background-position: 100% 0; }
+}
+
+.orb-wrapper {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 2px;
     padding: 4px;
+}
+
+.orb-container {
+    display: inline-block;
+    padding: 8px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.05);
+    box-shadow: 0 0 16px rgba(100,180,240,0.6),
+                inset 0 0 8px rgba(255,255,255,0.2);
+    transition: box-shadow 0.3s ease;
+}
+
+.orb-container:hover {
+    box-shadow: 0 0 24px rgba(100,180,240,0.8),
+                inset 0 0 12px rgba(255,255,255,0.3);
 }
 
 .orb-value {
@@ -2695,7 +2746,7 @@ body.darkenshift-mode .tabsContainer button.active {
     gap: 2px;
 }
 
-.speech-orb {
+.construct-orb {
     width: 36px;
     height: 36px;
     border-radius: 50%;
@@ -2705,11 +2756,11 @@ body.darkenshift-mode .tabsContainer button.active {
     color: #fff;
 }
 
-.speech-orb.full {
+.construct-orb.full {
     box-shadow: 0 0 6px currentColor, 0 0 12px currentColor;
 }
 
-.speech-orb.pulse {
+.construct-orb.pulse {
     animation: orb-pulse 0.3s ease;
 }
 
@@ -2719,7 +2770,7 @@ body.darkenshift-mode .tabsContainer button.active {
     100% { transform: scale(1); }
 }
 
-.speech-orb .orb-fill {
+.construct-orb .orb-fill {
     position: absolute;
     bottom: 0;
     left: 0;
@@ -2835,6 +2886,7 @@ body.darkenshift-mode .tabsContainer button.active {
     flex-direction: column;
     align-items: center;
     gap: 4px;
+    overflow: visible;
 }
 .construct-hotbar .construct-effect {
     font-size: 0.55rem;
@@ -2857,17 +2909,21 @@ body.darkenshift-mode .tabsContainer button.active {
     height: 90px;
     padding: 3px 6px 6px;
     border: 1px solid #555;
-    border-radius: 4px;
+    border-radius: 8px;
     font-size: 0.9rem;
     cursor: pointer;
     background: #111;
     color: #eee;
+    overflow: visible;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+    transition: transform 0.15s ease-out, box-shadow 0.15s ease-out, border-color 0.15s ease-out;
 }
-.construct-card.active {
-    box-shadow: 0 0 6px #ffd27d;
-}
-.construct-card:hover {
-    box-shadow: 0 0 6px #999;
+.construct-card.active,
+.construct-card:hover,
+.construct-card:active {
+    transform: scale(1.05);
+    border-color: var(--element-color, #ffd27d);
+    box-shadow: 0 0 6px var(--element-color, #999);
 }
 
 .construct-card.collapsed > *:not(.construct-name) {
@@ -3060,7 +3116,42 @@ body.darkenshift-mode .tabsContainer button.active {
     justify-content: center;
     align-items: center;
     align-content: center;
+    position: relative; /* allow background texture overlay */
 }
+
+
+.construct-area {
+    position: relative;
+    padding: 32px;
+    border-radius: 8px;
+    background:
+        repeating-linear-gradient(
+            60deg,
+            rgba(255,255,255,0.03),
+            rgba(255,255,255,0.03) 1px,
+            transparent 1px,
+            transparent 20px
+        ),
+        repeating-linear-gradient(
+            -60deg,
+            rgba(255,255,255,0.03),
+            rgba(255,255,255,0.03) 1px,
+            transparent 1px,
+            transparent 20px
+        ),
+        radial-gradient(
+            circle at top center,
+            var(--season-start),
+            var(--season-end)
+        );
+    z-index: 0;
+}
+
+#constructTabCardContainer {
+    backdrop-filter: blur(8px);
+    background: rgba(255, 255, 255, 0.05);
+}
+
 .construct-lexicon {
     justify-content: center;
 }
@@ -3090,13 +3181,15 @@ body.darkenshift-mode .tabsContainer button.active {
     width: 100%;
 }
 
-.card-construct-container {
+.modal-card-container {
     flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 6px;
     width: 100%;
+    backdrop-filter: blur(8px);
+    background: rgba(255, 255, 255, 0.05);
 }
 
 .slots-and-disciples {
@@ -3149,7 +3242,7 @@ body.darkenshift-mode .tabsContainer button.active {
     cursor: pointer;
 }
 
-.speech-panel.construct-mode .speech-orbs {
+.construct-panel.construct-mode .construct-orbs {
     position: absolute;
     right: 8px;
     top: 8px;
@@ -3160,6 +3253,9 @@ body.darkenshift-mode .tabsContainer button.active {
 .hotbar-construct {
     font-size: 0.75rem;
     min-height: 48px;
+}
+.construct-hotbar .construct-info {
+    display: flex;
 }
 
 .cast-button {
@@ -3196,13 +3292,13 @@ body.darkenshift-mode .tabsContainer button.active {
 }
 
 /* Speech resource panels */
-.speech-gains, .speech-upgrades, .secondary-resources {
+.construct-gains, .construct-upgrades, .secondary-resources {
     display: flex;
     flex-direction: column;
     gap: 4px;
     font-size: 0.8rem;
 }
-.speech-upgrades button {
+.construct-upgrades button {
     padding: 6px;
     border: 2px solid #b76eff;
     background: #4b0082;
@@ -3219,7 +3315,7 @@ body.darkenshift-mode .tabsContainer button.active {
     justify-content: space-between;
     gap: 4px;
 }
-.speech-upgrades button .detail {
+.construct-upgrades button .detail {
     display: none;
     flex-direction: column;
     gap: 2px;
@@ -3227,14 +3323,14 @@ body.darkenshift-mode .tabsContainer button.active {
     width: 100%;
     text-align: left;
 }
-.speech-upgrades button.expanded {
+.construct-upgrades button.expanded {
     flex-direction: column;
     align-items: flex-start;
 }
-.speech-upgrades button.expanded .detail {
+.construct-upgrades button.expanded .detail {
     display: flex;
 }
-.speech-upgrades .buy-btn {
+.construct-upgrades .buy-btn {
     align-self: flex-end;
     padding: 2px 4px;
     margin-top: 2px;
@@ -3244,42 +3340,42 @@ body.darkenshift-mode .tabsContainer button.active {
     cursor: pointer;
     font-size: 0.7em;
 }
-.speech-upgrades .buy-btn:hover {
+.construct-upgrades .buy-btn:hover {
     background: #b76eff;
     color: #220044;
 }
-.speech-upgrades .buy-btn.disabled {
+.construct-upgrades .buy-btn.disabled {
     opacity: 0.6;
     pointer-events: none;
 }
-.speech-upgrades button:hover {
+.construct-upgrades button:hover {
     box-shadow: 0 0 12px rgba(183, 110, 255, 0.8);
     color: #fff4b3;
 }
-.speech-upgrades .icon-row {
+.construct-upgrades .icon-row {
     display: flex;
     gap: 4px;
     align-items: center;
 }
-.speech-upgrades .icon-row i {
+.construct-upgrades .icon-row i {
     width: 12px;
     height: 12px;
 }
-.speech-upgrades .cost-missing {
+.construct-upgrades .cost-missing {
     color: #ff6b6b;
 }
-.speech-upgrades button.unaffordable {
+.construct-upgrades button.unaffordable {
     opacity: 0.6;
 }
-.speech-upgrades .upg-info {
+.construct-upgrades .upg-info {
     display: flex;
     gap: 4px;
     align-items: center;
 }
-.speech-upgrades .upgrade-level {
+.construct-upgrades .upgrade-level {
     opacity: 0.8;
 }
-.speech-upgrades .section-title {
+.construct-upgrades .section-title {
     margin-top: 8px;
     margin-bottom: 4px;
 }
@@ -3370,31 +3466,31 @@ body.darkenshift-mode .tabsContainer button.active {
     text-align: center;
 }
 
-.speech-orb#orbWill {
+.construct-orb#orbWill {
     background: rgba(128,0,255,0.2);
     border-color: #a060ff;
     color: #a060ff;
 }
-.speech-orb#orbWill .orb-fill {
+.construct-orb#orbWill .orb-fill {
     background: rgba(128,0,255,0.6);
 }
 
-.speech-orb#orbBody {
+.construct-orb#orbBody {
     background: rgba(255,0,0,0.2);
     border-color: #ff8888;
     color: #ff8888;
 }
-.speech-orb#orbBody .orb-fill {
+.construct-orb#orbBody .orb-fill {
     background: rgba(255,0,0,0.6);
 }
 
-.speech-orb#orbInsight {
+.construct-orb#orbInsight {
     background: rgba(127,217,255,0.2);
     border-color: #7fd9ff;
     color: #7fd9ff;
 }
 
-.speech-tab-orbs .speech-orb {
+.construct-tab-orbs .construct-orb {
     width: 48px;
     height: 48px;
 }
@@ -3506,6 +3602,7 @@ body.darkenshift-mode .tabsContainer button.active {
     flex: 1;
     width: 100%;
     position: relative;
+    min-height: 200px;
 }
 
 .colony-side {
@@ -3513,6 +3610,12 @@ body.darkenshift-mode .tabsContainer button.active {
     display: flex;
     gap: 6px;
     flex: 1;
+}
+#colonyTasksPanel {
+    border-right: 1px solid var(--core-border);
+}
+#colonyInfoPanel {
+    border-left: 1px solid var(--core-border);
 }
 .colony-panel {
     flex: 1;
@@ -3535,6 +3638,9 @@ body.darkenshift-mode .tabsContainer button.active {
 .task-entry.selected {
     background: #333;
 }
+.task-entry.idle {
+    opacity: 0.5;
+}
 .disciple-task-name {
     min-width: 80px;
 }
@@ -3547,8 +3653,8 @@ body.darkenshift-mode .tabsContainer button.active {
 .disciple-progress {
     position: relative;
     width: 120px;
-    height: 12px;
-    background: #222;
+    height: 10px;
+    background: #333;
     border: 1px solid #555;
     border-radius: 4px;
     overflow: hidden;
@@ -3559,7 +3665,7 @@ body.darkenshift-mode .tabsContainer button.active {
     left: 0;
     height: 100%;
     width: 0%;
-    background: #6b5b95;
+    background: var(--core-accent);
     transition: width 0.3s ease;
 }
 .disciple-progress-label {
@@ -3577,6 +3683,12 @@ body.darkenshift-mode .tabsContainer button.active {
     font-size: 0.7rem;
     text-align: right;
     color: #ddd;
+}
+.panel-heading {
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-align: center;
+    margin-bottom: 4px;
 }
 .sect-disciples {
     text-align: center;
@@ -3687,7 +3799,7 @@ body.darkenshift-mode .tabsContainer button.active {
 .slot-word {
     pointer-events: none;
 }
-.speech-orb#orbInsight .orb-fill {
+.construct-orb#orbInsight .orb-fill {
     background: rgba(127,217,255,0.6);
 }
 
@@ -3723,6 +3835,7 @@ body.darkenshift-mode .tabsContainer button.active {
     width: 60px;
     gap: 4px;
     margin: 6px;
+    overflow: visible;
 }
 
 .cooldown-timer {
@@ -3732,11 +3845,17 @@ body.darkenshift-mode .tabsContainer button.active {
 }
 
 .construct-info {
-    font-size: 0.55rem;
+    font-size: 0.4rem;
     text-align: center;
     display: none;
     flex-direction: column;
     gap: 2px;
+    min-height: 24px;
+}
+.construct-info .stat-line {
+    display: flex;
+    justify-content: center;
+    gap: 4px;
 }
 
 .construct-card-wrapper.expanded .construct-info {
@@ -3748,8 +3867,8 @@ body.darkenshift-mode .tabsContainer button.active {
 }
 
 .construct-info i {
-    width: 8px;
-    height: 8px;
+    width: 5px;
+    height: 5px;
 }
 
 .construct-icons {
@@ -3757,7 +3876,7 @@ body.darkenshift-mode .tabsContainer button.active {
     flex-direction: column;
     align-items: center;
     gap: 2px;
-    font-size: 0.55rem;
+    font-size: 0.4rem;
 }
 .construct-icons .icon-row {
     display: flex;
@@ -3765,8 +3884,34 @@ body.darkenshift-mode .tabsContainer button.active {
     align-items: center;
 }
 .construct-icons i {
-    width: 8px;
-    height: 8px;
+    width: 5px;
+    height: 5px;
+}
+
+.construct-icon {
+    font-size: 1rem;
+    margin-bottom: 2px;
+}
+
+.construct-stats {
+    border-top: 1px solid #555;
+    border-bottom: 1px solid #555;
+    padding: 4px;
+    margin-top: 6px;
+    font-size: 0.55rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    align-items: center;
+    min-height: 32px;
+}
+
+.construct-stats .stat-line {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    white-space: nowrap;
 }
 
 .season-banner {
@@ -3812,7 +3957,7 @@ body.darkenshift-mode .tabsContainer button.active {
     position: relative;
     width: 100%;
     height: 8px;
-    background: #222;
+    background: #333;
     border: 1px solid #555;
     border-radius: 4px;
     overflow: hidden;
@@ -3821,7 +3966,7 @@ body.darkenshift-mode .tabsContainer button.active {
     position: absolute;
     top: 0; left: 0; bottom: 0;
     width: 0%;
-    background: #6b5b95;
+    background: var(--core-accent);
     transition: width 0.3s ease;
 }
 

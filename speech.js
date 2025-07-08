@@ -35,6 +35,21 @@ const seasonIcons = ['\uD83C\uDF31', '\u2600\uFE0F', '\u2728', '\uD83C\uDF42', '
 const seasonClasses = ['spring','summer','aurora','autumn','winter'];
 const seasonTemps = [15, 25, 20, 10, -5];
 
+export const SEASON_COLORS = {
+  Verdantia: ['rgba(40,90,40,0.4)', 'rgba(20,40,20,0.8)'],
+  Solaria: ['rgba(120,50,20,0.4)', 'rgba(60,20,10,0.8)'],
+  Aurora: ['rgba(100,80,40,0.4)', 'rgba(50,40,20,0.8)'],
+  Aurelia: ['rgba(90,90,100,0.4)', 'rgba(40,40,50,0.8)'],
+  Bruma: ['rgba(40,80,100,0.4)', 'rgba(20,40,50,0.8)']
+};
+
+export function setSeasonBackdrop(season) {
+  const [start, end] = SEASON_COLORS[season];
+  const root = document.documentElement;
+  root.style.setProperty('--season-start', start);
+  root.style.setProperty('--season-end', end);
+}
+
 
 export const speechState = {
   orbs: {
@@ -269,6 +284,27 @@ export const constructEffectText = {
   'The Calling': 'Attempts to recruit a Disciple based on Calling potency'
 };
 
+export const constructColors = {
+  'Murmur': '#b0b0b0', // Metallic Grey
+  'Echo of Mind': '#8a2be2', // Violet
+  'Clarity Pulse': '#87ceeb', // Sky Blue
+  'Symbol Seed': '#8a2be2', // Violet
+  'Intone': '#87ceeb', // Sky Blue
+  'Mental Construct': '#ffbf00', // Amber
+  'Mnemonic Rhythm': '#ffd700' // Gold
+};
+
+export const constructIcons = {
+  'Murmur': 'volume-1',
+  'Echo of Mind': 'brain',
+  'Clarity Pulse': 'zap',
+  'Symbol Seed': 'leaf',
+  'Intone': 'mic',
+  'Mental Construct': 'cpu',
+  'Mnemonic Rhythm': 'music',
+  'The Calling': 'bell'
+};
+
 function xpRequired(level) {
   return Math.round(50 * Math.pow(1.2, level));
 }
@@ -326,7 +362,7 @@ function awardXp(amount, tags) {
   if (speechState.memorySlots !== prevSlots) {
     renderConstructCards();
   }
-  window.dispatchEvent(new CustomEvent('speech-xp-changed'));
+  window.dispatchEvent(new CustomEvent('voice-xp-changed'));
 }
 
 function awardConstructXp(xpObj = {}, mult = 1) {
@@ -448,27 +484,33 @@ let selectedChanter = null;
 let lastConstructTarget = null;
 
 export function initSpeech() {
-  container = document.getElementById('speechPanel');
+  container = document.getElementById('constructTabCardContainer');
   if (!container) return;
   container.innerHTML = `
-    <div class="speech-top">
+    <div class="construct-top">
       <div class="orbs-section">
         <h3 class="section-title">Core Orbs</h3>
-        <div class="speech-orbs speech-tab-orbs">
-          <div id="orbInsightContainer" class="orb-container">
-            <div id="orbInsight" class="speech-orb"><div class="orb-fill"></div></div>
+        <div class="construct-orbs construct-tab-orbs">
+          <div id="orbInsightContainer" class="orb-wrapper">
+            <div class="orb-container">
+              <div id="orbInsight" class="construct-orb"><div class="orb-fill"></div></div>
+            </div>
             <div id="orbInsightValue" class="orb-value"></div>
             <div id="orbInsightRegen" class="orb-regen">
               <span class="season-icon"></span><span class="regen-value"></span><span id="intoneMultiplier" class="mult-badge"></span>
             </div>
           </div>
-          <div id="orbBodyContainer" class="orb-container" style="display:none">
-            <div id="orbBody" class="speech-orb"><div class="orb-fill"></div></div>
+          <div id="orbBodyContainer" class="orb-wrapper" style="display:none">
+            <div class="orb-container">
+              <div id="orbBody" class="construct-orb"><div class="orb-fill"></div></div>
+            </div>
             <div id="orbBodyValue" class="orb-value"></div>
             <div id="orbBodyRegen" class="orb-regen"></div>
           </div>
-          <div id="orbWillContainer" class="orb-container" style="display:none">
-            <div id="orbWill" class="speech-orb"><div class="orb-fill"></div></div>
+          <div id="orbWillContainer" class="orb-wrapper" style="display:none">
+            <div class="orb-container">
+              <div id="orbWill" class="construct-orb"><div class="orb-fill"></div></div>
+            </div>
             <div id="orbWillValue" class="orb-value"></div>
             <div id="orbWillRegen" class="orb-regen"></div>
           </div>
@@ -489,12 +531,13 @@ export function initSpeech() {
           <button id="performConstruct" class="cast-button construct-button">Construct</button>
           <div id="constructRequirements" class="construct-requirements"></div>
         </div>
-        <div class="card-construct-container">
+        <div class="modal-card-container">
           <div class="slots-and-disciples">
             <div id="memorySlotsDisplay" class="memory-slots"></div>
             <div id="constructDisciples" class="construct-disciples"></div>
           </div>
-          <div id="constructCards" class="built-constructs"></div>
+          <div id="modalCardContainer" class="built-constructs"></div>
+          <div id="constructStats" class="construct-stats"></div>
         </div>
       </div>
     </div>
@@ -671,7 +714,7 @@ function addConstruct(name) {
 }
 
 function renderConstructCards() {
-  const cont = panel.querySelector('#constructCards');
+  const cont = panel.querySelector('#modalCardContainer');
   const slotCont = panel.querySelector('#memorySlotsDisplay');
   if (!cont || !slotCont) return;
   cont.innerHTML = '';
@@ -687,19 +730,15 @@ function renderConstructCards() {
     wrapper.className = 'construct-card-wrapper';
     wrapper.dataset.name = c;
     const card = createConstructCard(c);
-    card.classList.add('collapsed');
     if (speechState.activeConstructs.includes(c)) card.classList.add('active');
     card.addEventListener('click', () => {
       toggleConstructActive(c);
-      wrapper.classList.toggle('expanded');
-      card.classList.toggle('collapsed');
+      showConstructStats(c);
     });
     wrapper.appendChild(card);
     const timer = document.createElement('div');
     timer.className = 'cooldown-timer';
     wrapper.appendChild(timer);
-    const info = createConstructInfo(c);
-    if (info) wrapper.appendChild(info);
     const assignedId = Object.entries(sectState.chantAssignments).find(([id, n]) => n === c)?.[0];
     const assign = document.createElement('div');
     assign.className = 'construct-assignment';
@@ -728,6 +767,9 @@ function renderConstructCards() {
     cont.appendChild(wrapper);
   });
   if (window.lucide) lucide.createIcons({ icons: lucide.icons });
+  if (speechState.savedConstructs.length > 0) {
+    showConstructStats(speechState.savedConstructs[0]);
+  }
   renderChantDisciples();
 }
 
@@ -735,31 +777,18 @@ export function createConstructCard(name) {
   const card = document.createElement('div');
   card.className = 'construct-card';
   card.dataset.name = name;
+  const color = constructColors[name];
+  if (color) card.style.setProperty('--element-color', color);
+  const icon = document.createElement('div');
+  icon.className = 'construct-icon';
+  icon.innerHTML = `<i data-lucide="${constructIcons[name] || 'package'}"></i>`;
+  card.appendChild(icon);
   const title = document.createElement('div');
   title.className = 'construct-name';
   title.textContent = name;
   card.appendChild(title);
   const recipe = recipes.find(r => r.name === name);
   if (recipe) {
-    const iconCont = document.createElement('div');
-    iconCont.className = 'construct-icons';
-    const outRow = document.createElement('div');
-    outRow.className = 'icon-row';
-    Object.entries(recipe.output).forEach(([res, amt]) => {
-      const span = document.createElement('span');
-      span.innerHTML = `<i data-lucide="${resourceIcons[res] || 'package'}"></i> ${amt}`;
-      outRow.appendChild(span);
-    });
-    iconCont.appendChild(outRow);
-    const costRow = document.createElement('div');
-    costRow.className = 'icon-row';
-    Object.entries(recipe.input).forEach(([res, amt]) => {
-      const span = document.createElement('span');
-      span.innerHTML = `<i data-lucide="${resourceIcons[res] || 'package'}"></i> ${amt}`;
-      costRow.appendChild(span);
-    });
-    iconCont.appendChild(costRow);
-    card.appendChild(iconCont);
     if (name === 'Intone') {
       const meter = document.createElement('div');
       meter.className = 'intone-meter';
@@ -785,9 +814,12 @@ export function createConstructCard(name) {
       card.appendChild(bar);
     }
     if (recipe.cooldown) {
-      const overlay = document.createElement('div');
-      overlay.className = 'cooldown-overlay';
-      card.appendChild(overlay);
+      const bar = document.createElement('div');
+      bar.className = 'cooldown-bar';
+      const fill = document.createElement('div');
+      fill.className = 'cooldown-bar-fill';
+      bar.appendChild(fill);
+      card.appendChild(bar);
     }
   } else {
     card.textContent = name;
@@ -828,42 +860,15 @@ export function createConstructInfo(name) {
   if (!recipe) return null;
   const info = document.createElement('div');
   info.className = 'construct-info';
-  const effText = getConstructEffect(name);
-  if (effText) {
-    const effect = document.createElement('div');
-    effect.className = 'construct-effect';
-    effect.textContent = `Effect: ${effText}`;
-    info.appendChild(effect);
-  }
-  if (name === 'The Calling') {
-    const callPower = speechState.constructPotency['The Calling'] || 1;
-    const targetIdx = speechState.disciples.length + 1;
-    const reqPower = Math.pow(1.8, targetIdx - 1);
-    const chance = Math.max(0.05, Math.min(1, callPower / reqPower));
-    const chanceEl = document.createElement('div');
-    chanceEl.className = 'construct-chance';
-    chanceEl.textContent = `Chance: ${(chance * 100).toFixed(0)}%`;
-    info.appendChild(chanceEl);
-  }
-  const cost = document.createElement('div');
-  cost.className = 'construct-cost';
-  const cc = recipe.castCost || recipe.input;
-  cost.textContent = `Cost: ${Object.entries(cc)
-    .map(([k, v]) => `${v} ${k}`)
-    .join(', ')}`;
-  info.appendChild(cost);
-  if (recipe.duration) {
-    const dur = document.createElement('div');
-    dur.className = 'construct-duration';
-    dur.textContent = `Duration: ${recipe.duration}s`;
-    info.appendChild(dur);
-  }
-  if (recipe.cooldown) {
-    const cd = document.createElement('div');
-    cd.className = 'construct-cooldown';
-    cd.textContent = `Cooldown: ${recipe.cooldown}s`;
-    info.appendChild(cd);
-  }
+  const cc = recipe.castCost || recipe.input || {};
+  const costHtml = Object.entries(cc)
+    .map(([res, amt]) => `${amt} <i data-lucide="${resourceIcons[res] || 'package'}"></i>`)
+    .join(' ');
+  const cd = recipe.cooldown || 0;
+  const pot = (speechState.constructPotency[name] || 1).toFixed(2);
+  const eff = getConstructEffect(name) || '';
+  info.innerHTML = `<div class="stat-line"><span class="stat-cost">Cost: ${costHtml || '—'}</span> <span class="stat-cd">CD: ${cd} s</span> <span class="stat-potency">Potency: ${pot}</span></div><div class="stat-line">Effect: ${eff}</div>`;
+  if (window.lucide) lucide.createIcons({ icons: lucide.icons });
   return info;
 }
 
@@ -875,6 +880,25 @@ export function getConstructEffect(name) {
   return Object.entries(recipe.output)
     .map(([k, v]) => `+${v} ${k}`)
     .join(', ');
+}
+
+function showConstructStats(name) {
+  const statsEl = panel.querySelector('#constructStats');
+  if (!statsEl) return;
+  const recipe = recipes.find(r => r.name === name);
+  if (!recipe) {
+    statsEl.textContent = '';
+    return;
+  }
+  const cc = recipe.castCost || recipe.input || {};
+  const costHtml = Object.entries(cc)
+    .map(([res, amt]) => `${amt} <i data-lucide="${resourceIcons[res] || 'package'}"></i>`)
+    .join(' ');
+  const cd = recipe.cooldown || 0;
+  const pot = (speechState.constructPotency[name] || 1).toFixed(2);
+  const eff = getConstructEffect(name) || '';
+  statsEl.innerHTML = `<div class="stat-line"><span class="stat-cost">Cost: ${costHtml || '—'}</span> <span class="stat-cd">CD: ${cd} s</span> <span class="stat-potency">Potency: ${pot}</span></div><div class="stat-line">Effect: ${eff}</div>`;
+  if (window.lucide) lucide.createIcons({ icons: lucide.icons });
 }
 
 function toggleConstructActive(name) {
@@ -987,19 +1011,14 @@ function renderHotbar() {
     card.classList.add('hotbar-construct');
     card.addEventListener('click', () => castConstruct(c, card));
     wrapper.appendChild(card);
-    const effectText = getConstructEffect(c);
-    if (effectText) {
-      const eff = document.createElement('div');
-      eff.className = 'construct-effect';
-      eff.textContent = effectText;
-      wrapper.appendChild(eff);
-    }
+    const info = createConstructInfo(c);
+    if (info) wrapper.appendChild(info);
     bar.appendChild(wrapper);
   });
 }
 
 export function renderXpBar() {
-  const barFill = document.querySelector('#voiceSkillPanel .speech-xp-fill');
+  const barFill = document.querySelector('#voiceSkillPanel .voice-xp-fill');
   const lvlEl = document.getElementById('voiceLevel');
   const detailEl = document.getElementById('voiceDetail');
   if (!barFill || !lvlEl) return;
@@ -1066,6 +1085,7 @@ function renderSeasonBanner() {
   if (!banner) return;
   const idx = speechState.seasonIndex;
   const season = seasons[idx];
+  setSeasonBackdrop(season.name);
   const day = speechState.seasonDay + 1;
   const daysLeft = SEASON_LENGTH_DAYS - day;
   const temp = seasonTemps[idx];
@@ -1148,7 +1168,7 @@ function canAfford(cost) {
 }
 
 function updateUpgradeAffordability() {
-  const panelUp = document.getElementById('speechUpgrades');
+  const panelUp = document.getElementById('constructUpgrades');
   if (!panelUp) return;
   const buttons = panelUp.querySelectorAll('button[data-upgrade]');
   buttons.forEach(btn => {
@@ -1220,7 +1240,7 @@ function purchaseUpgrade(name) {
 }
 
 export function renderUpgrades() {
-  const panelUp = document.getElementById('speechUpgrades');
+  const panelUp = document.getElementById('constructUpgrades');
   if (!panelUp) return;
   panelUp.innerHTML = '';
   const coreGroup = document.createElement('div');
@@ -1310,7 +1330,7 @@ export function renderUpgrades() {
 }
 
 function renderGains() {
-  const panel = document.getElementById('speechGains');
+  const panel = document.getElementById('constructGains');
   if (!panel) return;
   panel.innerHTML = '';
 }
@@ -1340,8 +1360,8 @@ function updateCooldownOverlays() {
     if (!def) return;
     const remaining = def.cooldown ? (speechState.cooldowns[name] || 0) : 0;
     const ratio = def.cooldown ? 1 - remaining / def.cooldown : 1;
-    const overlay = card.querySelector('.cooldown-overlay');
-    if (overlay) overlay.style.setProperty('--cooldown', ratio);
+    const fill = card.querySelector('.cooldown-bar-fill');
+    if (fill) fill.style.width = `${ratio * 100}%`;
     const cost = def.castCost || def.input || {};
     const affordable = Object.entries(cost).every(([res, amt]) => {
       const r = speechState.resources[res];

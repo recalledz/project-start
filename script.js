@@ -209,6 +209,17 @@ const CHANT_XP_PER_CYCLE = 0.5;
 const EXPLORATION_CYCLE_SECONDS = 150;
 const STAMINA_DRAIN_PER_EXPLORATION = 1;
 
+const TASK_ICONS = {
+  'Gather Fruit': '🍎',
+  'Log Pine': '🪵',
+  Building: '⚒️',
+  Research: '🔬',
+  Chant: '🎶',
+  Exploration: '🧭',
+  'Delve Dungeon': '🗝️',
+  Idle: '💤'
+};
+
 const LOCATION_DEFS = [
   { name: 'Firewood Grove', reqDistance: 100, baseChance: 0.2, x: '30%', y: '70%' },
   { name: 'Crystal Cavern', reqDistance: 300, baseChance: 0.15, x: '70%', y: '40%' },
@@ -548,8 +559,8 @@ let deckUpgradesViewBtn;
 let deckUpgradesContainer;
 let playerCoreSubTabButton;
 let playerCorePanel;
-let playerSpeechSubTabButton;
-let playerSpeechPanel;
+let playerConstructSubTabButton;
+let playerConstructPanel;
 let playerLexiconSubTabButton;
 let playerLexiconPanel;
 let playerSectSubTabButton;
@@ -652,7 +663,7 @@ function setupTabHandlers() {
         refreshCore();
         showTab(playerTab);
         setActiveTabButton(playerTabButton);
-        if (playerSpeechSubTabButton) playerSpeechSubTabButton.click();
+        if (playerConstructSubTabButton) playerConstructSubTabButton.click();
       }
     },
     {
@@ -802,8 +813,8 @@ function initTabs() {
   jobsCarouselBtn = document.querySelector('.jobsCarouselBtn');
   playerCoreSubTabButton = document.querySelector(".playerCoreSubTabButton");
   playerCorePanel = document.querySelector(".player-core-panel");
-  playerSpeechSubTabButton = document.querySelector('.playerSpeechSubTabButton');
-  playerSpeechPanel = document.querySelector('.player-speech-panel');
+  playerConstructSubTabButton = document.querySelector('.playerConstructSubTabButton');
+  playerConstructPanel = document.querySelector('.player-construct-panel');
   playerLexiconSubTabButton = document.querySelector('.playerLexiconSubTabButton');
   playerLexiconPanel = document.querySelector('.player-lexicon-panel');
   playerSectSubTabButton = document.querySelector('.playerSectSubTabButton');
@@ -890,45 +901,45 @@ function initTabs() {
   if (playerCoreSubTabButton)
     playerCoreSubTabButton.addEventListener("click", () => {
       if (playerCorePanel) playerCorePanel.style.display = "flex";
-      if (playerSpeechPanel) playerSpeechPanel.style.display = "none";
+      if (playerConstructPanel) playerConstructPanel.style.display = "none";
       if (playerLexiconPanel) playerLexiconPanel.style.display = 'none';
       if (playerSectPanel) playerSectPanel.style.display = 'none';
       playerCoreSubTabButton.classList.add("active");
-      if (playerSpeechSubTabButton) playerSpeechSubTabButton.classList.remove("active");
+      if (playerConstructSubTabButton) playerConstructSubTabButton.classList.remove("active");
       if (playerLexiconSubTabButton) playerLexiconSubTabButton.classList.remove('active');
     });
-  if (playerSpeechSubTabButton)
-    playerSpeechSubTabButton.addEventListener('click', () => {
+  if (playerConstructSubTabButton)
+    playerConstructSubTabButton.addEventListener('click', () => {
       if (playerCorePanel) playerCorePanel.style.display = 'none';
-      if (playerSpeechPanel) playerSpeechPanel.style.display = 'flex';
+      if (playerConstructPanel) playerConstructPanel.style.display = 'flex';
       if (playerLexiconPanel) playerLexiconPanel.style.display = 'none';
       if (playerSectPanel) playerSectPanel.style.display = 'none';
-      playerSpeechSubTabButton.classList.add('active');
+      playerConstructSubTabButton.classList.add('active');
       if (playerCoreSubTabButton) playerCoreSubTabButton.classList.remove('active');
       if (playerLexiconSubTabButton) playerLexiconSubTabButton.classList.remove('active');
     });
   if (playerLexiconSubTabButton)
     playerLexiconSubTabButton.addEventListener('click', () => {
       if (playerCorePanel) playerCorePanel.style.display = 'none';
-      if (playerSpeechPanel) playerSpeechPanel.style.display = 'none';
+      if (playerConstructPanel) playerConstructPanel.style.display = 'none';
       if (playerLexiconPanel) playerLexiconPanel.style.display = 'flex';
       if (playerSectPanel) playerSectPanel.style.display = 'none';
       playerLexiconSubTabButton.classList.add('active');
       if (playerCoreSubTabButton) playerCoreSubTabButton.classList.remove('active');
-      if (playerSpeechSubTabButton) playerSpeechSubTabButton.classList.remove('active');
+      if (playerConstructSubTabButton) playerConstructSubTabButton.classList.remove('active');
       if (playerSectSubTabButton) playerSectSubTabButton.classList.remove('active');
     });
   if (playerSectSubTabButton)
     playerSectSubTabButton.addEventListener('click', () => {
       if (playerCorePanel) playerCorePanel.style.display = 'none';
-      if (playerSpeechPanel) playerSpeechPanel.style.display = 'none';
+      if (playerConstructPanel) playerConstructPanel.style.display = 'none';
       if (playerLexiconPanel) playerLexiconPanel.style.display = 'none';
       if (playerSectPanel) playerSectPanel.style.display = 'flex';
       startDiscipleMovement();
       playerSectSubTabButton.classList.add('active');
       playerSectSubTabButton.classList.remove('glow-notify');
       if (playerCoreSubTabButton) playerCoreSubTabButton.classList.remove('active');
-      if (playerSpeechSubTabButton) playerSpeechSubTabButton.classList.remove('active');
+      if (playerConstructSubTabButton) playerConstructSubTabButton.classList.remove('active');
       if (playerLexiconSubTabButton) playerLexiconSubTabButton.classList.remove('active');
     });
   if (statsOverviewSubTabButton)
@@ -1448,20 +1459,37 @@ function startDiscipleMovement() {
 
 function renderColonyTasks() {
   colonyTasksPanel.innerHTML = '';
+  const heading = document.createElement('div');
+  heading.className = 'panel-heading';
+  heading.textContent = 'Tasks';
+  colonyTasksPanel.appendChild(heading);
+
   speechState.disciples.forEach(d => {
     const row = document.createElement('div');
     row.className = 'task-entry';
     if (d.id === selectedDiscipleId) row.classList.add('selected');
+    const current = sectState.discipleTasks[d.id] || 'Idle';
+    if (current === 'Idle') row.classList.add('idle');
     row.addEventListener('click', () => {
       selectedDiscipleId = d.id;
       renderColonyTasks();
       renderColonyInfo();
     });
+    const icon = document.createElement('span');
+    icon.textContent = TASK_ICONS[current] || '⚪️';
     const label = document.createElement('div');
-    label.textContent = `Disciple #${d.id}`;
+    label.textContent = d.name || `Disciple ${d.id}`;
+    label.addEventListener('dblclick', () => {
+      const nn = prompt('Rename disciple', d.name || `Disciple ${d.id}`);
+      if (nn) {
+        d.name = nn;
+        renderColonyTasks();
+        renderColonyInfo();
+      }
+    });
     const taskName = document.createElement('div');
     taskName.className = 'disciple-task-name';
-    taskName.textContent = sectState.discipleTasks[d.id] || 'Idle';
+    taskName.textContent = current;
 
     const taskInfo = document.createElement('div');
     taskInfo.className = 'disciple-task-info';
@@ -1481,6 +1509,7 @@ function renderColonyTasks() {
     rate.id = `disciple-rate-${d.id}`;
     taskInfo.appendChild(rate);
 
+    row.appendChild(icon);
     row.appendChild(label);
     row.appendChild(taskName);
     row.appendChild(taskInfo);
@@ -1491,9 +1520,15 @@ function renderColonyTasks() {
 
 function renderColonyInfo() {
   colonyInfoPanel.innerHTML = '';
+  const heading = document.createElement('div');
+  heading.className = 'panel-heading';
+  heading.textContent = 'Proficiencies';
+  colonyInfoPanel.appendChild(heading);
   const d = speechState.disciples.find(x => x.id === selectedDiscipleId);
   if (!d) {
-    colonyInfoPanel.textContent = 'Select a disciple';
+    const info = document.createElement('div');
+    info.textContent = 'Select a disciple';
+    colonyInfoPanel.appendChild(info);
     return;
   }
   const taskList = document.createElement('div');

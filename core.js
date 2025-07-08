@@ -12,7 +12,8 @@ let meditateBtn;
 let levelDisplay;
 let progressText;
 let meditationTimer; // unused now but kept for compatibility
-let speechLevelEl;
+let speechLevelEl; // deprecated variable name for backward compatibility
+let voiceLevelEl;
 let mindValEl;
 let bodyValEl;
 let willValEl;
@@ -30,7 +31,7 @@ const bodyPath = `M200 140
                C230 190, 230 160, 210 140
                Z`;
   container.innerHTML = `
-    <div id="speechLevelDisplay" class="speech-level-display">Speech Level: <span id="speechLevelValue" class="speech-level-value"></span></div>
+    <div id="voiceLevelDisplay" class="voice-level-display">Voice Level: <span id="voiceLevelValue" class="voice-level-value"></span></div>
     <div class="core-resource-indicators">
       <div class="resource-box mind"><i data-lucide="brain"></i><span id="mindValue" class="resource-value"></span></div>
       <div class="resource-box body"><i data-lucide="heart"></i><span id="bodyValue" class="resource-value"></span></div>
@@ -99,7 +100,8 @@ const bodyPath = `M200 140
     });
     willOrbEl.addEventListener('mouseleave', window.hideTooltip);
   }
-  speechLevelEl = container.querySelector('#speechLevelValue');
+  speechLevelEl = container.querySelector('#voiceLevelValue');
+  voiceLevelEl = speechLevelEl;
   mindValEl = container.querySelector('#mindValue');
   bodyValEl = container.querySelector('#bodyValue');
   willValEl = container.querySelector('#willValue');
@@ -110,7 +112,7 @@ const bodyPath = `M200 140
       voicePanel.classList.toggle('expanded');
     });
   }
-  window.addEventListener('speech-xp-changed', () => {
+  window.addEventListener('voice-xp-changed', () => {
     renderCore();
     renderXpBar();
   });
@@ -181,7 +183,7 @@ function renderCore() {
   const progressText = container.querySelector('#coreProgressText');
   if (progressText) progressText.textContent = `${Math.floor(coreState.meditationProgress)}/${coreState.requirement}`;
   levelDisplay.textContent = `Core Level: ${coreState.coreLevel}`;
-  if (speechLevelEl) speechLevelEl.textContent = speechState.level;
+  if (voiceLevelEl) voiceLevelEl.textContent = speechState.level;
   if (mindValEl) mindValEl.textContent = `${Math.floor(speechState.orbs.insight.current)}/${speechState.orbs.insight.max}`;
   if (bodyValEl) bodyValEl.textContent = `${Math.floor(speechState.orbs.body.current)}/${speechState.orbs.body.max}`;
   if (willValEl) willValEl.textContent = `${Math.floor(speechState.orbs.will.current)}/${speechState.orbs.will.max}`;

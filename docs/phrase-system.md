@@ -37,3 +37,15 @@ The phrase builder has been replaced with a simpler construct mechanic. The **Co
 ### Upgrades
 
 - **Sound Expansion** – costs 25 Sound for the first level and increases your maximum Sound by 25. The second level costs 50 Sound and grants an additional construct slot. Each further level costs 4 more Sound than the last.
+
+### Card Border Glows
+
+When a construct card is hovered or selected in the **Lexicon** or **Construct** tab, its border glows to match its element:
+
+- **Murmur** – Metallic Grey
+- **Echo of Mind** – Violet
+- **Clarity Pulse** – Sky Blue
+- **Symbol Seed** – Violet
+- **Intone** – Sky Blue
+- **Mental Construct** – Amber
+- **Mnemonic Rhythm** – Gold
