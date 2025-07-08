@@ -1421,6 +1421,8 @@ function updateMnemonicUI() {
 export function tickSpeech(delta) {
   const hasUI = !!container;
   const dt = delta / 1000;
+  const activeDisc = speechState.disciples.filter(d => !d.incapacitated).length;
+  speechState.gains.body = activeDisc * 0.1;
   if (speechState.intoneTimer > 0) {
     speechState.intoneTimer = Math.max(0, speechState.intoneTimer - dt);
     if (speechState.intoneTimer === 0) {
