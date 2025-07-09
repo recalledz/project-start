@@ -3770,6 +3770,10 @@ body.darkenshift-mode .tabsContainer button.active {
     pointer-events: none;
     transition: transform 3s;
 }
+.sect-disciple.incapacitated {
+    background: rgba(255, 64, 64, 0.9);
+    box-shadow: 0 0 6px rgba(255, 0, 0, 0.9);
+}
 #colonyTasksPanel .task-entry {
     width: 100%;
     font-size: 0.75rem;
@@ -3961,6 +3965,10 @@ body.darkenshift-mode .tabsContainer button.active {
     flex-direction: column;
     width: 120px;
     cursor: pointer;
+}
+.disciple-skill-option.disabled {
+    opacity: 0.5;
+    pointer-events: none;
 }
 .disciple-skill-label { font-size: 0.75rem; }
 .disciple-skill-progress {
