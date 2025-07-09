@@ -27,6 +27,12 @@ export function drawRestartArt(canvas) {
   ctx.stroke();
 }
 
+export const SPEAKER_QUOTES = [
+  'Sometimes it\u2019s safer to hide in a nightmare... but are we ever truly free from the dream?',
+  'Words don\u2019t just describe. They make.',
+  'The soul is the only prison you\u2019ve never tried to break.'
+];
+
 export function showRestartScreen(onRestart) {
   if (restartOverlay) return;
 
@@ -42,17 +48,18 @@ export function showRestartScreen(onRestart) {
 
   const message = document.createElement('div');
   message.classList.add('restart-message');
-  message.textContent = 'Game Over';
+  const quote = SPEAKER_QUOTES[Math.floor(Math.random() * SPEAKER_QUOTES.length)];
+  message.textContent = quote;
   box.appendChild(message);
 
   const flavor = document.createElement('div');
   flavor.classList.add('restart-flavor');
-  flavor.textContent = 'The deck runs cold. Try your luck again.';
+  flavor.textContent = 'You muster your strength and bring back your party.';
   box.appendChild(flavor);
 
   const btn = document.createElement('button');
   btn.classList.add('restart-button');
-  btn.textContent = 'Draw New Hand';
+  btn.textContent = 'Return to Sect';
   btn.addEventListener('click', () => {
     if (onRestart) onRestart();
     hideRestartScreen();
