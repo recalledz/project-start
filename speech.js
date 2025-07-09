@@ -1137,6 +1137,10 @@ function renderSeasonBanner() {
   const temp = seasonTemps[idx];
   banner.textContent = `${season.name} Day ${day} (${daysLeft}d) ${temp}°C`;
   banner.className = `season-banner ${seasonClasses[idx]}`;
+  if (container) {
+    seasonClasses.forEach(cls => container.classList.remove(cls));
+    container.classList.add(seasonClasses[idx]);
+  }
   if (speechState.weather) {
     banner.innerHTML = `${season.name} Day ${day} (${daysLeft}d) ${temp}°C<span class="weather-icon">${speechState.weather.icon}</span>`;
   }

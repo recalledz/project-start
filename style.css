@@ -3109,16 +3109,13 @@ body.darkenshift-mode .tabsContainer button.active {
     z-index: 0;
 }
 
-.construct-area.verdantia {
-    backdrop-filter: blur(8px) hue-rotate(60deg) brightness(0.9);
-}
-
-.construct-area.solaria {
-    backdrop-filter: blur(8px) hue-rotate(-20deg) brightness(1.1);
-}
-
-.construct-area.bruma {
-    backdrop-filter: blur(8px) hue-rotate(180deg) brightness(0.8);
+.construct-area.spring,
+.construct-area.summer,
+.construct-area.aurora,
+.construct-area.autumn,
+.construct-area.winter {
+    background: linear-gradient(135deg, var(--season-start), var(--season-end));
+    backdrop-filter: blur(8px) brightness(0.9);
 }
 
 @supports not (backdrop-filter: blur(1px)) {
@@ -3129,7 +3126,6 @@ body.darkenshift-mode .tabsContainer button.active {
 
 #constructTabCardContainer {
     backdrop-filter: blur(8px);
-    background: rgba(255, 255, 255, 0.05);
 }
 
 .construct-lexicon {
