@@ -96,16 +96,22 @@ let disciples = [new Disciple({ id: 1 }), new Disciple({ id: 2 }), new Disciple(
 function selectDisciple(d) {
   if (!drawnCards.includes(d) && drawnCards.length < stats.cardSlots) {
     drawnCards.push(d);
+    discipleAttackTimers[d.id] = 0;
+    renderCombatDisciples();
   }
 }
 
 function deselectDisciple(d) {
   const idx = drawnCards.indexOf(d);
   if (idx >= 0) drawnCards.splice(idx, 1);
+  delete discipleAttackTimers[d.id];
+  renderCombatDisciples();
 }
 
 function clearActiveDisciples() {
   drawnCards.length = 0;
+  discipleAttackTimers = {};
+  if (handContainer) handContainer.innerHTML = '';
 }
 // cards discarded from play land in `discardPile`
 let discardPile = [];
@@ -506,7 +512,6 @@ function hidePlayerAttackBar() {
   const bar = document.getElementById('playerAttackBar');
   if (bar) bar.style.display = 'none';
   if (playerAttackFill) playerAttackFill.style.width = '0%';
-  playerAttackTimer = 0;
 }
 
 //function hideStageProgressBar() {
@@ -522,7 +527,7 @@ const unlockedJokers = [];
 // attack progress bars
 let playerAttackFill = null;
 let enemyAttackFill = null;
-let playerAttackTimer = 0;
+let discipleAttackTimers = {}; // map disciple id -> elapsed attack time
 let enemyAttackProgress = 0; // carryover ratio of enemy attack timer
 let cashTimer = 0;
 let worldProgressTimer = 0;
@@ -3128,6 +3133,30 @@ function updateHandDisplay() {
   });
 }
 
+function renderCombatDisciples() {
+  if (!handContainer) return;
+  handContainer.innerHTML = '';
+  drawnCards.forEach(d => {
+    const wrap = document.createElement('div');
+    wrap.className = 'disciple-card';
+    const name = document.createElement('div');
+    name.textContent = d.name || `Disciple ${d.id}`;
+    const hp = document.createElement('div');
+    hp.className = 'disciple-hp';
+    hp.textContent = `HP: ${Math.round(d.currentHp)}/${Math.round(d.maxHp)}`;
+    const bar = document.createElement('div');
+    bar.className = 'disciple-attack-bar';
+    const fill = document.createElement('div');
+    fill.className = 'disciple-attack-fill';
+    bar.appendChild(fill);
+    wrap.append(name, hp, bar);
+    handContainer.appendChild(wrap);
+    d.wrapperElement = wrap;
+    d.hpDisplay = hp;
+    d.attackFill = fill;
+  });
+}
+
 // Create DOM elements for a card in the player's hand
 // card rendering moved to rendering.js
 
@@ -3615,6 +3644,7 @@ const awardJokerCard = () => awardJokerCardByWorld(stageData.world);
 function spawnPlayer() {
   clearActiveDisciples();
   disciples.slice(0, stats.cardSlots).forEach(d => selectDisciple(d));
+  renderCombatDisciples();
 }
 
 function respawnPlayer() {
@@ -3699,20 +3729,34 @@ location.reload();
 // redraw logic moved to cardManagement.js
 
 // Player auto-attack; deals combined damage to the current enemy
-function attack() {
+function attack(deltaTime = 0) {
   if (!currentEnemy) return;
 
-  currentEnemy.takeDamage(stats.pDamage);
+  drawnCards.forEach(d => {
+    if (!discipleAttackTimers[d.id]) discipleAttackTimers[d.id] = 0;
+    discipleAttackTimers[d.id] += deltaTime;
 
-stageData.dealerLifeCurrent = currentEnemy.currentHp;
+    if (d.attackFill) {
+      const pratio = Math.min(1, discipleAttackTimers[d.id] / d.attackSpeed);
+      d.attackFill.style.width = `${pratio * 100}%`;
+    }
 
-if (currentEnemy.isDefeated()) {
-currentEnemy.onDefeat?.();
-} else {
-  dealerLifeDisplay.textContent = `Life: ${formatNumber(Math.floor(
-    currentEnemy.currentHp
-  ))}/${formatNumber(currentEnemy.maxHp)}`;
-  renderDealerLifeBarFill(currentEnemy);
+    if (discipleAttackTimers[d.id] >= d.attackSpeed) {
+      currentEnemy.takeDamage(d.damage);
+      discipleAttackTimers[d.id] = 0;
+      if (d.attackFill) d.attackFill.style.width = '0%';
+    }
+  });
+
+  stageData.dealerLifeCurrent = currentEnemy.currentHp;
+
+  if (currentEnemy.isDefeated()) {
+    currentEnemy.onDefeat?.();
+  } else {
+    dealerLifeDisplay.textContent = `Life: ${formatNumber(Math.floor(
+      currentEnemy.currentHp
+    ))}/${formatNumber(currentEnemy.maxHp)}`;
+    renderDealerLifeBarFill(currentEnemy);
   }
 }
 
@@ -4108,16 +4152,7 @@ if (currentEnemy) {
     worldProgressTimer = 0;
   }
   if (currentEnemy) {
-    playerAttackTimer += deltaTime;
-    if (playerAttackFill) {
-      const pratio = Math.min(1, playerAttackTimer / stats.attackSpeed);
-      playerAttackFill.style.width = `${pratio * 100}%`;
-    }
-    if (playerAttackTimer >= stats.attackSpeed) {
-      attack();
-      playerAttackTimer = 0;
-      if (playerAttackFill) playerAttackFill.style.width = "0%";
-    }
+    attack(deltaTime);
   }
 
   if (systems.manaUnlocked) {
