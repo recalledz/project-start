@@ -85,15 +85,6 @@ export function renderDiscipleCard(disciple, handContainer) {
   disciple.xpLabel = xpLabel;
 }
 
-export function renderDiscardCard(card, discardContainer, backImages) {
-  discardContainer.innerHTML = '';
-  const img = document.createElement('img');
-  img.alt = 'Card Back';
-  img.src = backImages[card.backType] || backImages['basic-red'];
-  img.classList.add('card-back', card.backType);
-  discardContainer.appendChild(img);
-  card.discardElement = img;
-}
 
 function drawBloodSplat(canvas) {
   const ctx = canvas.getContext('2d');

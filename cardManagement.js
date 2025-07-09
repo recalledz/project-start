@@ -58,20 +58,11 @@ export function redrawHand(state) {
     updateDeckDisplay,
     updatePlayerStats,
     pDeck,
-    discardPile,
-    discardContainer,
-    cardBackImages,
-    renderDiscardCard,
     renderDeckTop,
     updatePileCounts
   } = state;
 
-  // move current hand to discard pile
-  drawnCards.forEach(c => {
-    discardPile.push(c);
-    if (renderDiscardCard)
-      renderDiscardCard(c, discardContainer, cardBackImages);
-  });
+  // clear existing hand
   drawnCards.length = 0;
   handContainer.innerHTML = '';
 
