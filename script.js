@@ -90,26 +90,28 @@ import {
 // --- Game State ---
 // `drawnCards` holds the cards currently in the player's hand
 let drawnCards = [];
+// Active disciples engaged in combat
+let activeDisciples = [];
 // Available disciples under the player's control
 let disciples = [new Disciple({ id: 1 }), new Disciple({ id: 2 }), new Disciple({ id: 3 })];
 // Functions to manage which disciples are active in combat
 function selectDisciple(d) {
-  if (!drawnCards.includes(d) && drawnCards.length < stats.cardSlots) {
-    drawnCards.push(d);
+  if (!activeDisciples.includes(d) && activeDisciples.length < stats.cardSlots) {
+    activeDisciples.push(d);
     discipleAttackTimers[d.id] = 0;
     renderCombatDisciples();
   }
 }
 
 function deselectDisciple(d) {
-  const idx = drawnCards.indexOf(d);
-  if (idx >= 0) drawnCards.splice(idx, 1);
+  const idx = activeDisciples.indexOf(d);
+  if (idx >= 0) activeDisciples.splice(idx, 1);
   delete discipleAttackTimers[d.id];
   renderCombatDisciples();
 }
 
 function clearActiveDisciples() {
-  drawnCards.length = 0;
+  activeDisciples.length = 0;
   discipleAttackTimers = {};
   if (handContainer) handContainer.innerHTML = '';
 }
@@ -3052,7 +3054,7 @@ function cardXp(xpAmount) {
 }
 
 function combatXp(xpAmount) {
-  drawnCards.forEach(d => {
+  activeDisciples.forEach(d => {
     if (!d) return;
     d.gainCombatXp(xpAmount);
   });
@@ -3102,7 +3104,7 @@ function updateHandDisplay() {
 function renderCombatDisciples() {
   if (!handContainer) return;
   handContainer.innerHTML = '';
-  drawnCards.forEach(d => {
+  activeDisciples.forEach(d => {
     const wrap = document.createElement('div');
     wrap.className = 'disciple-card';
     const name = document.createElement('div');
@@ -3676,7 +3678,7 @@ location.reload();
 function attack(deltaTime = 0) {
   if (!currentEnemy) return;
 
-  drawnCards.forEach(d => {
+  activeDisciples.forEach(d => {
     if (!discipleAttackTimers[d.id]) discipleAttackTimers[d.id] = 0;
     discipleAttackTimers[d.id] += deltaTime;
 
