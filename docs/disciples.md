@@ -160,3 +160,21 @@ With these values, the default XP gain rates and example time to reach higher pr
 | Building | `1` XP/s | ~50s | ~6m 12s |
 
 These estimates assume no attribute bonuses and continuous work on the same task. Attribute points or upgrades will shorten the timelines further.
+
+## Combat Participation
+
+Disciples join the player during combat encounters. Each follower acts in place
+of a card from the old deck system and uses their personal attributes when
+attacking or invoking abilities.
+
+### Construct Spells
+
+Constructs crafted through the phrase system provide spells that disciples can
+cast. Equipping a construct unlocks its spell for any attuned disciple,
+expanding the party's options in battle.
+
+### Esoteric Dungeon
+
+The esoteric dungeon currently reuses the original card-based combat mechanics.
+Disciples stand in for cards until a dedicated disciple combat system is
+implemented.

@@ -11,17 +11,17 @@ A dynamic card-based combat game where cards represent characters. Players battl
 
 🧩 Key Features
 
-Card-Based Stat and Level System: Classic cards—Clubs, Hearts, Diamonds, and Spades—with no inherent suit bonuses.
+Disciple Stat and Level System: Recruit followers who track levels and attributes with no inherent suit bonuses.
 
-Job System: Unlock specialized roles for cards upon reaching level thresholds, with jobs determined by card suits.
+Job System: Unlock specialized roles for disciples upon reaching level thresholds.
 
 Dealer and Boss Encounters: Face off against enemies with distinct abilities and escalating challenges.
 
 Real-Time Combat Mechanics: Engage in battles with cooldown logic, ability overlays, and a combat tick system.
 
-Healing Mechanics: Cards recover 1 HP after each enemy defeat.
+Healing Mechanics: Disciples recover 1 HP after each enemy defeat.
 
-Game Over Screen: A restart overlay appears when your deck is wiped out.
+Game Over Screen: A restart overlay appears when every disciple is defeated.
 Click the Restart button or wait five seconds to respawn automatically.
 Stats Screen: View lifetime progress and start a new run from the stats tab.
 
@@ -29,9 +29,9 @@ Progression Systems:
 
 Stages and Worlds: Advance through stages, encountering bosses at milestones (e.g., stage 10) and progressing to new worlds with increased difficulty.
 
-Auto-Attack: Activate automated attacks with adjustable speeds, influenced by card stats.
+Auto-Attack: Activate automated attacks with adjustable speeds, influenced by disciple stats.
 
-Prestige System: Reset progress for long-term benefits, including deck reshuffling, HP refill, and stage resets.
+Prestige System: Reset progress for long-term benefits, including disciple recall, HP refill, and stage resets.
 
 Core Meditation: Mind, Body and Soul orbs fill from Life tab activities. They no longer gain XP from mana, healing or defeats during combat.
 Constructs System: Combine resources to craft constructs (see docs/phrase-system.md).
@@ -39,9 +39,9 @@ Constructs System: Combine resources to craft constructs (see docs/phrase-system
 
 Resource Management:
 
-Cash: Earned based on active card values and current stage/world.
+Cash: Earned based on active disciple power and current stage/world.
 
-Card HP per Kill: Each enemy defeated heals your cards.
+Disciple HP per Kill: Each enemy defeated heals your disciples.
 
 
 Attributes and Stats:
@@ -59,9 +59,9 @@ Holy: Reduces cooldowns.
 
 Jokers: Active abilities with cooldowns and limited slots.
 
-Traits: Late-game mechanics where enemies possess special traits (e.g., double damage, shields) that can be inherited by player cards.
+Traits: Late-game mechanics where enemies possess special traits (e.g., double damage, shields) that can be inherited by your disciples.
 
-Interactive Star Chart: Drag star nodes to rearrange upgrade paths in real time.
+Interactive Star Chart: Drag star nodes to rearrange upgrade paths for your disciples in real time.
 
 
 🧠 Tech Stack
@@ -92,7 +92,7 @@ Node Simulation: Run `node simulate.js [strategy]` to test upgrade progressions 
 
 🌠 Star Chart Setup
 
-Include `pixi.min.js` and `pixi-filters.min.js` in your page. The chart initializes via `initStarChart()` when the Star Chart tab is opened.
+Include `pixi.min.js` and `pixi-filters.min.js` in your page. The chart initializes via `initStarChart()` when the Star Chart tab is opened to map disciple upgrades.
 
 🔧 Codex Integration
 
@@ -118,34 +118,34 @@ A structured approach to manage and balance game elements.
 
 Upgrade Name	Base Value	Max Value	Cost Formula	Notes
 
-Card Slots      3       ?       1000 * level^3	Increase the number of active cards
+Disciple Slots      3       ?       1000 * level^3	Increase the number of active disciples
 Global Damage Multiplier	1.0	?	200 * level^2	Amplify all damage dealt
 Auto-Attack Speed	10000 ms	2000 ms	300 * level^2.2	Reduce time between automated attacks
-Base Card HP        +3 per level   ?       100 * level^2   Enhance base HP for all cards
-Card HP per Kill        1       ?       150 * level^2	HP recovered by cards after each kill
+Base Disciple HP        +3 per level   ?       100 * level^2   Enhance base HP for all disciples
+Disciple HP per Kill        1       ?       150 * level^2	HP recovered by disciples after each kill
 
 
-🃏 Card Progression
+🧑‍🎓 Disciple Progression
 
 Stat	Scaling Formula	Notes
 
-Damage	value * level	Base damage scales with card value and level
-Max HP	value * level * baseHPMultiplier	HP influenced by card value, level, and attributes
+Damage	value * level	Base damage scales with disciple power and level
+Max HP	value * level * baseHPMultiplier	HP influenced by disciple power, level, and attributes
 Ability Power	Tied to attribute/stat	Determines potency of magical abilities
-XP Requirement	XpReq = value * (level^2)	Higher value cards require more XP to level up
+XP Requirement	XpReq = value * (level^2)	Higher power disciples require more XP to level up
 
 XP per Kill     (7/18) * L^2 / (1 + 0.007*(L-1))  L = stage + 10*(world-1)
 
 ### XP Calculation
 
-Cards level up by defeating enemies. Two formulas keep the pace near
-"one level per stage" for an average value card:
+Disciples level up by defeating enemies. Two formulas keep the pace near
+"one level per stage" for an average disciple:
 
 1. **Requirement** for level `L`
 
    `XpReq = value * (L^2)`
 
-   Low-value cards reach higher levels quickly, while face cards require
+   Low-power disciples reach higher levels quickly, while elite disciples require
    more grinding.
 
 2. **XP award** when an enemy from stage `s` and world `w` is defeated
@@ -159,7 +159,7 @@ Cards level up by defeating enemies. Two formulas keep the pace near
    levels to the scale. The small epsilon term increases kills needed by
    roughly one every few stages (e.g., stage 9 takes ~3m10s instead of 3m).
 
-Cards in the deck but not currently drawn gain only half of this XP.
+Disciples not currently deployed gain only half of this XP.
 
 
 🧠 Attributes
@@ -177,7 +177,7 @@ Attributes influence resource gathering, passive skill trees, and job unlocks.
 
 🧙‍♂️ Jobs
 
-Unlocked when cards reach level 10. Jobs are permanent and provide unique abilities.
+Unlocked when disciples reach level 10. Jobs are permanent and provide unique abilities.
 
 Job Type	Based On	Effects
 
@@ -207,7 +207,7 @@ Cooldown	Varies	base - (Holy%)	Reduced by Holy attribute
 
 🚧 Upcoming Goals
 
-Finalize card visual designs
+Finalize disciple visual designs
 
 Implement player stats display on the board
 
@@ -215,7 +215,7 @@ Complete main layout polish with casino theme variations per world
 
 Introduce joker system with active abilities
 
-Develop comprehensive card progression systems
+Develop comprehensive disciple progression systems
 
 Implement jobs, traits, and reincarnation mechanics
 
