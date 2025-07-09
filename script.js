@@ -558,6 +558,7 @@ let playerStatsTabButton;
 let worldSubTabButton;
 let cardSubTabButton;
 let playerTabButton;
+let explorationTabButton;
 let locationTabButton;
 let mainTab;
 let cardSubTab;
@@ -566,8 +567,11 @@ let starChartTab;
 let playerStatsTab;
 let worldsTab;
 let playerTab;
+let explorationTab;
 let locationTab;
 let locationListContainer;
+let explorationListContainer;
+let startDungeonBtn;
 let purchasedUpgradeList;
 let activeEffectsContainer;
 let tooltip;
@@ -612,6 +616,8 @@ let statsEconomyContainer;
 let jobsViewBtn;
 let jobsCarouselBtn;
 const discoveredLocations = [];
+const explorationParty = new Set();
+let currentExplorationParty = [];
 
 function setActiveTabButton(btn) {
   document.querySelectorAll('.tabsContainer button').forEach(b => {
@@ -640,6 +646,13 @@ function addDiscoveredLocation(name) {
   if (locationTabButton && locationTabButton.style.display === 'none') {
     locationTabButton.style.display = '';
   }
+  if (
+    explorationTabButton &&
+    name === 'Esoteric Dungeon' &&
+    explorationTabButton.style.display === 'none'
+  ) {
+    explorationTabButton.style.display = '';
+  }
 }
 
 function setupTabHandlers() {
@@ -659,6 +672,14 @@ function setupTabHandlers() {
         showTab(playerTab);
         setActiveTabButton(playerTabButton);
         if (playerConstructSubTabButton) playerConstructSubTabButton.click();
+      }
+    },
+    {
+      buttonSelector: '.explorationTabButton',
+      onClick: () => {
+        renderExplorationTab();
+        showTab(explorationTab);
+        setActiveTabButton(explorationTabButton);
       }
     },
     {
@@ -701,6 +722,7 @@ function hideTab() {
   if (playerStatsTab) playerStatsTab.style.display = "none";
   if (worldsTab) worldsTab.style.display = "none";
   if (playerTab) playerTab.style.display = "none";
+  if (explorationTab) explorationTab.style.display = "none";
   if (locationTab) locationTab.style.display = "none";
 }
 
@@ -784,6 +806,7 @@ function initTabs() {
   cardSubTabButton = document.querySelector('.cardSubTabButton');
   worldSubTabButton = document.querySelector('.worldSubTabButton');
   playerTabButton = document.querySelector('.playerTabButton');
+  explorationTabButton = document.querySelector('.explorationTabButton');
   locationTabButton = document.querySelector('.locationTabButton');
   mainTab = document.querySelector('.mainTab');
   cardSubTab = document.querySelector('.cardSubTab');
@@ -792,8 +815,11 @@ function initTabs() {
   playerStatsTab = document.querySelector('.playerStatsTab');
   worldsTab = document.querySelector('.worldsTab');
   playerTab = document.querySelector('.playerTab');
+  explorationTab = document.querySelector('.explorationTab');
   locationTab = document.querySelector('.locationTab');
   locationListContainer = document.querySelector('.location-list');
+  explorationListContainer = document.querySelector('.exploration-list');
+  startDungeonBtn = document.querySelector('.startDungeonBtn');
   purchasedUpgradeList = document.querySelector('.purchased-upgrade-list');
   activeEffectsContainer = document.querySelector('.active-effects');
   tooltip = document.getElementById('tooltip');
@@ -877,6 +903,20 @@ function initTabs() {
     showJobCarouselView();
     renderJobCarousel(jobCarouselContainer);
   });
+  if (startDungeonBtn)
+    startDungeonBtn.addEventListener('click', () => {
+      if (!explorationListContainer) return;
+      explorationParty.clear();
+      explorationListContainer
+        .querySelectorAll('input[type="checkbox"]:checked')
+        .forEach(cb => explorationParty.add(parseInt(cb.value)));
+      currentExplorationParty = Array.from(explorationParty);
+      if (currentExplorationParty.length > 0) {
+        showTab(mainTab);
+        setActiveTabButton(playerTabButton);
+        respawnDealerStage();
+      }
+    });
   if (deckListContainer)
     deckListContainer.addEventListener('deck-selected', e => {
       showDeckCardsView(e.detail.id);
@@ -2015,6 +2055,25 @@ function buildDiscipleCombatStatsView(d) {
     `Attack Speed ×${attackSpeed}<br>` +
     `Stamina ×${stamina}`;
   return body;
+}
+
+function renderExplorationTab() {
+  if (!explorationListContainer) return;
+  explorationListContainer.innerHTML = '';
+  speechState.disciples.forEach(d => {
+    const row = document.createElement('label');
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.value = d.id;
+    cb.checked = explorationParty.has(d.id);
+    cb.addEventListener('change', () => {
+      if (cb.checked) explorationParty.add(d.id);
+      else explorationParty.delete(d.id);
+    });
+    row.appendChild(cb);
+    row.appendChild(document.createTextNode(d.name || `Disciple ${d.id}`));
+    explorationListContainer.appendChild(row);
+  });
 }
 
 function triggerOrbFlash() {
