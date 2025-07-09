@@ -36,11 +36,11 @@ const seasonClasses = ['spring','summer','aurora','autumn','winter'];
 const seasonTemps = [15, 25, 20, 10, -5];
 
 export const SEASON_COLORS = {
-  Verdantia: ['rgba(40,90,40,0.6)', 'rgba(20,40,20,1.0)'],
-  Solaria: ['rgba(120,50,20,0.6)', 'rgba(60,20,10,1.0)'],
-  Aurora: ['rgba(100,80,40,0.6)', 'rgba(50,40,20,1.0)'],
-  Aurelia: ['rgba(90,90,100,0.6)', 'rgba(40,40,50,1.0)'],
-  Bruma: ['rgba(40,80,100,0.6)', 'rgba(20,40,50,1.0)']
+  Verdantia: ['rgba(80,160,80,0.9)', 'rgba(30,70,30,1.0)'],
+  Solaria: ['rgba(200,120,40,0.9)', 'rgba(90,40,10,1.0)'],
+  Aurora: ['rgba(150,130,80,0.9)', 'rgba(70,50,30,1.0)'],
+  Aurelia: ['rgba(140,140,160,0.9)', 'rgba(60,60,80,1.0)'],
+  Bruma: ['rgba(60,120,160,0.9)', 'rgba(30,60,80,1.0)']
 };
 
 export function setSeasonBackdrop(season) {
