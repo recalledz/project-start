@@ -3089,8 +3089,12 @@ function updateHandDisplay() {
   drawnCards.forEach(card => {
     if (!card || !card.hpDisplay) return; // Skip if card or elements are missing
     card.hpDisplay.textContent = `HP: ${formatNumber(Math.round(card.currentHp))}/${formatNumber(Math.round(card.maxHp))}`;
-    card.xpLabel.textContent = `LV: ${card.currentLevel}`;
-    card.xpBarFill.style.width = `${(card.XpCurrent / card.XpReq) * 100}%`;
+    if (card.xpLabel) {
+      card.xpLabel.textContent = `LV: ${card.currentLevel}`;
+    }
+    if (card.xpBarFill) {
+      card.xpBarFill.style.width = `${(card.XpCurrent / card.XpReq) * 100}%`;
+    }
     updateBloodSplat(card);
   });
 }
