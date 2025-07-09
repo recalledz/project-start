@@ -185,6 +185,7 @@ export const sectState = {
   discipleSkills: {}, // map disciple id -> skill levels per task
   discipleConstructXp: {}, // map disciple id -> construct XP
   chantAssignments: {}, // map disciple id -> assigned construct
+  discipleRest: {}, // map disciple id -> time spent resting
   buildings: { pineShack: 0, researchTable: 0, chantingHall: 0 },
   researchPoints: 0,
   researchProgress: 0,
@@ -208,6 +209,8 @@ const RESEARCH_XP_PER_CYCLE = 20;
 const CHANT_XP_PER_CYCLE = 0.5;
 const EXPLORATION_CYCLE_SECONDS = 150;
 const STAMINA_DRAIN_PER_EXPLORATION = 1;
+const DISCIPLE_MAX_HEALTH = 10;
+const REST_TIME_SECONDS = 300; // health fully restored over 5 minutes
 
 const TASK_ICONS = {
   'Gather Fruit': '🍎',
@@ -217,7 +220,8 @@ const TASK_ICONS = {
   Chant: '🎶',
   Exploration: '🧭',
   'Delve Dungeon': '🗝️',
-  Idle: '💤'
+  Idle: '💤',
+  Resting: '🛌'
 };
 
 const LOCATION_DEFS = [
@@ -1119,6 +1123,24 @@ function tickSect(delta) {
     const maxStamina = calculateMaxStamina(d.endurance);
     const regenRate = calculateStaminaRegen(d.endurance);
     d.stamina = Math.min(maxStamina, Math.max(0, d.stamina));
+
+    if (d.incapacitated) {
+      sectState.discipleTasks[d.id] = 'Idle';
+      if (d.health < DISCIPLE_MAX_HEALTH) {
+        d.health = Math.min(
+          DISCIPLE_MAX_HEALTH,
+          d.health + (DISCIPLE_MAX_HEALTH / REST_TIME_SECONDS) * dt
+        );
+      } else {
+        d.stamina = Math.min(maxStamina, d.stamina + regenRate * dt);
+        if (d.stamina >= maxStamina) {
+          d.incapacitated = false;
+          sectState.discipleRest[d.id] = 0;
+        }
+      }
+      return;
+    }
+
     const task = sectState.discipleTasks[d.id];
     if (task === 'Exploration') {
       // drain stamina once per completed cycle
@@ -1267,7 +1289,9 @@ function updateTaskProgressDisplay() {
     const fill = wrapper.querySelector('.disciple-progress-fill');
     const label = wrapper.querySelector('.disciple-progress-label');
     const rateEl = wrapper.querySelector('.disciple-task-rate');
-    const taskName = sectState.discipleTasks[d.id] || 'Idle';
+    const taskName = d.incapacitated
+      ? 'Resting'
+      : sectState.discipleTasks[d.id] || 'Idle';
     if (taskName === 'Gather Fruit' || taskName === 'Log Pine') {
       const progress = sectState.discipleProgress[d.id] || 0;
       const baseSeconds =
@@ -1308,6 +1332,10 @@ function updateTaskProgressDisplay() {
       const pct = (progress / EXPLORATION_CYCLE_SECONDS) * 100;
       if (fill) fill.style.width = `${pct}%`;
       if (label) label.textContent = 'Exploring';
+      if (rateEl) rateEl.textContent = '';
+    } else if (taskName === 'Resting') {
+      if (fill) fill.style.width = '0%';
+      if (label) label.textContent = 'Resting';
       if (rateEl) rateEl.textContent = '';
     } else {
       if (fill) fill.style.width = '0%';
@@ -1450,9 +1478,21 @@ function startDiscipleMovement() {
     speechState.disciples.forEach(d => {
       const el = sectDiscipleEls[d.id];
       if (!el) return;
-      const task = sectState.discipleTasks[d.id];
-      if (task === 'Gather Fruit' || task === 'Log Pine') updateDiscipleGather(d.id, el);
-      else moveDisciple(el);
+      if (d.incapacitated) {
+        const orb = document.querySelector('#sectOrbs .body');
+        if (orb) {
+          const bx = orb.offsetLeft + orb.offsetWidth / 2 - 2;
+          const by = orb.offsetTop + orb.offsetHeight / 2 - 2;
+          el.style.transform = `translate(${bx}px, ${by}px)`;
+        }
+        el.classList.add('incapacitated');
+      } else {
+        el.classList.remove('incapacitated');
+        const task = sectState.discipleTasks[d.id];
+        if (task === 'Gather Fruit' || task === 'Log Pine')
+          updateDiscipleGather(d.id, el);
+        else moveDisciple(el);
+      }
     });
   }, 3000);
 }
@@ -1468,7 +1508,9 @@ function renderColonyTasks() {
     const row = document.createElement('div');
     row.className = 'task-entry';
     if (d.id === selectedDiscipleId) row.classList.add('selected');
-    const current = sectState.discipleTasks[d.id] || 'Idle';
+    const current = d.incapacitated
+      ? 'Resting'
+      : sectState.discipleTasks[d.id] || 'Idle';
     if (current === 'Idle') row.classList.add('idle');
     row.addEventListener('click', () => {
       selectedDiscipleId = d.id;
@@ -1541,6 +1583,7 @@ function renderColonyInfo() {
   tasks.forEach(t => {
     const option = document.createElement('div');
     option.className = 'disciple-skill-option';
+    if (d.incapacitated) option.classList.add('disabled');
 
     const skills =
       sectState.discipleSkills[d.id] || {
@@ -1568,6 +1611,7 @@ function renderColonyInfo() {
     option.appendChild(bar);
 
     option.addEventListener('click', () => {
+      if (d.incapacitated) return;
       const prev = sectState.discipleTasks[d.id];
       sectState.discipleTasks[d.id] = t;
       discipleGatherPhase[d.id] = -1;
@@ -1870,7 +1914,10 @@ function buildDiscipleStatusView(d) {
     body.appendChild(wrapper);
   });
   const task = document.createElement('div');
-  task.textContent = `Current Task: ${sectState.discipleTasks[d.id] || 'Idle'}`;
+  const curTask = d.incapacitated
+    ? 'Resting'
+    : sectState.discipleTasks[d.id] || 'Idle';
+  task.textContent = `Current Task: ${curTask}`;
   body.appendChild(task);
 
   const invRow = document.createElement('div');
