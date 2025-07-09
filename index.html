@@ -48,6 +48,7 @@
       <button class="explorationTabButton" style="display:none;">exploration</button>
       <button class="playerStatsTabButton">stats</button>
       <button class="locationTabButton" style="display:none;">locations</button>
+      <button class="logTabButton">log</button>
     </div>
 
     <!--------------main tab panel----------------->
@@ -98,10 +99,11 @@
             </div>
           </div>
         </div>
-        <div class="vignette log">
-          <button class="vignette-toggle">Log</button>
-          <div class="casino-section vignette-content" id="log-panel">
-            <div id="game-log"></div>
+        <div class="vignette resources">
+          <button class="vignette-toggle">Resources</button>
+          <div class="casino-section vignette-content">
+            <div id="combatOrbs" class="construct-orbs combat-orbs"></div>
+            <div id="combatResources" class="secondary-resources"></div>
           </div>
         </div>
         <div class="deck-info">
@@ -144,8 +146,6 @@
         </div>
         <div class="handContainer casino-section"></div>
         <div id="combatHotbar" class="construct-hotbar casino-section"></div>
-        <div id="combatOrbs" class="construct-orbs combat-orbs"></div>
-        <div id="combatResources" class="secondary-resources"></div>
       </div>
       </div>
       <div class="worldsTab" style="display:none;">
@@ -280,6 +280,10 @@
     <div class="locationTab" style="display:none;">
       <div class="location-list casino-section"></div>
     </div>
+    <div class="logTab" style="display:none;">
+      <div id="log-panel" class="casino-section">
+        <div id="game-log"></div>
+      </div>
+    </div>
     <div id="tooltip"></div>
-    <script type="module" src="script.js"></script>
-  </body></html>
+    <script type="module" src="script.js"></script>  </body></html>

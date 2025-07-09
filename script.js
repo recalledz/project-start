@@ -145,6 +145,7 @@ const BASE_STATS = {
   attackSpeed: 10000,
   //ms between automatic attacks
   hpPerKill: 1,
+  avgCombatLevel: 0,
   baseCardHpBoost: 0,
   maxMana: 0,
   mana: 0,
@@ -524,6 +525,7 @@ let cardSubTabButton;
 let playerTabButton;
 let explorationTabButton;
 let locationTabButton;
+let logTabButton;
 let mainTab;
 let cardSubTab;
 let deckTab;
@@ -533,6 +535,7 @@ let worldsTab;
 let playerTab;
 let explorationTab;
 let locationTab;
+let logTab;
 let locationListContainer;
 let explorationListContainer;
 let startDungeonBtn;
@@ -652,6 +655,13 @@ function setupTabHandlers() {
         showTab(locationTab);
         setActiveTabButton(locationTabButton);
       }
+    },
+    {
+      buttonSelector: '.logTabButton',
+      onClick: () => {
+        showTab(logTab);
+        setActiveTabButton(logTabButton);
+      }
     }
   ];
 
@@ -688,6 +698,7 @@ function hideTab() {
   if (playerTab) playerTab.style.display = "none";
   if (explorationTab) explorationTab.style.display = "none";
   if (locationTab) locationTab.style.display = "none";
+  if (logTab) logTab.style.display = "none";
 }
 
 function showTab(tab) {
@@ -772,6 +783,7 @@ function initTabs() {
   playerTabButton = document.querySelector('.playerTabButton');
   explorationTabButton = document.querySelector('.explorationTabButton');
   locationTabButton = document.querySelector('.locationTabButton');
+  logTabButton = document.querySelector('.logTabButton');
   mainTab = document.querySelector('.mainTab');
   cardSubTab = document.querySelector('.cardSubTab');
   deckTab = document.querySelector('.deckTab');
@@ -781,6 +793,7 @@ function initTabs() {
   playerTab = document.querySelector('.playerTab');
   explorationTab = document.querySelector('.explorationTab');
   locationTab = document.querySelector('.locationTab');
+  logTab = document.querySelector('.logTab');
   locationListContainer = document.querySelector('.location-list');
   explorationListContainer = document.querySelector('.exploration-list');
   startDungeonBtn = document.querySelector('.startDungeonBtn');
@@ -2238,6 +2251,8 @@ document.addEventListener("DOMContentLoaded", () => {
   showDeckListView();
   showColonyTab('tasks');
   Object.values(upgrades).forEach(u => u.effect({ stats, pDeck, stageData, systems }));
+  updatePlayerStats(stats);
+  updatePlayerStats(stats);
   renderPurchasedUpgrades();
   // Start or resume the game after loading
   spawnPlayer();
@@ -2307,6 +2322,7 @@ function unlockManaSystem() {
   stats.manaRegen = 0.01;
   // re-apply upgrade effects in case levels were purchased before unlock
   Object.values(upgrades).forEach(u => u.effect({ stats, pDeck, stageData, systems }));
+  updatePlayerStats(stats);
   updateManaBar();
   checkUpgradeUnlocks();
 }
@@ -3073,8 +3089,12 @@ function updateHandDisplay() {
   drawnCards.forEach(card => {
     if (!card || !card.hpDisplay) return; // Skip if card or elements are missing
     card.hpDisplay.textContent = `HP: ${formatNumber(Math.round(card.currentHp))}/${formatNumber(Math.round(card.maxHp))}`;
-    card.xpLabel.textContent = `LV: ${card.currentLevel}`;
-    card.xpBarFill.style.width = `${(card.XpCurrent / card.XpReq) * 100}%`;
+    if (card.xpLabel) {
+      card.xpLabel.textContent = `LV: ${card.currentLevel}`;
+    }
+    if (card.xpBarFill) {
+      card.xpBarFill.style.width = `${(card.XpCurrent / card.XpReq) * 100}%`;
+    }
     updateBloodSplat(card);
   });
 }
@@ -3925,6 +3945,7 @@ if (
 }
 
 Object.values(upgrades).forEach(u => u.effect({ stats, pDeck, stageData, systems }));
+  updatePlayerStats(stats);
 
 
   renderJokers();
