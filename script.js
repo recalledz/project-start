@@ -21,7 +21,7 @@ import {
 import {
   initStarChart
 } from "./starChart.js"; // optional star chart tab
-import { initSpeech, tickSpeech, speechState, DAY_LENGTH_SECONDS, castConstruct, createConstructCard, createConstructInfo, recipes, openInsightRegenPopup } from "./speech.js";
+import { initSpeech, tickSpeech, speechState, DAY_LENGTH_SECONDS, castConstruct, createConstructCard, createConstructInfo, recipes, openInsightRegenPopup, unlockConstruct } from "./speech.js";
 import { Jobs, assignJob, getAvailableJobs, renderJobAssignments, renderJobCarousel } from "./jobs.js"; // job definitions
 import RateTracker from "./utils/rateTracker.js";
 import { formatNumber } from "./utils/numberFormat.js";
@@ -127,7 +127,7 @@ let chips = 0;
 let cardPoints = 0;
 // Track how many card points have already been converted to cash
 let lastCashOutPoints = 0;
-let currentEnemy = null;
+export let currentEnemy = null;
 
 function spendCash(amount) {
   const amt = Math.min(amount, cash);
@@ -487,6 +487,9 @@ const jobCarouselContainer = document.querySelector('.jobCarouselContainer');
 const dCardContainer = document.getElementsByClassName("dCardContainer")[0];
 const dealerContainer = document.querySelector('.dealerContainer');
 const jokerContainers = document.querySelectorAll(".jokerContainer");
+const combatHotbar = document.getElementById('combatHotbar');
+const combatOrbs = document.getElementById('combatOrbs');
+const combatResources = document.getElementById('combatResources');
 const manaBar = document.getElementById("manaBar");
 const manaFill = document.getElementById("manaFill");
 const manaText = document.getElementById("manaText");
@@ -917,6 +920,13 @@ function initTabs() {
         .forEach(cb => explorationParty.add(parseInt(cb.value)));
       currentExplorationParty = Array.from(explorationParty);
       if (currentExplorationParty.length > 0) {
+        clearActiveDisciples();
+        currentExplorationParty.forEach(id => {
+          const d = speechState.disciples.find(x => x.id === id);
+          if (d) {
+            selectDisciple(d);
+          }
+        });
         showTab(mainTab);
         setActiveTabButton(playerTabButton);
         respawnDealerStage();
@@ -1851,6 +1861,7 @@ function renderColonyResearchPanel() {
         sectState.researchPoints -= 10;
         systems.explorationUnlocked = true;
         addLog('Research complete: Foreseers', 'good');
+        unlockConstruct('Sonic Boom');
         renderColonyResearchPanel();
       }
     });
@@ -3746,6 +3757,7 @@ function attack(deltaTime = 0) {
       discipleAttackTimers[d.id] = 0;
       if (d.attackFill) d.attackFill.style.width = '0%';
     }
+
   });
 
   stageData.dealerLifeCurrent = currentEnemy.currentHp;
@@ -4271,7 +4283,7 @@ renderPlayerStats(stats);
   unlockExploration: () => {
     systems.explorationUnlocked = true;
     addDiscoveredLocation('Esoteric Dungeon');
+    unlockConstruct('Sonic Boom');
   },
   save: saveGame,
-  load: loadGame,
-  newGame: startNewGame};
+  load: loadGame,  newGame: startNewGame};
