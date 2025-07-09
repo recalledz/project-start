@@ -33,4 +33,12 @@ export default class Disciple {
     this.damage = this.combatLevel * 3 * (1 + 0.05 * this.strength);
     this.attackSpeed = 10000 / (1 + 0.05 * this.dexterity);
   }
+
+  takeDamage(amount) {
+    this.currentHp = Math.round(Math.max(0, this.currentHp - amount));
+  }
+
+  isDefeated() {
+    return this.currentHp <= 0;
+  }
 }
