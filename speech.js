@@ -1,6 +1,6 @@
 import addLog from './log.js';
 import { coreState, refreshCore } from './core.js';
-import { sectState, systems } from './script.js';
+import { sectState, systems, currentEnemy } from './script.js';
 import { generateDiscipleAttributes } from './discipleAttributes.js';
 import { createOverlay } from './ui/overlay.js';
 
@@ -150,7 +150,8 @@ export const recipes = [
     tags: ['single-cast', 'generator'],
     unlocked: true,
     cooldown: 1,
-    potency: 1
+    potency: 1,
+    battle: { damage: 2 }
   },
   {
     name: 'Echo of Mind',
@@ -163,7 +164,8 @@ export const recipes = [
     castCost: { sound: 25, insight: 500 },
     duration: 5,
     cooldown: 5,
-    potency: 1
+    potency: 1,
+    battle: { damage: 3 }
   },
   {
     name: 'Clarity Pulse',
@@ -176,7 +178,8 @@ export const recipes = [
     castCost: { thought: 20, sound: 50 },
     duration: 30,
     cooldown: 30,
-    potency: 1
+    potency: 1,
+    battle: { damage: 4 }
   },
   {
     name: 'Symbol Seed',
@@ -188,7 +191,8 @@ export const recipes = [
     requirements: { mindLevel: 3, insight: 2000 },
     duration: 30,
     cooldown: 30,
-    potency: 1
+    potency: 1,
+    battle: { damage: 5 }
   },
   {
     name: 'Mental Construct',
@@ -200,7 +204,8 @@ export const recipes = [
     requirements: { voiceLevel: 5, mindLevel: 5, insight: 2300 },
     castCost: { thought: 10, structure: 10, insight: 1000 },
     cooldown: 10,
-    potency: 1
+    potency: 1,
+    battle: { damage: 6 }
   },
   {
     name: 'Intone',
@@ -232,6 +237,19 @@ export const recipes = [
     unlocked: false,
     requirements: { sound: 100 },
     cooldown: 300
+  },
+  {
+    name: 'Sonic Boom',
+    input: {},
+    output: {},
+    xp: { voice: 10 },
+    tags: ['single-cast', 'combat'],
+    unlocked: false,
+    castCost: { sound: 10 },
+    cooldown: 10,
+    potency: 1,
+    borderGlow: 'metal',
+    battle: { damage: 20 }
   }
 ];
 
@@ -281,7 +299,8 @@ export const constructEffectText = {
   'Intone': 'Press repeatedly to charge; 1.2× at 5, 1.5× at 10, 2× at 15 for 30s',
   'Mnemonic Rhythm': 'Grants ×2 XP to other constructs for 3s; +0.2× per potency',
   'Mental Construct': 'Gain 0.1 elemental essence based on season',
-  'The Calling': 'Attempts to recruit a Disciple based on Calling potency'
+  'The Calling': 'Attempts to recruit a Disciple based on Calling potency',
+  'Sonic Boom': 'Deal 20 damage to the enemy'
 };
 
 export const constructColors = {
@@ -291,7 +310,8 @@ export const constructColors = {
   'Symbol Seed': '#8a2be2', // Violet
   'Intone': '#87ceeb', // Sky Blue
   'Mental Construct': '#ffbf00', // Amber
-  'Mnemonic Rhythm': '#ffd700' // Gold
+  'Mnemonic Rhythm': '#ffd700', // Gold
+  'Sonic Boom': '#999999'
 };
 
 export const constructIcons = {
@@ -302,7 +322,8 @@ export const constructIcons = {
   'Intone': 'mic',
   'Mental Construct': 'cpu',
   'Mnemonic Rhythm': 'music',
-  'The Calling': 'bell'
+  'The Calling': 'bell',
+  'Sonic Boom': 'volume-2'
 };
 
 function xpRequired(level) {
@@ -713,6 +734,15 @@ function addConstruct(name) {
   }
 }
 
+export function unlockConstruct(name) {
+  const rec = recipes.find(r => r.name === name);
+  if (rec && !rec.unlocked) {
+    rec.unlocked = true;
+    delete rec.requirements;
+    addConstruct(name);
+  }
+}
+
 function renderConstructCards() {
   const cont = panel.querySelector('#modalCardContainer');
   const slotCont = panel.querySelector('#memorySlotsDisplay');
@@ -925,6 +955,10 @@ function toggleConstructActive(name) {
 export function castConstruct(name, el, powerMult = 1, caster = 'player') {
   const def = recipes.find(r => r.name === name);
   if (!def) return;
+  if (currentEnemy && (!def.tags || !def.tags.includes('combat'))) {
+    addLog('Cannot use this construct in combat', 'error');
+    return;
+  }
   const voiceSkill = speechState.skills.voice;
   const mindSkill = speechState.skills.mind;
   if (def.requirements && def.requirements.voiceLevel && voiceSkill.level < def.requirements.voiceLevel) {
@@ -939,7 +973,8 @@ export function castConstruct(name, el, powerMult = 1, caster = 'player') {
     addLog(`Requires ${def.requirements.insight} Insight`, 'error');
     return;
   }
-  if (speechState.cooldowns[name] > 0) return;
+  const cdKey = caster === 'player' ? name : `${name}:${caster}`;
+  if (speechState.cooldowns[cdKey] > 0) return;
   const cost = def.castCost || def.input;
   for (const [res, amt] of Object.entries(cost)) {
     const r = speechState.resources[res];
@@ -992,8 +1027,11 @@ export function castConstruct(name, el, powerMult = 1, caster = 'player') {
     if (effect) effect(1, finalMult);
   }
   lastConstructTarget = null;
+  if (def.battle && def.battle.damage && currentEnemy) {
+    currentEnemy.takeDamage(def.battle.damage * finalMult);
+  }
   if (def.cooldown && name !== 'Intone') {
-    speechState.cooldowns[name] = def.cooldown;
+    speechState.cooldowns[cdKey] = def.cooldown;
   }
   renderResources();
   renderXpBar();
@@ -1001,19 +1039,26 @@ export function castConstruct(name, el, powerMult = 1, caster = 'player') {
 }
 
 function renderHotbar() {
-  const bar = container.querySelector('#constructHotbar');
-  if (!bar) return;
-  bar.innerHTML = '';
-  speechState.activeConstructs.forEach(c => {
-    const wrapper = document.createElement('div');
-    wrapper.className = 'construct-card-wrapper';
-    const card = createConstructCard(c);
-    card.classList.add('hotbar-construct');
-    card.addEventListener('click', () => castConstruct(c, card));
-    wrapper.appendChild(card);
-    const info = createConstructInfo(c);
-    if (info) wrapper.appendChild(info);
-    bar.appendChild(wrapper);
+  const bars = [];
+  if (container) {
+    const b = container.querySelector('#constructHotbar');
+    if (b) bars.push(b);
+  }
+  const combatBar = document.getElementById('combatHotbar');
+  if (combatBar) bars.push(combatBar);
+  bars.forEach(bar => {
+    bar.innerHTML = '';
+    speechState.activeConstructs.forEach(c => {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'construct-card-wrapper';
+      const card = createConstructCard(c);
+      card.classList.add('hotbar-construct');
+      card.addEventListener('click', () => castConstruct(c, card));
+      wrapper.appendChild(card);
+      const info = createConstructInfo(c);
+      if (info) wrapper.appendChild(info);
+      bar.appendChild(wrapper);
+    });
   });
 }
 
@@ -1035,48 +1080,53 @@ export function renderXpBar() {
 }
 
 function renderOrbs() {
-  if (!container) return;
-  const update = (id, orb) => {
-    const fill = container.querySelector(`#${id} .orb-fill`);
-    if (!fill) return;
-    const pct = Math.max(0, Math.min(1, orb.current / orb.max)) * 100;
-    fill.style.height = `${pct}%`;
-    const el = container.querySelector(`#${id}`);
-    if (el) {
-      el.title = `${Math.floor(orb.current)}/${orb.max} (${speechState.gains[id.replace('orb','').toLowerCase()].toFixed(1)}/sec)`;
-      el.classList.toggle('full', orb.current >= orb.max);
-    }
-    const label = container.querySelector(`#${id}Value`);
-    if (label) label.textContent = `${Math.floor(orb.current)}/${orb.max}`;
-    const regenLabel = container.querySelector(`#${id}Regen`);
-    if (regenLabel) {
-      if (speechState.upgrades.clarividence.level > 0) {
-        const iconEl = regenLabel.querySelector('.season-icon');
-        const valEl = regenLabel.querySelector('.regen-value');
-        if (valEl) {
-          valEl.textContent = `+${speechState.gains[id.replace('orb','').toLowerCase()].toFixed(3)}/s`;
-        }
-        if (id === 'orbInsight' && iconEl) {
-          const icon = seasonIcons[speechState.seasonIndex];
-          iconEl.textContent = icon;
-          regenLabel.onmouseenter = e => {
-            showTooltip(`Base: ${speechState.insightRegenBase.toFixed(3)}<br>Current: ${speechState.gains.insight.toFixed(3)}`, e.clientX + 10, e.clientY + 10);
-          };
-          regenLabel.onmouseleave = hideTooltip;
-        }
-        regenLabel.style.display = 'flex';
-      } else {
-        regenLabel.style.display = 'none';
+  const roots = [];
+  if (container) roots.push(container);
+  const combatRoot = document.getElementById('combatOrbs');
+  if (combatRoot) roots.push(combatRoot);
+  roots.forEach(root => {
+    const update = (id, orb) => {
+      const fill = root.querySelector(`#${id} .orb-fill`);
+      if (!fill) return;
+      const pct = Math.max(0, Math.min(1, orb.current / orb.max)) * 100;
+      fill.style.height = `${pct}%`;
+      const el = root.querySelector(`#${id}`);
+      if (el) {
+        el.title = `${Math.floor(orb.current)}/${orb.max} (${speechState.gains[id.replace('orb','').toLowerCase()].toFixed(1)}/sec)`;
+        el.classList.toggle('full', orb.current >= orb.max);
       }
-    }
-  };
-  update('orbBody', speechState.orbs.body);
-  update('orbInsight', speechState.orbs.insight);
-  update('orbWill', speechState.orbs.will);
-  const bodyEl = container.querySelector('#orbBodyContainer');
-  if (bodyEl) bodyEl.style.display = speechState.orbs.body.current >= 1 ? 'flex' : 'none';
-  const willEl = container.querySelector('#orbWillContainer');
-  if (willEl) willEl.style.display = speechState.orbs.will.current >= 1 ? 'flex' : 'none';
+      const label = root.querySelector(`#${id}Value`);
+      if (label) label.textContent = `${Math.floor(orb.current)}/${orb.max}`;
+      const regenLabel = root.querySelector(`#${id}Regen`);
+      if (regenLabel) {
+        if (speechState.upgrades.clarividence.level > 0) {
+          const iconEl = regenLabel.querySelector('.season-icon');
+          const valEl = regenLabel.querySelector('.regen-value');
+          if (valEl) {
+            valEl.textContent = `+${speechState.gains[id.replace('orb','').toLowerCase()].toFixed(3)}/s`;
+          }
+          if (id === 'orbInsight' && iconEl) {
+            const icon = seasonIcons[speechState.seasonIndex];
+            iconEl.textContent = icon;
+            regenLabel.onmouseenter = e => {
+              showTooltip(`Base: ${speechState.insightRegenBase.toFixed(3)}<br>Current: ${speechState.gains.insight.toFixed(3)}`, e.clientX + 10, e.clientY + 10);
+            };
+            regenLabel.onmouseleave = hideTooltip;
+          }
+          regenLabel.style.display = 'flex';
+        } else {
+          regenLabel.style.display = 'none';
+        }
+      }
+    };
+    update('orbBody', speechState.orbs.body);
+    update('orbInsight', speechState.orbs.insight);
+    update('orbWill', speechState.orbs.will);
+    const bodyEl = root.querySelector('#orbBodyContainer');
+    if (bodyEl) bodyEl.style.display = speechState.orbs.body.current >= 1 ? 'flex' : 'none';
+    const willEl = root.querySelector('#orbWillContainer');
+    if (willEl) willEl.style.display = speechState.orbs.will.current >= 1 ? 'flex' : 'none';
+  });
   window.dispatchEvent(new CustomEvent('orbs-changed'));
 }
 
@@ -1097,35 +1147,40 @@ function renderSeasonBanner() {
 }
 
 function renderResources() {
-  const panelRes = document.getElementById('secondaryResources');
-  if (!panelRes) return;
-  panelRes.innerHTML = '';
-  Object.entries(speechState.resources).forEach(([key, res]) => {
-    if (key === 'insight' || res.unlocked === false) return;
-    const box = document.createElement('div');
-    box.className = 'resource-box';
-    const header = document.createElement('div');
-    header.className = 'resource-text';
-    const icon = document.createElement('i');
-    icon.dataset.lucide = resourceIcons[key] || 'package';
-    const name = document.createElement('span');
-    name.className = 'resource-name';
-    name.textContent = key.charAt(0).toUpperCase() + key.slice(1);
-    const value = document.createElement('span');
-    value.className = `resource-value ${key}`;
-    value.textContent = `${Math.floor(res.current)}/${res.max}`;
-    header.appendChild(icon);
-    header.appendChild(name);
-    header.appendChild(value);
-    const bar = document.createElement('div');
-    bar.className = 'resource-bar';
-    const fill = document.createElement('div');
-    fill.className = `resource-fill ${key}`;
-    fill.style.width = `${(res.current / res.max) * 100}%`;
-    bar.appendChild(fill);
-    box.appendChild(header);
-    box.appendChild(bar);
-    panelRes.appendChild(box);
+  const panels = [
+    document.getElementById('secondaryResources'),
+    document.getElementById('combatResources')
+  ];
+  panels.forEach(panelRes => {
+    if (!panelRes) return;
+    panelRes.innerHTML = '';
+    Object.entries(speechState.resources).forEach(([key, res]) => {
+      if (key === 'insight' || res.unlocked === false) return;
+      const box = document.createElement('div');
+      box.className = 'resource-box';
+      const header = document.createElement('div');
+      header.className = 'resource-text';
+      const icon = document.createElement('i');
+      icon.dataset.lucide = resourceIcons[key] || 'package';
+      const name = document.createElement('span');
+      name.className = 'resource-name';
+      name.textContent = key.charAt(0).toUpperCase() + key.slice(1);
+      const value = document.createElement('span');
+      value.className = `resource-value ${key}`;
+      value.textContent = `${Math.floor(res.current)}/${res.max}`;
+      header.appendChild(icon);
+      header.appendChild(name);
+      header.appendChild(value);
+      const bar = document.createElement('div');
+      bar.className = 'resource-bar';
+      const fill = document.createElement('div');
+      fill.className = `resource-fill ${key}`;
+      fill.style.width = `${(res.current / res.max) * 100}%`;
+      bar.appendChild(fill);
+      box.appendChild(header);
+      box.appendChild(bar);
+      panelRes.appendChild(box);
+    });
   });
   if (window.lucide) lucide.createIcons({ icons: lucide.icons });
   window.dispatchEvent(new CustomEvent('resources-changed'));
