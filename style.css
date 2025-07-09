@@ -3126,30 +3126,27 @@ body.darkenshift-mode .tabsContainer button.active {
     position: relative;
     padding: 32px;
     border-radius: 8px;
-    background:
-        repeating-linear-gradient(
-            60deg,
-            rgba(255,255,255,0.03),
-            rgba(255,255,255,0.03) 1px,
-            transparent 1px,
-            transparent 20px
-        ),
-        repeating-linear-gradient(
-            -60deg,
-            rgba(255,255,255,0.03),
-            rgba(255,255,255,0.03) 1px,
-            transparent 1px,
-            transparent 20px
-        ),
-        radial-gradient(
-            circle at top center,
-            var(--season-start) 0%,
-            var(--season-start) 20%,
-            var(--season-end) 80%,
-            rgba(0,0,0,0.9) 100%
-        );
-    background-blend-mode: screen;
+    background: rgba(30, 35, 50, 0.6);
+    backdrop-filter: blur(8px) brightness(0.9);
     z-index: 0;
+}
+
+.construct-area.verdantia {
+    backdrop-filter: blur(8px) hue-rotate(60deg) brightness(0.9);
+}
+
+.construct-area.solaria {
+    backdrop-filter: blur(8px) hue-rotate(-20deg) brightness(1.1);
+}
+
+.construct-area.bruma {
+    backdrop-filter: blur(8px) hue-rotate(180deg) brightness(0.8);
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+    .construct-area {
+        background: rgba(30,35,50,0.8);
+    }
 }
 
 #constructTabCardContainer {
