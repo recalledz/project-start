@@ -224,7 +224,6 @@ const TASK_ICONS = {
   Research: '🔬',
   Chant: '🎶',
   Exploration: '🧭',
-  'Delve Dungeon': '🗝️',
   Idle: '💤',
   Resting: '🛌'
 };
@@ -263,8 +262,7 @@ function ensureDiscipleSkills(id) {
       Building: 0,
       Research: 0,
       Chant: 0,
-      Exploration: 0,
-      'Delve Dungeon': 0
+      Exploration: 0
     };
   }
 }
@@ -1588,7 +1586,6 @@ function renderColonyInfo() {
   if (sectState.buildings.researchTable > 0) tasks.push('Research');
   if (sectState.buildings.chantingHall > 0) tasks.push('Chant');
   if (systems.explorationUnlocked) tasks.push('Exploration');
-  if (discoveredLocations.includes('Esoteric Dungeon')) tasks.push('Delve Dungeon');
   tasks.forEach(t => {
     const option = document.createElement('div');
     option.className = 'disciple-skill-option';
@@ -3679,6 +3676,11 @@ function returnPartyToSect() {
   });
   currentExplorationParty = [];
   clearActiveDisciples();
+  inCombat = false;
+  currentEnemy = null;
+  removeDealerLifeBar();
+  hidePlayerAttackBar();
+  playerStats.hasDied = false;
   showTab(playerTab);
   setActiveTabButton(playerTabButton);
   if (playerSectSubTabButton) playerSectSubTabButton.click();

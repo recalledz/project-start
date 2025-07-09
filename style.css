@@ -1946,6 +1946,7 @@ body.darkenshift-mode .tabsContainer button.active {
     font-size: 1.6rem;
     color: #ddd;
     font-style: italic;
+    font-family: 'Creepster', cursive;
     text-shadow: 0 0 8px #fff;
     animation: fogFade 7s ease-in-out;
 }
