@@ -537,9 +537,6 @@ const saveInterval = setInterval(saveGame, 30000);
 
 //=========tabs==========
 
-let mainTabButton;
-let deckTabButton;
-let starChartTabButton;
 let playerStatsTabButton;
 let worldSubTabButton;
 let cardSubTabButton;
@@ -630,29 +627,6 @@ function addDiscoveredLocation(name) {
 
 function setupTabHandlers() {
   const tabHandlers = [
-    {
-      buttonSelector: '.mainTabButton',
-      onClick: () => {
-        showTab(mainTab);
-        setActiveTabButton(mainTabButton);
-      }
-    },
-    {
-      buttonSelector: '.deckTabButton',
-      onClick: () => {
-        showTab(deckTab);
-        setActiveTabButton(deckTabButton);
-        showDeckListView();
-      }
-    },
-    {
-      buttonSelector: '.starChartTabButton',
-      onClick: () => {
-        initStarChart();
-        showTab(starChartTab);
-        setActiveTabButton(starChartTabButton);
-      }
-    },
     {
       buttonSelector: '.playerStatsTabButton',
       onClick: () => {
@@ -789,9 +763,6 @@ function showColonyTab(name) {
 function initTabs() {
   if (typeof document === 'undefined') return;
 
-  mainTabButton = document.querySelector('.mainTabButton');
-  deckTabButton = document.querySelector('.deckTabButton');
-  starChartTabButton = document.querySelector('.starChartTabButton');
   playerStatsTabButton = document.querySelector('.playerStatsTabButton');
   cardSubTabButton = document.querySelector('.cardSubTabButton');
   worldSubTabButton = document.querySelector('.worldSubTabButton');
@@ -962,8 +933,9 @@ function initTabs() {
       renderEconomyStats();
     });
 
-  showTab(mainTab); // Start with main tab visible
-  setActiveTabButton(mainTabButton);
+  showTab(playerTab); // Start with construct panel visible
+  setActiveTabButton(playerTabButton);
+  if (playerConstructSubTabButton) playerConstructSubTabButton.click();
 }
 
 // Allow collapsing/expanding vignette UI panels
@@ -2166,6 +2138,7 @@ function showJobCarouselView() {
 //========render functions==========
 document.addEventListener("DOMContentLoaded", () => {
   // now the DOM is in, and lucide.js has run, so window.lucide is defined
+  initSpeech();
   initTabs();
   window.addEventListener('location-discovered', e => addDiscoveredLocation(e.detail.name));
   loadGame();
@@ -2180,7 +2153,6 @@ document.addEventListener("DOMContentLoaded", () => {
   initVignetteToggles();
   if (window.lucide) lucide.createIcons({ icons: lucide.icons });
   initCore();
-  initSpeech();
   renderConstructLexicon();
   document.addEventListener('day-passed', () => {
     speechState.disciples.forEach(d => {
@@ -2844,7 +2816,6 @@ function onSpeakerDefeat() {
   } else if (idx === 3) {
     showSpeakerQuote("The soul is the only prison you’ve never tried to break.");
     if (playerTabButton) playerTabButton.style.display = "inline-block";
-    if (mainTabButton) mainTabButton.disabled = true;
     showTab(playerTab);
     setActiveTabButton(playerTabButton);
   }
