@@ -1041,7 +1041,10 @@ function renderHotbar() {
   if (combatBar) bars.push(combatBar);
   bars.forEach(bar => {
     bar.innerHTML = '';
+    const combatOnly = bar.id === 'combatHotbar';
     speechState.activeConstructs.forEach(c => {
+      const recipe = recipes.find(r => r.name === c);
+      if (combatOnly && (!recipe || !recipe.tags || !recipe.tags.includes('combat'))) return;
       const wrapper = document.createElement('div');
       wrapper.className = 'construct-card-wrapper';
       const card = createConstructCard(c);
