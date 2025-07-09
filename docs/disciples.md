@@ -44,6 +44,15 @@ The current inventory contents are shown in the colony interface when viewing a 
 
 Gaining three points in a single stat is therefore possible but uncommon.
 
+## Incapacitation and Resting
+
+When a disciple's health drops to zero they become **incapacitated**. Incapacitated followers
+gather around the Body orb in the Sect tab and emit a red glow while they rest. During this
+time they do not regain stamina and cannot be assigned any tasks. Health steadily returns to
+full over five minutes of real time. Once their health is above zero they begin recovering
+stamina at the normal rate. When stamina reaches its maximum the disciple leaves the resting
+state and may be assigned work again.
+
 ## Task Proficiency
 
 Disciples gain skill experience (XP) for the task they are performing. XP follows an exponential curve where the XP required for each level is `50 × 1.2^level`:

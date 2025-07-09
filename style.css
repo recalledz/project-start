@@ -27,8 +27,8 @@ body {
     --core-accent: #7fafff;
     --core-text: #e0e0f0;
     --core-glow: rgba(127, 175, 255, 0.2);
-    --season-start: rgba(60,70,90,0.4);
-    --season-end: rgba(20,25,35,0.8);
+    --season-start: rgba(80,160,80,0.9);
+    --season-end: rgba(30,70,30,1.0);
 }
 
 body.darkenshift-mode {
@@ -2990,7 +2990,9 @@ body.darkenshift-mode .tabsContainer button.active {
     background: linear-gradient(#11131c, #0e0f1a);
     border: 1px solid #4a4a60;
     box-shadow: 0 0 8px #7f7fcf;
-    backdrop-filter: blur(4px);
+    backdrop-filter: blur(6px);
+    border-radius: 10px;
+    overflow: hidden;
     display: flex;
     flex-direction: column;
     height: 100%;
@@ -3124,28 +3126,27 @@ body.darkenshift-mode .tabsContainer button.active {
     position: relative;
     padding: 32px;
     border-radius: 8px;
-    background:
-        repeating-linear-gradient(
-            60deg,
-            rgba(255,255,255,0.03),
-            rgba(255,255,255,0.03) 1px,
-            transparent 1px,
-            transparent 20px
-        ),
-        repeating-linear-gradient(
-            -60deg,
-            rgba(255,255,255,0.03),
-            rgba(255,255,255,0.03) 1px,
-            transparent 1px,
-            transparent 20px
-        ),
-        radial-gradient(
-            circle 150% at top center,
-            var(--season-start),
-            var(--season-end)
-        );
-    background-blend-mode: screen;
+    background: rgba(30, 35, 50, 0.6);
+    backdrop-filter: blur(8px) brightness(0.9);
     z-index: 0;
+}
+
+.construct-area.verdantia {
+    backdrop-filter: blur(8px) hue-rotate(60deg) brightness(0.9);
+}
+
+.construct-area.solaria {
+    backdrop-filter: blur(8px) hue-rotate(-20deg) brightness(1.1);
+}
+
+.construct-area.bruma {
+    backdrop-filter: blur(8px) hue-rotate(180deg) brightness(0.8);
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+    .construct-area {
+        background: rgba(30,35,50,0.8);
+    }
 }
 
 #constructTabCardContainer {
@@ -3766,6 +3767,10 @@ body.darkenshift-mode .tabsContainer button.active {
     pointer-events: none;
     transition: transform 3s;
 }
+.sect-disciple.incapacitated {
+    background: rgba(255, 64, 64, 0.9);
+    box-shadow: 0 0 6px rgba(255, 0, 0, 0.9);
+}
 #colonyTasksPanel .task-entry {
     width: 100%;
     font-size: 0.75rem;
@@ -3957,6 +3962,10 @@ body.darkenshift-mode .tabsContainer button.active {
     flex-direction: column;
     width: 120px;
     cursor: pointer;
+}
+.disciple-skill-option.disabled {
+    opacity: 0.5;
+    pointer-events: none;
 }
 .disciple-skill-label { font-size: 0.75rem; }
 .disciple-skill-progress {
