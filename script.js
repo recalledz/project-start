@@ -1,10 +1,11 @@
 // Core modules that power the card game
-import generateDeck, {
+import {
   shuffleArray,
   Card,
   recalcCardHp,
   updateAllCardHp
 } from "./card.js"; // card utilities
+import Disciple from "./disciple.js";
 import addLog from "./log.js"; // helper for appending to the event log
 import Enemy from "./enemy.js"; // base enemy class
 import {
@@ -71,7 +72,7 @@ import {
   removeBloodSplat,
   updateBloodSplat
 } from "./rendering.js";
-import { drawCard, redrawHand } from "./cardManagement.js";
+
 import {
   deckMastery,
   deckConfigs,
@@ -89,6 +90,23 @@ import {
 // --- Game State ---
 // `drawnCards` holds the cards currently in the player's hand
 let drawnCards = [];
+// Available disciples under the player's control
+let disciples = [new Disciple({ id: 1 }), new Disciple({ id: 2 }), new Disciple({ id: 3 })];
+// Functions to manage which disciples are active in combat
+function selectDisciple(d) {
+  if (!drawnCards.includes(d) && drawnCards.length < stats.cardSlots) {
+    drawnCards.push(d);
+  }
+}
+
+function deselectDisciple(d) {
+  const idx = drawnCards.indexOf(d);
+  if (idx >= 0) drawnCards.splice(idx, 1);
+}
+
+function clearActiveDisciples() {
+  drawnCards.length = 0;
+}
 // cards discarded from play land in `discardPile`
 let discardPile = [];
 // mapping of card back styles
@@ -399,7 +417,7 @@ function getDealerIconStyle(stage) {
   };
 }
 
-let pDeck = generateDeck();
+let pDeck = [];
 let deck = [...pDeck];
 deckConfigs.basic.cards = pDeck;
 
@@ -432,8 +450,7 @@ function getCardState() {
     pDeck,
     shuffleArray,
     updateDrawButton,
-    updatePlayerStats,
-    drawCard, // will be replaced after definition
+    updatePlayerStats
   };
 }
 
@@ -2208,7 +2225,6 @@ document.addEventListener("DOMContentLoaded", () => {
   renderJobAssignments(deckJobsContainer, pDeck);
   rollNewCardUpgrades(2, deckConfigs[selectedDeck]?.upgrades || []);
   renderPurchasedUpgrades();
-  shuffleArray(deck);
   checkUpgradeUnlocks();
 
   if (nextStageArea) {
@@ -2860,7 +2876,6 @@ function onBossDefeat(boss) {
   stats.upgradePower += 5;
   rollNewCardUpgrades(2, deckConfigs[selectedDeck]?.upgrades || []);
   renderPurchasedUpgrades();
-  shuffleArray(deck);
   checkSpeakerEncounter();
   // Unlock and immediately travel to the next world
   updateWorldTabNotification();
@@ -3095,12 +3110,7 @@ function rarityClass(rarity) {
 }
 
 function handleRedraw() {
-  if (!redrawAllowed) return;
-  if (cash < redrawCost) return;
-  spendCash(redrawCost);
-  redrawCost = redrawCost * 2;
-  redrawHand(getCardState());
-  renderPlayerStats(stats);
+  // Deck system disabled - selecting disciples instead
 }
 
 function openCardUpgradeSelection(onCloseCallback = null) {
@@ -3544,11 +3554,8 @@ const awardJokerCard = () => awardJokerCardByWorld(stageData.world);
 //=========player functions===========
 
 function spawnPlayer() {
-  while (drawnCards.length < stats.cardSlots && deck.length > 0) {
-    drawCard(getCardState());
-  }
-  renderDeckTop();
-  updatePileCounts();
+  clearActiveDisciples();
+  disciples.slice(0, stats.cardSlots).forEach(d => selectDisciple(d));
 }
 
 function respawnPlayer() {
@@ -3561,8 +3568,7 @@ function respawnPlayer() {
   resetCashRates(cash);
 
   resetCardUpgrades();
-  pDeck = generateDeck();
-
+  pDeck = [];
   deck = [...pDeck];
   drawnCards = [];
   discardPile = [];
@@ -3576,14 +3582,9 @@ function respawnPlayer() {
     cash,
     onPurchase: purchaseCardUpgrade
   });
-  shuffleArray(deck);
 
-  handContainer.innerHTML = "";
-  discardContainer.innerHTML = "";
-  deckTabContainer.innerHTML = "";
-  renderDeckTop();
-  updatePileCounts();
-
+  clearActiveDisciples();
+  
   cashDisplay.textContent = `Cash: $${formatNumber(cash)}`;
   updateChipsDisplay();
   resetCashRates(cash);
