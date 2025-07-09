@@ -4230,10 +4230,13 @@ const amt = parseFloat(document.getElementById("debugManaRegen").value) || 0;
 stats.manaRegen += amt;
 renderPlayerStats(stats);
 },
-toggleFastMode: () => {
-timeScale = timeScale === 1 ? FAST_MODE_SCALE: 1;
-},
-save: saveGame,
-load: loadGame,
-newGame: startNewGame
-};
+  toggleFastMode: () => {
+    timeScale = timeScale === 1 ? FAST_MODE_SCALE: 1;
+  },
+  unlockExploration: () => {
+    systems.explorationUnlocked = true;
+    addDiscoveredLocation('Esoteric Dungeon');
+  },
+  save: saveGame,
+  load: loadGame,
+  newGame: startNewGame};
