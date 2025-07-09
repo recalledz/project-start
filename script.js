@@ -122,29 +122,9 @@ const cardBackImages = {
 // theme state
 let isDarkenshift = false;
 // resources and progress trackers
-let cash = 0;
-let chips = 0;
 let cardPoints = 0;
-// Track how many card points have already been converted to cash
-let lastCashOutPoints = 0;
-export let currentEnemy = null;
+export let currentEnemy = null
 
-function spendCash(amount) {
-  const amt = Math.min(amount, cash);
-  cash -= amt;
-  if (cashDisplay) cashDisplay.textContent = `Cash: $${formatNumber(cash)}`;
-  recordCashRates(cash);
-  updateUpgradeButtons();
-  return amt;
-}
-
-function updateChipsDisplay() {
-  if (chipsDisplay) chipsDisplay.textContent = `Chips: ${formatNumber(chips)}`;
-}
-
-function computeChipReward() {
-  return Math.floor((1 + Math.pow(stageData.stage, 0.5)) * stats.cashMulti);
-}
 
 // track how many upgrade power points have been bought total
 let upgradePowerPurchased = 0;
@@ -155,11 +135,9 @@ function upgradePowerCost() {
 
 // Base player stats used for resets
 const BASE_STATS = {
-  points: 0,
   upgradePower: 0,
   pDamage: 0,
   pRegen: 0,
-  cashMulti: 1,
   damageMultiplier: 1,
   upgradeDamageMultiplier: 1,
   cardSlots: 3,
@@ -183,8 +161,7 @@ const BASE_STATS = {
   hpMultiplier: 1,
   extraDamageMultiplier: 1,
   damageBuffMultiplier: 1,
-  damageBuffExpiration: 0,
-  cashOutWithoutRedraw: false
+  damageBuffExpiration: 0
 };
 
 // Persistent player stats affecting combat and rewards
@@ -448,7 +425,6 @@ function getCardState() {
     applyCardUpgrade,
     renderCardUpgrades,
     purchaseCardUpgrade,
-    cash,
     renderPurchasedUpgrades,
     updateActiveEffects,
     updateAllCardHp: recalcAllCardHp,
@@ -466,10 +442,6 @@ const nextStageProgress = document.getElementById("nextStageProgress");
 const fightBossBtn = document.getElementById("fightBossBtn");
 const bossProgress = document.getElementById("bossProgress");
 const campBtn = document.getElementById("campBtn");
-const pointsDisplay = document.getElementById("pointsDisplay");
-const cashDisplay = document.getElementById("cashDisplay");
-const chipsDisplay = document.getElementById("chipsDisplay");
-const cardPointsDisplay = document.getElementById("cardPointsDisplay");
 const handContainer = document.getElementsByClassName("handContainer")[0];
 const discardContainer = document.getElementsByClassName("discardContainer")[0];
 const deckContainer = document.getElementsByClassName("deckContainer")[0];
@@ -532,25 +504,9 @@ let playerAttackFill = null;
 let enemyAttackFill = null;
 let discipleAttackTimers = {}; // map disciple id -> elapsed attack time
 let enemyAttackProgress = 0; // carryover ratio of enemy attack timer
-let cashTimer = 0;
 let worldProgressTimer = 0;
 //let sanityTimer = 0;
-const cashRateTracker = new RateTracker(10000);
-const cashRateTracker1h = new RateTracker(3600000);
-const cashRateTracker24h = new RateTracker(86400000);
 const worldProgressRateTracker = new RateTracker(30000);
-
-function recordCashRates(value) {
-  cashRateTracker.record(value);
-  cashRateTracker1h.record(value);
-  cashRateTracker24h.record(value);
-}
-
-function resetCashRates(value = 0) {
-  cashRateTracker.reset(value);
-  cashRateTracker1h.reset(value);
-  cashRateTracker24h.reset(value);
-}
 // Chance to trigger a random event each step of movement
 // Reduced from 30% to 10% so encounters feel more like rare discoveries
 const EVENT_CHANCE = 0.1;
@@ -1002,7 +958,7 @@ function initTabs() {
       if (statsEconomyContainer) statsEconomyContainer.style.display = '';
       statsEconomySubTabButton.classList.add('active');
       if (statsOverviewSubTabButton) statsOverviewSubTabButton.classList.remove('active');
-      renderEconomyStats();
+      // economy stats removed
     });
 
   showTab(playerTab); // Start with construct panel visible
@@ -1029,11 +985,9 @@ function updateUpgradeButtons() {
     const up = upgrades[key];
     if (!up || typeof up.costFormula !== 'function') return;
     const cost = up.costFormula(up.level + 1);
-    const affordable = cash >= cost;
-    btn.disabled = !affordable;
-    btn.textContent = `Buy $${cost}`;
-    row.classList.toggle("affordable", affordable);
-    row.classList.toggle("unaffordable", !affordable);
+    btn.disabled = false;
+    btn.textContent = `Buy ${cost}`;
+    row.classList.add("affordable");
   });
   updateCardUpgradeButtons();
 }
@@ -1044,8 +998,8 @@ function updateCardUpgradeButtons() {
     const id = wrap.dataset.id;
     if (!btn || !id) return;
     const cost = getCardUpgradeCost(id, stats);
-    btn.disabled = cash < cost;
-    btn.textContent = `Buy $${cost}`;
+    btn.disabled = false;
+    btn.textContent = `Buy ${cost}`;
   });
 }
 
@@ -1067,16 +1021,11 @@ function checkUpgradeUnlocks() {
 
 
 function purchaseCardUpgrade(id, cost) {
-  if (cash < cost) return;
-  cash -= cost;
-  cashDisplay.textContent = `Cash: $${formatNumber(cash)}`;
-  recordCashRates(cash);
   applyCardUpgrade(id, { stats, pDeck, updateAllCardHp: recalcAllCardHp });
   removeActiveUpgrade(id);
   renderCardUpgrades(document.querySelector('.card-upgrade-list'), {
     stats,
     stageData,
-    cash,
     onPurchase: purchaseCardUpgrade
   });
   renderPurchasedUpgrades();
@@ -2323,7 +2272,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const buttons = document.querySelector('.buttonsContainer');
   playerAttackFill = renderPlayerAttackBar(buttons);
   hidePlayerAttackBar();
-  updateChipsDisplay();
   requestAnimationFrame(gameLoop);
 });
 
@@ -2377,15 +2325,13 @@ function renderStageInfo() {
 
 function renderPlayerStats(stats) {
   const damageDisplay = document.getElementById("damageDisplay");
-  const cashMultiDisplay = document.getElementById("cashMultiDisplay");
   const hpPerKillDisplay = document.getElementById("hpPerKillDisplay");
   const attackSpeedDisplay = document.getElementById("attackSpeedDisplay");
+  const combatLevelDisplay = document.getElementById("combatLevelDisplay");
 
   damageDisplay.textContent = `Damage: ${formatNumber(Math.floor(stats.pDamage))}`;
-  cashMultiDisplay.textContent = `Cash Multi: ${formatNumber(Math.floor(stats.cashMulti))}`;
-  pointsDisplay.textContent = `Points: ${formatNumber(stats.points)}`;
-  cardPointsDisplay.textContent = `Card Points: ${formatNumber(cardPoints)}`;
-  attackSpeedDisplay.textContent = `Attack Speed: ${Math.floor(stats.attackSpeed / 1000)}s`;
+  combatLevelDisplay.textContent = `Combat Lv: ${stats.avgCombatLevel.toFixed(1)}`;
+  attackSpeedDisplay.textContent = `Attack Speed: ${(stats.attackSpeed / 1000).toFixed(1)}s`;
   if (manaRegenDisplay) {
     manaRegenDisplay.textContent = `Mana Regen: ${stats.manaRegen.toFixed(2)}/s`;
   }
@@ -2430,17 +2376,7 @@ function renderGlobalStats() {
   container.appendChild(restartBtn);
 }
 
-function renderEconomyStats() {
-  if (!statsEconomyContainer) return;
-  statsEconomyContainer.innerHTML = '';
-  const hourRate = cashRateTracker1h.getRate();
-  const dayRate = cashRateTracker24h.getRate();
-  const hRow = document.createElement('div');
-  hRow.textContent = `Avg Cash/sec (1h): ${hourRate.toFixed(2)}`;
-  const dRow = document.createElement('div');
-  dRow.textContent = `Avg Cash/sec (24h): ${dayRate.toFixed(2)}`;
-  statsEconomyContainer.append(hRow, dRow);
-}
+
 
 function renderConstructLexicon() {
   if (!constructLexiconContainer) return;
@@ -2693,8 +2629,6 @@ function nextStage() {
   renderStageInfo();
   checkUpgradeUnlocks();
   checkSpeakerEncounter();
-  // start the next stage without double-counting points
-  lastCashOutPoints = stats.points;
   inCombat = false;
   currentEnemy = null;
   redrawAllowed = false;
@@ -2728,8 +2662,6 @@ function nextWorld() {
   renderGlobalStats();
   renderStageInfo();
   checkUpgradeUnlocks();
-  // entering a new world resets cash-out tracking
-  lastCashOutPoints = stats.points;
   inCombat = false;
   currentEnemy = null;
   redrawAllowed = false;
@@ -2758,7 +2690,6 @@ function goToWorld(id) {
   renderGlobalStats();
   renderStageInfo();
   checkUpgradeUnlocks();
-  lastCashOutPoints = stats.points;
   inCombat = false;
   currentEnemy = null;
   redrawAllowed = false;
@@ -2770,8 +2701,7 @@ function goToWorld(id) {
 
 // Reset tracking for average cash when a new stage begins
 function resetStageCashStats() {
-  cashTimer = 0;
-  resetCashRates(cash);
+  // no cash stats
 }
 
 function updateNextStageAvailability() {
@@ -2878,8 +2808,7 @@ function onDealerDefeat() {
   // capture remaining attack progress before resetting
   enemyAttackProgress = currentEnemy.attackTimer / currentEnemy.attackInterval;
   cardXp(calculateKillXp(stageData.stage, stageData.world));
-  chips += computeChipReward();
-  updateChipsDisplay();
+  combatXp(calculateKillXp(stageData.stage, stageData.world));
   healCardsOnKill();
   stageData.kills += 1;
   playerStats.stageKills[stageData.stage] = stageData.kills;
@@ -2914,8 +2843,7 @@ function onSpeakerDefeat() {
   dealerBarDeathAnimation(() => {
     inCombat = false;
     currentEnemy = null;
-    chips += computeChipReward();
-    updateChipsDisplay();
+    combatXp(calculateKillXp(stageData.stage, stageData.world));
     updateDealerLifeDisplay();
     hidePlayerAttackBar();
     respawnDealerStage();
@@ -2960,8 +2888,7 @@ function onBossDefeat(boss) {
   dealerBarDeathAnimation(() => {
     inCombat = false;
     currentEnemy = null;
-    chips += computeChipReward();
-    updateChipsDisplay();
+    combatXp(boss.xp);
     hidePlayerAttackBar();
     nextWorld();
   });
@@ -3108,6 +3035,14 @@ function cardXp(xpAmount) {
   updateDeckDisplay(); // paints deck tab bars
 }
 
+function combatXp(xpAmount) {
+  drawnCards.forEach(d => {
+    if (!d) return;
+    d.gainCombatXp(xpAmount);
+  });
+  updatePlayerStats();
+}
+
 /**
 * Draws the top card from `Deck` into `intoHand`.
 * Renders it with `renderFn` and then calls `updateFn`.
@@ -3244,8 +3179,7 @@ function openCardUpgradeSelection(onCloseCallback = null) {
   statsRow.innerHTML = `
     <div>Damage: ${formatNumber(Math.floor(stats.pDamage))}</div>
     <div>Attack: ${(stats.attackSpeed / 1000).toFixed(1)}s</div>
-    <div>HP/kill: ${stats.hpPerKill}</div>
-    <div>Cash: $${formatNumber(cash)}</div>`;
+    <div>HP/kill: ${stats.hpPerKill}</div>`;
   box.appendChild(statsRow);
 
 
@@ -3258,7 +3192,7 @@ function openCardUpgradeSelection(onCloseCallback = null) {
   const freeIndex = Math.floor(Math.random() * ids.length);
   ids.forEach((id, idx) => {
     const def = cardUpgradeDefinitions[id];
-    const baseCost = getCardUpgradeCost(id, { points: stats.points }, stageData);
+    const baseCost = getCardUpgradeCost(id, {}, stageData);
     const cost = idx === freeIndex ? 0 : baseCost;
     const wrap = document.createElement('div');
     wrap.classList.add('card-wrapper');
@@ -3267,14 +3201,10 @@ function openCardUpgradeSelection(onCloseCallback = null) {
     const icon = def.icon || 'sword';
     card.innerHTML = `\n      <div class="card-suit"><i data-lucide="${icon}"></i></div>\n      <div class="card-desc">${def.name} - ${cost === 0 ? 'FREE' : '$' + cost}</div>\n      <div class="card-flavor">${def.flavor || ''}</div>\n    `;
     wrap.appendChild(card);
-    if (cash >= cost) {
-      wrap.addEventListener('click', () => {
-        purchaseCardUpgrade(id, cost);
-        closeCardUpgradeSelection();
-      });
-    } else {
-      card.classList.add('unaffordable');
-    }
+    wrap.addEventListener('click', () => {
+      purchaseCardUpgrade(id, cost);
+      closeCardUpgradeSelection();
+    });
     cardsContainer.appendChild(wrap);
   });
   upgradeOverlay.appendButton('Skip', () => closeCardUpgradeSelection());
@@ -3334,8 +3264,7 @@ function openCamp(onCloseCallback = null) {
   statsRow.innerHTML = `
     <div>Damage: ${formatNumber(Math.floor(stats.pDamage))}</div>
     <div>Attack: ${(stats.attackSpeed / 1000).toFixed(1)}s</div>
-    <div>HP/kill: ${stats.hpPerKill}</div>
-    <div>Cash: $${formatNumber(cash)}</div>`;
+    <div>HP/kill: ${stats.hpPerKill}</div>`;
   box.appendChild(statsRow);
 
 
@@ -3362,18 +3291,10 @@ function openCamp(onCloseCallback = null) {
 
   addBtn('▶ Continue', () => closeCamp(), 'Resume journey');
 
-  if (stats.cashOutWithoutRedraw) {
-    addBtn('💰 Cash Out', () => {
-      cashOut();
-      closeCamp();
-    }, 'Collect chips and quit');
-  }
-
-  addBtn('⟳ Redraw & Cash Out', () => {
-    cashOut();
+  addBtn('⟳ Redraw', () => {
     handleRedraw();
     closeCamp();
-  }, 'Cash out then draw again');
+  }, 'Draw again');
 
   addBtn('♥ Heal Party', () => {
     drawnCards.forEach(c => {
@@ -3663,9 +3584,7 @@ function respawnPlayer() {
   playerStats.hasDied = false;
   Object.assign(stats, BASE_STATS);
   stats.cardSlots = BASE_STATS.cardSlots + attributes.Strength.inventorySlots;
-  cash = 0;
-  chips = 0;
-  resetCashRates(cash);
+  // reset resources
 
   resetCardUpgrades();
   pDeck = [];
@@ -3679,15 +3598,11 @@ function respawnPlayer() {
   renderCardUpgrades(document.querySelector('.card-upgrade-list'), {
     stats,
     stageData,
-    cash,
     onPurchase: purchaseCardUpgrade
   });
 
   clearActiveDisciples();
   
-  cashDisplay.textContent = `Cash: $${formatNumber(cash)}`;
-  updateChipsDisplay();
-  resetCashRates(cash);
   updateUpgradeButtons();
   stageData.world = 1;
   stageData.stage = 1;
@@ -3697,8 +3612,6 @@ function respawnPlayer() {
   spawnPlayer();
   respawnDealerStage();
   updatePlayerStats(stats);
-  // reset baseline so new kills don't award previous points again
-  lastCashOutPoints = stats.points;
   killsDisplay.textContent = `Kills: ${formatNumber(stageData.kills)}`;
   renderGlobalStats();
   renderWorldsMenu();
@@ -3772,50 +3685,7 @@ function attack(deltaTime = 0) {
   }
 }
 
-/*if (currentEnemy instanceof Boss) {
-  // Handle boss damage
-  currentEnemy.takeDamage(stats.pDamage);
-  stageData.dealerLifeCurrent = currentEnemy.currentHp;
-  if (currentEnemy.currentHp <= 0) {
-    onBossDefeat(currentEnemy);
-    respawnDealer();
-    dealerLifeBar();
-    cashOut();
-    nextWorld();
-    dealerDeathAnimation();
-  } else {
-    dealerLifeDisplay.textContent = `Life: ${formatNumber(Math.floor(currentEnemy.currentHp))}/${formatNumber(currentEnemy.maxHp)}`;
-    dealerLifeBar();
-  }
-} else {
-  // Handle regular enemy damage
-  if (stageData.dealerLifeCurrent - stats.pDamage <= 0) {
-    stageData.kills += 1;
-    killsDisplay.textContent = `Kills: ${formatNumber(stageData.kills)}`;
-    respawnDealer();
-    dealerLifeBar();
-    cardXp(stageData.stage ** 1.2);
-    cashOut();
-    dealerDeathAnimation();
-  } else {
-    stageData.dealerLifeCurrent = stageData.dealerLifeCurrent - stats.pDamage;
-    dealerLifeDisplay.textContent = `Life: ${formatNumber(Math.floor(stageData.dealerLifeCurrent))}/${formatNumber(stageData.dealerLifeMax)}`;
-    dealerLifeBar();
-  }
-}*/
 
-// Convert points earned this stage into spendable cash
-function cashOut() {
-  if (chips <= 0) return cash;
-  const reward = chips * stats.points;
-  cash += reward;
-  chips = 0;
-  cashDisplay.textContent = `Cash: $${formatNumber(cash)}`;
-  updateChipsDisplay();
-  recordCashRates(cash);
-  updateUpgradeButtons();
-  return cash;
-}
 
 // Recalculate combat stats based on cards currently drawn
 function updatePlayerStats() {
@@ -3824,8 +3694,8 @@ function updatePlayerStats() {
   stats.damageMultiplier =
     stats.upgradeDamageMultiplier * barUpgrades.damage.multiplier * stats.extraDamageMultiplier;
   stats.pRegen = 0;
-  stats.cashMulti = 1;
-  stats.points = 0;
+  stats.avgCombatLevel = 0;
+  stats.attackSpeed = 0;
 
   if (stats.damageBuffExpiration && Date.now() > stats.damageBuffExpiration) {
     stats.damageBuffMultiplier = 1;
@@ -3835,17 +3705,22 @@ function updatePlayerStats() {
     if (!card) continue;
     recalcCardHp(card, stats, barUpgrades);
 
-    const suitMult =
-      card.suit === "Spades" ? stats.spadeDamageMultiplier || 1 : 1;
-    card.damage = (card.baseDamage + 5 * (card.currentLevel - 1)) * suitMult;
     stats.pDamage += card.damage;
-    stats.points += card.value;
+    stats.attackSpeed += card.attackSpeed;
+    stats.avgCombatLevel += card.combatLevel;
   }
 
   stats.pDamage *=
     stats.damageMultiplier *
     stats.damageBuffMultiplier *
     attributes.Strength.meleeDamageMultiplier;
+
+  if (drawnCards.length > 0) {
+    stats.attackSpeed /= drawnCards.length;
+    stats.avgCombatLevel /= drawnCards.length;
+  } else {
+    stats.attackSpeed = BASE_STATS.attackSpeed;
+  }
 
   stats.cardSlots = BASE_STATS.cardSlots + attributes.Strength.inventorySlots;
   renderPlayerStats(stats);
@@ -3883,10 +3758,7 @@ Object.entries(upgrades).map(([k, u]) => [k, u.unlocked])
   const state = {
     stats,
     stageData,
-    cash,
-    chips,
     upgradePowerPurchased,
-    lastCashOutPoints,
     cardPoints,
     redrawCost,
     deck: deckData,
@@ -3924,12 +3796,10 @@ if (!json) return;
 
 try {
 const state = JSON.parse(json);
-  cash = state.cash || 0;
-  chips = state.chips || 0;
+  // legacy cash/chip values are ignored
   cardPoints = state.cardPoints || 0;
   redrawCost = state.redrawCost || 10;
   upgradePowerPurchased = state.upgradePowerPurchased || 0;
-  lastCashOutPoints = state.lastCashOutPoints || 0;
   Object.assign(stats, state.stats || {});
   if (state.systems) {
     Object.assign(systems, state.systems);
@@ -4056,9 +3926,6 @@ if (
 
 Object.values(upgrades).forEach(u => u.effect({ stats, pDeck, stageData, systems }));
 
-cashDisplay.textContent = `Cash: $${formatNumber(cash)}`;
-updateChipsDisplay();
-cardPointsDisplay.textContent = `Card Points: ${formatNumber(cardPoints)}`;
 
   renderJokers();
 updateUpgradeButtons();
@@ -4066,7 +3933,6 @@ updateUpgradeButtons();
   renderStageInfo();
   renderGlobalStats();
   renderWorldsMenu();
-  resetCashRates(cash);
   worldProgressRateTracker.reset(
     computeWorldProgress(stageData.world) * 100
   );
@@ -4145,15 +4011,7 @@ if (currentEnemy) {
   updateDrawButton();
   updateRedrawButton();
   updatePlayerStats(stats);
-  cashTimer += deltaTime;
   worldProgressTimer += deltaTime;
-  if (cashTimer >= 1000) {
-    recordCashRates(cash);
-    if (statsEconomyContainer && statsEconomyContainer.style.display !== 'none') {
-      renderEconomyStats();
-    }
-    cashTimer = 0;
-  }
   if (worldProgressTimer >= 1000) {
     const currentPct = computeWorldProgress(stageData.world) * 100;
     worldProgressRateTracker.record(currentPct);
@@ -4245,14 +4103,6 @@ currentEnemy.onDefeat?.();
 logEnemy: () => console.log(currentEnemy),
 advanceStage: () => nextStage(),
 
-giveCash: () => {
-const amount =
-parseInt(document.getElementById("debugCash").value) || 0;
-cash += amount;
-  cashDisplay.textContent = `Cash: $${formatNumber(cash)}`;
-recordCashRates(cash);
-updateUpgradeButtons();
-},
 
 setStageWorld: () => {
 const stage = parseInt(document.getElementById("debugStage").value);

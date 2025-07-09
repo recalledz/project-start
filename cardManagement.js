@@ -11,7 +11,6 @@ export function drawCard(state) {
     applyCardUpgrade,
     renderCardUpgrades,
     purchaseCardUpgrade,
-    cash,
     renderPurchasedUpgrades,
     updateActiveEffects,
     updateAllCardHp,
@@ -30,7 +29,6 @@ export function drawCard(state) {
     applyCardUpgrade(card.upgradeId, { stats, pDeck, updateAllCardHp });
     renderCardUpgrades(document.querySelector('.card-upgrade-list'), {
       stats,
-      cash,
       onPurchase: purchaseCardUpgrade
     });
     renderPurchasedUpgrades();
