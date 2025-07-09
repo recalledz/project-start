@@ -2937,7 +2937,7 @@ function cDealerDamage(damageAmount = null, ability = null, source = "dealer") {
   const targets = drawnCards.length > 0 ? drawnCards : activeDisciples;
   if (targets.length === 0) {
     playerStats.hasDied = true;
-    showRestartScreen(respawnPlayer);
+    showRestartScreen(returnPartyToSect);
     return;
   }
 
@@ -2996,17 +2996,21 @@ function cDealerDamage(damageAmount = null, ability = null, source = "dealer") {
         updateDeckDisplay();
         if (drawnCards.length === 0) {
           playerStats.hasDied = true;
-          showRestartScreen(respawnPlayer);
+          showRestartScreen(returnPartyToSect);
         }
       });
     } else {
       activeDisciples.splice(idx, 1);
+      card.incapacitated = true;
+      card.health = 0;
+      card.stamina = 0;
+      sectState.discipleTasks[card.id] = 'Idle';
       animateCardDeath(card, () => {
         removeBloodSplat(card);
         card.wrapperElement?.remove();
         if (activeDisciples.length === 0) {
           playerStats.hasDied = true;
-          showRestartScreen(respawnPlayer);
+          showRestartScreen(returnPartyToSect);
         }
       });
     }
@@ -3660,6 +3664,27 @@ function respawnPlayer() {
   renderGlobalStats();
   renderWorldsMenu();
   checkSpeakerEncounter();
+}
+
+function returnPartyToSect() {
+  currentExplorationParty.forEach(id => {
+    const d = speechState.disciples.find(x => x.id === id);
+    if (d) {
+      d.currentHp = 0;
+      d.health = 0;
+      d.stamina = 0;
+      d.incapacitated = true;
+      sectState.discipleTasks[d.id] = 'Idle';
+    }
+  });
+  currentExplorationParty = [];
+  clearActiveDisciples();
+  showTab(playerTab);
+  setActiveTabButton(playerTabButton);
+  if (playerSectSubTabButton) playerSectSubTabButton.click();
+  updateSectDisplay();
+  renderDiscipleList();
+  renderDiscipleDetails();
 }
 
 
