@@ -63,6 +63,7 @@ import {
 } from "./enemySpawning.js";
 import {
   renderCard,
+  renderDiscipleCard,
   renderDiscardCard,
   renderDealerLifeBar,
   renderEnemyAttackBar,
@@ -2931,8 +2932,8 @@ function updateDealerLifeDisplay() {
 
 // Apply damage from the enemy to the first card in the player's hand
 function cDealerDamage(damageAmount = null, ability = null, source = "dealer") {
-  // If no card is available to take the hit, trigger game over
-  if (drawnCards.length === 0) {
+  const targets = drawnCards.length > 0 ? drawnCards : activeDisciples;
+  if (targets.length === 0) {
     playerStats.hasDied = true;
     showRestartScreen(respawnPlayer);
     return;
@@ -2956,20 +2957,23 @@ function cDealerDamage(damageAmount = null, ability = null, source = "dealer") {
     finalDamage -= absorbed;
   }
 
-  // randomly target one of the drawn cards
-  const idx = Math.floor(Math.random() * drawnCards.length);
-  const card = drawnCards[idx];
+  // randomly target one of the available targets
+  const idx = Math.floor(Math.random() * targets.length);
+  const card = targets[idx];
 
   // subtract **one** hit’s worth
   card.currentHp = Math.round(Math.max(0, card.currentHp - finalDamage));
+  const targetName = card.name ? card.name : `${card.value}${card.symbol}`;
   addLog(
-    `${source} hit ${card.value}${card.symbol} for ${finalDamage} damage!`,
+    `${source} hit ${targetName} for ${finalDamage} damage!`,
     "damage"
   );
 
   // update its specific HP display
-  card.hpDisplay.textContent = `HP: ${formatNumber(Math.round(card.currentHp))}/${formatNumber(Math.round(card.maxHp))}`;
-  updateDeckDisplay();
+  if (card.hpDisplay) {
+    card.hpDisplay.textContent = `HP: ${formatNumber(Math.round(card.currentHp))}/${formatNumber(Math.round(card.maxHp))}`;
+  }
+  if (targets === drawnCards) updateDeckDisplay();
   if (card.wrapperElement) {
     animateCardHit(card);
     // Show actual damage dealt after shield reduction
@@ -2978,23 +2982,32 @@ function cDealerDamage(damageAmount = null, ability = null, source = "dealer") {
   updateBloodSplat(card);
   // if it’s dead, remove it
   if (card.currentHp === 0) {
-    // immediately remove from data so new draws don't shift the wrong card
-    drawnCards.splice(idx, 1);
-
-    animateCardDeath(card, () => {
-      // 1) from the DOM
-      removeBloodSplat(card);
-      card.wrapperElement?.remove();
-
-      discardCard(card);
-      updatePlayerStats(stats);
-      updateDrawButton();
-      updateDeckDisplay();
-      if (drawnCards.length === 0) {
-        playerStats.hasDied = true;
-        showRestartScreen(respawnPlayer);
-      }
-    });
+    if (targets === drawnCards) {
+      // immediately remove from data so new draws don't shift the wrong card
+      drawnCards.splice(idx, 1);
+      animateCardDeath(card, () => {
+        removeBloodSplat(card);
+        card.wrapperElement?.remove();
+        discardCard(card);
+        updatePlayerStats(stats);
+        updateDrawButton();
+        updateDeckDisplay();
+        if (drawnCards.length === 0) {
+          playerStats.hasDied = true;
+          showRestartScreen(respawnPlayer);
+        }
+      });
+    } else {
+      activeDisciples.splice(idx, 1);
+      animateCardDeath(card, () => {
+        removeBloodSplat(card);
+        card.wrapperElement?.remove();
+        if (activeDisciples.length === 0) {
+          playerStats.hasDied = true;
+          showRestartScreen(respawnPlayer);
+        }
+      });
+    }
   }
   // Optional ability logic (e.g., healing, fireball
 }
@@ -3099,28 +3112,31 @@ function updateHandDisplay() {
     }
     updateBloodSplat(card);
   });
+  activeDisciples.forEach(d => {
+    if (!d || !d.hpDisplay) return;
+    d.hpDisplay.textContent = `HP: ${Math.round(d.currentHp)}/${Math.round(d.maxHp)}`;
+    if (d.xpLabel) {
+      d.xpLabel.textContent = `LV: ${d.combatLevel}`;
+    }
+    if (d.xpBarFill) {
+      const pct = (d.combatXp / d.xpForNextLevel()) * 100;
+      d.xpBarFill.style.width = `${Math.min(pct, 100)}%`;
+    }
+    updateBloodSplat(d);
+  });
 }
 
 function renderCombatDisciples() {
   if (!handContainer) return;
   handContainer.innerHTML = '';
   activeDisciples.forEach(d => {
-    const wrap = document.createElement('div');
-    wrap.className = 'disciple-card';
-    const name = document.createElement('div');
-    name.textContent = d.name || `Disciple ${d.id}`;
-    const hp = document.createElement('div');
-    hp.className = 'disciple-hp';
-    hp.textContent = `HP: ${Math.round(d.currentHp)}/${Math.round(d.maxHp)}`;
+    renderDiscipleCard(d, handContainer);
     const bar = document.createElement('div');
     bar.className = 'disciple-attack-bar';
     const fill = document.createElement('div');
     fill.className = 'disciple-attack-fill';
     bar.appendChild(fill);
-    wrap.append(name, hp, bar);
-    handContainer.appendChild(wrap);
-    d.wrapperElement = wrap;
-    d.hpDisplay = hp;
+    d.wrapperElement.appendChild(bar);
     d.attackFill = fill;
   });
 }

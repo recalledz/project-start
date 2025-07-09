@@ -61,6 +61,30 @@ export function renderCard(card, handContainer) {
   card.xpLabel = xpLabel;
 }
 
+export function renderDiscipleCard(disciple, handContainer) {
+  const wrapper = document.createElement('div');
+  wrapper.classList.add('card-wrapper');
+  const cardPane = document.createElement('div');
+  cardPane.classList.add('card');
+  cardPane.innerHTML = `\n  <div class="card-value">${disciple.name}</div>\n  <div class="card-suit">🧍</div>\n  <div class="card-hp">HP: ${Math.round(disciple.currentHp)}/${Math.round(disciple.maxHp)}</div>\n  `;
+  const xpBar = document.createElement('div');
+  const xpBarFill = document.createElement('div');
+  const xpLabel = document.createElement('div');
+  xpBar.classList.add('xpBar');
+  xpBarFill.classList.add('xpBarFill');
+  xpLabel.classList.add('xpBarLabel');
+  xpLabel.textContent = `LV: ${disciple.combatLevel}`;
+  xpBar.append(xpBarFill, xpLabel);
+  wrapper.append(cardPane, xpBar);
+  handContainer.appendChild(wrapper);
+  disciple.wrapperElement = wrapper;
+  disciple.cardElement = cardPane;
+  disciple.hpDisplay = cardPane.querySelector('.card-hp');
+  disciple.xpBar = xpBar;
+  disciple.xpBarFill = xpBarFill;
+  disciple.xpLabel = xpLabel;
+}
+
 export function renderDiscardCard(card, discardContainer, backImages) {
   discardContainer.innerHTML = '';
   const img = document.createElement('img');
