@@ -2,6 +2,7 @@ import addLog from './log.js';
 import { coreState, refreshCore } from './core.js';
 import { sectState, systems } from './script.js';
 import { generateDiscipleAttributes } from './discipleAttributes.js';
+import Disciple from './disciple.js';
 import { createOverlay } from './ui/overlay.js';
 
 // Core state for the Constructs system. Orbs and upgrades from the
@@ -450,21 +451,13 @@ const constructEffects = {
     const chance = Math.max(0.05, Math.min(1, callPower / reqPower));
     if (Math.random() < chance) {
       const bonus = generateDiscipleAttributes();
-      speechState.disciples.push({
-        id: targetIdx,
-        name: `Disciple ${targetIdx}`,
-        health: 10,
-        stamina: 10,
-        hunger: 20,
-        power: 1,
+      const attrs = {
         strength: 1 + bonus.strength,
         dexterity: 1 + bonus.dexterity,
         endurance: 1 + bonus.endurance,
-        intelligence: 1 + bonus.intelligence,
-        incapacitated: false,
-        inventorySlots: 10,
-        inventory: {}
-      });
+        intelligence: 1 + bonus.intelligence
+      };
+      speechState.disciples.push(new Disciple({ id: targetIdx, name: `Disciple ${targetIdx}`, attributes: attrs }));
       sectState.discipleConstructXp[targetIdx] = {};
       addLog('A new Disciple has answered your call!', 'info');
       if (lastConstructTarget) showConstructCloud('+1', lastConstructTarget);
