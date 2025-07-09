@@ -3698,7 +3698,8 @@ location.reload();
 
 // Player auto-attack; deals combined damage to the current enemy
 function attack(deltaTime = 0) {
-  if (!currentEnemy) return;
+  const enemy = currentEnemy;
+  if (!enemy) return;
 
   activeDisciples.forEach(d => {
     if (!discipleAttackTimers[d.id]) discipleAttackTimers[d.id] = 0;
@@ -3709,23 +3710,23 @@ function attack(deltaTime = 0) {
       d.attackFill.style.width = `${pratio * 100}%`;
     }
 
-    if (discipleAttackTimers[d.id] >= d.attackSpeed) {
-      currentEnemy.takeDamage(d.damage);
+    if (discipleAttackTimers[d.id] >= d.attackSpeed && !enemy.isDefeated()) {
+      enemy.takeDamage(d.damage);
       discipleAttackTimers[d.id] = 0;
       if (d.attackFill) d.attackFill.style.width = '0%';
     }
 
   });
 
-  stageData.dealerLifeCurrent = currentEnemy.currentHp;
+  stageData.dealerLifeCurrent = enemy.currentHp;
 
-  if (currentEnemy.isDefeated()) {
-    currentEnemy.onDefeat?.();
+  if (enemy.isDefeated()) {
+    enemy.onDefeat?.();
   } else {
     dealerLifeDisplay.textContent = `Life: ${formatNumber(Math.floor(
-      currentEnemy.currentHp
-    ))}/${formatNumber(currentEnemy.maxHp)}`;
-    renderDealerLifeBarFill(currentEnemy);
+      enemy.currentHp
+    ))}/${formatNumber(enemy.maxHp)}`;
+    renderDealerLifeBarFill(enemy);
   }
 }
 
