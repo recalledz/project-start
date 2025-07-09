@@ -64,7 +64,6 @@ import {
 import {
   renderCard,
   renderDiscipleCard,
-  renderDiscardCard,
   renderDealerLifeBar,
   renderEnemyAttackBar,
   renderPlayerAttackBar,
@@ -116,8 +115,6 @@ function clearActiveDisciples() {
   discipleAttackTimers = {};
   if (handContainer) handContainer.innerHTML = '';
 }
-// cards discarded from play land in `discardPile`
-let discardPile = [];
 // mapping of card back styles
 const cardBackImages = {
   "basic-red": "img/basic deck.png"
@@ -413,13 +410,10 @@ function getCardState() {
   return {
     deck,
     drawnCards,
-    discardPile,
-    discardContainer,
     cardBackImages,
     handContainer,
     renderCard: card => renderCard(card, handContainer),
     updateDeckDisplay,
-    renderDiscardCard,
     renderDeckTop,
     updatePileCounts,
     stats,
@@ -445,10 +439,8 @@ const fightBossBtn = document.getElementById("fightBossBtn");
 const bossProgress = document.getElementById("bossProgress");
 const campBtn = document.getElementById("campBtn");
 const handContainer = document.getElementsByClassName("handContainer")[0];
-const discardContainer = document.getElementsByClassName("discardContainer")[0];
 const deckContainer = document.getElementsByClassName("deckContainer")[0];
 const deckCountDisplay = document.getElementById("deckCount");
-const discardCountDisplay = document.getElementById("discardCount");
 const dealerLifeDisplay =
 document.getElementsByClassName("dealerLifeDisplay")[0];
 const killsDisplay = document.getElementById("kills");
@@ -2127,7 +2119,6 @@ function renderDeckTop() {
 
 function updatePileCounts() {
   if (deckCountDisplay) deckCountDisplay.textContent = `Deck: ${deck.length}`;
-  if (discardCountDisplay) discardCountDisplay.textContent = `Discard: ${discardPile.length}`;
 }
 
 function updateMasteryBars() {
@@ -2987,7 +2978,6 @@ function cDealerDamage(damageAmount = null, ability = null, source = "dealer") {
       animateCardDeath(card, () => {
         removeBloodSplat(card);
         card.wrapperElement?.remove();
-        discardCard(card);
         updatePlayerStats(stats);
         updateDrawButton();
         updateDeckDisplay();
@@ -3146,14 +3136,6 @@ function renderCombatDisciples() {
 
 // Create DOM elements for a card in the player's hand
 // card rendering moved to rendering.js
-
-// Move a card to the discard pile and update the UI
-function discardCard(card) {
-  discardPile.push(card);
-  renderDiscardCard(card, discardContainer, cardBackImages);
-  updatePileCounts();
-}
-
 
 let gamePaused = false;
 let campOverlayOpen = false;
@@ -3635,7 +3617,6 @@ function respawnPlayer() {
   pDeck = [];
   deck = [...pDeck];
   drawnCards = [];
-  discardPile = [];
   redrawCost = 10;
   updateRedrawButton();
 
