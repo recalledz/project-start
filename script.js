@@ -2824,8 +2824,11 @@ function respawnDealerStage() {
 
 // What happens after defeating a regular dealer
 function onDealerDefeat() {
+  if (!currentEnemy) return;
   // capture remaining attack progress before resetting
   enemyAttackProgress = currentEnemy.attackTimer / currentEnemy.attackInterval;
+  // clear enemy immediately to prevent repeated callbacks
+  currentEnemy = null;
   cardXp(calculateKillXp(stageData.stage, stageData.world));
   combatXp(calculateKillXp(stageData.stage, stageData.world));
   healCardsOnKill();
@@ -2838,7 +2841,6 @@ function onDealerDefeat() {
   dealerDeathAnimation();
     dealerBarDeathAnimation(() => {
       inCombat = false;
-      currentEnemy = null;
       updateDealerLifeDisplay();
       hidePlayerAttackBar();
       respawnDealerStage();
@@ -3136,7 +3138,7 @@ function renderCombatDisciples() {
     const fill = document.createElement('div');
     fill.className = 'disciple-attack-fill';
     bar.appendChild(fill);
-    d.wrapperElement.appendChild(bar);
+    d.wrapperElement.insertBefore(bar, d.xpBar);
     d.attackFill = fill;
   });
 }
@@ -3613,6 +3615,10 @@ const awardJokerCard = () => awardJokerCardByWorld(stageData.world);
 
 function spawnPlayer() {
   clearActiveDisciples();
+  // Ensure disciples start combat at full health
+  disciples.forEach(d => {
+    d.currentHp = d.maxHp;
+  });
   disciples.slice(0, stats.cardSlots).forEach(d => selectDisciple(d));
   renderCombatDisciples();
 }
