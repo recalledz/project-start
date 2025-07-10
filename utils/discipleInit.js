@@ -10,6 +10,10 @@ export function initializeDisciple(d) {
   if (d.dexterity === undefined) d.dexterity = 1;
   if (d.endurance === undefined) d.endurance = 1;
   if (d.intelligence === undefined) d.intelligence = 1;
+  if (d.baseStrength === undefined) d.baseStrength = d.strength;
+  if (d.baseDexterity === undefined) d.baseDexterity = d.dexterity;
+  if (d.baseEndurance === undefined) d.baseEndurance = d.endurance;
+  if (d.baseIntelligence === undefined) d.baseIntelligence = d.intelligence;
   if (d.incapacitated === undefined) d.incapacitated = false;
   if (!d.name) d.name = `Disciple ${d.id}`;
   if (d.inventorySlots === undefined) d.inventorySlots = 10;

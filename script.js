@@ -108,6 +108,7 @@ let drawnCards = [];
 let activeDisciples = [];
 // Available disciples under the player's control
 let disciples = [new Disciple({ id: 1 }), new Disciple({ id: 2 }), new Disciple({ id: 3 })];
+disciples.forEach(initializeDisciple);
 // Functions to manage which disciples are active in combat
 function selectDisciple(d) {
   if (!activeDisciples.includes(d) && activeDisciples.length < stats.cardSlots) {
@@ -2097,6 +2098,7 @@ function buildDiscipleStatusView(d) {
     {
       label: 'Strength',
       value: d.strength,
+      base: d.baseStrength ?? 1,
       effect:
         `Melee Damage ×${(1 + 0.05 * (d.strength - 1)).toFixed(2)}, ` +
         `+${Math.floor((d.strength - 1) / 2)} Inventory Slots`,
@@ -2105,18 +2107,21 @@ function buildDiscipleStatusView(d) {
     {
       label: 'Dexterity',
       value: d.dexterity,
+      base: d.baseDexterity ?? 1,
       effect: `Attack Speed ×${(1 + 0.05 * (d.dexterity - 1)).toFixed(2)}`,
       skills: 'Woodcutting & Gather Fruit'
     },
     {
       label: 'Intelligence',
       value: d.intelligence,
+      base: d.baseIntelligence ?? 1,
       effect: `Construct Potency ×${(1 + 0.03 * (d.intelligence - 1)).toFixed(2)}`,
       skills: 'Chant & Research'
     },
     {
       label: 'Endurance',
       value: d.endurance,
+      base: d.baseEndurance ?? 1,
       effect:
         `Stamina ×${(1 + 0.05 * (d.endurance - 1)).toFixed(2)}, ` +
         `Regen ×${(1 + 0.01 * (d.endurance - 1)).toFixed(2)}, ` +
@@ -2127,7 +2132,9 @@ function buildDiscipleStatusView(d) {
   const attrContainer = document.createElement('div');
   attrInfo.forEach(a => {
     const row = document.createElement('div');
-    row.textContent = `${a.label} ${a.value} (${a.effect} – boosts ${a.skills} XP)`;
+    const diff = a.value - a.base;
+    const gainText = diff > 0 ? ` (+${diff})` : '';
+    row.textContent = `${a.label} ${a.value}${gainText} (${a.effect} – boosts ${a.skills} XP)`;
     attrContainer.appendChild(row);
   });
   body.appendChild(attrContainer);
@@ -2268,6 +2275,7 @@ function buildDiscipleStatsView(d) {
     {
       label: 'Strength',
       value: d.strength,
+      base: d.baseStrength ?? 1,
       effect:
         `Melee ×${(1 + 0.05 * (d.strength - 1)).toFixed(2)}, +${Math.floor(
           (d.strength - 1) / 2
@@ -2277,6 +2285,7 @@ function buildDiscipleStatsView(d) {
     {
       label: 'Dexterity',
       value: d.dexterity,
+      base: d.baseDexterity ?? 1,
       effect:
         `Speed ×${(1 + 0.05 * (d.dexterity - 1)).toFixed(2)}, +XP: Woodcut, Gather Fruit`,
       cls: 'dexterity'
@@ -2284,6 +2293,7 @@ function buildDiscipleStatsView(d) {
     {
       label: 'Intelligence',
       value: d.intelligence,
+      base: d.baseIntelligence ?? 1,
       effect:
         `Potency ×${(1 + 0.03 * (d.intelligence - 1)).toFixed(2)}, +XP: Chant, Research`,
       cls: 'intelligence'
@@ -2291,6 +2301,7 @@ function buildDiscipleStatsView(d) {
     {
       label: 'Endurance',
       value: d.endurance,
+      base: d.baseEndurance ?? 1,
       effect:
         `Stamina ×${(1 + 0.05 * (d.endurance - 1)).toFixed(2)}, Regen ×${(
           1 + 0.01 * (d.endurance - 1)
@@ -2301,7 +2312,9 @@ function buildDiscipleStatsView(d) {
   rows.forEach(r => {
     const tr = document.createElement('tr');
     const td1 = document.createElement('td');
-    td1.textContent = `${r.label} ${r.value}`;
+    const diff = r.value - r.base;
+    const gainText = diff > 0 ? ` (+${diff})` : '';
+    td1.textContent = `${r.label} ${r.value}${gainText}`;
     td1.className = `attr-${r.cls}`;
     const td2 = document.createElement('td');
     td2.textContent = r.effect;
