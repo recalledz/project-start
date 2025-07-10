@@ -609,11 +609,37 @@ body.darkenshift-mode .tabsContainer button.active {
     width: 300px;
     min-height: 260px;
     font-size: 0.75rem;
+    position: relative;
 }
 .disciple-overlay .overlay-box button {
     background: var(--verdantia-parchment);
     color: #000;
     border: 1px solid #3a5a3a;
+}
+.disciple-overlay .close-btn {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 16px;
+    height: 16px;
+    background: #c33;
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    font-size: 12px;
+    line-height: 14px;
+    text-align: center;
+    cursor: pointer;
+}
+.disciple-stats-general,
+.disciple-stats-combat {
+    margin-bottom: 8px;
+    font-size: 0.75rem;
+}
+.disciple-stats-general h3,
+.disciple-stats-combat h3 {
+    margin: 0 0 4px 0;
+    font-size: 0.8rem;
 }
 
 .qi-regen-overlay {
@@ -4203,9 +4229,9 @@ body.darkenshift-mode .tabsContainer button.active {
 .disciple-general {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
     gap: 4px;
-    text-align: center;
+    text-align: left;
 }
 .disciple-portrait {
     width: 80px;
