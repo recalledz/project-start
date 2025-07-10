@@ -12,7 +12,14 @@
 }
 
 body {
-    background: radial-gradient(circle, #0b5121 0%, #052a13 100%);
+    background-color: #0f1a10; /* deep muted green as base */
+    background-image:
+        linear-gradient(to bottom right, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.6)),
+        url('img/mist.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
     font-family: 'Inter', sans-serif;
     padding: 5px;
     color: #fff;
