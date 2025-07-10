@@ -3479,21 +3479,101 @@ body.darkenshift-mode .tabsContainer button.active {
     flex: 1;
     position: absolute;
     inset: 0;
-    border: 1px solid #555;
     box-sizing: border-box;
+    border: 1px solid rgba(0, 0, 0, 0.6);
+    box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.6);
     background-image: url('img/sect-map.png');
-    background-size: contain;
+    background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
+    overflow: hidden;
 }
-.sect-resources {
-    text-align: center;
-    margin-bottom: 4px;
+
+.sect-disciples-container::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(circle at 50% 10%, rgba(255, 255, 200, 0.2), transparent 80%);
+    z-index: 1;
 }
-.sect-upkeep {
-    text-align: center;
-    margin-bottom: 4px;
-    font-size: 0.75rem;
+
+.sect-disciples-container::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(circle at center, rgba(0,0,0,0) 60%, rgba(0,0,0,0.6) 100%);
+    z-index: 1;
+}
+.sect-summary {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    padding: 6px 8px;
+    font-size: 0.8rem;
+    background: rgba(0,0,0,0.25);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+    border-top: 1px solid rgba(0,0,0,0.6);
+}
+.sect-summary span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 0 4px;
+}
+
+.zone {
+    position: absolute;
+    pointer-events: none;
+    border: 2px solid rgba(0,0,0,0.2);
+    border-radius: 4px;
+    box-shadow: inset 0 0 8px rgba(0,0,0,0.4);
+    z-index: 0;
+}
+.zone.orchard {
+    left: 2%;
+    top: 2%;
+    width: 30%;
+    height: 40%;
+    background: radial-gradient(circle, rgba(160,220,160,0.15), transparent 80%);
+}
+.zone.lumberyard {
+    right: 2%;
+    top: 2%;
+    width: 30%;
+    height: 40%;
+    background: radial-gradient(circle, rgba(200,170,120,0.15), transparent 80%);
+}
+.zone.meditation {
+    left: 20%;
+    bottom: 2%;
+    width: 60%;
+    height: 40%;
+    background: radial-gradient(circle, rgba(250,250,200,0.1), transparent 80%);
+}
+
+.pollen-layer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 2;
+}
+.pollen {
+    position: absolute;
+    top: -10px;
+    width: 4px;
+    height: 4px;
+    background: rgba(255,255,200,0.5);
+    border-radius: 50%;
+    opacity: 0.6;
+    animation: pollen-fall linear infinite;
+}
+
+@keyframes pollen-fall {
+    from { transform: translateY(0); opacity: 0.6; }
+    to { transform: translateY(110%); opacity: 0; }
 }
 
 .colony-container {
@@ -3649,7 +3729,7 @@ body.darkenshift-mode .tabsContainer button.active {
     height: 50px;
     border-radius: 50%;
     opacity: 0.9;
-    box-shadow: 0 0 6px rgba(255, 255, 255, 0.8);
+    box-shadow: 0 0 4px rgba(255, 255, 255, 0.6);
     animation: sectGlow 3s infinite alternate;
 }
 .sect-orb.flash {
@@ -3663,8 +3743,8 @@ body.darkenshift-mode .tabsContainer button.active {
     background: #845;
     border-radius: 0 0 8px 8px;
     left: 50%;
-    bottom: 50%;
-    transform: translate(-50%, 50%);
+    top: 25%;
+    transform: translate(-50%, -50%);
 }
 .sect-shack {
     position: absolute;
@@ -4025,13 +4105,17 @@ body.darkenshift-mode .tabsContainer button.active {
 /* Sect disciple list cards */
 .sect-disciple-list {
     display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
     justify-content: center;
+    gap: 8px;
+    padding: 4px 0;
+    flex-wrap: nowrap;
+    overflow-x: auto;
 }
 .sect-disciple-card {
+    position: relative;
     border: 1px solid #b4b89f;
     padding: 4px;
+    padding-top: 22px;
     width: 90px;
     font-size: 0.7rem;
     display: flex;
@@ -4039,13 +4123,32 @@ body.darkenshift-mode .tabsContainer button.active {
     align-items: center;
     cursor: pointer;
     background: var(--verdantia-parchment);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+    transition: box-shadow 0.2s, background 0.2s;
+}
+.sect-disciple-card:hover {
+    background: #fbf6e0;
+    box-shadow: 0 0 8px rgba(0,0,0,0.4);
+}
+.disciple-icon {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #eee;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.65rem;
+    box-shadow: 0 0 2px rgba(0,0,0,0.5);
 }
 .sect-disciple-card .bar {
     width: 100%;
     height: 6px;
-    background: #ddd;
-    border: 1px solid #b4b89f;
+    background: #444;
+    border: 1px solid #222;
     margin-top: 2px;
     position: relative;
 }
@@ -4122,10 +4225,9 @@ body.darkenshift-mode .tabsContainer button.active {
   content: "";
   position: absolute;
   inset: 0;
-  background-image: url('img/mist.png');
+  background-image: linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,0.25) 20%, rgba(255,255,255,0.25) 80%, rgba(255,255,255,0) 100%), url('img/mist.png');
   background-size: cover;
   background-position: center;
-  opacity: 0.25;
   z-index: 0;
   pointer-events: none;
 }
