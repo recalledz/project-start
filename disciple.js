@@ -9,6 +9,7 @@ export default class Disciple {
     this.currentHp = maxHp;
     this.combatLevel = combatLevel;
     this.combatXp = 0;
+    this.globalLevel = 0;
     this.strength = attributes.strength || 0;
     this.dexterity = attributes.dexterity || 0;
     this.endurance = attributes.endurance || 0;

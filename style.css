@@ -4338,6 +4338,15 @@ body.darkenshift-mode .tabsContainer button.active {
   font-size: 0.65rem;
 }
 
+.disciple-card-glevel {
+  background: #5a3a3a;
+  color: #f5eedb;
+  border-radius: 4px;
+  padding: 0 4px;
+  font-size: 0.65rem;
+  margin-left: 4px;
+}
+
 .disciple-card-row {
   display: flex;
   align-items: center;

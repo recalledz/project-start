@@ -159,6 +159,7 @@ const BASE_STATS = {
   //ms between automatic attacks
   hpPerKill: 1,
   avgCombatLevel: 0,
+  avgProficiencyLevel: 0,
   baseCardHpBoost: 0,
   maxMana: 0,
   mana: 0,
@@ -248,6 +249,46 @@ const TASK_GROUPS = {
   Idle: 'Idle',
   Resting: 'Idle'
 };
+
+const ATTRIBUTE_FOR_GROUP = {
+  Gathering: 'dexterity',
+  Logging: 'strength',
+  Building: 'endurance',
+  Researching: 'intelligence',
+  Chanting: 'intelligence',
+  Exploration: 'dexterity',
+  Idle: null
+};
+
+function awardAttributePoints(d, group) {
+  const attr = ATTRIBUTE_FOR_GROUP[group];
+  const points = 1 + (Math.random() < 0.1 ? 1 : 0);
+  for (let i = 0; i < points; i++) {
+    const targeted = Math.random() < 0.5 && attr;
+    let target = attr;
+    if (!targeted || !attr) {
+      const others = ['strength', 'dexterity', 'endurance', 'intelligence'];
+      if (attr) others.splice(others.indexOf(attr), 1);
+      target = others[Math.floor(Math.random() * others.length)];
+    }
+    d[target] += 1;
+  }
+}
+
+function addSkillXp(d, group, amount) {
+  ensureDiscipleSkills(d.id);
+  const prevXp = sectState.discipleSkills[d.id][group] || 0;
+  const oldLevel = getTaskSkillProgress(prevXp).level;
+  const newXp = prevXp + amount;
+  sectState.discipleSkills[d.id][group] = newXp;
+  const newLevel = getTaskSkillProgress(newXp).level;
+  if (newLevel > oldLevel) {
+    if (newLevel > d.globalLevel) {
+      d.globalLevel = newLevel;
+      awardAttributePoints(d, group);
+    }
+  }
+}
 
 const LOCATION_DEFS = [
   { name: 'Firewood Grove', reqDistance: 100, baseChance: 0.2, x: '30%', y: '70%' },
@@ -353,7 +394,10 @@ function createDiscipleCard(d) {
   const level = document.createElement('span');
   level.className = 'disciple-card-level';
   level.textContent = `Lv${d.combatLevel || 1}`;
-  head.append(icon, name, level);
+  const gLevel = document.createElement('span');
+  gLevel.className = 'disciple-card-glevel';
+  gLevel.textContent = `Skill ${d.globalLevel || 0}`;
+  head.append(icon, name, level, gLevel);
   card.appendChild(head);
 
   card.appendChild(createLabeledBar('❤️', d.health, DISCIPLE_MAX_HEALTH, '#a33'));
@@ -397,6 +441,7 @@ function createDiscipleCard(d) {
   });
   actions.append(assign, statsBtn, feedBtn);
   card.appendChild(actions);
+  d.gLevelLabel = gLevel;
   return card;
 }
 
@@ -1346,7 +1391,7 @@ function tickSect(delta) {
           intelligenceXpMultiplier(task);
         const baseXp = task === 'Gather Fruit' ? FRUIT_XP_PER_CYCLE : LOG_XP_PER_CYCLE;
         const groupKey = TASK_GROUPS[task];
-        sectState.discipleSkills[d.id][groupKey] += cycles * baseXp * mult;
+        addSkillXp(d, groupKey, cycles * baseXp * mult);
         d.inventory = {};
         updateSectDisplay();
       }
@@ -1361,9 +1406,11 @@ function tickSect(delta) {
         sectState.researchProgress -= ptsBase * 500;
         const pts = Math.floor(ptsBase * (1 + 0.02 * lvl));
         sectState.researchPoints += pts;
-        sectState.discipleSkills[d.id]['Researching'] =
-          (sectState.discipleSkills[d.id]['Researching'] || 0) +
-          ptsBase * RESEARCH_XP_PER_CYCLE;
+        addSkillXp(
+          d,
+          'Researching',
+          ptsBase * RESEARCH_XP_PER_CYCLE
+        );
         if (!systems.researchUnlocked) {
           systems.researchUnlocked = true;
           if (colonyResearchTabButton) colonyResearchTabButton.style.display = '';
@@ -1383,7 +1430,7 @@ function tickSect(delta) {
           const lvl = getTaskSkillProgress(xp).level;
           const pot = 0.3 * (1 + 0.02 * lvl) * attributes.Intelligence.constructPotencyMultiplier;
           castConstruct(target, null, pot, d.id);
-          sectState.discipleSkills[d.id]['Chanting'] = xp + CHANT_XP_PER_CYCLE;
+          addSkillXp(d, 'Chanting', CHANT_XP_PER_CYCLE);
         }
       }
       const spend = Math.min(speechState.resources.qi.current, dt);
@@ -1818,8 +1865,7 @@ function tickBuilding(dt) {
       const xp = sectState.discipleSkills[d.id]['Building'];
       const lvl = getTaskSkillProgress(xp).level;
       speed += 1 + 0.02 * lvl;
-      sectState.discipleSkills[d.id]['Building'] =
-        xp + BUILD_XP_RATE * dt;
+      addSkillXp(d, 'Building', BUILD_XP_RATE * dt);
     }
   });
   if (speed === 0) return;
@@ -2780,9 +2826,13 @@ function renderPlayerStats(stats) {
   const hpPerKillDisplay = document.getElementById("hpPerKillDisplay");
   const attackSpeedDisplay = document.getElementById("attackSpeedDisplay");
   const combatLevelDisplay = document.getElementById("combatLevelDisplay");
+  const avgProfDisplay = document.getElementById("avgProfDisplay");
 
   damageDisplay.textContent = `Damage: ${formatNumber(Math.floor(stats.pDamage))}`;
   combatLevelDisplay.textContent = `Combat Lv: ${stats.avgCombatLevel.toFixed(1)}`;
+  if (avgProfDisplay) {
+    avgProfDisplay.textContent = `Avg Skill Lv: ${stats.avgProficiencyLevel.toFixed(1)}`;
+  }
   attackSpeedDisplay.textContent = `Attack Speed: ${(stats.attackSpeed / 1000).toFixed(1)}s`;
   if (manaRegenDisplay) {
     manaRegenDisplay.textContent = `Mana Regen: ${stats.manaRegen.toFixed(2)}/s`;
@@ -3563,6 +3613,9 @@ function updateHandDisplay() {
     if (d.xpLabel) {
       d.xpLabel.textContent = `LV: ${d.combatLevel}`;
     }
+    if (d.gLevelLabel) {
+      d.gLevelLabel.textContent = `Skill ${d.globalLevel}`;
+    }
     if (d.xpBarFill) {
       const pct = (d.combatXp / d.xpForNextLevel()) * 100;
       d.xpBarFill.style.width = `${Math.min(pct, 100)}%`;
@@ -4202,6 +4255,7 @@ function updatePlayerStats() {
     stats.upgradeDamageMultiplier * barUpgrades.damage.multiplier * stats.extraDamageMultiplier;
   stats.pRegen = 0;
   stats.avgCombatLevel = 0;
+  stats.avgProficiencyLevel = 0;
   stats.attackSpeed = 0;
 
   if (stats.damageBuffExpiration && Date.now() > stats.damageBuffExpiration) {
@@ -4215,6 +4269,17 @@ function updatePlayerStats() {
     stats.pDamage += card.damage;
     stats.attackSpeed += card.attackSpeed;
     stats.avgCombatLevel += card.combatLevel;
+  }
+
+  // Calculate average proficiency level of disciples
+  if (speechState && Array.isArray(speechState.disciples)) {
+    let total = 0;
+    speechState.disciples.forEach(d => {
+      total += d.globalLevel || 0;
+    });
+    if (speechState.disciples.length > 0) {
+      stats.avgProficiencyLevel = total / speechState.disciples.length;
+    }
   }
 
   stats.pDamage *=
