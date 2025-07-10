@@ -4241,3 +4241,80 @@ body.darkenshift-mode .tabsContainer button.active {
   pointer-events: none;
 }
 
+.disciple-card {
+  background: #f5eedb;
+  border: 1px solid #3a5a3a;
+  box-shadow: inset 0 0 4px rgba(0,0,0,0.4);
+  padding: 4px;
+  width: 120px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.7rem;
+}
+
+.disciple-card-head {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 600;
+  color: #3a5a3a;
+}
+
+.disciple-card-icon {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #eee;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  box-shadow: 0 0 2px rgba(0,0,0,0.5);
+}
+
+.disciple-card-level {
+  background: #3a5a3a;
+  color: #f5eedb;
+  border-radius: 4px;
+  padding: 0 4px;
+  font-size: 0.65rem;
+}
+
+.disciple-card-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.disciple-card-bar {
+  flex: 1;
+}
+
+.disciple-bar-icon {
+  width: 1em;
+}
+
+.disciple-card-task,
+.disciple-card-eta {
+  font-size: 0.65rem;
+}
+
+.disciple-card-actions {
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+  margin-top: 2px;
+}
+
+.disciple-card-actions button {
+  font-size: 0.6rem;
+}
+
+.exploration-entry {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 2px 0;
+}
+

@@ -274,6 +274,120 @@ function makeBar(value, max, color) {
   return bar;
 }
 
+function formatTime(seconds) {
+  if (!isFinite(seconds)) return '∞';
+  const s = Math.max(0, Math.round(seconds));
+  const m = Math.floor(s / 60);
+  const sec = s % 60;
+  return m > 0 ? `${m}m ${sec}s` : `${sec}s`;
+}
+
+function createLabeledBar(icon, value, max, color) {
+  const row = document.createElement('div');
+  row.className = 'disciple-card-row';
+  const ic = document.createElement('span');
+  ic.className = 'disciple-bar-icon';
+  ic.textContent = icon;
+  const text = document.createElement('span');
+  text.className = 'disciple-bar-text';
+  text.textContent = `${Math.round(value)}/${Math.round(max)}`;
+  const bar = makeBar(value, max, color);
+  bar.classList.add('disciple-card-bar');
+  row.appendChild(ic);
+  row.appendChild(text);
+  row.appendChild(bar);
+  return row;
+}
+
+function getTaskEta(d) {
+  const task = d.incapacitated ? 'Resting' : sectState.discipleTasks[d.id] || 'Idle';
+  if (task === 'Gather Fruit' || task === 'Log Pine') {
+    const progress = sectState.discipleProgress[d.id] || 0;
+    const baseSeconds = task === 'Gather Fruit' ? FRUIT_CYCLE_SECONDS : PINE_LOG_CYCLE_SECONDS;
+    const cycleAmount = task === 'Gather Fruit' ? FRUIT_CYCLE_AMOUNT : PINE_LOG_CYCLE_AMOUNT;
+    const skillXp = sectState.discipleSkills[d.id]?.[task] || 0;
+    const lvl = getTaskSkillProgress(skillXp).level;
+    const yieldMult = 1 + 0.05 * lvl;
+    const gatherAmt = Math.min(cycleAmount * yieldMult, d.inventorySlots);
+    const cycleSeconds = baseSeconds * (gatherAmt / (cycleAmount * yieldMult));
+    return cycleSeconds - progress;
+  } else if (task === 'Research') {
+    const researcherCount = speechState.disciples.filter(x => sectState.discipleTasks[x.id] === 'Research').length;
+    const researchRate = researcherCount * 4;
+    const researchProg = sectState.researchProgress % 500;
+    return researchRate > 0 ? (500 - researchProg) / researchRate : Infinity;
+  } else if (task === 'Building') {
+    const buildKey = sectState.currentBuild;
+    const buildData = buildKey ? BUILDINGS[buildKey] : null;
+    const builderCount = speechState.disciples.filter(x => sectState.discipleTasks[x.id] === 'Building').length;
+    return buildData && builderCount > 0 ? ((1 - sectState.buildProgress) * buildData.time) / builderCount : Infinity;
+  } else if (task === 'Exploration') {
+    const progress = sectState.discipleProgress[d.id] || 0;
+    return EXPLORATION_CYCLE_SECONDS - progress;
+  }
+  return 0;
+}
+
+function createDiscipleCard(d) {
+  const card = document.createElement('div');
+  card.className = 'disciple-card';
+  const head = document.createElement('div');
+  head.className = 'disciple-card-head';
+  const icon = document.createElement('div');
+  icon.className = 'disciple-card-icon';
+  icon.textContent = (d.name || `Disciple ${d.id}`).charAt(0);
+  const name = document.createElement('span');
+  name.textContent = d.name || `Disciple ${d.id}`;
+  const level = document.createElement('span');
+  level.className = 'disciple-card-level';
+  level.textContent = `Lv${d.combatLevel || 1}`;
+  head.append(icon, name, level);
+  card.appendChild(head);
+
+  card.appendChild(createLabeledBar('❤️', d.health, DISCIPLE_MAX_HEALTH, '#a33'));
+  card.appendChild(
+    createLabeledBar('⚡', d.stamina, calculateMaxStamina(d.endurance), '#cc3')
+  );
+  card.appendChild(createLabeledBar('🍖', d.hunger, 20, '#996633'));
+
+  const task = document.createElement('div');
+  task.className = 'disciple-card-task';
+  const curTask = d.incapacitated ? 'Resting' : sectState.discipleTasks[d.id] || 'Idle';
+  task.textContent = `Task: ${curTask}`;
+  const eta = document.createElement('div');
+  eta.className = 'disciple-card-eta';
+  eta.textContent = `ETA: ${formatTime(getTaskEta(d))}`;
+  card.append(task, eta);
+
+  const actions = document.createElement('div');
+  actions.className = 'disciple-card-actions';
+  const assign = document.createElement('button');
+  assign.textContent = 'Assign';
+  assign.addEventListener('click', e => {
+    e.stopPropagation();
+    openDiscipleOverlay(d);
+  });
+  const statsBtn = document.createElement('button');
+  statsBtn.textContent = 'Stats';
+  statsBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    openDiscipleOverlay(d);
+  });
+  const feedBtn = document.createElement('button');
+  feedBtn.textContent = 'Feed';
+  feedBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    if (sectState.fruits > 0 && d.hunger < 20) {
+      sectState.fruits -= 1;
+      d.hunger = 20;
+      updateSectDisplay();
+    }
+  });
+  actions.append(assign, statsBtn, feedBtn);
+  card.appendChild(actions);
+  return card;
+}
+
 function ensureDiscipleSkills(id) {
   if (!sectState.discipleSkills[id]) {
     sectState.discipleSkills[id] = {
@@ -2176,23 +2290,7 @@ function renderSectDiscipleList() {
   const list = document.createElement('div');
   list.className = 'sect-disciple-list';
   speechState.disciples.forEach(d => {
-    const card = document.createElement('div');
-    card.className = 'sect-disciple-card';
-    const icon = document.createElement('div');
-    icon.className = 'disciple-icon';
-    icon.textContent = (d.name || `Disciple ${d.id}`).charAt(0);
-    card.appendChild(icon);
-    const name = document.createElement('div');
-    name.textContent = d.name || `Disciple ${d.id}`;
-    const task = d.incapacitated ? 'Resting' : sectState.discipleTasks[d.id] || 'Idle';
-    const taskEl = document.createElement('div');
-    taskEl.textContent = task;
-    const life = makeBar(d.health, DISCIPLE_MAX_HEALTH, '#a33');
-    const stam = makeBar(d.stamina, calculateMaxStamina(d.endurance), '#cc3');
-    card.appendChild(name);
-    card.appendChild(taskEl);
-    card.appendChild(life);
-    card.appendChild(stam);
+    const card = createDiscipleCard(d);
     card.addEventListener('click', () => openDiscipleOverlay(d));
     list.appendChild(card);
   });
@@ -2306,6 +2404,7 @@ function renderExplorationTab() {
   explorationListContainer.innerHTML = '';
   speechState.disciples.forEach(d => {
     const row = document.createElement('label');
+    row.className = 'exploration-entry';
     const cb = document.createElement('input');
     cb.type = 'checkbox';
     cb.value = d.id;
@@ -2315,7 +2414,7 @@ function renderExplorationTab() {
       else explorationParty.delete(d.id);
     });
     row.appendChild(cb);
-    row.appendChild(document.createTextNode(d.name || `Disciple ${d.id}`));
+    row.appendChild(createDiscipleCard(d));
     explorationListContainer.appendChild(row);
   });
 }
