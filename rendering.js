@@ -75,7 +75,9 @@ export function renderDiscipleCard(disciple, handContainer) {
   xpLabel.classList.add('xpBarLabel');
   xpLabel.textContent = `LV: ${disciple.combatLevel}`;
   xpBar.append(xpBarFill, xpLabel);
-  wrapper.append(cardPane, xpBar);
+  const statsDiv = document.createElement('div');
+  statsDiv.className = 'disciple-stats';
+  wrapper.append(cardPane, xpBar, statsDiv);
   handContainer.appendChild(wrapper);
   disciple.wrapperElement = wrapper;
   disciple.cardElement = cardPane;
@@ -83,6 +85,7 @@ export function renderDiscipleCard(disciple, handContainer) {
   disciple.xpBar = xpBar;
   disciple.xpBarFill = xpBarFill;
   disciple.xpLabel = xpLabel;
+  disciple.statsElement = statsDiv;
 }
 
 
