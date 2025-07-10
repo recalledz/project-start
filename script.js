@@ -3057,6 +3057,7 @@ function combatXp(xpAmount) {
     d.gainCombatXp(xpAmount);
   });
   updatePlayerStats();
+  updateHandDisplay();
 }
 
 /**
@@ -3084,6 +3085,15 @@ function updateRedrawButton() {
   // removed redraw button UI
 }
 
+function updateDiscipleStatsDisplay(d) {
+  if (!d.statsElement) return;
+  const atkPerSec = (1000 / d.attackSpeed).toFixed(2);
+  const defense = Math.round(d.defense ?? 0);
+  d.statsElement.innerHTML =
+    `LV ${d.combatLevel} | DMG ${Math.round(d.damage)}<br>` +
+    `Atk/s ${atkPerSec} | Def ${defense}`;
+}
+
 // Refresh the cards currently shown in the player's hand
 function updateHandDisplay() {
   drawnCards.forEach(card => {
@@ -3107,6 +3117,7 @@ function updateHandDisplay() {
       const pct = (d.combatXp / d.xpForNextLevel()) * 100;
       d.xpBarFill.style.width = `${Math.min(pct, 100)}%`;
     }
+    updateDiscipleStatsDisplay(d);
     updateBloodSplat(d);
   });
 }
@@ -3123,6 +3134,7 @@ function renderCombatDisciples() {
     bar.appendChild(fill);
     d.wrapperElement.insertBefore(bar, d.xpBar);
     d.attackFill = fill;
+    updateDiscipleStatsDisplay(d);
   });
 }
 

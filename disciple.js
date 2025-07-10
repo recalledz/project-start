@@ -13,6 +13,7 @@ export default class Disciple {
     this.dexterity = attributes.dexterity || 0;
     this.endurance = attributes.endurance || 0;
     this.intelligence = attributes.intelligence || 0;
+    this.defense = 1;
     this.updateCombatStats();
   }
 
@@ -32,6 +33,7 @@ export default class Disciple {
   updateCombatStats() {
     this.damage = this.combatLevel * 3 * (1 + 0.05 * this.strength);
     this.attackSpeed = 10000 / (1 + 0.05 * this.dexterity);
+    this.defense = (1 + 0.05 * this.endurance) * this.combatLevel;
   }
 
   takeDamage(amount) {
