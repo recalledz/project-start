@@ -2223,7 +2223,6 @@ function openDiscipleOverlay(d) {
       const c = document.createElement('div');
       c.appendChild(buildDiscipleStatsView(d));
       c.appendChild(buildDiscipleLifeStatsView(d));
-      c.appendChild(buildDiscipleCastingStatsView(d));
       c.appendChild(buildDiscipleCombatStatsView(d));
       content.appendChild(c);
     } else if (active === 'skills') {
