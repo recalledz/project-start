@@ -1999,25 +1999,11 @@ function buildDiscipleLifeStatsView(d) {
 
 function buildDiscipleCastingStatsView(d) {
   const body = document.createElement('div');
-  ensureDiscipleConstructXp(d.id);
-  const xpMap = sectState.discipleConstructXp[d.id];
   Object.keys(speechState.constructPotency).forEach(name => {
-    const xp = xpMap[name] || 0;
-    const prog = getTaskSkillProgress(xp);
-    const mult = Math.pow(1.05, prog.level);
+    const mult = speechState.constructPotency[name] || 1;
     const row = document.createElement('div');
     row.className = 'disciple-skill-option';
-    const label = document.createElement('div');
-    label.className = 'disciple-skill-label';
-    label.textContent = `${name} Lv ${prog.level} (×${mult.toFixed(2)})`;
-    const bar = document.createElement('div');
-    bar.className = 'disciple-skill-progress';
-    const fill = document.createElement('div');
-    fill.className = 'disciple-skill-progress-fill';
-    fill.style.width = `${Math.floor(prog.progress * 100)}%`;
-    bar.appendChild(fill);
-    row.appendChild(label);
-    row.appendChild(bar);
+    row.textContent = `${name} ×${mult.toFixed(2)}`;
     body.appendChild(row);
   });
   return body;
@@ -2032,6 +2018,156 @@ function buildDiscipleCombatStatsView(d) {
     `Damage ${Math.round(d.damage)}<br>` +
     `Attack/s ${atkPerSec}<br>` +
     `Defense ${defense}`;
+  return body;
+}
+
+function buildDiscipleGeneralView(d) {
+  const body = document.createElement('div');
+  body.className = 'disciple-general';
+  const name = document.createElement('div');
+  name.className = 'disciple-name';
+  name.textContent = d.name || `Disciple ${d.id}`;
+  const portrait = document.createElement('img');
+  portrait.className = 'disciple-portrait';
+  portrait.src = 'img/generated-icon.png';
+  const status = document.createElement('div');
+  status.className = 'disciple-status';
+  status.textContent = d.incapacitated ? 'Incapacitated' : 'Healthy';
+  body.appendChild(name);
+  body.appendChild(portrait);
+  body.appendChild(status);
+  return body;
+}
+
+function makeStatRow(label, value, max, color) {
+  const row = document.createElement('div');
+  row.className = 'stat-row';
+  const lbl = document.createElement('div');
+  lbl.textContent = label;
+  const bar = makeBar(value, max, color);
+  bar.classList.add('vital-bar');
+  const val = document.createElement('div');
+  val.textContent = `${value}/${max}`;
+  row.appendChild(lbl);
+  row.appendChild(bar);
+  row.appendChild(val);
+  return row;
+}
+
+function buildDiscipleStatsView(d) {
+  const container = document.createElement('div');
+  container.className = 'disciple-stats-view';
+  const vit = document.createElement('div');
+  vit.className = 'vital-stats';
+  vit.appendChild(
+    makeStatRow(
+      'Health',
+      d.health,
+      DISCIPLE_MAX_HEALTH,
+      'linear-gradient(90deg,#b33,#e66)'
+    )
+  );
+  vit.appendChild(
+    makeStatRow(
+      'Stamina',
+      d.stamina,
+      calculateMaxStamina(d.endurance),
+      'linear-gradient(90deg,#3b3,#7f7)'
+    )
+  );
+  vit.appendChild(
+    makeStatRow('Hunger', d.hunger, 20, 'linear-gradient(90deg,#bb7,#dd5)')
+  );
+  container.appendChild(vit);
+
+  const task = document.createElement('div');
+  task.className = 'active-task';
+  const curTask = d.incapacitated
+    ? 'Resting'
+    : sectState.discipleTasks[d.id] || 'Idle';
+  task.innerHTML = `<strong>Current Task:</strong> ${curTask}`;
+  container.appendChild(task);
+
+  const entries = Object.entries(d.inventory || {});
+  const filled = entries.reduce((a, [_, v]) => a + v, 0);
+  const desc = entries.map(([k, v]) => `${v} ${k}`).join(', ');
+  const inv = document.createElement('div');
+  inv.className = 'disciple-inventory-summary';
+  inv.textContent = `Inventory: ${filled}/${d.inventorySlots}` +
+    (desc ? ` (${desc})` : '');
+  container.appendChild(inv);
+
+  const table = document.createElement('table');
+  table.className = 'attribute-table';
+  const rows = [
+    {
+      label: 'Strength',
+      value: d.strength,
+      effect:
+        `Melee ×${(1 + 0.05 * (d.strength - 1)).toFixed(2)}, +${Math.floor(
+          (d.strength - 1) / 2
+        )} inventory, +XP: Log, Mine, Smith`,
+      cls: 'strength'
+    },
+    {
+      label: 'Dexterity',
+      value: d.dexterity,
+      effect:
+        `Speed ×${(1 + 0.05 * (d.dexterity - 1)).toFixed(2)}, +XP: Woodcut, Gather Fruit`,
+      cls: 'dexterity'
+    },
+    {
+      label: 'Intelligence',
+      value: d.intelligence,
+      effect:
+        `Potency ×${(1 + 0.03 * (d.intelligence - 1)).toFixed(2)}, +XP: Chant, Research`,
+      cls: 'intelligence'
+    },
+    {
+      label: 'Endurance',
+      value: d.endurance,
+      effect:
+        `Stamina ×${(1 + 0.05 * (d.endurance - 1)).toFixed(2)}, Regen ×${(
+          1 + 0.01 * (d.endurance - 1)
+        ).toFixed(2)}, +${10 * (d.endurance - 1)} HP, +XP: Build, Defend, Combat`,
+      cls: 'endurance'
+    }
+  ];
+  rows.forEach(r => {
+    const tr = document.createElement('tr');
+    const td1 = document.createElement('td');
+    td1.textContent = `${r.label} ${r.value}`;
+    td1.className = `attr-${r.cls}`;
+    const td2 = document.createElement('td');
+    td2.textContent = r.effect;
+    tr.appendChild(td1);
+    tr.appendChild(td2);
+    table.appendChild(tr);
+  });
+  container.appendChild(table);
+  return container;
+}
+
+function buildDiscipleInventoryView(d) {
+  const body = document.createElement('div');
+  const entries = Object.entries(d.inventory || {});
+  const filled = entries.reduce((a, [_, v]) => a + v, 0);
+  const header = document.createElement('div');
+  header.textContent = `Slots ${filled}/${d.inventorySlots}`;
+  body.appendChild(header);
+  const list = document.createElement('ul');
+  entries.forEach(([k, v]) => {
+    const li = document.createElement('li');
+    li.textContent = `${v} ${k}`;
+    list.appendChild(li);
+  });
+  body.appendChild(list);
+  return body;
+}
+
+function buildDiscipleGearView() {
+  const body = document.createElement('div');
+  body.textContent = 'No gear equipped';
   return body;
 }
 
@@ -2073,22 +2209,29 @@ function openDiscipleOverlay(d) {
   box.appendChild(content);
 
   const defs = [
-    { key: 'info', label: 'General' },
+    { key: 'general', label: 'General' },
     { key: 'stats', label: 'Stats' },
-    { key: 'skills', label: 'Skills' }
+    { key: 'skills', label: 'Skills' },
+    { key: 'inventory', label: 'Inventory' },
+    { key: 'gear', label: 'Gear' }
   ];
-  let active = 'info';
+  let active = 'general';
   function render() {
     content.innerHTML = '';
-    if (active === 'info') content.appendChild(buildDiscipleStatusView(d));
+    if (active === 'general') content.appendChild(buildDiscipleGeneralView(d));
     else if (active === 'stats') {
       const c = document.createElement('div');
+      c.appendChild(buildDiscipleStatsView(d));
       c.appendChild(buildDiscipleLifeStatsView(d));
       c.appendChild(buildDiscipleCastingStatsView(d));
       c.appendChild(buildDiscipleCombatStatsView(d));
       content.appendChild(c);
     } else if (active === 'skills') {
       content.appendChild(buildDiscipleSkillsList(d));
+    } else if (active === 'inventory') {
+      content.appendChild(buildDiscipleInventoryView(d));
+    } else if (active === 'gear') {
+      content.appendChild(buildDiscipleGearView());
     }
     if (window.lucide) lucide.createIcons({ icons: lucide.icons });
   }
