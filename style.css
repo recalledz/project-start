@@ -585,34 +585,34 @@ body.darkenshift-mode .tabsContainer button.active {
     margin: 4px;
 }
 
-.insight-regen-overlay {
+.qi-regen-overlay {
     flex-direction: column;
     gap: 8px;
 }
 
-.insight-info {
+.qi-info {
     width: 100%;
     text-align: center;
     font-size: 0.85rem;
 }
 
-.insight-regen-list {
+.qi-regen-list {
     display: flex;
     flex-direction: column;
     gap: 4px;
     font-size: 0.9rem;
 }
 
-.insight-row {
+.qi-row {
     display: flex;
     justify-content: space-between;
 }
 
-.insight-row.negative {
+.qi-row.negative {
     color: #ff8888;
 }
 
-.insight-total {
+.qi-total {
     margin-top: 4px;
     text-align: center;
     font-weight: bold;
@@ -2379,8 +2379,6 @@ body.darkenshift-mode .tabsContainer button.active {
     color: #aaa;
 }
 .resource-box.mind .resource-value { color: #7fd9ff; }
-.resource-box.body .resource-value { color: #ff8888; }
-.resource-box.will .resource-value { color: #ffa37f; }
 .resource-value.thought { color: #c785ff; }
 .resource-value.structure { color: #a97b5d; }
 
@@ -3392,11 +3390,9 @@ body.darkenshift-mode .tabsContainer button.active {
     height: 100%;
     width: 0%;
 }
-.resource-fill.insight { background: #7fd9ff; }
+.resource-fill.qi { background: #7fd9ff; }
 .resource-fill.thought { background: #c785ff; }
 .resource-fill.structure { background: #a97b5d; }
-.resource-fill.body { background: #ff8888; }
-.resource-fill.will { background: #ffa37f; }
 .resource-fill.sound {
     background: linear-gradient(#555, #999);
 }
@@ -3406,25 +3402,7 @@ body.darkenshift-mode .tabsContainer button.active {
     text-align: center;
 }
 
-.construct-orb#orbWill {
-    background: rgba(128,0,255,0.2);
-    border-color: #a060ff;
-    color: #a060ff;
-}
-.construct-orb#orbWill .orb-fill {
-    background: rgba(128,0,255,0.6);
-}
-
-.construct-orb#orbBody {
-    background: rgba(255,0,0,0.2);
-    border-color: #ff8888;
-    color: #ff8888;
-}
-.construct-orb#orbBody .orb-fill {
-    background: rgba(255,0,0,0.6);
-}
-
-.construct-orb#orbInsight {
+.construct-orb#orbQi {
     background: rgba(127,217,255,0.2);
     border-color: #7fd9ff;
     color: #7fd9ff;
@@ -3659,9 +3637,7 @@ body.darkenshift-mode .tabsContainer button.active {
 .sect-orb.flash {
     animation: sectGlow 3s infinite alternate, sectGlowFlash 0.5s;
 }
-.sect-orb.insight { background: rgba(127,217,255,0.6); }
-.sect-orb.body { background: rgba(255,100,100,0.6); }
-.sect-orb.will { background: rgba(255,163,127,0.6); }
+.sect-orb.qi { background: rgba(127,217,255,0.6); }
 .sect-basket {
     position: absolute;
     width: 8px;
@@ -3743,7 +3719,7 @@ body.darkenshift-mode .tabsContainer button.active {
 .slot-word {
     pointer-events: none;
 }
-.construct-orb#orbInsight .orb-fill {
+.construct-orb#orbQi .orb-fill {
     background: rgba(127,217,255,0.6);
 }
 

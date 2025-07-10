@@ -145,7 +145,7 @@ Each task provides a small amount of skill XP whenever a work cycle is completed
 
 - **Gather Fruit** – `FRUIT_CYCLE_SECONDS = 200`
 - **Log Pine** – `PINE_LOG_CYCLE_SECONDS = 215`
-- **Research** – progresses at 4 insight per second and requires `500` progress for 1 XP (125&nbsp;seconds)
+- **Research** – progresses at 4 qi per second and requires `500` progress for 1 XP (125&nbsp;seconds)
 - **Chant** – awards 1 XP every 3 seconds
 - **Building** – grants XP each second while construction is underway
 
