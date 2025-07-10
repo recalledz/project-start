@@ -994,6 +994,21 @@ function initTabs() {
   if (playerConstructSubTabButton) playerConstructSubTabButton.click();
 }
 
+function initPollen() {
+  if (!sectDisciplesContainer) return;
+  const layer = document.createElement('div');
+  layer.className = 'pollen-layer';
+  for (let i = 0; i < 20; i++) {
+    const p = document.createElement('div');
+    p.className = 'pollen';
+    p.style.left = Math.random() * 100 + '%';
+    p.style.animationDelay = (Math.random() * 10) + 's';
+    p.style.animationDuration = (30 + Math.random() * 20) + 's';
+    layer.appendChild(p);
+  }
+  sectDisciplesContainer.appendChild(layer);
+}
+
 // Allow collapsing/expanding vignette UI panels
 function initVignetteToggles() {
   document.querySelectorAll(".vignette-toggle").forEach(btn => {
@@ -1653,8 +1668,6 @@ function renderColonyInfo() {
 function renderColonyResources() {
   colonyResourcesPanel.innerHTML = '';
   renderSectDiscipleList();
-  if (sectDiscipleListContainer)
-    colonyResourcesPanel.appendChild(sectDiscipleListContainer);
   if (sectSummaryDisplay) colonyResourcesPanel.appendChild(sectSummaryDisplay);
   checkBuildingUnlock();
 }
@@ -2446,6 +2459,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // now the DOM is in, and lucide.js has run, so window.lucide is defined
   initSpeech();
   initTabs();
+  initPollen();
   window.addEventListener('location-discovered', e => addDiscoveredLocation(e.detail.name));
   loadGame();
   checkBuildingUnlock();
