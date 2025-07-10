@@ -238,6 +238,17 @@ const TASK_ICONS = {
   Resting: '🛌'
 };
 
+const TASK_GROUPS = {
+  'Gather Fruit': 'Gathering',
+  'Log Pine': 'Logging',
+  'Building': 'Building',
+  'Research': 'Researching',
+  'Chant': 'Chanting',
+  'Exploration': 'Exploration',
+  Idle: 'Idle',
+  Resting: 'Idle'
+};
+
 const LOCATION_DEFS = [
   { name: 'Firewood Grove', reqDistance: 100, baseChance: 0.2, x: '30%', y: '70%' },
   { name: 'Crystal Cavern', reqDistance: 300, baseChance: 0.15, x: '70%', y: '40%' },
@@ -305,7 +316,8 @@ function getTaskEta(d) {
     const progress = sectState.discipleProgress[d.id] || 0;
     const baseSeconds = task === 'Gather Fruit' ? FRUIT_CYCLE_SECONDS : PINE_LOG_CYCLE_SECONDS;
     const cycleAmount = task === 'Gather Fruit' ? FRUIT_CYCLE_AMOUNT : PINE_LOG_CYCLE_AMOUNT;
-    const skillXp = sectState.discipleSkills[d.id]?.[task] || 0;
+    const group = TASK_GROUPS[task];
+    const skillXp = sectState.discipleSkills[d.id]?.[group] || 0;
     const lvl = getTaskSkillProgress(skillXp).level;
     const yieldMult = 1 + 0.05 * lvl;
     const gatherAmt = Math.min(cycleAmount * yieldMult, d.inventorySlots);
@@ -392,11 +404,11 @@ function ensureDiscipleSkills(id) {
   if (!sectState.discipleSkills[id]) {
     sectState.discipleSkills[id] = {
       Idle: 0,
-      'Gather Fruit': 0,
-      'Log Pine': 0,
+      Gathering: 0,
+      Logging: 0,
       Building: 0,
-      Research: 0,
-      Chant: 0,
+      Researching: 0,
+      Chanting: 0,
       Exploration: 0
     };
   }
@@ -414,7 +426,7 @@ function calculateDailyFruitGain() {
     if (sectState.discipleTasks[d.id] === 'Gather Fruit') {
       ensureDiscipleSkills(d.id);
       ensureDiscipleConstructXp(d.id);
-      const xp = sectState.discipleSkills[d.id]['Gather Fruit'];
+      const xp = sectState.discipleSkills[d.id]['Gathering'];
       const lvl = getTaskSkillProgress(xp).level;
       const yieldMult = 1 + 0.05 * lvl;
       const gatherAmt = Math.min(
@@ -1304,7 +1316,8 @@ function tickSect(delta) {
       const baseSeconds = task === 'Gather Fruit' ? FRUIT_CYCLE_SECONDS : PINE_LOG_CYCLE_SECONDS;
       const cycleAmount = task === 'Gather Fruit' ? FRUIT_CYCLE_AMOUNT : PINE_LOG_CYCLE_AMOUNT;
       const prog = sectState.discipleProgress[d.id];
-      const skillXp = sectState.discipleSkills[d.id]?.[task] || 0;
+      const group = TASK_GROUPS[task];
+      const skillXp = sectState.discipleSkills[d.id]?.[group] || 0;
       const lvl = getTaskSkillProgress(skillXp).level;
       const yieldMult = 1 + 0.05 * lvl;
       const gatherAmt = Math.min(cycleAmount * yieldMult, d.inventorySlots);
@@ -1326,23 +1339,14 @@ function tickSect(delta) {
         if (task === 'Gather Fruit') sectState.fruits += deposit;
         else sectState.pineLogs += deposit;
         checkBuildingUnlock();
-        if (!sectState.discipleSkills[d.id]) {
-          sectState.discipleSkills[d.id] = {
-            'Idle': 0,
-            'Gather Fruit': 0,
-            'Log Pine': 0,
-            'Building': 0,
-            'Research': 0,
-            'Chant': 0
-          };
-        }
         const mult =
           strengthXpMultiplier(task) *
           enduranceXpMultiplier(task) *
           dexterityXpMultiplier(task) *
           intelligenceXpMultiplier(task);
         const baseXp = task === 'Gather Fruit' ? FRUIT_XP_PER_CYCLE : LOG_XP_PER_CYCLE;
-        sectState.discipleSkills[d.id][task] += cycles * baseXp * mult;
+        const groupKey = TASK_GROUPS[task];
+        sectState.discipleSkills[d.id][groupKey] += cycles * baseXp * mult;
         d.inventory = {};
         updateSectDisplay();
       }
@@ -1351,14 +1355,14 @@ function tickSect(delta) {
       speechState.resources.qi.current -= spend;
       sectState.researchProgress += spend;
       if (sectState.researchProgress >= 500) {
-        const xp = sectState.discipleSkills[d.id]?.['Research'] || 0;
+        const xp = sectState.discipleSkills[d.id]?.['Researching'] || 0;
         const lvl = getTaskSkillProgress(xp).level;
         const ptsBase = Math.floor(sectState.researchProgress / 500);
         sectState.researchProgress -= ptsBase * 500;
         const pts = Math.floor(ptsBase * (1 + 0.02 * lvl));
         sectState.researchPoints += pts;
-        sectState.discipleSkills[d.id]['Research'] =
-          (sectState.discipleSkills[d.id]['Research'] || 0) +
+        sectState.discipleSkills[d.id]['Researching'] =
+          (sectState.discipleSkills[d.id]['Researching'] || 0) +
           ptsBase * RESEARCH_XP_PER_CYCLE;
         if (!systems.researchUnlocked) {
           systems.researchUnlocked = true;
@@ -1375,11 +1379,11 @@ function tickSect(delta) {
         sectState.discipleProgress[d.id] -= 5;
         const target = sectState.chantAssignments[d.id];
         if (target) {
-          const xp = sectState.discipleSkills[d.id]?.['Chant'] || 0;
+          const xp = sectState.discipleSkills[d.id]?.['Chanting'] || 0;
           const lvl = getTaskSkillProgress(xp).level;
           const pot = 0.3 * (1 + 0.02 * lvl) * attributes.Intelligence.constructPotencyMultiplier;
           castConstruct(target, null, pot, d.id);
-          sectState.discipleSkills[d.id]['Chant'] = xp + CHANT_XP_PER_CYCLE;
+          sectState.discipleSkills[d.id]['Chanting'] = xp + CHANT_XP_PER_CYCLE;
         }
       }
       const spend = Math.min(speechState.resources.qi.current, dt);
@@ -1448,7 +1452,8 @@ function updateTaskProgressDisplay() {
         taskName === 'Gather Fruit' ? FRUIT_CYCLE_SECONDS : PINE_LOG_CYCLE_SECONDS;
       const cycleAmount =
         taskName === 'Gather Fruit' ? FRUIT_CYCLE_AMOUNT : PINE_LOG_CYCLE_AMOUNT;
-      const skillXp = sectState.discipleSkills[d.id]?.[taskName] || 0;
+      const group = TASK_GROUPS[taskName];
+      const skillXp = sectState.discipleSkills[d.id]?.[group] || 0;
       const lvl = getTaskSkillProgress(skillXp).level;
       const yieldMult = 1 + 0.05 * lvl;
       const gatherAmt = Math.min(cycleAmount * yieldMult, d.inventorySlots);
@@ -1579,8 +1584,9 @@ function updateDiscipleGather(id, el) {
   const cycleAmount =
     task === 'Log Pine' ? PINE_LOG_CYCLE_AMOUNT : FRUIT_CYCLE_AMOUNT;
   const d = speechState.disciples.find(x => x.id === id);
+  const group = TASK_GROUPS[task];
   const lvl = getTaskSkillProgress(
-    sectState.discipleSkills[id]?.[task] || 0
+    sectState.discipleSkills[id]?.[group] || 0
   ).level;
   const yieldMult = 1 + 0.05 * lvl;
   const gatherAmt = Math.min(cycleAmount * yieldMult, d?.inventorySlots || 10);
@@ -1728,16 +1734,9 @@ function renderColonyInfo() {
     option.className = 'disciple-skill-option';
     if (d.incapacitated) option.classList.add('disabled');
 
-    const skills =
-      sectState.discipleSkills[d.id] || {
-        Idle: 0,
-        'Gather Fruit': 0,
-        'Log Pine': 0,
-        Building: 0,
-        'Research': 0,
-        'Chant': 0
-      };
-    const prog = getTaskSkillProgress(skills[t] || 0);
+    const skills = sectState.discipleSkills[d.id] || {};
+    const groupKey = TASK_GROUPS[t];
+    const prog = getTaskSkillProgress(skills[groupKey] || 0);
 
     const label = document.createElement('div');
     label.className = 'disciple-skill-label';
@@ -2099,7 +2098,8 @@ function buildDiscipleLifeStatsView(d) {
     { name: 'Chant', effect: 'potency' }
   ];
   tasks.forEach(t => {
-    const xp = skillMap[t.name] || 0;
+    const groupKey = TASK_GROUPS[t.name] || t.name;
+    const xp = skillMap[groupKey] || 0;
     const prog = getTaskSkillProgress(xp);
     const row = document.createElement('div');
     const isGather = t.name === 'Gather Fruit' || t.name === 'Log Pine';
@@ -2140,15 +2140,58 @@ function buildDiscipleGeneralView(d) {
   const name = document.createElement('div');
   name.className = 'disciple-name';
   name.textContent = d.name || `Disciple ${d.id}`;
-  const portrait = document.createElement('img');
-  portrait.className = 'disciple-portrait';
-  portrait.src = 'img/generated-icon.png';
   const status = document.createElement('div');
   status.className = 'disciple-status';
   status.textContent = d.incapacitated ? 'Incapacitated' : 'Healthy';
   body.appendChild(name);
-  body.appendChild(portrait);
   body.appendChild(status);
+
+  const vit = document.createElement('div');
+  vit.className = 'vital-stats';
+  vit.appendChild(
+    makeStatRow(
+      'Health',
+      d.health,
+      DISCIPLE_MAX_HEALTH,
+      'linear-gradient(90deg,#b33,#e66)'
+    )
+  );
+  const staminaRow = makeStatRow(
+    'Stamina',
+    d.stamina,
+    calculateMaxStamina(d.endurance),
+    'linear-gradient(90deg,#3b3,#7f7)'
+  );
+  const stamRate = document.createElement('span');
+  stamRate.textContent = ` (+${calculateStaminaRegen(d.endurance).toFixed(2)}/s)`;
+  staminaRow.appendChild(stamRate);
+  vit.appendChild(staminaRow);
+  const hungerRow = makeStatRow(
+    'Hunger',
+    d.hunger,
+    20,
+    'linear-gradient(90deg,#bb7,#dd5)'
+  );
+  const hungerRate = document.createElement('span');
+  hungerRate.textContent = ' (-1/day)';
+  hungerRow.appendChild(hungerRate);
+  vit.appendChild(hungerRow);
+  body.appendChild(vit);
+
+  const task = document.createElement('div');
+  task.className = 'active-task';
+  const curTask = d.incapacitated ? 'Resting' : sectState.discipleTasks[d.id] || 'Idle';
+  task.innerHTML = `<strong>Task:</strong> ${curTask} (ETA: ${formatTime(getTaskEta(d))})`;
+  body.appendChild(task);
+
+  const entries = Object.entries(d.inventory || {});
+  const filled = entries.reduce((a, [_, v]) => a + v, 0);
+  const desc = entries.map(([k, v]) => `${v} ${k}`).join(', ');
+  const inv = document.createElement('div');
+  inv.className = 'disciple-inventory-summary';
+  inv.textContent = `Inventory: ${filled}/${d.inventorySlots}` +
+    (desc ? ` (${desc})` : '');
+  body.appendChild(inv);
   return body;
 }
 
@@ -2170,45 +2213,7 @@ function makeStatRow(label, value, max, color) {
 function buildDiscipleStatsView(d) {
   const container = document.createElement('div');
   container.className = 'disciple-stats-view';
-  const vit = document.createElement('div');
-  vit.className = 'vital-stats';
-  vit.appendChild(
-    makeStatRow(
-      'Health',
-      d.health,
-      DISCIPLE_MAX_HEALTH,
-      'linear-gradient(90deg,#b33,#e66)'
-    )
-  );
-  vit.appendChild(
-    makeStatRow(
-      'Stamina',
-      d.stamina,
-      calculateMaxStamina(d.endurance),
-      'linear-gradient(90deg,#3b3,#7f7)'
-    )
-  );
-  vit.appendChild(
-    makeStatRow('Hunger', d.hunger, 20, 'linear-gradient(90deg,#bb7,#dd5)')
-  );
-  container.appendChild(vit);
-
-  const task = document.createElement('div');
-  task.className = 'active-task';
-  const curTask = d.incapacitated
-    ? 'Resting'
-    : sectState.discipleTasks[d.id] || 'Idle';
-  task.innerHTML = `<strong>Current Task:</strong> ${curTask}`;
-  container.appendChild(task);
-
-  const entries = Object.entries(d.inventory || {});
-  const filled = entries.reduce((a, [_, v]) => a + v, 0);
-  const desc = entries.map(([k, v]) => `${v} ${k}`).join(', ');
-  const inv = document.createElement('div');
-  inv.className = 'disciple-inventory-summary';
-  inv.textContent = `Inventory: ${filled}/${d.inventorySlots}` +
-    (desc ? ` (${desc})` : '');
-  container.appendChild(inv);
+  // Vital stats moved to general view
 
   const table = document.createElement('table');
   table.className = 'attribute-table';
@@ -2398,13 +2403,24 @@ function buildDiscipleSkillsList(d) {
     Chanting: ['Chant'],
     Researching: ['Research']
   };
+  const effects = {
+    Gathering: 'yield',
+    Logging: 'yield',
+    Building: 'speed',
+    Chanting: 'potency',
+    Researching: 'research pts'
+  };
   Object.entries(groups).forEach(([name, tasks]) => {
-    const xp = sectState.discipleSkills[d.id]?.[tasks[0]] || 0;
+    const xp = sectState.discipleSkills[d.id]?.[name] || 0;
     const prog = getTaskSkillProgress(xp);
     const entry = document.createElement('div');
     entry.className = 'skill-group';
     const head = document.createElement('div');
-    head.textContent = `${name} Lv ${prog.level}`;
+    const isGather = name === 'Gathering' || name === 'Logging';
+    const mult = 1 + (isGather ? 0.05 : 0.02) * prog.level;
+    const effect = effects[name];
+    head.textContent = `${name} Lv ${prog.level}` +
+      (effect ? ` (×${mult.toFixed(2)} ${effect})` : '');
     const bar = document.createElement('div');
     bar.className = 'disciple-skill-progress';
     const fill = document.createElement('div');

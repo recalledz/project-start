@@ -606,7 +606,8 @@ body.darkenshift-mode .tabsContainer button.active {
     color: #000;
     border: 1px solid #3a5a3a;
     box-shadow: 0 2px 6px rgba(0,0,0,0.4);
-    max-width: 300px;
+    width: 300px;
+    min-height: 260px;
     font-size: 0.75rem;
 }
 .disciple-overlay .overlay-box button {
