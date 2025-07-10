@@ -4047,6 +4047,46 @@ body.darkenshift-mode .tabsContainer button.active {
 .disciple-tabs button.active {
     background: #333;
 }
+.disciple-general {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    text-align: center;
+}
+.disciple-portrait {
+    width: 80px;
+    height: 80px;
+    border-radius: 4px;
+}
+.vital-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 4px;
+}
+.stat-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.75rem;
+}
+.vital-bar {
+    flex: 1;
+}
+.attribute-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.7rem;
+    margin-top: 4px;
+}
+.attribute-table td {
+    padding: 2px 4px;
+}
+.attr-strength { color: #f66; }
+.attr-dexterity { color: #6f6; }
+.attr-intelligence { color: #6af; }
+.attr-endurance { color: #ff6; }
 .skill-task-option {
     padding-left: 8px;
     cursor: pointer;
