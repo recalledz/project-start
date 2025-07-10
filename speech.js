@@ -730,7 +730,7 @@ export function unlockConstruct(name) {
   }
 }
 
-function renderConstructCards() {
+export function renderConstructCards() {
   const cont = panel.querySelector('#modalCardContainer');
   const slotCont = panel.querySelector('#memorySlotsDisplay');
   if (!cont || !slotCont) return;
@@ -1025,7 +1025,7 @@ export function castConstruct(name, el, powerMult = 1, caster = 'player') {
   renderOrbs();
 }
 
-function renderHotbar() {
+export function renderHotbar() {
   const bars = [];
   if (container) {
     const b = container.querySelector('#constructHotbar');
