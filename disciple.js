@@ -1,5 +1,6 @@
 import { generateDiscipleAttributes } from './discipleAttributes.js';
 import { xpRequirement } from './utils/xp.js';
+import { runAnimation } from './utils/animation.js';
 
 export default class Disciple {
   constructor({ id = 0, name = `Disciple ${id}`, maxHp = 10, combatLevel = 1, attributes = generateDiscipleAttributes() } = {}) {
@@ -23,11 +24,15 @@ export default class Disciple {
   }
 
   gainCombatXp(amount) {
+    const before = this.combatLevel;
     this.combatXp += amount;
     while (this.combatXp >= this.xpForNextLevel()) {
       this.combatXp -= this.xpForNextLevel();
       this.combatLevel += 1;
       this.updateCombatStats();
+    }
+    if (this.combatLevel > before && this.cardElement) {
+      runAnimation(this.cardElement, 'levelup-animate');
     }
   }
 

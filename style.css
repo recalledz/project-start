@@ -4251,7 +4251,8 @@ body.darkenshift-mode .tabsContainer button.active {
     font-size: 0.75rem;
 }
 .vital-bar {
-    flex: 1;
+    width: 100px;
+    flex: 0 0 100px;
 }
 .attribute-table {
     width: 100%;

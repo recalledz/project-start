@@ -275,6 +275,7 @@ function awardAttributePoints(d, group) {
     }
     d[target] += 1;
   }
+  if (d.cardElement) runAnimation(d.cardElement, 'levelup-animate');
 }
 
 function addSkillXp(d, group, amount) {
@@ -289,6 +290,7 @@ function addSkillXp(d, group, amount) {
       d.globalLevel = newLevel;
       awardAttributePoints(d, group);
     }
+    if (d.cardElement) runAnimation(d.cardElement, 'levelup-animate');
   }
 }
 
@@ -315,6 +317,17 @@ function getTaskSkillProgress(xp) {
   }
   const progress = (xp - total) / next;
   return { level, progress, next };
+}
+
+function computeGlobalSkillLevel(id) {
+  ensureDiscipleSkills(id);
+  const skills = sectState.discipleSkills[id];
+  let max = 0;
+  for (const xp of Object.values(skills)) {
+    const lvl = getTaskSkillProgress(xp).level;
+    if (lvl > max) max = lvl;
+  }
+  return max;
 }
 
 function makeBar(value, max, color) {
@@ -444,6 +457,8 @@ function createDiscipleCard(d) {
   actions.append(assign, statsBtn, feedBtn);
   card.appendChild(actions);
   d.gLevelLabel = gLevel;
+  d.etaLabel = eta;
+  d.cardElement = card;
   return card;
 }
 
@@ -696,6 +711,7 @@ let enemyAttackFill = null;
 let discipleAttackTimers = {}; // map disciple id -> elapsed attack time
 let enemyAttackProgress = 0; // carryover ratio of enemy attack timer
 let worldProgressTimer = 0;
+let discipleEtaTimer = 0;
 //let sanityTimer = 0;
 const worldProgressRateTracker = new RateTracker(30000);
 // Chance to trigger a random event each step of movement
@@ -1464,6 +1480,11 @@ function tickSect(delta) {
     }
   });
   updateTaskProgressDisplay();
+  discipleEtaTimer += delta;
+  if (discipleEtaTimer >= 1000) {
+    updateSectCardInfo();
+    discipleEtaTimer = 0;
+  }
   tickBuilding(dt);
 }
 
@@ -3636,6 +3657,22 @@ function updateHandDisplay() {
     }
     updateDiscipleStatsDisplay(d);
     updateBloodSplat(d);
+  });
+}
+
+function updateSectCardInfo() {
+  speechState.disciples.forEach(d => {
+    if (d.etaLabel) {
+      d.etaLabel.textContent = `ETA: ${formatTime(getTaskEta(d))}`;
+    }
+    const lvl = computeGlobalSkillLevel(d.id);
+    if (lvl > d.globalLevel) {
+      d.globalLevel = lvl;
+      if (d.gLevelLabel) d.gLevelLabel.textContent = `Skill ${d.globalLevel}`;
+      if (d.cardElement) runAnimation(d.cardElement, 'levelup-animate');
+    } else if (d.gLevelLabel) {
+      d.gLevelLabel.textContent = `Skill ${d.globalLevel}`;
+    }
   });
 }
 
