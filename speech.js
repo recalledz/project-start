@@ -1132,6 +1132,11 @@ function renderSeasonBanner() {
   if (container) {
     seasonClasses.forEach(cls => container.classList.remove(cls));
     container.classList.add(seasonClasses[idx]);
+    if (season.name === 'Verdantia') {
+      container.classList.add('verdantia-bg');
+    } else {
+      container.classList.remove('verdantia-bg');
+    }
   }
   if (speechState.weather) {
     banner.innerHTML = `${season.name} Day ${day} (${daysLeft}d) ${temp}°C<span class="weather-icon">${speechState.weather.icon}</span>`;
