@@ -2009,13 +2009,13 @@ function buildDiscipleCastingStatsView(d) {
 
 function buildDiscipleCombatStatsView(d) {
   const body = document.createElement('div');
-  const melee = (1 + 0.05 * (d.strength - 1)).toFixed(2);
-  const attackSpeed = (1 + 0.05 * (d.dexterity - 1)).toFixed(2);
-  const stamina = (1 + 0.05 * (d.endurance - 1)).toFixed(2);
+  const atkPerSec = (1000 / d.attackSpeed).toFixed(2);
+  const defense = Math.round(d.defense ?? 0);
   body.innerHTML =
-    `Melee Damage ×${melee}<br>` +
-    `Attack Speed ×${attackSpeed}<br>` +
-    `Stamina ×${stamina}`;
+    `Level ${d.combatLevel}<br>` +
+    `Damage ${Math.round(d.damage)}<br>` +
+    `Attack/s ${atkPerSec}<br>` +
+    `Defense ${defense}`;
   return body;
 }
 
@@ -3087,11 +3087,8 @@ function updateRedrawButton() {
 
 function updateDiscipleStatsDisplay(d) {
   if (!d.statsElement) return;
-  const atkPerSec = (1000 / d.attackSpeed).toFixed(2);
-  const defense = Math.round(d.defense ?? 0);
-  d.statsElement.innerHTML =
-    `LV ${d.combatLevel} | DMG ${Math.round(d.damage)}<br>` +
-    `Atk/s ${atkPerSec} | Def ${defense}`;
+  // Stats are now shown in the sect info panel rather than below the card
+  d.statsElement.innerHTML = '';
 }
 
 // Refresh the cards currently shown in the player's hand
