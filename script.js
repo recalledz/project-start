@@ -572,9 +572,7 @@ let playerLexiconPanel;
 let playerSectSubTabButton;
 let playerSectPanel;
 let constructLexiconContainer;
-let sectDisciplesDisplay;
-let sectResourcesDisplay;
-let sectUpkeepDisplay;
+let sectSummaryDisplay;
 let colonyTasksPanel;
 let colonyInfoPanel;
 let colonyResourcesPanel;
@@ -833,9 +831,7 @@ function initTabs() {
   playerSectSubTabButton = document.querySelector('.playerSectSubTabButton');
   playerSectPanel = document.querySelector('.player-sect-panel');
   constructLexiconContainer = document.getElementById('constructLexicon');
-  sectDisciplesDisplay = document.getElementById('sectDisciples');
-  sectResourcesDisplay = document.getElementById('sectResources');
-  sectUpkeepDisplay = document.getElementById('sectUpkeep');
+  sectSummaryDisplay = document.getElementById('sectSummary');
   sectDisciplesContainer = document.getElementById('sectDisciplesContainer');
   sectDiscipleListContainer = document.getElementById('sectDiscipleList');
   colonyTasksPanel = document.getElementById('colonyTasksPanel');
@@ -1374,15 +1370,16 @@ function updateSectDisplay() {
   if (!sectTabUnlocked || !playerSectPanel) return;
   const total = speechState.disciples.length;
   const assigned = Object.values(sectState.discipleTasks).filter(t => t && t !== 'Idle').length;
-  if (sectDisciplesDisplay)
-    sectDisciplesDisplay.textContent = `Disciples: ${total - assigned} / ${total}`;
-  if (sectResourcesDisplay)
-    sectResourcesDisplay.textContent = `Fruits: ${sectState.fruits} | Pine Logs: ${sectState.pineLogs}`;
-  if (sectUpkeepDisplay) {
+  if (sectSummaryDisplay) {
     const remaining = Math.max(0, DAY_LENGTH_SECONDS - speechState.seasonTimer);
     const mm = String(Math.floor(remaining / 60)).padStart(2, '0');
     const ss = String(Math.floor(remaining % 60)).padStart(2, '0');
-    sectUpkeepDisplay.textContent = `Upkeep: ${DAILY_FRUIT_CONSUMPTION} fruits/disciple per day (next in ${mm}:${ss})`;
+    const upkeep = DAILY_FRUIT_CONSUMPTION * speechState.disciples.length;
+    sectSummaryDisplay.innerHTML = `
+      <span>👥 ${total - assigned}/${total}</span>
+      <span>🍎 ${sectState.fruits}</span>
+      <span>🪵 ${sectState.pineLogs}</span>
+      <span>⚖️ -${upkeep}/day (${mm}:${ss})</span>`;
   }
 
   const orbs = document.getElementById('sectOrbs');
@@ -1656,33 +1653,9 @@ function renderColonyInfo() {
 function renderColonyResources() {
   colonyResourcesPanel.innerHTML = '';
   renderSectDiscipleList();
-  if (sectDiscipleListContainer) colonyResourcesPanel.appendChild(sectDiscipleListContainer);
-  if (sectDisciplesDisplay) colonyResourcesPanel.appendChild(sectDisciplesDisplay);
-  if (sectResourcesDisplay) colonyResourcesPanel.appendChild(sectResourcesDisplay);
-  if (sectUpkeepDisplay) colonyResourcesPanel.appendChild(sectUpkeepDisplay);
-  const fruits = document.createElement('div');
-  fruits.textContent = `Fruits: ${sectState.fruits}`;
-  const logs = document.createElement('div');
-  logs.textContent = `Pine Logs: ${sectState.pineLogs}`;
-  const dailyGain = calculateDailyFruitGain();
-  const dailyLoss = speechState.disciples.length * DAILY_FRUIT_CONSUMPTION;
-  const dailyNet = dailyGain - dailyLoss;
-  const foodRate = document.createElement('div');
-  const sign = dailyNet >= 0 ? '+' : '';
-  foodRate.textContent =
-    `Fruits/day: +${dailyGain.toFixed(1)} / -${dailyLoss} = ${sign}${dailyNet.toFixed(1)}`;
-  const sound = document.createElement('div');
-  sound.textContent = 'Sound: 0';
-  const qi = document.createElement('div');
-  qi.textContent = 'Qi: 0';
-  const research = document.createElement('div');
-  research.textContent = `Research Points: ${sectState.researchPoints}`;
-  colonyResourcesPanel.appendChild(fruits);
-  colonyResourcesPanel.appendChild(logs);
-  colonyResourcesPanel.appendChild(foodRate);
-  colonyResourcesPanel.appendChild(sound);
-  colonyResourcesPanel.appendChild(qi);
-  colonyResourcesPanel.appendChild(research);
+  if (sectDiscipleListContainer)
+    colonyResourcesPanel.appendChild(sectDiscipleListContainer);
+  if (sectSummaryDisplay) colonyResourcesPanel.appendChild(sectSummaryDisplay);
   checkBuildingUnlock();
 }
 
@@ -2192,6 +2165,10 @@ function renderSectDiscipleList() {
   speechState.disciples.forEach(d => {
     const card = document.createElement('div');
     card.className = 'sect-disciple-card';
+    const icon = document.createElement('div');
+    icon.className = 'disciple-icon';
+    icon.textContent = (d.name || `Disciple ${d.id}`).charAt(0);
+    card.appendChild(icon);
     const name = document.createElement('div');
     name.textContent = d.name || `Disciple ${d.id}`;
     const task = d.incapacitated ? 'Resting' : sectState.discipleTasks[d.id] || 'Idle';
