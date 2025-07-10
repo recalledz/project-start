@@ -4040,6 +4040,12 @@ Object.assign(playerStats, state.playerStats || {});
       });
     }
 
+    if (!Array.isArray(speechState.savedConstructs)) {
+      speechState.savedConstructs = ['Murmur'];
+    } else if (!speechState.savedConstructs.includes('Murmur')) {
+      speechState.savedConstructs.unshift('Murmur');
+    }
+
     // ensure disciples have required stats when loading older saves
     if (Array.isArray(speechState.disciples)) {
       speechState.disciples.forEach(d => {
@@ -4156,6 +4162,9 @@ updateUpgradeButtons();
 
   updateWorldTabNotification();
   updateSectDisplay();
+  if (typeof renderConstructCards === 'function') {
+    renderConstructCards();
+  }
 
 addLog("Game loaded!",
 "info");
