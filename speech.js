@@ -1082,7 +1082,9 @@ function renderOrbs() {
       fill.style.height = `${pct}%`;
       const el = root.querySelector(`#${id}`);
       if (el) {
-        el.title = `${Math.floor(orb.current)}/${orb.max} (${speechState.gains[id.replace('orb','').toLowerCase()].toFixed(1)}/sec)`;
+        const gainKey = id.replace('orb', '').toLowerCase();
+        const gain = speechState.gains[gainKey] ?? 0;
+        el.title = `${Math.floor(orb.current)}/${orb.max} (${gain.toFixed(1)}/sec)`;
         el.classList.toggle('full', orb.current >= orb.max);
       }
       const label = root.querySelector(`#${id}Value`);
@@ -1093,7 +1095,9 @@ function renderOrbs() {
           const iconEl = regenLabel.querySelector('.season-icon');
           const valEl = regenLabel.querySelector('.regen-value');
           if (valEl) {
-            valEl.textContent = `+${speechState.gains[id.replace('orb','').toLowerCase()].toFixed(3)}/s`;
+            const gainKey = id.replace('orb', '').toLowerCase();
+            const gain = speechState.gains[gainKey] ?? 0;
+            valEl.textContent = `+${gain.toFixed(3)}/s`;
           }
           if (id === 'orbQi' && iconEl) {
             const icon = seasonIcons[speechState.seasonIndex];
