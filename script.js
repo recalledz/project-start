@@ -21,7 +21,7 @@ import {
 import {
   initStarChart
 } from "./starChart.js"; // optional star chart tab
-import { initSpeech, tickSpeech, speechState, DAY_LENGTH_SECONDS, castConstruct, createConstructCard, createConstructInfo, recipes, openInsightRegenPopup, unlockConstruct } from "./speech.js";
+import { initSpeech, tickSpeech, speechState, DAY_LENGTH_SECONDS, castConstruct, createConstructCard, createConstructInfo, recipes, openQiRegenPopup, unlockConstruct } from "./speech.js";
 import { Jobs, assignJob, getAvailableJobs, renderJobAssignments, renderJobCarousel } from "./jobs.js"; // job definitions
 import RateTracker from "./utils/rateTracker.js";
 import { formatNumber } from "./utils/numberFormat.js";
@@ -1196,8 +1196,8 @@ function tickSect(delta) {
         updateSectDisplay();
       }
     } else if (task === 'Research') {
-      const spend = Math.min(speechState.resources.insight.current, 4 * dt);
-      speechState.resources.insight.current -= spend;
+      const spend = Math.min(speechState.resources.qi.current, 4 * dt);
+      speechState.resources.qi.current -= spend;
       sectState.researchProgress += spend;
       if (sectState.researchProgress >= 500) {
         const xp = sectState.discipleSkills[d.id]?.['Research'] || 0;
@@ -1231,8 +1231,8 @@ function tickSect(delta) {
           sectState.discipleSkills[d.id]['Chant'] = xp + CHANT_XP_PER_CYCLE;
         }
       }
-      const spend = Math.min(speechState.resources.insight.current, dt);
-      speechState.resources.insight.current -= spend;
+      const spend = Math.min(speechState.resources.qi.current, dt);
+      speechState.resources.qi.current -= spend;
     } else if (task === 'Exploration') {
       if (!sectState.discipleProgress[d.id]) sectState.discipleProgress[d.id] = 0;
       sectState.discipleProgress[d.id] += dt;
@@ -1364,23 +1364,15 @@ function updateSectDisplay() {
     orbs.innerHTML = '';
     const mobile = window.innerWidth <= 600;
     const positions = mobile
-      ? [
-          { cls: 'insight', left: '50%', top: '10%' },
-          { cls: 'body', left: '20%', top: '70%' },
-          { cls: 'will', left: '80%', top: '70%' }
-        ]
-      : [
-          { cls: 'insight', left: '50%', top: '5%' },
-          { cls: 'body', left: '15%', top: '70%' },
-          { cls: 'will', left: '85%', top: '70%' }
-        ];
+      ? [{ cls: 'qi', left: '50%', top: '10%' }]
+      : [{ cls: 'qi', left: '50%', top: '5%' }];
     positions.forEach(p => {
       const orb = document.createElement('div');
       orb.className = `sect-orb ${p.cls}`;
       orb.style.left = p.left;
       orb.style.top = p.top;
-      if (p.cls === 'insight') {
-        orb.addEventListener('click', openInsightRegenPopup);
+      if (p.cls === 'qi') {
+        orb.addEventListener('click', openQiRegenPopup);
       }
       orbs.appendChild(orb);
     });
@@ -1478,7 +1470,7 @@ function startDiscipleMovement() {
       const el = sectDiscipleEls[d.id];
       if (!el) return;
       if (d.incapacitated) {
-        const orb = document.querySelector('#sectOrbs .body');
+        const orb = document.querySelector('#sectOrbs .qi');
         if (orb) {
           const bx = orb.offsetLeft + orb.offsetWidth / 2 - 2;
           const by = orb.offsetTop + orb.offsetHeight / 2 - 2;
@@ -1652,15 +1644,15 @@ function renderColonyResources() {
     `Fruits/day: +${dailyGain.toFixed(1)} / -${dailyLoss} = ${sign}${dailyNet.toFixed(1)}`;
   const sound = document.createElement('div');
   sound.textContent = 'Sound: 0';
-  const insight = document.createElement('div');
-  insight.textContent = 'Insight: 0';
+  const qi = document.createElement('div');
+  qi.textContent = 'Qi: 0';
   const research = document.createElement('div');
   research.textContent = `Research Points: ${sectState.researchPoints}`;
   colonyResourcesPanel.appendChild(fruits);
   colonyResourcesPanel.appendChild(logs);
   colonyResourcesPanel.appendChild(foodRate);
   colonyResourcesPanel.appendChild(sound);
-  colonyResourcesPanel.appendChild(insight);
+  colonyResourcesPanel.appendChild(qi);
   colonyResourcesPanel.appendChild(research);
   checkBuildingUnlock();
 }
@@ -1776,7 +1768,7 @@ function renderColonyResearchPanel() {
   const time = rate > 0 ? ((500 - prog) / rate).toFixed(1) : '∞';
   const info = document.createElement('div');
   info.className = 'research-progress-info';
-  info.textContent = `Insight Rate: ${rate}/s | Next RP in ${time}s`;
+  info.textContent = `Qi Rate: ${rate}/s | Next RP in ${time}s`;
   colonyResearchPanel.appendChild(info);
   if (!systems.chantingHallUnlocked) {
     const btn = document.createElement('button');
@@ -3875,9 +3867,9 @@ Object.assign(playerStats, state.playerStats || {});
     if (state.speechState) {
       const { upgrades: savedUpgrades, ...restSpeech } = state.speechState;
       Object.assign(speechState, restSpeech);
-      // ensure the insight orb and resource reference the same object
-      if (speechState.orbs && speechState.orbs.insight) {
-        speechState.resources.insight = speechState.orbs.insight;
+      // ensure the qi orb and resource reference the same object
+      if (speechState.orbs && speechState.orbs.qi) {
+        speechState.resources.qi = speechState.orbs.qi;
       }
       if (speechState.weather && speechState.weather.days !== undefined) {
         speechState.weather.duration = speechState.weather.days;
@@ -4023,7 +4015,7 @@ function gameLoop(currentTime) {
 const rawDelta = currentTime - lastFrameTime;
 lastFrameTime = currentTime;
 const deltaTime = rawDelta * timeScale;
-const startInsight = speechState.resources.insight.current;
+const startQi = speechState.resources.qi.current;
 
 if (currentEnemy) {
     currentEnemy.tick(deltaTime);
@@ -4092,9 +4084,9 @@ if (currentEnemy) {
   tickSpeech(deltaTime);
   tickSect(deltaTime);
   const dtSeconds = deltaTime / 1000;
-  speechState.gains.insight =
+  speechState.gains.qi =
     dtSeconds > 0
-      ? (speechState.resources.insight.current - startInsight) / dtSeconds
+      ? (speechState.resources.qi.current - startQi) / dtSeconds
       : 0;
   requestAnimationFrame(gameLoop);
 }
