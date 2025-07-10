@@ -1417,7 +1417,8 @@ function updateDiscipleGather(id, el) {
   const cont = el.parentElement;
   if (!cont) return;
   const basket = document.getElementById('sectBasket');
-  if (!basket) return;
+  const patch = document.getElementById('fruitPatch');
+  if (!basket || !patch) return;
 
   const progress = sectState.discipleProgress[id] || 0;
   const task = sectState.discipleTasks[id];
@@ -1440,17 +1441,17 @@ function updateDiscipleGather(id, el) {
 
   const bx = basket.offsetLeft + basket.offsetWidth / 2 - 8;
   const by = basket.offsetTop + basket.offsetHeight / 2 - 8;
-  const outsideX = -40;
-  const outsideY = cont.clientHeight * 0.5;
+  const px = patch.offsetLeft + patch.offsetWidth / 2 - 8;
+  const py = patch.offsetTop + patch.offsetHeight / 2 - 8;
 
   switch (phase) {
     case 0: // travelling out
       el.style.opacity = '1';
-      el.style.transform = `translate(${outsideX}px, ${outsideY}px)`;
+      el.style.transform = `translate(${px}px, ${py}px)`;
       break;
     case 1: // gathering (stay outside, hidden)
       el.style.opacity = '0';
-      el.style.transform = `translate(${outsideX}px, ${outsideY}px)`;
+      el.style.transform = `translate(${px}px, ${py}px)`;
       break;
     case 2: // hauling back
       el.style.opacity = '1';
