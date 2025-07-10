@@ -3867,10 +3867,19 @@ Object.assign(playerStats, state.playerStats || {});
     if (state.speechState) {
       const { upgrades: savedUpgrades, ...restSpeech } = state.speechState;
       Object.assign(speechState, restSpeech);
-      // ensure the qi orb and resource reference the same object
-      if (speechState.orbs && speechState.orbs.qi) {
-        speechState.resources.qi = speechState.orbs.qi;
+      // ensure orbs exist for older saves
+      if (!speechState.orbs || !speechState.orbs.qi) {
+        const qi = speechState.resources?.qi || {};
+        speechState.orbs = {
+          qi: {
+            current: qi.current || 0,
+            max: qi.max || 2000,
+            regen: qi.regen || 6
+          }
+        };
       }
+      // maintain reference between qi resource and orb
+      speechState.resources.qi = speechState.orbs.qi;
       if (speechState.weather && speechState.weather.days !== undefined) {
         speechState.weather.duration = speechState.weather.days;
         delete speechState.weather.days;
