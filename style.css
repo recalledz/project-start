@@ -3481,6 +3481,10 @@ body.darkenshift-mode .tabsContainer button.active {
     inset: 0;
     border: 1px solid #555;
     box-sizing: border-box;
+    background-image: url('img/sect-map.png');
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 .sect-resources {
     text-align: center;
