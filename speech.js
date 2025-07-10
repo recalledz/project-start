@@ -730,7 +730,7 @@ export function unlockConstruct(name) {
   }
 }
 
-function renderConstructCards() {
+export function renderConstructCards() {
   const cont = panel.querySelector('#modalCardContainer');
   const slotCont = panel.querySelector('#memorySlotsDisplay');
   if (!cont || !slotCont) return;
@@ -1025,7 +1025,7 @@ export function castConstruct(name, el, powerMult = 1, caster = 'player') {
   renderOrbs();
 }
 
-function renderHotbar() {
+export function renderHotbar() {
   const bars = [];
   if (container) {
     const b = container.querySelector('#constructHotbar');
@@ -1082,7 +1082,9 @@ function renderOrbs() {
       fill.style.height = `${pct}%`;
       const el = root.querySelector(`#${id}`);
       if (el) {
-        el.title = `${Math.floor(orb.current)}/${orb.max} (${speechState.gains[id.replace('orb','').toLowerCase()].toFixed(1)}/sec)`;
+        const gainKey = id.replace('orb', '').toLowerCase();
+        const gain = speechState.gains[gainKey] ?? 0;
+        el.title = `${Math.floor(orb.current)}/${orb.max} (${gain.toFixed(1)}/sec)`;
         el.classList.toggle('full', orb.current >= orb.max);
       }
       const label = root.querySelector(`#${id}Value`);
@@ -1093,7 +1095,9 @@ function renderOrbs() {
           const iconEl = regenLabel.querySelector('.season-icon');
           const valEl = regenLabel.querySelector('.regen-value');
           if (valEl) {
-            valEl.textContent = `+${speechState.gains[id.replace('orb','').toLowerCase()].toFixed(3)}/s`;
+            const gainKey = id.replace('orb', '').toLowerCase();
+            const gain = speechState.gains[gainKey] ?? 0;
+            valEl.textContent = `+${gain.toFixed(3)}/s`;
           }
           if (id === 'orbQi' && iconEl) {
             const icon = seasonIcons[speechState.seasonIndex];
@@ -1128,6 +1132,11 @@ function renderSeasonBanner() {
   if (container) {
     seasonClasses.forEach(cls => container.classList.remove(cls));
     container.classList.add(seasonClasses[idx]);
+    if (season.name === 'Verdantia') {
+      container.classList.add('verdantia-bg');
+    } else {
+      container.classList.remove('verdantia-bg');
+    }
   }
   if (speechState.weather) {
     banner.innerHTML = `${season.name} Day ${day} (${daysLeft}d) ${temp}°C<span class="weather-icon">${speechState.weather.icon}</span>`;

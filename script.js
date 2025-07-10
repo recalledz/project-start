@@ -21,7 +21,20 @@ import {
 import {
   initStarChart
 } from "./starChart.js"; // optional star chart tab
-import { initSpeech, tickSpeech, speechState, DAY_LENGTH_SECONDS, castConstruct, createConstructCard, createConstructInfo, recipes, openQiRegenPopup, unlockConstruct } from "./speech.js";
+import {
+  initSpeech,
+  tickSpeech,
+  speechState,
+  DAY_LENGTH_SECONDS,
+  castConstruct,
+  createConstructCard,
+  createConstructInfo,
+  recipes,
+  openQiRegenPopup,
+  unlockConstruct,
+  renderConstructCards,
+  renderHotbar
+} from "./speech.js";
 import { Jobs, assignJob, getAvailableJobs, renderJobAssignments, renderJobCarousel } from "./jobs.js"; // job definitions
 import RateTracker from "./utils/rateTracker.js";
 import { formatNumber } from "./utils/numberFormat.js";
@@ -248,6 +261,17 @@ function getTaskSkillProgress(xp) {
   }
   const progress = (xp - total) / next;
   return { level, progress, next };
+}
+
+function makeBar(value, max, color) {
+  const bar = document.createElement('div');
+  bar.className = 'bar';
+  const fill = document.createElement('div');
+  fill.className = 'bar-fill';
+  fill.style.background = color;
+  fill.style.width = `${Math.min(100, (value / max) * 100)}%`;
+  bar.appendChild(fill);
+  return bar;
 }
 
 function ensureDiscipleSkills(id) {
@@ -563,6 +587,7 @@ let colonyBuildTabButton;
 let colonyResearchTabButton;
 let locationsPanelBtn;
 let sectDisciplesContainer;
+let sectDiscipleListContainer;
 let selectedDiscipleId = null;
 let discipleInfoView = 'status';
 const sectDiscipleEls = {};
@@ -812,6 +837,7 @@ function initTabs() {
   sectResourcesDisplay = document.getElementById('sectResources');
   sectUpkeepDisplay = document.getElementById('sectUpkeep');
   sectDisciplesContainer = document.getElementById('sectDisciplesContainer');
+  sectDiscipleListContainer = document.getElementById('sectDiscipleList');
   colonyTasksPanel = document.getElementById('colonyTasksPanel');
   colonyInfoPanel = document.getElementById('colonyInfoPanel');
   colonyResourcesPanel = document.getElementById('colonyResourcesPanel');
@@ -1417,7 +1443,8 @@ function updateDiscipleGather(id, el) {
   const cont = el.parentElement;
   if (!cont) return;
   const basket = document.getElementById('sectBasket');
-  if (!basket) return;
+  const patch = document.getElementById('fruitPatch');
+  if (!basket || !patch) return;
 
   const progress = sectState.discipleProgress[id] || 0;
   const task = sectState.discipleTasks[id];
@@ -1440,17 +1467,17 @@ function updateDiscipleGather(id, el) {
 
   const bx = basket.offsetLeft + basket.offsetWidth / 2 - 8;
   const by = basket.offsetTop + basket.offsetHeight / 2 - 8;
-  const outsideX = -40;
-  const outsideY = cont.clientHeight * 0.5;
+  const px = patch.offsetLeft + patch.offsetWidth / 2 - 8;
+  const py = patch.offsetTop + patch.offsetHeight / 2 - 8;
 
   switch (phase) {
     case 0: // travelling out
       el.style.opacity = '1';
-      el.style.transform = `translate(${outsideX}px, ${outsideY}px)`;
+      el.style.transform = `translate(${px}px, ${py}px)`;
       break;
     case 1: // gathering (stay outside, hidden)
       el.style.opacity = '0';
-      el.style.transform = `translate(${outsideX}px, ${outsideY}px)`;
+      el.style.transform = `translate(${px}px, ${py}px)`;
       break;
     case 2: // hauling back
       el.style.opacity = '1';
@@ -1628,6 +1655,8 @@ function renderColonyInfo() {
 
 function renderColonyResources() {
   colonyResourcesPanel.innerHTML = '';
+  renderSectDiscipleList();
+  if (sectDiscipleListContainer) colonyResourcesPanel.appendChild(sectDiscipleListContainer);
   if (sectDisciplesDisplay) colonyResourcesPanel.appendChild(sectDisciplesDisplay);
   if (sectResourcesDisplay) colonyResourcesPanel.appendChild(sectResourcesDisplay);
   if (sectUpkeepDisplay) colonyResourcesPanel.appendChild(sectUpkeepDisplay);
@@ -1983,25 +2012,11 @@ function buildDiscipleLifeStatsView(d) {
 
 function buildDiscipleCastingStatsView(d) {
   const body = document.createElement('div');
-  ensureDiscipleConstructXp(d.id);
-  const xpMap = sectState.discipleConstructXp[d.id];
   Object.keys(speechState.constructPotency).forEach(name => {
-    const xp = xpMap[name] || 0;
-    const prog = getTaskSkillProgress(xp);
-    const mult = Math.pow(1.05, prog.level);
+    const mult = speechState.constructPotency[name] || 1;
     const row = document.createElement('div');
     row.className = 'disciple-skill-option';
-    const label = document.createElement('div');
-    label.className = 'disciple-skill-label';
-    label.textContent = `${name} Lv ${prog.level} (×${mult.toFixed(2)})`;
-    const bar = document.createElement('div');
-    bar.className = 'disciple-skill-progress';
-    const fill = document.createElement('div');
-    fill.className = 'disciple-skill-progress-fill';
-    fill.style.width = `${Math.floor(prog.progress * 100)}%`;
-    bar.appendChild(fill);
-    row.appendChild(label);
-    row.appendChild(bar);
+    row.textContent = `${name} ×${mult.toFixed(2)}`;
     body.appendChild(row);
   });
   return body;
@@ -2009,14 +2024,291 @@ function buildDiscipleCastingStatsView(d) {
 
 function buildDiscipleCombatStatsView(d) {
   const body = document.createElement('div');
-  const melee = (1 + 0.05 * (d.strength - 1)).toFixed(2);
-  const attackSpeed = (1 + 0.05 * (d.dexterity - 1)).toFixed(2);
-  const stamina = (1 + 0.05 * (d.endurance - 1)).toFixed(2);
+  const atkPerSec = (1000 / d.attackSpeed).toFixed(2);
+  const defense = Math.round(d.defense ?? 0);
   body.innerHTML =
-    `Melee Damage ×${melee}<br>` +
-    `Attack Speed ×${attackSpeed}<br>` +
-    `Stamina ×${stamina}`;
+    `Level ${d.combatLevel}<br>` +
+    `Damage ${Math.round(d.damage)}<br>` +
+    `Attack/s ${atkPerSec}<br>` +
+    `Defense ${defense}`;
   return body;
+}
+
+function buildDiscipleGeneralView(d) {
+  const body = document.createElement('div');
+  body.className = 'disciple-general';
+  const name = document.createElement('div');
+  name.className = 'disciple-name';
+  name.textContent = d.name || `Disciple ${d.id}`;
+  const portrait = document.createElement('img');
+  portrait.className = 'disciple-portrait';
+  portrait.src = 'img/generated-icon.png';
+  const status = document.createElement('div');
+  status.className = 'disciple-status';
+  status.textContent = d.incapacitated ? 'Incapacitated' : 'Healthy';
+  body.appendChild(name);
+  body.appendChild(portrait);
+  body.appendChild(status);
+  return body;
+}
+
+function makeStatRow(label, value, max, color) {
+  const row = document.createElement('div');
+  row.className = 'stat-row';
+  const lbl = document.createElement('div');
+  lbl.textContent = label;
+  const bar = makeBar(value, max, color);
+  bar.classList.add('vital-bar');
+  const val = document.createElement('div');
+  val.textContent = `${value}/${max}`;
+  row.appendChild(lbl);
+  row.appendChild(bar);
+  row.appendChild(val);
+  return row;
+}
+
+function buildDiscipleStatsView(d) {
+  const container = document.createElement('div');
+  container.className = 'disciple-stats-view';
+  const vit = document.createElement('div');
+  vit.className = 'vital-stats';
+  vit.appendChild(
+    makeStatRow(
+      'Health',
+      d.health,
+      DISCIPLE_MAX_HEALTH,
+      'linear-gradient(90deg,#b33,#e66)'
+    )
+  );
+  vit.appendChild(
+    makeStatRow(
+      'Stamina',
+      d.stamina,
+      calculateMaxStamina(d.endurance),
+      'linear-gradient(90deg,#3b3,#7f7)'
+    )
+  );
+  vit.appendChild(
+    makeStatRow('Hunger', d.hunger, 20, 'linear-gradient(90deg,#bb7,#dd5)')
+  );
+  container.appendChild(vit);
+
+  const task = document.createElement('div');
+  task.className = 'active-task';
+  const curTask = d.incapacitated
+    ? 'Resting'
+    : sectState.discipleTasks[d.id] || 'Idle';
+  task.innerHTML = `<strong>Current Task:</strong> ${curTask}`;
+  container.appendChild(task);
+
+  const entries = Object.entries(d.inventory || {});
+  const filled = entries.reduce((a, [_, v]) => a + v, 0);
+  const desc = entries.map(([k, v]) => `${v} ${k}`).join(', ');
+  const inv = document.createElement('div');
+  inv.className = 'disciple-inventory-summary';
+  inv.textContent = `Inventory: ${filled}/${d.inventorySlots}` +
+    (desc ? ` (${desc})` : '');
+  container.appendChild(inv);
+
+  const table = document.createElement('table');
+  table.className = 'attribute-table';
+  const rows = [
+    {
+      label: 'Strength',
+      value: d.strength,
+      effect:
+        `Melee ×${(1 + 0.05 * (d.strength - 1)).toFixed(2)}, +${Math.floor(
+          (d.strength - 1) / 2
+        )} inventory, +XP: Log, Mine, Smith`,
+      cls: 'strength'
+    },
+    {
+      label: 'Dexterity',
+      value: d.dexterity,
+      effect:
+        `Speed ×${(1 + 0.05 * (d.dexterity - 1)).toFixed(2)}, +XP: Woodcut, Gather Fruit`,
+      cls: 'dexterity'
+    },
+    {
+      label: 'Intelligence',
+      value: d.intelligence,
+      effect:
+        `Potency ×${(1 + 0.03 * (d.intelligence - 1)).toFixed(2)}, +XP: Chant, Research`,
+      cls: 'intelligence'
+    },
+    {
+      label: 'Endurance',
+      value: d.endurance,
+      effect:
+        `Stamina ×${(1 + 0.05 * (d.endurance - 1)).toFixed(2)}, Regen ×${(
+          1 + 0.01 * (d.endurance - 1)
+        ).toFixed(2)}, +${10 * (d.endurance - 1)} HP, +XP: Build, Defend, Combat`,
+      cls: 'endurance'
+    }
+  ];
+  rows.forEach(r => {
+    const tr = document.createElement('tr');
+    const td1 = document.createElement('td');
+    td1.textContent = `${r.label} ${r.value}`;
+    td1.className = `attr-${r.cls}`;
+    const td2 = document.createElement('td');
+    td2.textContent = r.effect;
+    tr.appendChild(td1);
+    tr.appendChild(td2);
+    table.appendChild(tr);
+  });
+  container.appendChild(table);
+  return container;
+}
+
+function buildDiscipleInventoryView(d) {
+  const body = document.createElement('div');
+  const entries = Object.entries(d.inventory || {});
+  const filled = entries.reduce((a, [_, v]) => a + v, 0);
+  const header = document.createElement('div');
+  header.textContent = `Slots ${filled}/${d.inventorySlots}`;
+  body.appendChild(header);
+  const list = document.createElement('ul');
+  entries.forEach(([k, v]) => {
+    const li = document.createElement('li');
+    li.textContent = `${v} ${k}`;
+    list.appendChild(li);
+  });
+  body.appendChild(list);
+  return body;
+}
+
+function buildDiscipleGearView() {
+  const body = document.createElement('div');
+  body.textContent = 'No gear equipped';
+  return body;
+}
+
+function renderSectDiscipleList() {
+  if (!sectDiscipleListContainer) return;
+  sectDiscipleListContainer.innerHTML = '';
+  const list = document.createElement('div');
+  list.className = 'sect-disciple-list';
+  speechState.disciples.forEach(d => {
+    const card = document.createElement('div');
+    card.className = 'sect-disciple-card';
+    const name = document.createElement('div');
+    name.textContent = d.name || `Disciple ${d.id}`;
+    const task = d.incapacitated ? 'Resting' : sectState.discipleTasks[d.id] || 'Idle';
+    const taskEl = document.createElement('div');
+    taskEl.textContent = task;
+    const life = makeBar(d.health, DISCIPLE_MAX_HEALTH, '#a33');
+    const stam = makeBar(d.stamina, calculateMaxStamina(d.endurance), '#cc3');
+    card.appendChild(name);
+    card.appendChild(taskEl);
+    card.appendChild(life);
+    card.appendChild(stam);
+    card.addEventListener('click', () => openDiscipleOverlay(d));
+    list.appendChild(card);
+  });
+  sectDiscipleListContainer.appendChild(list);
+}
+
+let discipleOverlay = null;
+function openDiscipleOverlay(d) {
+  if (discipleOverlay) discipleOverlay.close();
+  discipleOverlay = createOverlay({ className: 'disciple-overlay' });
+  const { box } = discipleOverlay;
+
+  const tabs = document.createElement('div');
+  tabs.className = 'disciple-tabs';
+  box.appendChild(tabs);
+  const content = document.createElement('div');
+  box.appendChild(content);
+
+  const defs = [
+    { key: 'general', label: 'General' },
+    { key: 'stats', label: 'Stats' },
+    { key: 'skills', label: 'Skills' },
+    { key: 'inventory', label: 'Inventory' },
+    { key: 'gear', label: 'Gear' }
+  ];
+  let active = 'general';
+  function render() {
+    content.innerHTML = '';
+    if (active === 'general') content.appendChild(buildDiscipleGeneralView(d));
+    else if (active === 'stats') {
+      const c = document.createElement('div');
+      c.appendChild(buildDiscipleStatsView(d));
+      c.appendChild(buildDiscipleLifeStatsView(d));
+      c.appendChild(buildDiscipleCombatStatsView(d));
+      content.appendChild(c);
+    } else if (active === 'skills') {
+      content.appendChild(buildDiscipleSkillsList(d));
+    } else if (active === 'inventory') {
+      content.appendChild(buildDiscipleInventoryView(d));
+    } else if (active === 'gear') {
+      content.appendChild(buildDiscipleGearView());
+    }
+    if (window.lucide) lucide.createIcons({ icons: lucide.icons });
+  }
+  defs.forEach(def => {
+    const btn = document.createElement('button');
+    btn.textContent = def.label;
+    if (def.key === active) btn.classList.add('active');
+    btn.addEventListener('click', () => {
+      active = def.key;
+      tabs.querySelectorAll('button').forEach(b => b.classList.toggle('active', b === btn));
+      render();
+    });
+    tabs.appendChild(btn);
+  });
+  render();
+  discipleOverlay.appendButton('Close', discipleOverlay.close);
+}
+
+function buildDiscipleSkillsList(d) {
+  const container = document.createElement('div');
+  const groups = {
+    Gathering: ['Gather Fruit'],
+    Logging: ['Log Pine'],
+    Building: ['Building'],
+    Chanting: ['Chant'],
+    Researching: ['Research']
+  };
+  Object.entries(groups).forEach(([name, tasks]) => {
+    const xp = sectState.discipleSkills[d.id]?.[tasks[0]] || 0;
+    const prog = getTaskSkillProgress(xp);
+    const entry = document.createElement('div');
+    entry.className = 'skill-group';
+    const head = document.createElement('div');
+    head.textContent = `${name} Lv ${prog.level}`;
+    const bar = document.createElement('div');
+    bar.className = 'disciple-skill-progress';
+    const fill = document.createElement('div');
+    fill.className = 'disciple-skill-progress-fill';
+    fill.style.width = `${Math.floor(prog.progress * 100)}%`;
+    bar.appendChild(fill);
+    head.appendChild(bar);
+    entry.appendChild(head);
+    const list = document.createElement('div');
+    list.style.display = 'none';
+    tasks.forEach(t => {
+      const opt = document.createElement('div');
+      opt.className = 'skill-task-option';
+      opt.textContent = t;
+      opt.addEventListener('click', () => {
+        if (!d.incapacitated) {
+          sectState.discipleTasks[d.id] = t;
+          discipleGatherPhase[d.id] = -1;
+          discipleOverlay.close();
+          updateSectDisplay();
+        }
+      });
+      list.appendChild(opt);
+    });
+    head.addEventListener('click', () => {
+      list.style.display = list.style.display === 'none' ? 'block' : 'none';
+    });
+    entry.appendChild(list);
+    container.appendChild(entry);
+  });
+  return container;
 }
 
 function renderExplorationTab() {
@@ -2232,7 +2524,7 @@ document.addEventListener("DOMContentLoaded", () => {
     updateManaBar();
   });
   showDeckListView();
-  showColonyTab('tasks');
+  showColonyTab('resources');
   Object.values(upgrades).forEach(u => u.effect({ stats, pDeck, stageData, systems }));
   updatePlayerStats(stats);
   updatePlayerStats(stats);
@@ -3087,11 +3379,8 @@ function updateRedrawButton() {
 
 function updateDiscipleStatsDisplay(d) {
   if (!d.statsElement) return;
-  const atkPerSec = (1000 / d.attackSpeed).toFixed(2);
-  const defense = Math.round(d.defense ?? 0);
-  d.statsElement.innerHTML =
-    `LV ${d.combatLevel} | DMG ${Math.round(d.damage)}<br>` +
-    `Atk/s ${atkPerSec} | Def ${defense}`;
+  // Stats are now shown in the sect info panel rather than below the card
+  d.statsElement.innerHTML = '';
 }
 
 // Refresh the cards currently shown in the player's hand
@@ -3906,6 +4195,19 @@ Object.assign(playerStats, state.playerStats || {});
       });
     }
 
+    if (!Array.isArray(speechState.savedConstructs)) {
+      speechState.savedConstructs = ['Murmur'];
+    } else if (!speechState.savedConstructs.includes('Murmur')) {
+      speechState.savedConstructs.unshift('Murmur');
+    }
+
+    // ensure the default Murmur card is active if no constructs are active
+    if (!Array.isArray(speechState.activeConstructs)) {
+      speechState.activeConstructs = ['Murmur'];
+    } else if (speechState.activeConstructs.length === 0) {
+      speechState.activeConstructs.push('Murmur');
+    }
+
     // ensure disciples have required stats when loading older saves
     if (Array.isArray(speechState.disciples)) {
       speechState.disciples.forEach(d => {
@@ -3921,6 +4223,12 @@ Object.assign(playerStats, state.playerStats || {});
         if (!d.name) d.name = `Disciple ${d.id}`;
         if (d.inventorySlots === undefined) d.inventorySlots = 10;
         if (!d.inventory) d.inventory = {};
+
+        if (d.combatLevel === undefined) d.combatLevel = 1;
+        if (d.maxHp === undefined) d.maxHp = 10;
+        if (d.currentHp === undefined) d.currentHp = d.maxHp;
+        Object.setPrototypeOf(d, Disciple.prototype);
+        if (typeof d.updateCombatStats === 'function') d.updateCombatStats();
       });
     }
   }
@@ -4016,6 +4324,10 @@ updateUpgradeButtons();
 
   updateWorldTabNotification();
   updateSectDisplay();
+  if (typeof renderConstructCards === 'function') {
+    renderConstructCards();
+    if (typeof renderHotbar === 'function') renderHotbar();
+  }
 
 addLog("Game loaded!",
 "info");
