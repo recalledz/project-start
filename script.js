@@ -574,6 +574,7 @@ let colonyBuildTabButton;
 let colonyResearchTabButton;
 let locationsPanelBtn;
 let sectDisciplesContainer;
+let sectDiscipleListContainer;
 let selectedDiscipleId = null;
 let discipleInfoView = 'status';
 const sectDiscipleEls = {};
@@ -823,6 +824,7 @@ function initTabs() {
   sectResourcesDisplay = document.getElementById('sectResources');
   sectUpkeepDisplay = document.getElementById('sectUpkeep');
   sectDisciplesContainer = document.getElementById('sectDisciplesContainer');
+  sectDiscipleListContainer = document.getElementById('sectDiscipleList');
   colonyTasksPanel = document.getElementById('colonyTasksPanel');
   colonyInfoPanel = document.getElementById('colonyInfoPanel');
   colonyResourcesPanel = document.getElementById('colonyResourcesPanel');
@@ -1640,6 +1642,8 @@ function renderColonyInfo() {
 
 function renderColonyResources() {
   colonyResourcesPanel.innerHTML = '';
+  renderSectDiscipleList();
+  if (sectDiscipleListContainer) colonyResourcesPanel.appendChild(sectDiscipleListContainer);
   if (sectDisciplesDisplay) colonyResourcesPanel.appendChild(sectDisciplesDisplay);
   if (sectResourcesDisplay) colonyResourcesPanel.appendChild(sectResourcesDisplay);
   if (sectUpkeepDisplay) colonyResourcesPanel.appendChild(sectUpkeepDisplay);
@@ -2032,8 +2036,8 @@ function buildDiscipleCombatStatsView(d) {
 }
 
 function renderSectDiscipleList() {
-  if (!sectDisciplesDisplay) return;
-  sectDisciplesDisplay.innerHTML = '';
+  if (!sectDiscipleListContainer) return;
+  sectDiscipleListContainer.innerHTML = '';
   const list = document.createElement('div');
   list.className = 'sect-disciple-list';
   speechState.disciples.forEach(d => {
@@ -2053,7 +2057,7 @@ function renderSectDiscipleList() {
     card.addEventListener('click', () => openDiscipleOverlay(d));
     list.appendChild(card);
   });
-  sectDisciplesDisplay.appendChild(list);
+  sectDiscipleListContainer.appendChild(list);
 }
 
 let discipleOverlay = null;
