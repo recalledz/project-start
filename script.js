@@ -21,7 +21,20 @@ import {
 import {
   initStarChart
 } from "./starChart.js"; // optional star chart tab
-import { initSpeech, tickSpeech, speechState, DAY_LENGTH_SECONDS, castConstruct, createConstructCard, createConstructInfo, recipes, openQiRegenPopup, unlockConstruct } from "./speech.js";
+import {
+  initSpeech,
+  tickSpeech,
+  speechState,
+  DAY_LENGTH_SECONDS,
+  castConstruct,
+  createConstructCard,
+  createConstructInfo,
+  recipes,
+  openQiRegenPopup,
+  unlockConstruct,
+  renderConstructCards,
+  renderHotbar
+} from "./speech.js";
 import { Jobs, assignJob, getAvailableJobs, renderJobAssignments, renderJobCarousel } from "./jobs.js"; // job definitions
 import RateTracker from "./utils/rateTracker.js";
 import { formatNumber } from "./utils/numberFormat.js";
@@ -4046,6 +4059,13 @@ Object.assign(playerStats, state.playerStats || {});
       speechState.savedConstructs.unshift('Murmur');
     }
 
+    // ensure the default Murmur card is active if no constructs are active
+    if (!Array.isArray(speechState.activeConstructs)) {
+      speechState.activeConstructs = ['Murmur'];
+    } else if (speechState.activeConstructs.length === 0) {
+      speechState.activeConstructs.push('Murmur');
+    }
+
     // ensure disciples have required stats when loading older saves
     if (Array.isArray(speechState.disciples)) {
       speechState.disciples.forEach(d => {
@@ -4164,6 +4184,7 @@ updateUpgradeButtons();
   updateSectDisplay();
   if (typeof renderConstructCards === 'function') {
     renderConstructCards();
+    if (typeof renderHotbar === 'function') renderHotbar();
   }
 
 addLog("Game loaded!",
