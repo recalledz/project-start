@@ -594,6 +594,54 @@ body.darkenshift-mode .tabsContainer button.active {
     margin: 4px;
 }
 
+/* Disciple overlay positioning and style */
+.disciple-overlay.overlay {
+    background: none;
+    backdrop-filter: none;
+    justify-content: flex-end;
+    align-items: flex-start;
+}
+.disciple-overlay .overlay-box {
+    background: var(--verdantia-parchment);
+    color: #000;
+    border: 1px solid #3a5a3a;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+    width: 300px;
+    min-height: 260px;
+    font-size: 0.75rem;
+    position: relative;
+}
+.disciple-overlay .overlay-box button {
+    background: var(--verdantia-parchment);
+    color: #000;
+    border: 1px solid #3a5a3a;
+}
+.disciple-overlay .close-btn {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 16px;
+    height: 16px;
+    background: #c33;
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    font-size: 12px;
+    line-height: 14px;
+    text-align: center;
+    cursor: pointer;
+}
+.disciple-stats-general,
+.disciple-stats-combat {
+    margin-bottom: 8px;
+    font-size: 0.75rem;
+}
+.disciple-stats-general h3,
+.disciple-stats-combat h3 {
+    margin: 0 0 4px 0;
+    font-size: 0.8rem;
+}
+
 .qi-regen-overlay {
     flex-direction: column;
     gap: 8px;
@@ -4167,15 +4215,23 @@ body.darkenshift-mode .tabsContainer button.active {
     margin-bottom: 6px;
     justify-content: center;
 }
+.disciple-tabs button {
+    background: var(--verdantia-parchment);
+    border: 1px solid #3a5a3a;
+    color: #000;
+    padding: 2px 4px;
+    font-size: 0.7rem;
+}
 .disciple-tabs button.active {
-    background: #333;
+    background: #3a5a3a;
+    color: var(--verdantia-parchment);
 }
 .disciple-general {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
     gap: 4px;
-    text-align: center;
+    text-align: left;
 }
 .disciple-portrait {
     width: 80px;
@@ -4239,5 +4295,83 @@ body.darkenshift-mode .tabsContainer button.active {
   background: linear-gradient(to bottom right, rgba(50, 100, 50, 0.1), rgba(80, 150, 80, 0.15));
   z-index: 0;
   pointer-events: none;
+}
+
+.disciple-card {
+  background: #f5eedb;
+  border: 1px solid #3a5a3a;
+  box-shadow: inset 0 0 4px rgba(0,0,0,0.4);
+  padding: 4px;
+  width: 120px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.7rem;
+  color: #000;
+}
+
+.disciple-card-head {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 600;
+  color: #000;
+}
+
+.disciple-card-icon {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #eee;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  box-shadow: 0 0 2px rgba(0,0,0,0.5);
+}
+
+.disciple-card-level {
+  background: #3a5a3a;
+  color: #f5eedb;
+  border-radius: 4px;
+  padding: 0 4px;
+  font-size: 0.65rem;
+}
+
+.disciple-card-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.disciple-card-bar {
+  flex: 1;
+}
+
+.disciple-bar-icon {
+  width: 1em;
+}
+
+.disciple-card-task,
+.disciple-card-eta {
+  font-size: 0.65rem;
+}
+
+.disciple-card-actions {
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+  margin-top: 2px;
+}
+
+.disciple-card-actions button {
+  font-size: 0.6rem;
+}
+
+.exploration-entry {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 2px 0;
 }
 
