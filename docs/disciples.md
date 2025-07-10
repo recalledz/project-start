@@ -161,6 +161,29 @@ With these values, the default XP gain rates and example time to reach higher pr
 
 These estimates assume no attribute bonuses and continuous work on the same task. Attribute points or upgrades will shorten the timelines further.
 
+## Disciple Cards
+
+Disciples appear in the colony interface as compact cards. Each card displays:
+
+```
+┌───────────────────────────────┐
+│ ● [Portrait]  Name LvX        │
+│ ───────────────────────────── │
+│ ❤️  h/m  [bar]                │
+│ ⚡  s/m  [bar]                │
+│ 🍖  h/m  [bar]                │
+│ ───────────────────────────── │
+│ 📋 Task: Current              │
+│ ⏳ ETA: time                  │
+│ ───────────────────────────── │
+│ [ Assign ] [ Stats ] [ Feed ] │
+└───────────────────────────────┘
+```
+
+Health, stamina and hunger are shown with icons, numeric values and colored bars. The task line reflects the follower's current job and the ETA counts down to the next cycle. Action buttons provide quick access to assignment, stats and feeding.
+
+Exploration uses the same layout—disciples selected for an expedition are shown with identical cards in the **Exploration** tab.
+
 ## Combat Participation
 
 Disciples join the player during combat encounters. Each follower acts in place
