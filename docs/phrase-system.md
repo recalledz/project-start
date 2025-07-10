@@ -13,25 +13,25 @@ The phrase builder has been replaced with a simpler construct mechanic. The **Co
 ### Starting Construct – Murmur
 
 - Unlocked from the start.
-- Costs: 25 Insight
+- Costs: 25 Qi
 - Produces 1 Sound and grants 1 Voice XP when cast.
-- When activated, Murmur converts 1 Insight into 1 Sound.
+- When activated, Murmur converts 1 Qi into 1 Sound.
 - Cooldown: 1s. Your Sound resource can hold up to 200.
 
 ### Invocation Summary
 
 | Invocation           | Recipe (to Discover)      | Cost to Use                                   | Cooldown | Tags                                | Effect Summary                                        |
 | -------------------- | ------------------------- | -------------------------------------------- | -------- | ----------------------------------- | ----------------------------------------------------- |
-| **Murmur**           | —                         | 25 Insight                   | 1s       | Single-cast, Generator             | Generates 1 Sound *(+1 Voice XP)*                     |
-| **Echo of Mind**     | Sound + Insight           | 25 Sound + 500 Insight                   | 5s       | Single-cast, Generator, Duration   | Generates 1 Thought per second for 5s *(Unlocks at Voice Lv.3, 1500 Insight)* |
-| **Clarity Pulse**    | Thought + Insight         | 20 Thought + 50 Sound                   | 30s      | Single-cast, Buff, Duration        | Gain 1% Insight per s *(Unlocks at Mind Lv.2, 1700 Insight)* |
-| **Symbol Seed**      | Sound + Thought           | Drains 1 Thought per second                   | 30s      | Duration, Generator, Drain         | Gain 0.1 Structure per thought drained *(Unlocks at Mind Lv.3, 2000 Insight)* |
-| **Intone**           | —                         | None                                          | 30s      | Buff                               | Press repeatedly to charge; 1.2× Insight at 5 presses, 1.5× at 10, 2× at 15 for 30s *(Unlocked after Murmur ×10)* |
+| **Murmur**           | —                         | 25 Qi                   | 1s       | Single-cast, Generator             | Generates 1 Sound *(+1 Voice XP)*                     |
+| **Echo of Mind**     | Sound + Qi           | 25 Sound + 500 Qi                   | 5s       | Single-cast, Generator, Duration   | Generates 1 Thought per second for 5s *(Unlocks at Voice Lv.3, 1500 Qi)* |
+| **Clarity Pulse**    | Thought + Qi         | 20 Thought + 50 Sound                   | 30s      | Single-cast, Buff, Duration        | Gain 1% Qi per s *(Unlocks at Mind Lv.2, 1700 Qi)* |
+| **Symbol Seed**      | Sound + Thought           | Drains 1 Thought per second                   | 30s      | Duration, Generator, Drain         | Gain 0.1 Structure per thought drained *(Unlocks at Mind Lv.3, 2000 Qi)* |
+| **Intone**           | —                         | None                                          | 30s      | Buff                               | Press repeatedly to charge; 1.2× Qi at 5 presses, 1.5× at 10, 2× at 15 for 30s *(Unlocked after Murmur ×10)* |
 | **Mnemonic Rhythm**  | —                         | 50 Sound               | 30s      | Buff                               | Grants ×2 XP to other constructs for 3s; +0.2× per potency point *(Unlocked after Murmur ×3 in a row)* |
-| **Mental Construct** | Thought + Insight + Sound | 10 Thought + 10 Structure + 1000 Insight      | 10s      | Single-cast                        | Gain 0.1 elemental essence based on season *(Unlocks at Voice Lv.5 & Mind Lv.5, 2300 Insight)* |
+| **Mental Construct** | Thought + Qi + Sound | 10 Thought + 10 Structure + 1000 Qi      | 10s      | Single-cast                        | Gain 0.1 elemental essence based on season *(Unlocks at Voice Lv.5 & Mind Lv.5, 2300 Qi)* |
 | **The Calling**     | —                         | 200 Sound                                    | 5m       | Action                               | Attempts to recruit a Disciple based on Calling potency |
 
-*Echo of Mind becomes available once you reach Voice Level 3 and have 1500 Insight saved up.*
+*Echo of Mind becomes available once you reach Voice Level 3 and have 1500 Qi saved up.*
 *Voice skill levels follow an exponential XP curve starting at 50 XP with a 1.2× increase per level.*
 
 ### Upgrades

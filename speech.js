@@ -7,16 +7,16 @@ import { createOverlay } from './ui/overlay.js';
 
 // Core state for the Constructs system. Orbs and upgrades from the
 // previous speech implementation remain intact.
-// Insight regeneration constants
-// Insight regen now scales with the Cohere upgrade using a saturating
+// Qi regeneration constants
+// Qi regen now scales with the Cohere upgrade using a saturating
 // logistic curve. This starts near zero and gradually approaches `R_MAX`
 // with diminishing returns as more Cohere levels are purchased. The curve
-// still tapers off as Insight accumulates.
+// still tapers off as Qi accumulates.
 const R_MAX = 6;        // cap per-second regen
 const BASE_MIDPOINT = 1000;  // default inflection point
 const K = 150;          // controls steepness of taper
 
-function getInsightMidpoint() {
+function getQiMidpoint() {
   return systems.voiceOfThePeople ? 1500 : BASE_MIDPOINT;
 }
 
@@ -54,9 +54,7 @@ export function setSeasonBackdrop(season) {
 
 export const speechState = {
   orbs: {
-    body: { current: 0, max: 10 },
-    insight: { current: 0, max: 2000, regen: R_MAX },
-    will: { current: 0, max: 10 }
+    qi: { current: 0, max: 2000, regen: R_MAX }
   },
   resources: {
     sound: { current: 0, max: 200, regen: 0, unlocked: true },
@@ -69,20 +67,18 @@ export const speechState = {
     waterEssence: { current: 0, max: 10, regen: 0, unlocked: false }
   },
   gains: {
-    body: 0,
-    insight: 0,
-    will: 0
+    qi: 0
   },
   upgrades: {
-    // Cohere costs scale more steeply so high levels require larger insight
+    // Cohere costs scale more steeply so high levels require larger qi
     // investment. This keeps Cohere from overwhelming Intone's impact.
     cohere: { level: 0, costFunc: lvl => Math.round(15 * Math.pow(1.2, lvl)) },
     vocalMaturity: { level: 0, baseCost: 2, unlocked: false },
-    capacityBoost: { level: 0, baseCost: { insight: 10 }, unlocked: false },
+    capacityBoost: { level: 0, baseCost: { qi: 10 }, unlocked: false },
     expandMind: {
       level: 0,
       unlocked: true,
-      costFunc: lvl => ({ insight: 2 * Math.pow(lvl + 1, 2) })
+      costFunc: lvl => ({ qi: 2 * Math.pow(lvl + 1, 2) })
     },
     soundExpansion: {
       level: 0,
@@ -116,7 +112,7 @@ export const speechState = {
   seasonDay: 0,
   seasonTimer: 0,
   weather: null,
-  insightRegenBase: 0,
+  qiRegenBase: 0,
   activeConstructs: [],
   savedConstructs: ['Murmur'],
   activeBuffs: {},
@@ -136,16 +132,16 @@ export const speechState = {
   murmurChain: 0
 };
 
-// use the same object for the insight resource and orb
-speechState.resources.insight = speechState.orbs.insight;
+// use the same object for the qi resource and orb
+speechState.resources.qi = speechState.orbs.qi;
 
 // Basic construct recipe list. Additional constructs can be appended
 // later through unlocks or upgrades.
 export const recipes = [
   {
     name: 'Murmur',
-    // Increased cost to make early insight management more meaningful
-    input: { insight: 25 },
+    // Increased cost to make early qi management more meaningful
+    input: { qi: 25 },
     output: { sound: 1 },
     xp: { voice: 1 },
     tags: ['single-cast', 'generator'],
@@ -156,13 +152,13 @@ export const recipes = [
   },
   {
     name: 'Echo of Mind',
-    input: { sound: 1, insight: 1 },
+    input: { sound: 1, qi: 1 },
     output: { thought: 1 },
     xp: { mind: 0.5, voice: 0.5 },
     tags: ['single-cast', 'generator', 'duration'],
     unlocked: false,
-    requirements: { voiceLevel: 3, insight: 1500 },
-    castCost: { sound: 25, insight: 500 },
+    requirements: { voiceLevel: 3, qi: 1500 },
+    castCost: { sound: 25, qi: 500 },
     duration: 5,
     cooldown: 5,
     potency: 1,
@@ -170,12 +166,12 @@ export const recipes = [
   },
   {
     name: 'Clarity Pulse',
-    input: { thought: 1, insight: 1 },
+    input: { thought: 1, qi: 1 },
     output: {},
     xp: { mind: 1 },
     tags: ['single-cast', 'buff', 'duration'],
     unlocked: false,
-    requirements: { mindLevel: 2, insight: 1700 },
+    requirements: { mindLevel: 2, qi: 1700 },
     castCost: { thought: 20, sound: 50 },
     duration: 30,
     cooldown: 30,
@@ -189,7 +185,7 @@ export const recipes = [
     xp: {},
     tags: ['duration', 'generator', 'drain'],
     unlocked: false,
-    requirements: { mindLevel: 3, insight: 2000 },
+    requirements: { mindLevel: 3, qi: 2000 },
     duration: 30,
     cooldown: 30,
     potency: 1,
@@ -197,13 +193,13 @@ export const recipes = [
   },
   {
     name: 'Mental Construct',
-    input: { sound: 1, thought: 1, insight: 1 },
+    input: { sound: 1, thought: 1, qi: 1 },
     output: {},
     xp: { invocation: 1 },
     tags: ['single-cast'],
     unlocked: false,
-    requirements: { voiceLevel: 5, mindLevel: 5, insight: 2300 },
-    castCost: { thought: 10, structure: 10, insight: 1000 },
+    requirements: { voiceLevel: 5, mindLevel: 5, qi: 2300 },
+    castCost: { thought: 10, structure: 10, qi: 1000 },
     cooldown: 10,
     potency: 1,
     battle: { damage: 6 }
@@ -260,12 +256,10 @@ recipes.forEach(r => {
 });
 
 const resourceIcons = {
-  insight: 'star',
+  qi: 'star',
   sound: 'volume-2',
   thought: 'activity',
   structure: 'box',
-  body: 'heart',
-  will: 'flame',
   woodEssence: 'leaf',
   fireEssence: 'flame',
   earthEssence: 'mountain',
@@ -280,9 +274,9 @@ const upgradeDescriptions = {
     const current = (R_MAX * (level / (level + 5))).toFixed(2);
     const next = (R_MAX * ((level + 1) / (level + 6))).toFixed(2);
     const inc = (next - current).toFixed(2);
-    return `Improves insight regeneration. Next +${inc}/s (now ${current}/s)`;
+    return `Improves qi regeneration. Next +${inc}/s (now ${current}/s)`;
   },
-  expandMind: 'Increase max insight by 15% each level.',
+  expandMind: 'Increase max qi by 15% each level.',
   soundExpansion: 'Raises sound capacity; Lv.2 grants an extra slot.',
   cognitiveLattice: 'Increase caps by +50 sound, +10 thought and +5 structure.',
   idleChatter: 'Bonus regen from idle disciples.',
@@ -295,7 +289,7 @@ const upgradeDescriptions = {
 export const constructEffectText = {
   'Murmur': 'Generates 1 Sound (+1 Voice XP)',
   'Echo of Mind': 'Generates 1 Thought per second for 5s',
-  'Clarity Pulse': 'Gain 1% Insight per s',
+  'Clarity Pulse': 'Gain 1% Qi per s',
   'Symbol Seed': 'Gain 0.1 Structure per thought drained',
   'Intone': 'Press repeatedly to charge; 1.2× at 5, 1.5× at 10, 2× at 15 for 30s',
   'Mnemonic Rhythm': 'Grants ×2 XP to other constructs for 3s; +0.2× per potency',
@@ -397,8 +391,8 @@ function awardConstructXp(xpObj = {}, mult = 1) {
 // implementations to demonstrate the new constructs in action.
 const constructEffects = {
   Murmur(dt, pot = speechState.constructPotency['Murmur'] || 1) {
-    const amount = dt * pot; // 1 insight -> sound per second scaled
-    const ins = speechState.resources.insight;
+    const amount = dt * pot; // 1 qi -> sound per second scaled
+    const ins = speechState.resources.qi;
     const snd = speechState.resources.sound;
     if (ins.current >= amount) {
       ins.current -= amount;
@@ -406,7 +400,7 @@ const constructEffects = {
     }
   },
   'Echo of Mind'(dt, pot = speechState.constructPotency['Echo of Mind'] || 1) {
-    const ins = speechState.resources.insight;
+    const ins = speechState.resources.qi;
     const th = speechState.resources.thought;
     const amount = dt * pot;
     if (ins.current >= amount) {
@@ -417,9 +411,9 @@ const constructEffects = {
   },
   'Clarity Pulse'(dt, pot = speechState.constructPotency['Clarity Pulse'] || 1) {
     const bonus = 0.01 * dt * pot;
-    speechState.resources.insight.current = Math.min(
-      speechState.resources.insight.max,
-      speechState.resources.insight.current + bonus
+    speechState.resources.qi.current = Math.min(
+      speechState.resources.qi.max,
+      speechState.resources.qi.current + bonus
     );
   },
   'Symbol Seed'(dt, pot = speechState.constructPotency['Symbol Seed'] || 1) {
@@ -505,12 +499,12 @@ export function initSpeech() {
       <div class="orbs-section">
         <h3 class="section-title">Core Orbs</h3>
         <div class="construct-orbs construct-tab-orbs">
-          <div id="orbInsightContainer" class="orb-wrapper">
+          <div id="orbQiContainer" class="orb-wrapper">
             <div class="orb-container">
-              <div id="orbInsight" class="construct-orb"><div class="orb-fill"></div></div>
+              <div id="orbQi" class="construct-orb"><div class="orb-fill"></div></div>
             </div>
-            <div id="orbInsightValue" class="orb-value"></div>
-            <div id="orbInsightRegen" class="orb-regen">
+            <div id="orbQiValue" class="orb-value"></div>
+            <div id="orbQiRegen" class="orb-regen">
               <span class="season-icon"></span><span class="regen-value"></span><span id="intoneMultiplier" class="mult-badge"></span>
             </div>
           </div>
@@ -575,8 +569,8 @@ export function initSpeech() {
   renderHotbar();
   renderSeasonBanner();
   if (window.lucide) lucide.createIcons({ icons: lucide.icons });
-  const insightOrbEl = container.querySelector('#orbInsight');
-  if (insightOrbEl) insightOrbEl.addEventListener('click', openInsightRegenPopup);
+  const qiOrbEl = container.querySelector('#orbQi');
+  if (qiOrbEl) qiOrbEl.addEventListener('click', openQiRegenPopup);
   document.addEventListener('disciple-gained', renderChantDisciples);
 }
 
@@ -645,8 +639,8 @@ function renderConstructRequirements() {
   if (recipe.requirements.mindLevel) {
     reqs.push(`Mind Lv.${recipe.requirements.mindLevel}`);
   }
-  if (recipe.requirements.insight) {
-    reqs.push(`${recipe.requirements.insight} Insight`);
+  if (recipe.requirements.qi) {
+    reqs.push(`${recipe.requirements.qi} Qi`);
   }
   reqEl.textContent = `Requires: ${reqs.join(' & ')}`;
   reqEl.style.display = 'block';
@@ -686,8 +680,8 @@ function performConstruct() {
       addLog(`Requires Mind Lv.${recipe.requirements.mindLevel}`, 'error');
       return;
     }
-    if (recipe.requirements.insight && speechState.resources.insight.current < recipe.requirements.insight) {
-      addLog(`Requires ${recipe.requirements.insight} Insight`, 'error');
+    if (recipe.requirements.qi && speechState.resources.qi.current < recipe.requirements.qi) {
+      addLog(`Requires ${recipe.requirements.qi} Qi`, 'error');
       return;
     }
   }
@@ -962,8 +956,8 @@ export function castConstruct(name, el, powerMult = 1, caster = 'player') {
     addLog(`Requires Mind Lv.${def.requirements.mindLevel}`, 'error');
     return;
   }
-  if (def.requirements && def.requirements.insight && speechState.resources.insight.current < def.requirements.insight) {
-    addLog(`Requires ${def.requirements.insight} Insight`, 'error');
+  if (def.requirements && def.requirements.qi && speechState.resources.qi.current < def.requirements.qi) {
+    addLog(`Requires ${def.requirements.qi} Qi`, 'error');
     return;
   }
   const cdKey = caster === 'player' ? name : `${name}:${caster}`;
@@ -1101,11 +1095,11 @@ function renderOrbs() {
           if (valEl) {
             valEl.textContent = `+${speechState.gains[id.replace('orb','').toLowerCase()].toFixed(3)}/s`;
           }
-          if (id === 'orbInsight' && iconEl) {
+          if (id === 'orbQi' && iconEl) {
             const icon = seasonIcons[speechState.seasonIndex];
             iconEl.textContent = icon;
             regenLabel.onmouseenter = e => {
-              showTooltip(`Base: ${speechState.insightRegenBase.toFixed(3)}<br>Current: ${speechState.gains.insight.toFixed(3)}`, e.clientX + 10, e.clientY + 10);
+              showTooltip(`Base: ${speechState.qiRegenBase.toFixed(3)}<br>Current: ${speechState.gains.qi.toFixed(3)}`, e.clientX + 10, e.clientY + 10);
             };
             regenLabel.onmouseleave = hideTooltip;
           }
@@ -1115,13 +1109,7 @@ function renderOrbs() {
         }
       }
     };
-    update('orbBody', speechState.orbs.body);
-    update('orbInsight', speechState.orbs.insight);
-    update('orbWill', speechState.orbs.will);
-    const bodyEl = root.querySelector('#orbBodyContainer');
-    if (bodyEl) bodyEl.style.display = speechState.orbs.body.current >= 1 ? 'flex' : 'none';
-    const willEl = root.querySelector('#orbWillContainer');
-    if (willEl) willEl.style.display = speechState.orbs.will.current >= 1 ? 'flex' : 'none';
+    update('orbQi', speechState.orbs.qi);
   });
   window.dispatchEvent(new CustomEvent('orbs-changed'));
 }
@@ -1155,7 +1143,7 @@ function renderResources() {
     if (!panelRes) return;
     panelRes.innerHTML = '';
     Object.entries(speechState.resources).forEach(([key, res]) => {
-      if (key === 'insight' || res.unlocked === false) return;
+      if (key === 'qi' || res.unlocked === false) return;
       const box = document.createElement('div');
       box.className = 'resource-box';
       const header = document.createElement('div');
@@ -1211,7 +1199,7 @@ function getUpgradeCost(name) {
 
 function canAfford(cost) {
   if (typeof cost === 'number') {
-    return speechState.orbs.insight.current >= cost;
+    return speechState.orbs.qi.current >= cost;
   }
   for (const [k, v] of Object.entries(cost)) {
     const orb = speechState.orbs[k];
@@ -1235,7 +1223,7 @@ function updateUpgradeAffordability() {
     if (buy) buy.classList.toggle('disabled', !affordable);
     const spans = btn.querySelectorAll('.icon-row span');
     if (typeof cost === 'number') {
-      const have = speechState.orbs.insight.current;
+      const have = speechState.orbs.qi.current;
       spans.forEach(span => span.classList.toggle('cost-missing', have < cost));
     } else {
       const entries = Object.entries(cost);
@@ -1254,8 +1242,8 @@ function purchaseUpgrade(name) {
   const cost = getUpgradeCost(name);
   const prevSlots = speechState.memorySlots;
   if (typeof cost === 'number') {
-    if (speechState.orbs.insight.current < cost) return;
-    speechState.orbs.insight.current -= cost;
+    if (speechState.orbs.qi.current < cost) return;
+    speechState.orbs.qi.current -= cost;
   } else {
     for (const [k, v] of Object.entries(cost)) {
       if (speechState.orbs[k] && speechState.orbs[k].current < v) return;
@@ -1274,7 +1262,7 @@ function purchaseUpgrade(name) {
   } else if (name === 'capacityBoost') {
     speechState.memorySlots += 1;
   } else if (name === 'expandMind') {
-    speechState.orbs.insight.max = Math.round(speechState.orbs.insight.max * 1.15);
+    speechState.orbs.qi.max = Math.round(speechState.orbs.qi.max * 1.15);
   } else if (name === 'soundExpansion') {
     speechState.resources.sound.max += 25;
     if (up.level === 2) {
@@ -1308,9 +1296,9 @@ export function renderUpgrades() {
     const up = speechState.upgrades[name];
     let costHtml = '';
     if (typeof cost === 'number') {
-      const have = speechState.orbs.insight.current;
+      const have = speechState.orbs.qi.current;
       const cls = have >= cost ? '' : 'cost-missing';
-      costHtml = `<span class="icon-row"><span class="${cls}"><i data-lucide="${resourceIcons.insight}"></i> ${cost}</span></span>`;
+      costHtml = `<span class="icon-row"><span class="${cls}"><i data-lucide="${resourceIcons.qi}"></i> ${cost}</span></span>`;
     } else {
       costHtml = `<span class="icon-row">` +
         Object.entries(cost).map(([r,a]) => {
@@ -1343,9 +1331,9 @@ export function renderUpgrades() {
     const btn = document.createElement('button');
     btn.dataset.upgrade = 'clarividence';
     const cost = getUpgradeCost('clarividence');
-    const cls = speechState.orbs.insight.current >= cost ? '' : 'cost-missing';
+    const cls = speechState.orbs.qi.current >= cost ? '' : 'cost-missing';
     btn.classList.toggle('unaffordable', !canAfford(cost));
-    btn.innerHTML = `<span class="upg-info"><span class="upg-name">clarividence</span><span class="upgrade-level">Lv.0</span></span><div class="detail"><div class="cost"><span class="icon-row"><span class="${cls}"><i data-lucide="${resourceIcons.insight}"></i> ${cost}</span></span></div><div class="desc">${upgradeDescriptions.clarividence}</div><span class="buy-btn">Buy</span></div>`;
+    btn.innerHTML = `<span class="upg-info"><span class="upg-name">clarividence</span><span class="upgrade-level">Lv.0</span></span><div class="detail"><div class="cost"><span class="icon-row"><span class="${cls}"><i data-lucide="${resourceIcons.qi}"></i> ${cost}</span></span></div><div class="desc">${upgradeDescriptions.clarividence}</div><span class="buy-btn">Buy</span></div>`;
     btn.addEventListener('click', e => {
       if (!btn.classList.contains('expanded')) {
         btn.classList.add('expanded');
@@ -1366,9 +1354,9 @@ export function renderUpgrades() {
     const btn = document.createElement('button');
     btn.dataset.upgrade = 'vocalMaturity';
     const cost = getUpgradeCost('vocalMaturity');
-    const cls = speechState.orbs.insight.current >= cost ? '' : 'cost-missing';
+    const cls = speechState.orbs.qi.current >= cost ? '' : 'cost-missing';
     btn.classList.toggle('unaffordable', !canAfford(cost));
-    btn.innerHTML = `<span class="upg-info"><span class="upg-name">vocalMaturity</span><span class="upgrade-level">Lv.${speechState.upgrades.vocalMaturity.level}</span></span><div class="detail"><div class="cost"><span class="icon-row"><span class="${cls}"><i data-lucide="${resourceIcons.insight}"></i> ${cost}</span></span></div><div class="desc">${upgradeDescriptions.vocalMaturity}</div><span class="buy-btn">Buy</span></div>`;
+    btn.innerHTML = `<span class="upg-info"><span class="upg-name">vocalMaturity</span><span class="upgrade-level">Lv.${speechState.upgrades.vocalMaturity.level}</span></span><div class="detail"><div class="cost"><span class="icon-row"><span class="${cls}"><i data-lucide="${resourceIcons.qi}"></i> ${cost}</span></span></div><div class="desc">${upgradeDescriptions.vocalMaturity}</div><span class="buy-btn">Buy</span></div>`;
     btn.addEventListener('click', e => {
       if (!btn.classList.contains('expanded')) {
         btn.classList.add('expanded');
@@ -1477,7 +1465,6 @@ export function tickSpeech(delta) {
   const hasUI = !!container;
   const dt = delta / 1000;
   const activeDisc = speechState.disciples.filter(d => !d.incapacitated).length;
-  speechState.gains.body = activeDisc * 0.1;
   if (speechState.intoneTimer > 0) {
     speechState.intoneTimer = Math.max(0, speechState.intoneTimer - dt);
     if (speechState.intoneTimer === 0) {
@@ -1497,17 +1484,6 @@ export function tickSpeech(delta) {
       speechState.mnemonicBeats = 0;
     }
   }
-  ['body', 'will'].forEach(k => {
-    const orb = speechState.orbs[k];
-    const rate = speechState.gains[k];
-    if (rate > 0) {
-      if (coreState.meditating) {
-        coreState.meditationProgress += rate * dt;
-      } else if (orb.current < orb.max) {
-        orb.current = Math.min(orb.max, orb.current + rate * dt);
-      }
-    }
-  });
   speechState.seasonTimer += dt;
   if (speechState.seasonTimer >= DAY_LENGTH_SECONDS) {
     speechState.seasonTimer -= DAY_LENGTH_SECONDS;
@@ -1535,10 +1511,10 @@ export function tickSpeech(delta) {
     speechState.weather.duration -= dt;
     if (speechState.weather.duration <= 0) speechState.weather = null;
   }
-  const ins = speechState.resources.insight;
-  const startInsight = ins.current;
+  const ins = speechState.resources.qi;
+  const startQi = ins.current;
   const seasonMult = seasons[speechState.seasonIndex].multiplier;
-  const baseRateRaw = R_MAX / (1 + Math.exp((ins.current - getInsightMidpoint()) / K));
+  const baseRateRaw = R_MAX / (1 + Math.exp((ins.current - getQiMidpoint()) / K));
   const level = speechState.upgrades.cohere.level;
   // provide baseline regen at level 0 while still tapering off with higher levels
   const upgradeMult = (level + 1) / (level + 5);
@@ -1553,10 +1529,10 @@ export function tickSpeech(delta) {
   let regen = baseTotal * seasonMult;
   if (speechState.weather) regen *= speechState.weather.multiplier;
   regen = Math.min(R_MAX, regen) * getIntoneMultiplier();
-  speechState.insightRegenBase = baseTotal;
+  speechState.qiRegenBase = baseTotal;
   ins.current = Math.min(ins.max, ins.current + regen * dt);
-  // Unlock clarividence once the player demonstrates basic insight control
-  // by accumulating at least 50 insight.
+  // Unlock clarividence once the player demonstrates basic qi control
+  // by accumulating at least 50 qi.
   if (!speechState.upgrades.clarividence.unlocked && ins.current >= 50) {
     speechState.upgrades.clarividence.unlocked = true;
     if (hasUI) renderUpgrades();
@@ -1661,27 +1637,27 @@ function showConstructCloud(text, target, color) {
   setTimeout(() => el.remove(), 3000);
 }
 
-export function openInsightRegenPopup() {
-  const overlay = createOverlay({ className: 'insight-regen-overlay' });
+export function openQiRegenPopup() {
+  const overlay = createOverlay({ className: 'qi-regen-overlay' });
   const box = overlay.box;
   const header = document.createElement('h2');
-  header.textContent = 'Insight Regeneration';
+  header.textContent = 'Qi Regeneration';
   box.appendChild(header);
 
   const info = document.createElement('p');
-  info.className = 'insight-info';
+  info.className = 'qi-info';
   info.textContent =
-    `Base insight regeneration follows a logistic curve that slows as your` +
-    ` total insight rises. At ${getInsightMidpoint()} insight the base rate is half of its` +
+    `Base qi regeneration follows a logistic curve that slows as your` +
+    ` total qi rises. At ${getQiMidpoint()} qi the base rate is half of its` +
     ` ${R_MAX}/s maximum before multipliers.`;
   box.appendChild(info);
 
   const list = document.createElement('div');
-  list.className = 'insight-regen-list';
+  list.className = 'qi-regen-list';
 
-  const ins = speechState.resources.insight;
+  const ins = speechState.resources.qi;
   const season = seasons[speechState.seasonIndex];
-  const baseRateRaw = R_MAX / (1 + Math.exp((ins.current - getInsightMidpoint()) / K));
+  const baseRateRaw = R_MAX / (1 + Math.exp((ins.current - getQiMidpoint()) / K));
   const level = speechState.upgrades.cohere.level;
   const upgradeMult = (level + 1) / (level + 5);
   const idleCount =
@@ -1738,14 +1714,14 @@ export function openInsightRegenPopup() {
     const isNeg =
       r.value.startsWith('-') ||
       (r.value.startsWith('×') && parseFloat(r.value.slice(1)) < 1);
-    row.className = 'insight-row' + (isNeg ? ' negative' : '');
+    row.className = 'qi-row' + (isNeg ? ' negative' : '');
     row.innerHTML = `<span>${r.label}</span><span>${r.value}</span>`;
     list.appendChild(row);
   });
 
   const totalRow = document.createElement('div');
-  totalRow.className = 'insight-total';
-  totalRow.textContent = `Total: ${speechState.gains.insight.toFixed(3)}/s`;
+  totalRow.className = 'qi-total';
+  totalRow.textContent = `Total: ${speechState.gains.qi.toFixed(3)}/s`;
   list.appendChild(totalRow);
 
   box.appendChild(list);
