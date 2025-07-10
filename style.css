@@ -594,6 +594,27 @@ body.darkenshift-mode .tabsContainer button.active {
     margin: 4px;
 }
 
+/* Disciple overlay positioning and style */
+.disciple-overlay.overlay {
+    background: none;
+    backdrop-filter: none;
+    justify-content: flex-end;
+    align-items: flex-start;
+}
+.disciple-overlay .overlay-box {
+    background: var(--verdantia-parchment);
+    color: #000;
+    border: 1px solid #3a5a3a;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+    max-width: 300px;
+    font-size: 0.75rem;
+}
+.disciple-overlay .overlay-box button {
+    background: var(--verdantia-parchment);
+    color: #000;
+    border: 1px solid #3a5a3a;
+}
+
 .qi-regen-overlay {
     flex-direction: column;
     gap: 8px;
@@ -4167,8 +4188,16 @@ body.darkenshift-mode .tabsContainer button.active {
     margin-bottom: 6px;
     justify-content: center;
 }
+.disciple-tabs button {
+    background: var(--verdantia-parchment);
+    border: 1px solid #3a5a3a;
+    color: #000;
+    padding: 2px 4px;
+    font-size: 0.7rem;
+}
 .disciple-tabs button.active {
-    background: #333;
+    background: #3a5a3a;
+    color: var(--verdantia-parchment);
 }
 .disciple-general {
     display: flex;
@@ -4251,6 +4280,7 @@ body.darkenshift-mode .tabsContainer button.active {
   flex-direction: column;
   gap: 2px;
   font-size: 0.7rem;
+  color: #000;
 }
 
 .disciple-card-head {
@@ -4258,7 +4288,7 @@ body.darkenshift-mode .tabsContainer button.active {
   align-items: center;
   gap: 4px;
   font-weight: 600;
-  color: #3a5a3a;
+  color: #000;
 }
 
 .disciple-card-icon {
