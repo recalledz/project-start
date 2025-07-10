@@ -2309,6 +2309,12 @@ function openDiscipleOverlay(d) {
   discipleOverlay = createOverlay({ className: 'disciple-overlay' });
   const { box } = discipleOverlay;
 
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 'close-btn';
+  closeBtn.innerHTML = '&times;';
+  closeBtn.addEventListener('click', discipleOverlay.close);
+  box.appendChild(closeBtn);
+
   const tabs = document.createElement('div');
   tabs.className = 'disciple-tabs';
   box.appendChild(tabs);
@@ -2327,15 +2333,9 @@ function openDiscipleOverlay(d) {
     content.innerHTML = '';
     discipleOverlayData.bars = null;
     if (active === 'general') {
-      content.appendChild(buildDiscipleGeneralView(d));
-    } else if (active === 'stats') {
-      const c = document.createElement('div');
-      const statsView = buildDiscipleStatsView(d);
-      c.appendChild(statsView);
-      c.appendChild(buildDiscipleLifeStatsView(d));
-      c.appendChild(buildDiscipleCombatStatsView(d));
-      content.appendChild(c);
-      const rows = statsView.querySelectorAll('.stat-row');
+      const view = buildDiscipleGeneralView(d);
+      content.appendChild(view);
+      const rows = view.querySelectorAll('.stat-row');
       if (rows.length >= 3) {
         discipleOverlayData.bars = {
           healthFill: rows[0].querySelector('.bar-fill'),
@@ -2346,6 +2346,23 @@ function openDiscipleOverlay(d) {
           hungerVal: rows[2].lastElementChild
         };
       }
+    } else if (active === 'stats') {
+      const c = document.createElement('div');
+      const genSection = document.createElement('div');
+      genSection.className = 'disciple-stats-general';
+      const genTitle = document.createElement('h3');
+      genTitle.textContent = 'General Stats';
+      genSection.appendChild(genTitle);
+      genSection.appendChild(buildDiscipleStatsView(d));
+      const combatSection = document.createElement('div');
+      combatSection.className = 'disciple-stats-combat';
+      const comTitle = document.createElement('h3');
+      comTitle.textContent = 'Combat Stats';
+      combatSection.appendChild(comTitle);
+      combatSection.appendChild(buildDiscipleCombatStatsView(d));
+      c.appendChild(genSection);
+      c.appendChild(combatSection);
+      content.appendChild(c);
     } else if (active === 'skills') {
       content.appendChild(buildDiscipleSkillsList(d));
     } else if (active === 'inventory') {
@@ -2368,7 +2385,6 @@ function openDiscipleOverlay(d) {
   });
   discipleOverlayData.disciple = d;
   render();
-  discipleOverlay.appendButton('Close', discipleOverlay.close);
   discipleOverlay.onClose(() => {
     discipleOverlayData.disciple = null;
     discipleOverlayData.bars = null;
