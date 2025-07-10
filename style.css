@@ -4010,3 +4010,10 @@ body.darkenshift-mode .tabsContainer button.active {
     width: 0%;
     background: #d4af37;
 }
+
+.disciple-stats {
+    font-size: 0.6rem;
+    text-align: center;
+    line-height: 1.1;
+    margin-top: 2px;
+}
