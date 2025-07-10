@@ -2298,6 +2298,7 @@ function renderSectDiscipleList() {
 }
 
 let discipleOverlay = null;
+let discipleOverlayData = { disciple: null, bars: null };
 function openDiscipleOverlay(d) {
   if (discipleOverlay) discipleOverlay.close();
   discipleOverlay = createOverlay({ className: 'disciple-overlay' });
@@ -2319,13 +2320,27 @@ function openDiscipleOverlay(d) {
   let active = 'general';
   function render() {
     content.innerHTML = '';
-    if (active === 'general') content.appendChild(buildDiscipleGeneralView(d));
-    else if (active === 'stats') {
+    discipleOverlayData.bars = null;
+    if (active === 'general') {
+      content.appendChild(buildDiscipleGeneralView(d));
+    } else if (active === 'stats') {
       const c = document.createElement('div');
-      c.appendChild(buildDiscipleStatsView(d));
+      const statsView = buildDiscipleStatsView(d);
+      c.appendChild(statsView);
       c.appendChild(buildDiscipleLifeStatsView(d));
       c.appendChild(buildDiscipleCombatStatsView(d));
       content.appendChild(c);
+      const rows = statsView.querySelectorAll('.stat-row');
+      if (rows.length >= 3) {
+        discipleOverlayData.bars = {
+          healthFill: rows[0].querySelector('.bar-fill'),
+          healthVal: rows[0].lastElementChild,
+          staminaFill: rows[1].querySelector('.bar-fill'),
+          staminaVal: rows[1].lastElementChild,
+          hungerFill: rows[2].querySelector('.bar-fill'),
+          hungerVal: rows[2].lastElementChild
+        };
+      }
     } else if (active === 'skills') {
       content.appendChild(buildDiscipleSkillsList(d));
     } else if (active === 'inventory') {
@@ -2346,8 +2361,32 @@ function openDiscipleOverlay(d) {
     });
     tabs.appendChild(btn);
   });
+  discipleOverlayData.disciple = d;
   render();
   discipleOverlay.appendButton('Close', discipleOverlay.close);
+  discipleOverlay.onClose(() => {
+    discipleOverlayData.disciple = null;
+    discipleOverlayData.bars = null;
+  });
+}
+
+function updateDiscipleOverlayBars() {
+  const data = discipleOverlayData;
+  if (!data.disciple || !data.bars) return;
+  const d = data.disciple;
+  const maxStamina = calculateMaxStamina(d.endurance);
+  if (data.bars.healthFill)
+    data.bars.healthFill.style.width = `${(d.health / DISCIPLE_MAX_HEALTH) * 100}%`;
+  if (data.bars.healthVal)
+    data.bars.healthVal.textContent = `${Math.round(d.health)}/${DISCIPLE_MAX_HEALTH}`;
+  if (data.bars.staminaFill)
+    data.bars.staminaFill.style.width = `${(d.stamina / maxStamina) * 100}%`;
+  if (data.bars.staminaVal)
+    data.bars.staminaVal.textContent = `${Math.round(d.stamina)}/${Math.round(maxStamina)}`;
+  if (data.bars.hungerFill)
+    data.bars.hungerFill.style.width = `${(d.hunger / 20) * 100}%`;
+  if (data.bars.hungerVal)
+    data.bars.hungerVal.textContent = `${Math.round(d.hunger)}/20`;
 }
 
 function buildDiscipleSkillsList(d) {
@@ -4506,6 +4545,7 @@ if (currentEnemy) {
   tickBarProgress(deltaTime);
   tickSpeech(deltaTime);
   tickSect(deltaTime);
+  updateDiscipleOverlayBars();
   const dtSeconds = deltaTime / 1000;
   speechState.gains.qi =
     dtSeconds > 0
