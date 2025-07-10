@@ -3659,6 +3659,16 @@ body.darkenshift-mode .tabsContainer button.active {
     transform: translate(-50%, 50%);
     display: none;
 }
+.fruit-patch {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background: linear-gradient(#0f0 50%, #d00 50%);
+    border-radius: 4px;
+    left: 80%;
+    top: 25%;
+    transform: translate(-50%, -50%);
+}
 .location-icon {
     position: absolute;
     transform: translate(-50%, -50%);
