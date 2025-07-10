@@ -3918,6 +3918,12 @@ Object.assign(playerStats, state.playerStats || {});
         if (!d.name) d.name = `Disciple ${d.id}`;
         if (d.inventorySlots === undefined) d.inventorySlots = 10;
         if (!d.inventory) d.inventory = {};
+
+        if (d.combatLevel === undefined) d.combatLevel = 1;
+        if (d.maxHp === undefined) d.maxHp = 10;
+        if (d.currentHp === undefined) d.currentHp = d.maxHp;
+        Object.setPrototypeOf(d, Disciple.prototype);
+        if (typeof d.updateCombatStats === 'function') d.updateCombatStats();
       });
     }
   }
