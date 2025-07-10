@@ -4164,6 +4164,7 @@ updateUpgradeButtons();
   updateSectDisplay();
   if (typeof renderConstructCards === 'function') {
     renderConstructCards();
+    if (typeof renderHotbar === 'function') renderHotbar();
   }
 
 addLog("Game loaded!",
