@@ -12,7 +12,7 @@
 }
 
 body {
-    background-color: #0f1a10; /* deep muted green as base */
+    background-color: #293a2c; /* Verdantia base */
     background-image:
         linear-gradient(to bottom right, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.6)),
         url('img/mist.png');
@@ -36,6 +36,10 @@ body {
     --core-glow: rgba(127, 175, 255, 0.2);
     --season-start: rgba(80,160,80,0.9);
     --season-end: rgba(30,70,30,1.0);
+    --verdantia-base: #293a2c;
+    --verdantia-highlight: #c5f2d4;
+    --verdantia-jade: #52795c;
+    --verdantia-parchment: #fefae0;
 }
 
 body.darkenshift-mode {
@@ -96,9 +100,9 @@ body.darkenshift-mode {
     display: flex;
     gap: 12px;
     padding: 10px;
-    background: radial-gradient(circle, #00451b 0%, #001a0a 100%);
-    box-shadow: 0 0 20px #d4af37;
-    border-bottom: 3px solid #d4af37;
+    background: radial-gradient(circle, var(--verdantia-jade) 0%, var(--verdantia-base) 100%);
+    box-shadow: 0 0 8px rgba(197,242,212,0.3);
+    border-bottom: 2px solid var(--verdantia-highlight);
 }
 body.darkenshift-mode .tabsContainer {
     background: radial-gradient(circle, #0d0d15 0%, #06070c 100%);
@@ -107,14 +111,13 @@ body.darkenshift-mode .tabsContainer {
 }
 
 .tabsContainer button {
-    background: rgba(0, 0, 0, 0.4);
-    color: #d4af37;
-    border: 3px solid #d4af37;
+    background: var(--verdantia-jade);
+    color: var(--verdantia-highlight);
+    border: 2px solid transparent;
     padding: 8px 14px;
     border-radius: 8px;
     font-weight: bold;
-    text-shadow: 0 0 6px #000;
-    box-shadow: 0 0 8px rgba(212, 175, 55, 0.5);
+    text-shadow: 0 0 4px #000;
     transition: all 0.2s;
     display: inline-flex;
     align-items: center;
@@ -127,17 +130,16 @@ body.darkenshift-mode .tabsContainer button {
     box-shadow: 0 0 8px var(--core-glow);
 }
 .tabsContainer button:hover {
-    box-shadow: 0 0 12px rgba(212, 175, 55, 0.8);
-    color: #fff4b3;
+    box-shadow: 0 0 6px rgba(197,242,212,0.5);
+    color: #fff;
 }
 body.darkenshift-mode .tabsContainer button:hover {
     box-shadow: 0 0 12px var(--core-glow);
     color: var(--core-text);
 }
 .tabsContainer button.active {
-    background: #d4af37;
-    color: #220000;
-    box-shadow: inset 0 0 8px #fff8c6, 0 0 12px #d4af37;
+    border-color: var(--verdantia-highlight);
+    box-shadow: inset 0 0 4px rgba(197,242,212,0.5);
 }
 body.darkenshift-mode .tabsContainer button.active {
     background: var(--core-accent);
@@ -309,10 +311,10 @@ body.darkenshift-mode .tabsContainer button.active {
     width: 100%;
     height: 100%;
     background: rgba(0, 0, 0, 0.8);
-    border: 1px solid #3498db;
+    border: 1px solid var(--verdantia-highlight);
     border-radius: 8px;
     overflow: hidden;
-    box-shadow: inset 0 0 6px #3498db;
+    box-shadow: inset 0 0 6px var(--verdantia-highlight);
 }
 
 .manaFill {
@@ -321,7 +323,7 @@ body.darkenshift-mode .tabsContainer button.active {
     left: 0;
     height: 100%;
     width: 0%;
-    background: #3498db;
+    background: var(--verdantia-highlight);
     transition: width 0.3s;
 }
 
@@ -1084,13 +1086,13 @@ body.darkenshift-mode .tabsContainer button.active {
     height: 6px; /* larger for better visibility */
     display: none;
     background: rgba(0, 0, 0, 0.8);
-    border: 1px solid #d4af37;
+    border: 1px solid var(--verdantia-highlight);
     border-radius: 8px;
     overflow: hidden;
     margin: 0 auto 4px; /* center above the buttons */
     position: relative;
     flex-basis: 100%; /* occupy its own row within the flex wrapper */
-    box-shadow: inset 0 0 6px #d4af37;
+    box-shadow: inset 0 0 6px var(--verdantia-highlight);
 }
 
 .playerAttackFill {
@@ -1106,12 +1108,12 @@ body.darkenshift-mode .tabsContainer button.active {
     width: 50%;
     height: 6px; /* match player bar */
     background: rgba(0, 0, 0, 0.8);
-    border: 1px solid #d4af37;
+    border: 1px solid var(--verdantia-highlight);
     border-radius: 8px;
     overflow: hidden;
     margin: 4px auto 0;
     position: relative;
-    box-shadow: inset 0 0 6px #d4af37;
+    box-shadow: inset 0 0 6px var(--verdantia-highlight);
 }
 
 .enemyAttackFill {
@@ -1176,21 +1178,23 @@ body.darkenshift-mode .tabsContainer button.active {
     border-radius: 8px;
     padding: 4px;
     background: white;
-    border: 2px solid grey;
+    border: 1px solid #52795c;
     margin-bottom: 4px;
     font-size: 2vmin;
     box-sizing: border-box;
     position: relative;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
 .card-back {
     width: 100%;
     aspect-ratio: 3 / 4;
     border-radius: 8px;
-    border: 2px solid grey;
+    border: 1px solid #52795c;
     margin: 0 auto;
     object-fit: cover;
     display: block;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
 .card-value {
@@ -1452,7 +1456,7 @@ body.darkenshift-mode .tabsContainer button.active {
     flex: 1;
     height: 8px;
     background: rgba(0, 0, 0, 0.8);
-    border: 1px solid #d4af37;
+    border: 1px solid var(--verdantia-highlight);
     border-radius: 4px;
     overflow: hidden;
 }
@@ -1463,7 +1467,7 @@ body.darkenshift-mode .tabsContainer button.active {
     left: 0;
     height: 100%;
     width: 0;
-    background: #d4af37;
+    background: var(--verdantia-highlight);
 }
 
 .deck-req {
@@ -2195,25 +2199,26 @@ body.darkenshift-mode .tabsContainer button.active {
 }
 .player-subtabs button {
     width: 100%;
-    border: 2px solid #b76eff;
+    border: 1px solid var(--verdantia-highlight);
     padding: 3px 5px;
     border-radius: 3px;
     font-size: 0.4rem;
     font-weight: bold;
-    text-shadow: 0 0 6px #000;
+    text-shadow: 0 0 4px #000;
     transition: all 0.2s;
-    color: #e0d0ff;
-    background: #4b0082;
+    color: var(--verdantia-parchment);
+    background: var(--verdantia-jade);
     text-align: center;
 }
 .player-subtabs button.active {
-    background: #b76eff;
-    color: #220000;
-    box-shadow: inset 0 0 8px #fff8c6, 0 0 12px #b76eff;
+    border-color: var(--verdantia-highlight);
+    background: var(--verdantia-base);
+    color: var(--verdantia-parchment);
+    box-shadow: inset 0 0 4px rgba(197,242,212,0.4);
 }
 .player-subtabs button:hover {
-    box-shadow: 0 0 12px rgba(183, 110, 255, 0.8);
-    color: #fff4b3;
+    box-shadow: 0 0 6px rgba(197,242,212,0.5);
+    color: #fff;
 }
 
 .player-header {
@@ -2260,28 +2265,28 @@ body.darkenshift-mode .tabsContainer button.active {
 }
 
 .playerSkillsSubTabButton {
-    background: linear-gradient(60deg, #a86b32, #5c3317, #a86b32);
-    background-size: 200% 100%;
-    border-color: #a86b32;
-    box-shadow: 0 0 8px rgba(168, 107, 50, 0.5);
-    color: #fff8e1;
+    background: var(--verdantia-jade);
+    border-color: var(--verdantia-highlight);
+    box-shadow: none;
+    color: var(--verdantia-parchment);
 }
 .playerSkillsSubTabButton.active {
-    background: #a86b32;
-    box-shadow: inset 0 0 8px #fff8c6, 0 0 12px #a86b32;
-    color: #220000;
+    background: var(--verdantia-base);
+    border-color: var(--verdantia-highlight);
+    box-shadow: inset 0 0 4px rgba(197,242,212,0.4);
+    color: var(--verdantia-parchment);
 }
 .playerUpgradesSubTabButton {
-    background: linear-gradient(60deg, #376fa8, #1e3a5c, #376fa8);
-    background-size: 200% 100%;
-    border-color: #376fa8;
-    box-shadow: 0 0 8px rgba(55, 111, 168, 0.5);
-    color: #e0f0ff;
+    background: var(--verdantia-jade);
+    border-color: var(--verdantia-highlight);
+    box-shadow: none;
+    color: var(--verdantia-parchment);
 }
 .playerUpgradesSubTabButton.active {
-    background: #376fa8;
-    box-shadow: inset 0 0 8px #fff8c6, 0 0 12px #376fa8;
-    color: #220000;
+    background: var(--verdantia-base);
+    border-color: var(--verdantia-highlight);
+    box-shadow: inset 0 0 4px rgba(197,242,212,0.4);
+    color: var(--verdantia-parchment);
 }
 /* player-core-panel modifications */
 .player-core-panel {
@@ -2517,13 +2522,13 @@ body.darkenshift-mode .tabsContainer button.active {
 
 .orb-text {
     font-size: 0.8rem;
-    fill: #d4af37;
+    fill: var(--verdantia-highlight);
     pointer-events: none;
 }
 
 #coreHalo {
     transition: opacity 0.3s;
-    filter: drop-shadow(0 0 6px gold);
+    filter: drop-shadow(0 0 6px gold) drop-shadow(0 0 4px cyan);
 }
 
 /* Construct system */
@@ -4021,7 +4026,7 @@ body.darkenshift-mode .tabsContainer button.active {
     justify-content: center;
 }
 .sect-disciple-card {
-    border: 1px solid #555;
+    border: 1px solid #b4b89f;
     padding: 4px;
     width: 90px;
     font-size: 0.7rem;
@@ -4029,12 +4034,14 @@ body.darkenshift-mode .tabsContainer button.active {
     flex-direction: column;
     align-items: center;
     cursor: pointer;
+    background: var(--verdantia-parchment);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
 }
 .sect-disciple-card .bar {
     width: 100%;
     height: 6px;
-    background: #333;
-    border: 1px solid #555;
+    background: #ddd;
+    border: 1px solid #b4b89f;
     margin-top: 2px;
     position: relative;
 }
@@ -4044,7 +4051,7 @@ body.darkenshift-mode .tabsContainer button.active {
     left: 0;
     height: 100%;
     width: 0%;
-    background: var(--core-accent);
+    background: var(--verdantia-jade);
 }
 
 .disciple-tabs {
