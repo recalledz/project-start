@@ -3,6 +3,7 @@ import { coreState, refreshCore } from './core.js';
 import { sectState, systems, currentEnemy } from './script.js';
 import { generateDiscipleAttributes } from './discipleAttributes.js';
 import Disciple from './disciple.js';
+import { initializeDisciple } from './utils/discipleInit.js';
 import { createOverlay } from './ui/overlay.js';
 
 // Core state for the Constructs system. Orbs and upgrades from the
@@ -472,7 +473,9 @@ const constructEffects = {
         endurance: 1 + bonus.endurance,
         intelligence: 1 + bonus.intelligence
       };
-      speechState.disciples.push(new Disciple({ id: targetIdx, name: `Disciple ${targetIdx}`, attributes: attrs }));
+      const newDisc = new Disciple({ id: targetIdx, name: `Disciple ${targetIdx}`, attributes: attrs });
+      initializeDisciple(newDisc);
+      speechState.disciples.push(newDisc);
       sectState.discipleConstructXp[targetIdx] = {};
       addLog('A new Disciple has answered your call!', 'info');
       if (lastConstructTarget) showConstructCloud('+1', lastConstructTarget);
