@@ -2388,8 +2388,13 @@ function renderSectDiscipleList() {
 
 let discipleOverlay = null;
 let discipleOverlayData = { disciple: null, bars: null };
+let discipleOverlayActiveTab = 'general';
 function openDiscipleOverlay(d) {
-  if (discipleOverlay) discipleOverlay.close();
+  if (discipleOverlay) {
+    discipleOverlay.close();
+  } else {
+    discipleOverlayActiveTab = d.lastTab || 'general';
+  }
   discipleOverlay = createOverlay({ className: 'disciple-overlay' });
   const { box } = discipleOverlay;
 
@@ -2412,7 +2417,7 @@ function openDiscipleOverlay(d) {
     { key: 'inventory', label: 'Inventory' },
     { key: 'gear', label: 'Gear' }
   ];
-  let active = 'general';
+  let active = discipleOverlayActiveTab;
   function render() {
     content.innerHTML = '';
     discipleOverlayData.bars = null;
@@ -2462,6 +2467,7 @@ function openDiscipleOverlay(d) {
     if (def.key === active) btn.classList.add('active');
     btn.addEventListener('click', () => {
       active = def.key;
+      discipleOverlayActiveTab = def.key;
       tabs.querySelectorAll('button').forEach(b => b.classList.toggle('active', b === btn));
       render();
     });
@@ -2470,6 +2476,9 @@ function openDiscipleOverlay(d) {
   discipleOverlayData.disciple = d;
   render();
   discipleOverlay.onClose(() => {
+    if (discipleOverlayData.disciple) {
+      discipleOverlayData.disciple.lastTab = discipleOverlayActiveTab;
+    }
     discipleOverlayData.disciple = null;
     discipleOverlayData.bars = null;
   });

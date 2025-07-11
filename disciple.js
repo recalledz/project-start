@@ -16,6 +16,7 @@ export default class Disciple {
     this.endurance = attributes.endurance || 0;
     this.intelligence = attributes.intelligence || 0;
     this.defense = 1;
+    this.lastTab = 'general';
     this.updateCombatStats();
   }
 
