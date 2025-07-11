@@ -600,6 +600,7 @@ body.darkenshift-mode .tabsContainer button.active {
     backdrop-filter: none;
     justify-content: flex-end;
     align-items: flex-start;
+    pointer-events: none;
 }
 .disciple-overlay .overlay-box {
     background: var(--verdantia-parchment);
@@ -610,6 +611,7 @@ body.darkenshift-mode .tabsContainer button.active {
     min-height: 260px;
     font-size: 0.75rem;
     position: relative;
+    pointer-events: auto;
 }
 .disciple-overlay .overlay-box button {
     background: var(--verdantia-parchment);
