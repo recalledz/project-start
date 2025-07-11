@@ -49,6 +49,7 @@ import {
 } from './attributes.js';
 import { createOverlay } from './ui/overlay.js';
 import { showRestartScreen } from './ui/restartOverlay.js';
+import { showLoadErrorOverlay } from './ui/loadErrorOverlay.js';
 import { calculateKillXp, XP_EFFICIENCY } from './utils/xp.js';
 import {
   calculateMaxStamina,
@@ -4690,8 +4691,12 @@ updateUpgradeButtons();
 addLog("Game loaded!",
 "info");
 } catch (e) {
-console.error("Load failed",
-e);
+  console.error("Load failed", e);
+  if (typeof showLoadErrorOverlay === 'function') {
+    showLoadErrorOverlay(e, startNewGame);
+  } else {
+    startNewGame();
+  }
 }
 }
 
