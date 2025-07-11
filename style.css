@@ -1943,6 +1943,21 @@ body.darkenshift-mode .tabsContainer button.active {
     border-radius: 4px;
 }
 
+.load-error-overlay {
+    flex-direction: column;
+    text-align: center;
+}
+
+.load-error-message {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.reset-save-button {
+    padding: 6px 16px;
+    font-size: 1rem;
+}
+
 .restart-art {
     width: 80px;
     height: 60px;
