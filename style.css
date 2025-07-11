@@ -600,6 +600,7 @@ body.darkenshift-mode .tabsContainer button.active {
     backdrop-filter: none;
     justify-content: flex-end;
     align-items: flex-start;
+    pointer-events: none;
 }
 .disciple-overlay .overlay-box {
     background: var(--verdantia-parchment);
@@ -610,6 +611,7 @@ body.darkenshift-mode .tabsContainer button.active {
     min-height: 260px;
     font-size: 0.75rem;
     position: relative;
+    pointer-events: auto;
 }
 .disciple-overlay .overlay-box button {
     background: var(--verdantia-parchment);
@@ -3814,6 +3816,17 @@ body.darkenshift-mode .tabsContainer button.active {
     left: 80%;
     top: 25%;
     transform: translate(-50%, -50%);
+}
+.fruit-bar {
+    position: absolute;
+    width: 32px;
+    height: 6px;
+    left: 50%;
+    bottom: calc(100% + 2px);
+    transform: translateX(-50%);
+}
+.fruit-bar .resource-fill {
+    background: #a33;
 }
 .location-icon {
     position: absolute;

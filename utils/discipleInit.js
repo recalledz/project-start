@@ -23,6 +23,7 @@ export function initializeDisciple(d) {
   if (d.combatLevel === undefined) d.combatLevel = 1;
   if (d.maxHp === undefined) d.maxHp = 10;
   if (d.currentHp === undefined) d.currentHp = d.maxHp;
+  if (d.lastTab === undefined) d.lastTab = 'general';
   Object.setPrototypeOf(d, Disciple.prototype);
   if (typeof d.updateCombatStats === 'function') d.updateCombatStats();
   return d;
