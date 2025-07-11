@@ -275,6 +275,7 @@ function awardAttributePoints(d, group) {
     }
     d[target] += 1;
   }
+  if (typeof d.updateCombatStats === 'function') d.updateCombatStats();
   if (d.cardElement) runAnimation(d.cardElement, 'levelup-animate');
 }
 
