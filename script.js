@@ -4509,6 +4509,14 @@ Object.assign(playerStats, state.playerStats || {});
     sectState.researchProgress = 0; // progress is not persisted
   }
 
+  // synchronize disciple global levels with saved skill data
+  if (Array.isArray(speechState.disciples)) {
+    speechState.disciples.forEach(d => {
+      const lvl = computeGlobalSkillLevel(d.id);
+      if (lvl > d.globalLevel) d.globalLevel = lvl;
+    });
+  }
+
   if (state.sectTabUnlocked ||
       (speechState.disciples && speechState.disciples.length > 0)) {
     sectTabUnlocked = true;
