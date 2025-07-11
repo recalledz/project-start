@@ -197,6 +197,8 @@ export const systems = {
 export const sectState = {
   fruits: 0,
   pineLogs: 0,
+  availableFruits: FRUIT_MAX_CAP,
+  animals: { Chicken: 3, Boar: 1, Deer: 0 },
   discipleTasks: {}, // map disciple id -> current task
   taskTimers: { gatherFruits: 0 },
   discipleProgress: {}, // map disciple id -> progress seconds in current cycle
@@ -215,6 +217,15 @@ export const sectState = {
 // Seconds per cycle is 200, so disciples repeat the cycle every ~3.3 minutes.
 const FRUIT_CYCLE_SECONDS = 200;
 const FRUIT_CYCLE_AMOUNT = 10;
+const FRUIT_MAX_CAP = 120;
+const FRUIT_GROWTH_RATES = [60, 40, 30, 20, 0];
+const HUNT_CYCLE_SECONDS = 200;
+const HUNT_XP_PER_SUCCESS = 30;
+const ANIMALS = [
+  { name: 'Chicken', level: 1, yield: 3, spawnRate: 0.8, max: 5 },
+  { name: 'Boar', level: 3, yield: 7, spawnRate: 0.4, max: 3 },
+  { name: 'Deer', level: 5, yield: 10, spawnRate: 0.2, max: 2 }
+];
 const PINE_LOG_CYCLE_SECONDS = 215;
 const PINE_LOG_CYCLE_AMOUNT = 10;
 const DAILY_FRUIT_CONSUMPTION = 20; // fruits eaten by each disciple per day
@@ -233,6 +244,7 @@ const REST_TIME_SECONDS = 300; // health fully restored over 5 minutes
 const TASK_ICONS = {
   'Gather Fruit': '🍎',
   'Log Pine': '🪵',
+  Hunt: '🏹',
   Building: '⚒️',
   Research: '🔬',
   Chant: '🎶',
@@ -244,6 +256,7 @@ const TASK_ICONS = {
 const TASK_GROUPS = {
   'Gather Fruit': 'Gathering',
   'Log Pine': 'Logging',
+  Hunt: 'Hunting',
   'Building': 'Building',
   'Research': 'Researching',
   'Chant': 'Chanting',
@@ -255,6 +268,7 @@ const TASK_GROUPS = {
 const ATTRIBUTE_FOR_GROUP = {
   Gathering: 'dexterity',
   Logging: 'strength',
+  Hunting: 'dexterity',
   Building: 'endurance',
   Researching: 'intelligence',
   Chanting: 'intelligence',
@@ -469,6 +483,7 @@ function ensureDiscipleSkills(id) {
       Idle: 0,
       Gathering: 0,
       Logging: 0,
+      Hunting: 0,
       Building: 0,
       Researching: 0,
       Chanting: 0,
@@ -1400,8 +1415,13 @@ function tickSect(delta) {
         const cycles = Math.floor(prog / cycleSeconds);
         sectState.discipleProgress[d.id] -= cycles * cycleSeconds;
         const deposit = gatherAmt * cycles;
-        if (task === 'Gather Fruit') sectState.fruits += deposit;
-        else sectState.pineLogs += deposit;
+        if (task === 'Gather Fruit') {
+          const actual = Math.min(deposit, sectState.availableFruits);
+          sectState.availableFruits -= actual;
+          sectState.fruits += actual;
+        } else {
+          sectState.pineLogs += deposit;
+        }
         checkBuildingUnlock();
         const mult =
           strengthXpMultiplier(task) *
@@ -1454,6 +1474,33 @@ function tickSect(delta) {
       }
       const spend = Math.min(speechState.resources.qi.current, dt);
       speechState.resources.qi.current -= spend;
+    } else if (task === 'Hunt') {
+      if (!sectState.discipleProgress[d.id]) sectState.discipleProgress[d.id] = 0;
+      sectState.discipleProgress[d.id] += dt;
+      if (sectState.discipleProgress[d.id] >= HUNT_CYCLE_SECONDS) {
+        sectState.discipleProgress[d.id] -= HUNT_CYCLE_SECONDS;
+        const available = Object.entries(sectState.animals).filter(([k, v]) => v > 0);
+        if (available.length > 0) {
+          const [name] = available[Math.floor(Math.random() * available.length)];
+          const animal = ANIMALS.find(a => a.name === name);
+          const skillXp = sectState.discipleSkills[d.id]?.['Hunting'] || 0;
+          const lvl = getTaskSkillProgress(skillXp).level;
+          let chance = d.combatLevel / (d.combatLevel + animal.level);
+          if (Math.random() < chance) {
+            const yieldAmt = Math.round(animal.yield * (1 + 0.1 * lvl));
+            sectState.fruits += yieldAmt;
+            sectState.animals[name] -= 1;
+            addSkillXp(d, 'Hunting', HUNT_XP_PER_SUCCESS);
+            d.gainCombatXp(calculateKillXp(animal.level, 1));
+            addLog(`${d.name} hunted a ${name}!`, 'good');
+          } else {
+            d.health = Math.max(0, d.health - 1);
+            addLog(`${d.name} failed to hunt a ${name}.`, 'bad');
+          }
+        } else {
+          addLog('No animals to hunt.', 'info');
+        }
+      }
     } else if (task === 'Exploration') {
       if (!sectState.discipleProgress[d.id]) sectState.discipleProgress[d.id] = 0;
       sectState.discipleProgress[d.id] += dt;
@@ -1553,6 +1600,12 @@ function updateTaskProgressDisplay() {
         label.textContent = `${buildData.name} ${builderCount > 0 ? buildTime.toFixed(1) : '∞'}s`;
       else if (label) label.textContent = '';
       if (rateEl) rateEl.textContent = '';
+    } else if (taskName === 'Hunt') {
+      const progress = sectState.discipleProgress[d.id] || 0;
+      const pct = (progress / HUNT_CYCLE_SECONDS) * 100;
+      if (fill) fill.style.width = `${pct}%`;
+      if (label) label.textContent = 'Hunting';
+      if (rateEl) rateEl.textContent = '';
     } else if (taskName === 'Exploration') {
       const progress = sectState.discipleProgress[d.id] || 0;
       const pct = (progress / EXPLORATION_CYCLE_SECONDS) * 100;
@@ -1585,6 +1638,22 @@ function updateSectDisplay() {
       <span>🍎 ${sectState.fruits}</span>
       <span>🪵 ${sectState.pineLogs}</span>
       <span>⚖️ -${upkeep}/day (${mm}:${ss})</span>`;
+  }
+
+  const patch = document.getElementById('fruitPatch');
+  if (patch) {
+    let bar = document.getElementById('fruitBar');
+    if (!bar) {
+      bar = document.createElement('div');
+      bar.id = 'fruitBar';
+      bar.className = 'fruit-bar resource-bar';
+      const fill = document.createElement('div');
+      fill.className = 'resource-fill fruit';
+      bar.appendChild(fill);
+      patch.appendChild(bar);
+    }
+    const fill = bar.querySelector('.resource-fill');
+    fill.style.width = `${(sectState.availableFruits / FRUIT_MAX_CAP) * 100}%`;
   }
 
   const orbs = document.getElementById('sectOrbs');
@@ -1796,7 +1865,7 @@ function renderColonyInfo() {
   }
   const taskList = document.createElement('div');
   taskList.className = 'disciple-skill-list';
-  const tasks = ['Idle', 'Gather Fruit', 'Log Pine', 'Building'];
+  const tasks = ['Idle', 'Gather Fruit', 'Log Pine', 'Hunt', 'Building'];
   if (sectState.buildings.researchTable > 0) tasks.push('Research');
   if (sectState.buildings.chantingHall > 0) tasks.push('Chant');
   if (systems.explorationUnlocked) tasks.push('Exploration');
@@ -2742,6 +2811,16 @@ document.addEventListener("DOMContentLoaded", () => {
             d.incapacitated = true;
           }
         }
+      }
+    });
+    sectState.availableFruits = Math.min(
+      FRUIT_MAX_CAP,
+      sectState.availableFruits + FRUIT_GROWTH_RATES[speechState.seasonIndex]
+    );
+    ANIMALS.forEach(a => {
+      const count = sectState.animals[a.name] || 0;
+      if (count < a.max && Math.random() < a.spawnRate) {
+        sectState.animals[a.name] = count + 1;
       }
     });
     updateSectDisplay();

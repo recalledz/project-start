@@ -3817,6 +3817,17 @@ body.darkenshift-mode .tabsContainer button.active {
     top: 25%;
     transform: translate(-50%, -50%);
 }
+.fruit-bar {
+    position: absolute;
+    width: 32px;
+    height: 6px;
+    left: 50%;
+    bottom: calc(100% + 2px);
+    transform: translateX(-50%);
+}
+.fruit-bar .resource-fill {
+    background: #a33;
+}
 .location-icon {
     position: absolute;
     transform: translate(-50%, -50%);
