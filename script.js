@@ -2007,6 +2007,8 @@ function renderColonyResearchPanel() {
         addLog('Research complete: Foreseers', 'good');
         unlockConstruct('Sonic Boom');
         renderColonyResearchPanel();
+        if (typeof renderColonyTasks === 'function') renderColonyTasks();
+        if (typeof renderColonyInfo === 'function') renderColonyInfo();
       }
     });
     colonyResearchPanel.appendChild(btn);
@@ -4400,7 +4402,8 @@ Object.entries(upgrades).map(([k, u]) => [k, u.unlocked])
       buildingUnlocked: systems.buildingUnlocked,
       researchUnlocked: systems.researchUnlocked,
       chantingHallUnlocked: systems.chantingHallUnlocked,
-      voiceOfThePeople: systems.voiceOfThePeople
+      voiceOfThePeople: systems.voiceOfThePeople,
+      explorationUnlocked: systems.explorationUnlocked
     }
   };
 
