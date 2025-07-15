@@ -150,6 +150,7 @@ Footer
 
 # Exploration overlay
 
+-show img/Map.png alongside the following overlays
 ┌───────────────────────────────────────────────────────────────────┐
 │ ○ Exploration   ○ Woodcutting Locations   ○ Mining Locations     │
 ├───────────────────────────────────────────────────────────────────┤
