@@ -51,16 +51,16 @@ Table of Contents
 15. Research Trees
 
 
-16. Qi Orb Mechanics
+16. [Qi Orb Mechanics](16-qi-orb.md)
 
 
-17. Paths & Attribute Affinities
+17. [Paths & Attribute Affinities](17-paths.md)
 
 
-18. Properties & Formulas
+18. [Properties & Formulas](18-properties.md)
 
 
-19. Attributes
+19. [Attributes](19-attributes.md)
 
 
-20. Skills
+20. [Skills](20-skills.md)
