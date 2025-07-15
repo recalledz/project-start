@@ -76,7 +76,7 @@ Determines initial learning speed
 
 
 
-Afects chanting and researching
+Affects chanting and researching
 
 
 
