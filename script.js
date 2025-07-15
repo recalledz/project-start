@@ -108,6 +108,7 @@ let drawnCards = [];
 // Active disciples engaged in combat
 let activeDisciples = [];
 // Available disciples under the player's control
+// Start with three disciples as outlined in the recruitment docs
 let disciples = [new Disciple({ id: 1 }), new Disciple({ id: 2 }), new Disciple({ id: 3 })];
 disciples.forEach(initializeDisciple);
 // Functions to manage which disciples are active in combat
