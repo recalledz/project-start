@@ -27,7 +27,7 @@ Table of Contents
 7. Locations & Unlock Rules
 
 
-8. [Ornaments](08 - ornaments.md)
+8. [Ornaments](08-ornaments.md)
 
 
 9. Skills & Proficiency
