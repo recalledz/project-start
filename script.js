@@ -87,19 +87,6 @@ import {
   updateBloodSplat
 } from "./rendering.js";
 
-import {
-  deckMastery,
-  deckConfigs,
-  selectedDeck,
-  addDeckMasteryProgress,
-  getDeckMasteryInfo,
-  renderDeckList,
-  renderDeckCards,
-  renderJokerView,
-  renderJobsList,
-  showJobs
-} from "./deck.js";
-
 
 // --- Game State ---
 // `drawnCards` holds the cards currently in the player's hand
