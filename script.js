@@ -35,7 +35,6 @@ import {
   renderConstructCards,
   renderHotbar
 } from "./speech.js";
-import { Jobs, assignJob, getAvailableJobs, renderJobAssignments, renderJobCarousel } from "./jobs.js"; // job definitions
 import RateTracker from "./utils/rateTracker.js";
 import { formatNumber } from "./utils/numberFormat.js";
 import { runAnimation } from "./utils/animation.js";
@@ -456,7 +455,6 @@ function createDiscipleCard(d) {
   assign.addEventListener('click', e => {
     e.stopPropagation();
     openDiscipleOverlay(d);
-  });
   const statsBtn = document.createElement('button');
   statsBtn.textContent = 'Stats';
   statsBtn.addEventListener('click', e => {
@@ -805,8 +803,6 @@ let statsOverviewSubTabButton;
 let statsEconomySubTabButton;
 let statsOverviewContainer;
 let statsEconomyContainer;
-let jobsViewBtn;
-let jobsCarouselBtn;
 const discoveredLocations = [];
 const explorationParty = new Set();
 let currentExplorationParty = [];
@@ -1029,8 +1025,6 @@ function initTabs() {
   jokerViewBtn = document.querySelector('.jokerViewBtn');
   deckUpgradesViewBtn = document.querySelector('.deckUpgradesViewBtn');
   deckUpgradesContainer = document.querySelector('.deckUpgradesContainer');
-  jobsViewBtn = document.querySelector('.jobsViewBtn');
-  jobsCarouselBtn = document.querySelector('.jobsCarouselBtn');
   playerCoreSubTabButton = document.querySelector(".playerCoreSubTabButton");
   playerCorePanel = document.querySelector(".player-core-panel");
   playerConstructSubTabButton = document.querySelector('.playerConstructSubTabButton');
@@ -1096,13 +1090,6 @@ function initTabs() {
       showTab(locationTab);
       setActiveTabButton(locationTabButton);
     });
-  if (jobsViewBtn) jobsViewBtn.addEventListener('click', () => {
-    showJobsView();
-    renderJobAssignments(deckJobsContainer, pDeck);
-  });
-  if (jobsCarouselBtn) jobsCarouselBtn.addEventListener('click', () => {
-    showJobCarouselView();
-    renderJobCarousel(jobCarouselContainer);
   });
   if (startDungeonBtn)
     startDungeonBtn.addEventListener('click', () => {
