@@ -2697,7 +2697,6 @@ function updateDeckDisplay() {
       card.hpDisplay.textContent = `HP: ${formatNumber(Math.round(card.currentHp))}/${formatNumber(Math.round(card.maxHp))}`;
     }
   });
-  renderJobAssignments(deckJobsContainer, pDeck);
   updateMasteryBars();
 }
 
@@ -2860,7 +2859,6 @@ document.addEventListener("DOMContentLoaded", () => {
   resetStageCashStats();
   renderStageInfo();
   renderWorldsMenu();
-  renderJobAssignments(deckJobsContainer, pDeck);
   rollNewCardUpgrades(2, deckConfigs[selectedDeck]?.upgrades || []);
   renderPurchasedUpgrades();
   checkUpgradeUnlocks();
