@@ -1,2 +1,5 @@
 node_modules/
 *.csv
+
+# Build artifacts
+/generated-icon.png
