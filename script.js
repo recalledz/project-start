@@ -706,8 +706,6 @@ let startDungeonBtn;
 let purchasedUpgradeList;
 let activeEffectsContainer;
 let tooltip;
-let jokerViewBtn;
-let deckUpgradesContainer;
 let playerCoreSubTabButton;
 let playerCorePanel;
 let playerConstructSubTabButton;
@@ -956,8 +954,6 @@ function initTabs() {
   purchasedUpgradeList = document.querySelector('.purchased-upgrade-list');
   activeEffectsContainer = document.querySelector('.active-effects');
   tooltip = document.getElementById('tooltip');
-  deckUpgradesViewBtn = document.querySelector('.deckUpgradesViewBtn');
-  deckUpgradesContainer = document.querySelector('.deckUpgradesContainer');
   playerCoreSubTabButton = document.querySelector(".playerCoreSubTabButton");
   playerCorePanel = document.querySelector(".player-core-panel");
   playerConstructSubTabButton = document.querySelector('.playerConstructSubTabButton');
@@ -1040,15 +1036,6 @@ function initTabs() {
         showTab(mainTab);
         setActiveTabButton(playerTabButton);
         respawnDealerStage();
-      }
-    });
-
-  if (deckUpgradesViewBtn)
-    deckUpgradesViewBtn.addEventListener('click', () => {
-      hideDeckViews();
-      if (deckUpgradesContainer) {
-        renderPurchasedUpgrades();
-        deckUpgradesContainer.style.display = 'flex';
       }
     });
   if (playerCoreSubTabButton)
@@ -2577,18 +2564,6 @@ function triggerOrbFlash() {
   });
 }
 
-function hideDeckViews() {
-  if (deckUpgradesContainer) deckUpgradesContainer.style.display = 'none';
-}
-
-function showDeckListView() {
-  hideDeckViews();
-  if (deckListContainer) {
-    renderDeckList(deckListContainer);
-    deckListContainer.style.display = 'flex';
-  }
-}
-
 
 //========render functions==========
 document.addEventListener("DOMContentLoaded", () => {
@@ -2673,7 +2648,6 @@ document.addEventListener("DOMContentLoaded", () => {
   resetStageCashStats();
   renderStageInfo();
   renderWorldsMenu();
-  rollNewCardUpgrades(2, deckConfigs[selectedDeck]?.upgrades || []);
   renderPurchasedUpgrades();
   checkUpgradeUnlocks();
 
@@ -3309,7 +3283,6 @@ function onBossDefeat(boss) {
 
   healCardsOnKill();
   stats.upgradePower += 5;
-  rollNewCardUpgrades(2, deckConfigs[selectedDeck]?.upgrades || []);
   renderPurchasedUpgrades();
   checkSpeakerEncounter();
   // Unlock and immediately travel to the next world
@@ -3596,8 +3569,6 @@ function openCardUpgradeSelection(onCloseCallback = null) {
   const cardsContainer = document.createElement('div');
   cardsContainer.classList.add('upgrade-cards');
   box.appendChild(cardsContainer);
-
-  const allowed = deckConfigs[selectedDeck]?.upgrades || [];
   const ids = rollNewCardUpgrades(3, allowed);
   const freeIndex = Math.floor(Math.random() * ids.length);
   ids.forEach((id, idx) => {
@@ -3865,20 +3836,6 @@ function respawnPlayer() {
   stats.cardSlots = BASE_STATS.cardSlots + attributes.Strength.inventorySlots;
   // reset resources
 
-  resetCardUpgrades();
-  pDeck = [];
-  deck = [...pDeck];
-  drawnCards = [];
-  redrawCost = 10;
-  updateRedrawButton();
-
-  rollNewCardUpgrades(2, deckConfigs[selectedDeck]?.upgrades || []);
-  renderCardUpgrades(document.querySelector('.card-upgrade-list'), {
-    stats,
-    stageData,
-    onPurchase: purchaseCardUpgrade
-  });
-
   clearActiveDisciples();
   
   updateUpgradeButtons();
@@ -3952,9 +3909,6 @@ window.removeEventListener("beforeunload", saveGame);
 clearInterval(saveInterval);
 location.reload();
 }
-
-// Shuffle all current cards back into the deck and draw a new hand
-// redraw logic moved to cardManagement.js
 
 // Player auto-attack; deals combined damage to the current enemy
 function attack(deltaTime = 0) {
@@ -4061,7 +4015,6 @@ Object.entries(upgrades).map(([k, u]) => [k, u.unlocked])
     upgradePowerPurchased,
     cardPoints,
     redrawCost,
-    deck: deckData,
     upgrades: upgradeLevels,
     unlockedJokers: unlockedJokers.map(j => j.id),
     playerStats,
@@ -4203,27 +4156,6 @@ if (state.upgradesUnlocked) {
 Object.entries(state.upgradesUnlocked).forEach(([k, unlocked]) => {
 if (upgrades[k]) upgrades[k].unlocked = unlocked;
 });
-}
-
-if (Array.isArray(state.deck)) {
-pDeck = state.deck.map(data => {
-const c = new Card(data.suit, data.value, data.backType);
-Object.assign(c, {
-currentLevel: data.currentLevel,
-XpCurrent: data.XpCurrent,
-XpReq: data.XpReq,
-baseDamage: data.baseDamage,
-damage: data.damage,
-maxHp: data.maxHp,
-currentHp: data.currentHp,
-baseHpBoost: data.baseHpBoost || 0,
-hpPerKill: data.hpPerKill,
-job: data.job,
-traits: data.traits
-});
-return c;
-});
-deck = [...pDeck];
 }
 
 unlockedJokers.length = 0;
