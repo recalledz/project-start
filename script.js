@@ -89,8 +89,6 @@ import {
 
 
 // --- Game State ---
-// `drawnCards` holds the cards currently in the player's hand
-let drawnCards = [];
 // Active disciples engaged in combat
 let activeDisciples = [];
 // Available disciples under the player's control
@@ -150,15 +148,10 @@ const BASE_STATS = {
   maxMana: 0,
   mana: 0,
   manaRegen: 0,
-  //maxSanity: 100,
-  //sanity: 100,
-  healOnRedraw: 0,
   abilityPower: 1,
   spadeDamageMultiplier: 1,
   playerShield: 0,
   abilityCooldownReduction: 0,
-  jokerCooldownReduction: 0,
-  redrawCooldownReduction: 0,
   hpMultiplier: 1,
   extraDamageMultiplier: 1,
   damageBuffMultiplier: 1,
@@ -3029,8 +3022,6 @@ function nextWorld() {
   stageData.world += 1;
   stageData.stage = 1;
   stageData.kills = playerStats.stageKills[stageData.stage] || 0;
-  redrawCost = 10;
-  updateRedrawButton();
   applyWorldTheme();
   resetStageCashStats();
   worldProgressTimer = 0;
@@ -3047,7 +3038,6 @@ function nextWorld() {
   checkUpgradeUnlocks();
   inCombat = false;
   currentEnemy = null;
-  redrawAllowed = false;
   if (nextStageArea) nextStageArea.classList.remove('glow-notify');
   respawnDealerStage();
 }
@@ -3059,8 +3049,6 @@ function goToWorld(id) {
   stageData.world = parseInt(id);
   stageData.stage = 1;
   stageData.kills = playerStats.stageKills[stageData.stage] || 0;
-  redrawCost = 10;
-  updateRedrawButton();
   resetStageCashStats();
   worldProgressTimer = 0;
   worldProgressRateTracker.reset(computeWorldProgress(stageData.world) * 100);
@@ -3075,7 +3063,6 @@ function goToWorld(id) {
   checkUpgradeUnlocks();
   inCombat = false;
   currentEnemy = null;
-  redrawAllowed = false;
   if (nextStageArea) nextStageArea.classList.remove('glow-notify');
   renderWorldsMenu();
   updateWorldTabNotification();
@@ -3297,7 +3284,7 @@ function updateDealerLifeDisplay() {
 
 // Apply damage from the enemy to the first card in the player's hand
 function cDealerDamage(damageAmount = null, ability = null, source = "dealer") {
-  const targets = drawnCards.length > 0 ? drawnCards : activeDisciples;
+  const targets = activeDisciples;
   if (targets.length === 0) {
     playerStats.hasDied = true;
     showRestartScreen(returnPartyToSect);
@@ -3353,7 +3340,6 @@ function cDealerDamage(damageAmount = null, ability = null, source = "dealer") {
         removeBloodSplat(card);
         card.wrapperElement?.remove();
         updatePlayerStats(stats);
-        updateDrawButton();
         if (drawnCards.length === 0) {
           playerStats.hasDied = true;
           showRestartScreen(returnPartyToSect);
@@ -3413,53 +3399,6 @@ function updateDiscipleStatsDisplay(d) {
   d.statsElement.innerHTML = '';
 }
 
-// Refresh the cards currently shown in the player's hand
-function updateHandDisplay() {
-  drawnCards.forEach(card => {
-    if (!card || !card.hpDisplay) return; // Skip if card or elements are missing
-    card.hpDisplay.textContent = `HP: ${formatNumber(Math.round(card.currentHp))}/${formatNumber(Math.round(card.maxHp))}`;
-    if (card.xpLabel) {
-      card.xpLabel.textContent = `LV: ${card.currentLevel}`;
-    }
-    if (card.xpBarFill) {
-      card.xpBarFill.style.width = `${(card.XpCurrent / card.XpReq) * 100}%`;
-    }
-    updateBloodSplat(card);
-  });
-  activeDisciples.forEach(d => {
-    if (!d || !d.hpDisplay) return;
-    d.hpDisplay.textContent = `HP: ${Math.round(d.currentHp)}/${Math.round(d.maxHp)}`;
-    if (d.xpLabel) {
-      d.xpLabel.textContent = `LV: ${d.combatLevel}`;
-    }
-    if (d.gLevelLabel) {
-      d.gLevelLabel.textContent = `Skill ${d.globalLevel}`;
-    }
-    if (d.xpBarFill) {
-      const pct = (d.combatXp / d.xpForNextLevel()) * 100;
-      d.xpBarFill.style.width = `${Math.min(pct, 100)}%`;
-    }
-    updateDiscipleStatsDisplay(d);
-    updateBloodSplat(d);
-  });
-}
-
-function updateSectCardInfo() {
-  speechState.disciples.forEach(d => {
-    if (d.etaLabel) {
-      d.etaLabel.textContent = `ETA: ${formatTime(getTaskEta(d))}`;
-    }
-    const lvl = computeGlobalSkillLevel(d.id);
-    if (lvl > d.globalLevel) {
-      d.globalLevel = lvl;
-      if (d.gLevelLabel) d.gLevelLabel.textContent = `Skill ${d.globalLevel}`;
-      if (d.cardElement) runAnimation(d.cardElement, 'levelup-animate');
-    } else if (d.gLevelLabel) {
-      d.gLevelLabel.textContent = `Skill ${d.globalLevel}`;
-    }
-  });
-}
-
 function renderCombatDisciples() {
   if (!handContainer) return;
   handContainer.innerHTML = '';
@@ -3485,7 +3424,6 @@ let campOverlay = null; // overlay instance
 let inCombat = false;
 let upgradeSelectionOpen = false;
 let upgradeOverlay = null; // overlay instance
-let redrawCost = 10;
 //let stageProgressing = false;
 //let stageProgressInterval = null;
 //let progressButtonActive = false;
@@ -3507,94 +3445,15 @@ function rarityClass(rarity) {
   }
 }
 
-function openCardUpgradeSelection(onCloseCallback = null) {
-  if (upgradeSelectionOpen) return;
-  upgradeSelectionOpen = true;
-  gamePaused = true;
-  dCardContainer.innerHTML = '';
-  upgradeOverlay = createOverlay({ className: 'upgrade-selection-overlay' });
-  upgradeOverlay.onClose(() => {
-    upgradeSelectionOpen = false;
-    dCardContainer.innerHTML = '';
-    renderDealerCard();
-    gamePaused = false;
-    onCloseCallback?.();
-  });
-
-  const box = upgradeOverlay.box;
-  box.classList.add('upgrade-box');
-
-  const headerWrap = document.createElement('div');
-  headerWrap.classList.add('upgrade-header');
-  headerWrap.innerHTML = `<h2><i data-lucide="sparkles"></i> Upgrade Selection</h2>`;
-  box.appendChild(headerWrap);
-
-  const info = document.createElement('p');
-  info.classList.add('upgrade-text');
-  info.textContent = 'Choose an upgrade';
-  box.appendChild(info);
-
-  const statsRow = document.createElement('div');
-  statsRow.classList.add('overlay-stats');
-  statsRow.innerHTML = `
-    <div>Damage: ${formatNumber(Math.floor(stats.pDamage))}</div>
-    <div>Attack: ${(stats.attackSpeed / 1000).toFixed(1)}s</div>
-    <div>HP/kill: ${stats.hpPerKill}</div>`;
-  box.appendChild(statsRow);
-
-
-  const cardsContainer = document.createElement('div');
-  cardsContainer.classList.add('upgrade-cards');
-  box.appendChild(cardsContainer);
-  const ids = rollNewCardUpgrades(3, allowed);
-  const freeIndex = Math.floor(Math.random() * ids.length);
-  ids.forEach((id, idx) => {
-    const def = cardUpgradeDefinitions[id];
-    const baseCost = getCardUpgradeCost(id, {}, stageData);
-    const cost = idx === freeIndex ? 0 : baseCost;
-    const wrap = document.createElement('div');
-    wrap.classList.add('card-wrapper');
-    const card = document.createElement('div');
-    card.classList.add('card', 'upgrade-card', `rarity-${rarityClass(def.rarity)}`);
-    const icon = def.icon || 'sword';
-    card.innerHTML = `\n      <div class="card-suit"><i data-lucide="${icon}"></i></div>\n      <div class="card-desc">${def.name} - ${cost === 0 ? 'FREE' : '$' + cost}</div>\n      <div class="card-flavor">${def.flavor || ''}</div>\n    `;
-    wrap.appendChild(card);
-    wrap.addEventListener('click', () => {
-      purchaseCardUpgrade(id, cost);
-      closeCardUpgradeSelection();
-    });
-    cardsContainer.appendChild(wrap);
-  });
-  upgradeOverlay.appendButton('Skip', () => closeCardUpgradeSelection());
-
-  const handRow = document.createElement('div');
-  handRow.classList.add('overlay-hand');
-  drawnCards.forEach(c => {
-    if (!c || !c.wrapperElement) return;
-    handRow.appendChild(c.wrapperElement.cloneNode(true));
-  });
-  box.appendChild(handRow);
-
-  lucide.createIcons({ icons: lucide.icons });
-}
-
-function closeCardUpgradeSelection() {
-  if (!upgradeSelectionOpen || !upgradeOverlay) return;
-  upgradeOverlay.close();
-}
-
 function openCamp(onCloseCallback = null) {
   if (campOverlayOpen) return;
   campOverlayOpen = true;
-  redrawAllowed = true;
   gamePaused = true;
   hidePlayerAttackBar();
   campOverlay = createOverlay({ className: 'camp-overlay' });
   campOverlay.onClose(() => {
     campOverlayOpen = false;
-    redrawAllowed = false;
     gamePaused = false;
-    updateRedrawButton();
     onCloseCallback?.();
   });
 
@@ -3649,11 +3508,6 @@ function openCamp(onCloseCallback = null) {
 
   addBtn('▶ Continue', () => closeCamp(), 'Resume journey');
 
-  addBtn('⟳ Redraw', () => {
-    handleRedraw();
-    closeCamp();
-  }, 'Draw again');
-
   addBtn('♥ Heal Party', () => {
     drawnCards.forEach(c => {
       if (!c) return;
@@ -3662,7 +3516,6 @@ function openCamp(onCloseCallback = null) {
     updateHandDisplay();
     closeCamp();
   }, 'Restore half HP');
-  updateRedrawButton();
 
   const handRow = document.createElement('div');
   handRow.classList.add('overlay-hand');
@@ -3982,7 +3835,6 @@ Object.entries(upgrades).map(([k, u]) => [k, u.unlocked])
     stageData,
     upgradePowerPurchased,
     cardPoints,
-    redrawCost,
     upgrades: upgradeLevels,
     unlockedJokers: unlockedJokers.map(j => j.id),
     playerStats,
@@ -4020,7 +3872,6 @@ try {
 const state = JSON.parse(json);
   // legacy cash/chip values are ignored
   cardPoints = state.cardPoints || 0;
-  redrawCost = state.redrawCost || 10;
   upgradePowerPurchased = state.upgradePowerPurchased || 0;
   Object.assign(stats, state.stats || {});
   if (state.systems) {
@@ -4160,7 +4011,6 @@ updateUpgradeButtons();
   updateUpgradePowerCost();
   renderPurchasedUpgrades();
   applyWorldTheme();
-  updateRedrawButton();
 
   updateWorldTabNotification();
   updateSectDisplay();
@@ -4230,9 +4080,6 @@ if (currentEnemy) {
     }
 }
 
-
-  updateDrawButton();
-  updateRedrawButton();
   updatePlayerStats(stats);
   worldProgressTimer += deltaTime;
   if (worldProgressTimer >= 1000) {
