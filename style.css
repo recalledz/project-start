@@ -478,14 +478,16 @@ body.darkenshift-mode .tabsContainer button.active {
     display: block; /* prevent text from jumbling when progress bar appears */
 }
 
-/*#distanceDisplay {
+/*
+#distanceDisplay {
     align-self: flex-start;
     font-size: 0.8rem;
     color: #d4af37;
     text-shadow: 0 0 5px black;
     z-index: 1;
-    display: block; /* ensure consistent vertical spacing */
-}*/
+    display: block;
+}
+*/
 
 #worldProgressPerSecDisplay {
     align-self: flex-start;
