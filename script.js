@@ -455,6 +455,7 @@ function createDiscipleCard(d) {
   assign.addEventListener('click', e => {
     e.stopPropagation();
     openDiscipleOverlay(d);
+  });
   const statsBtn = document.createElement('button');
   statsBtn.textContent = 'Stats';
   statsBtn.addEventListener('click', e => {
@@ -1086,10 +1087,9 @@ function initTabs() {
   if (deckViewBtn) deckViewBtn.addEventListener('click', showDeckListView);
   if (jokerViewBtn) jokerViewBtn.addEventListener('click', showJokerView);
   if (locationsPanelBtn)
-    locationsPanelBtn.addEventListener('click', () => {
-      showTab(locationTab);
-      setActiveTabButton(locationTabButton);
-    });
+  locationsPanelBtn.addEventListener('click', () => {
+    showTab(locationTab);
+    setActiveTabButton(locationTabButton);
   });
   if (startDungeonBtn)
     startDungeonBtn.addEventListener('click', () => {
