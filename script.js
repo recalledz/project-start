@@ -613,7 +613,6 @@ function getDealerIconStyle(stage) {
 }
 
 // Helper bound functions for card utilities
-const recalcAllCardHp = () => updateAllCardHp(pDeck, stats, barUpgrades);
 
 const nextStageArea = document.getElementById("nextStageArea");
 const nextStageProgress = document.getElementById("nextStageProgress");
@@ -1169,20 +1168,6 @@ function checkUpgradeUnlocks() {
   if (changed) {
     updateUpgradeButtons();
   }
-}
-
-
-function purchaseCardUpgrade(id, cost) {
-  applyCardUpgrade(id, { stats, pDeck, updateAllCardHp: recalcAllCardHp });
-  removeActiveUpgrade(id);
-  renderCardUpgrades(document.querySelector('.card-upgrade-list'), {
-    stats,
-    stageData,
-    onPurchase: purchaseCardUpgrade
-  });
-  renderPurchasedUpgrades();
-  updateUpgradeButtons();
-  updatePlayerStats(stats);
 }
 
 function renderPurchasedUpgrades() {
@@ -2635,9 +2620,7 @@ document.addEventListener("DOMContentLoaded", () => {
     stats.maxMana += 10;
     updateManaBar();
   });
-  showDeckListView();
   showColonyTab('resources');
-  Object.values(upgrades).forEach(u => u.effect({ stats, pDeck, stageData, systems }));
   updatePlayerStats(stats);
   updatePlayerStats(stats);
   renderPurchasedUpgrades();
@@ -2705,8 +2688,6 @@ function unlockManaSystem() {
   stats.maxMana = baseMana;
   stats.mana = stats.maxMana;
   stats.manaRegen = 0.01;
-  // re-apply upgrade effects in case levels were purchased before unlock
-  Object.values(upgrades).forEach(u => u.effect({ stats, pDeck, stageData, systems }));
   updatePlayerStats(stats);
   updateManaBar();
   checkUpgradeUnlocks();
@@ -3015,8 +2996,6 @@ function updateWorldTabNotification() {
   const shouldGlow = rewardAvailable || newWorldAvailable;
   worldSubTabButton.classList.toggle("glow-notify", shouldGlow);
 }
-
-// Show cards eligible for job assignment in the Deck tab
 
 // ===== Stage and world management =====
 // Advance to the next stage after defeating enough enemies
@@ -3359,7 +3338,6 @@ function cDealerDamage(damageAmount = null, ability = null, source = "dealer") {
   if (card.hpDisplay) {
     card.hpDisplay.textContent = `HP: ${formatNumber(Math.round(card.currentHp))}/${formatNumber(Math.round(card.maxHp))}`;
   }
-  if (targets === drawnCards) updateDeckDisplay();
   if (card.wrapperElement) {
     animateCardHit(card);
     // Show actual damage dealt after shield reduction
@@ -3376,7 +3354,6 @@ function cDealerDamage(damageAmount = null, ability = null, source = "dealer") {
         card.wrapperElement?.remove();
         updatePlayerStats(stats);
         updateDrawButton();
-        updateDeckDisplay();
         if (drawnCards.length === 0) {
           playerStats.hasDied = true;
           showRestartScreen(returnPartyToSect);
@@ -3783,15 +3760,6 @@ function animateCardDeath(card, callback) {
   runAnimation(w, "card-death", 600).then(() => callback?.());
 }
 
-function healCardsOnKill() {
-  drawnCards.forEach(card => {
-    if (!card) return;
-    card.healFromKill(stats.hpPerKill);
-  });
-  updateHandDisplay();
-  updateDeckDisplay();
-}
-
 
 function showTooltip(html, x, y) {
   if (!tooltip) return;
@@ -4173,8 +4141,6 @@ if (
 ) {
   unlockManaSystem();
 }
-
-Object.values(upgrades).forEach(u => u.effect({ stats, pDeck, stageData, systems }));
   updatePlayerStats(stats);
 
 
