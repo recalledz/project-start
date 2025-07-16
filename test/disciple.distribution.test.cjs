@@ -2,26 +2,36 @@ const { expect } = require('chai');
 const { generateDiscipleAttributes } = require('../discipleAttributes.js');
 
 describe('🧍 Disciple attribute distribution', () => {
-  it('allocates between 3 and 5 points total', () => {
-    for (let i = 0; i < 50; i++) {
+  it('starts with base attributes of 3 and distributes 6 extra points', () => {
+    for (let i = 0; i < 10; i++) {
       const dist = generateDiscipleAttributes();
       const total =
-        dist.strength + dist.dexterity + dist.endurance + dist.intelligence;
-      expect(total).to.be.at.least(3).and.at.most(5);
+        dist.strength +
+        dist.dexterity +
+        dist.endurance +
+        dist.intelligence +
+        dist.charisma;
+      expect(total).to.equal(21);
+      Object.values(dist).forEach(v => expect(v).to.be.at.least(3));
     }
   });
 
-  it('rarely gives 3 points in one stat', () => {
-    let triples = 0;
-    const runs = 500;
-    for (let i = 0; i < runs; i++) {
-      const d = generateDiscipleAttributes();
+  it('adds random points beyond the base', () => {
+    const first = generateDiscipleAttributes();
+    let varied = false;
+    for (let i = 0; i < 20; i++) {
+      const next = generateDiscipleAttributes();
       if (
-        Math.max(d.strength, d.dexterity, d.endurance, d.intelligence) >= 3
+        next.strength !== first.strength ||
+        next.dexterity !== first.dexterity ||
+        next.endurance !== first.endurance ||
+        next.intelligence !== first.intelligence ||
+        next.charisma !== first.charisma
       ) {
-        triples++;
+        varied = true;
+        break;
       }
     }
-    expect(triples).to.be.below(runs * 0.1);
+    expect(varied).to.equal(true);
   });
 });
