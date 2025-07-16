@@ -131,10 +131,6 @@ function clearActiveDisciples() {
   discipleAttackTimers = {};
   if (handContainer) handContainer.innerHTML = '';
 }
-// mapping of card back styles
-const cardBackImages = {
-  "basic-red": "img/basic deck.png"
-};
 // theme state
 let isDarkenshift = false;
 // resources and progress trackers
@@ -602,7 +598,6 @@ function checkSpeakerEncounter() {
 
 const playerStats = {
   timesPrestiged: 0,
-  decksUnlocked: 1,
   totalBossKills: 0,
   stageKills: {},
   speakerEncounters: 0,
@@ -630,38 +625,8 @@ function getDealerIconStyle(stage) {
   };
 }
 
-let pDeck = [];
-let deck = [...pDeck];
-deckConfigs.basic.cards = pDeck;
-
 // Helper bound functions for card utilities
 const recalcAllCardHp = () => updateAllCardHp(pDeck, stats, barUpgrades);
-
-function getCardState() {
-  return {
-    deck,
-    drawnCards,
-    cardBackImages,
-    handContainer,
-    renderCard: card => renderCard(card, handContainer),
-    updateDeckDisplay,
-    renderDeckTop,
-    updatePileCounts,
-    stats,
-    showUpgradePopup,
-    applyCardUpgrade,
-    renderCardUpgrades,
-    purchaseCardUpgrade,
-    renderPurchasedUpgrades,
-    updateActiveEffects,
-    updateAllCardHp: recalcAllCardHp,
-    updateHandDisplay,
-    pDeck,
-    shuffleArray,
-    updateDrawButton,
-    updatePlayerStats
-  };
-}
 
 const nextStageArea = document.getElementById("nextStageArea");
 const nextStageProgress = document.getElementById("nextStageProgress");
@@ -670,26 +635,15 @@ const fightBossBtn = document.getElementById("fightBossBtn");
 const bossProgress = document.getElementById("bossProgress");
 const campBtn = document.getElementById("campBtn");
 const handContainer = document.getElementsByClassName("handContainer")[0];
-const deckContainer = document.getElementsByClassName("deckContainer")[0];
-const deckCountDisplay = document.getElementById("deckCount");
 const dealerLifeDisplay =
 document.getElementsByClassName("dealerLifeDisplay")[0];
 const killsDisplay = document.getElementById("kills");
 const worldProgressPerSecDisplay = document.getElementById("worldProgressPerSecDisplay");
-const deckListContainer = document.querySelector('.deckListContainer');
-const deckTabContainer = document.querySelector('.deckTabContainer');
-const jokerViewContainer = document.querySelector('.jokerViewContainer');
-const deckJobsContainer = document.querySelector('.deckJobsContainer');
-const jobCarouselContainer = document.querySelector('.jobCarouselContainer');
 const dCardContainer = document.getElementsByClassName("dCardContainer")[0];
 const dealerContainer = document.querySelector('.dealerContainer');
-const jokerContainers = document.querySelectorAll(".jokerContainer");
 const combatHotbar = document.getElementById('combatHotbar');
 const combatOrbs = document.getElementById('combatOrbs');
 const combatResources = document.getElementById('combatResources');
-const manaBar = document.getElementById("manaBar");
-const manaFill = document.getElementById("manaFill");
-const manaText = document.getElementById("manaText");
 //const stageProgressFill = document.getElementById("stageProgressFill");
 //const stageProgressBar = document.getElementById("stageProgressBar");
 //const insanityMessages = [
@@ -752,8 +706,6 @@ let explorationTabButton;
 let locationTabButton;
 let logTabButton;
 let mainTab;
-let cardSubTab;
-let deckTab;
 let starChartTab;
 let playerStatsTab;
 let worldsTab;
@@ -767,9 +719,7 @@ let startDungeonBtn;
 let purchasedUpgradeList;
 let activeEffectsContainer;
 let tooltip;
-let deckViewBtn;
 let jokerViewBtn;
-let deckUpgradesViewBtn;
 let deckUpgradesContainer;
 let playerCoreSubTabButton;
 let playerCorePanel;
@@ -913,7 +863,6 @@ function selectWorld(id) {
 
 function hideTab() {
   if (mainTab) mainTab.style.display = "none";
-  if (deckTab) deckTab.style.display = "none";
   if (starChartTab) starChartTab.style.display = "none";
   if (playerStatsTab) playerStatsTab.style.display = "none";
   if (worldsTab) worldsTab.style.display = "none";
@@ -1007,8 +956,6 @@ function initTabs() {
   locationTabButton = document.querySelector('.locationTabButton');
   logTabButton = document.querySelector('.logTabButton');
   mainTab = document.querySelector('.mainTab');
-  cardSubTab = document.querySelector('.cardSubTab');
-  deckTab = document.querySelector('.deckTab');
   starChartTab = document.querySelector('.starChartTab');
   playerStatsTab = document.querySelector('.playerStatsTab');
   worldsTab = document.querySelector('.worldsTab');
@@ -1022,8 +969,6 @@ function initTabs() {
   purchasedUpgradeList = document.querySelector('.purchased-upgrade-list');
   activeEffectsContainer = document.querySelector('.active-effects');
   tooltip = document.getElementById('tooltip');
-  deckViewBtn = document.querySelector('.deckViewBtn');
-  jokerViewBtn = document.querySelector('.jokerViewBtn');
   deckUpgradesViewBtn = document.querySelector('.deckUpgradesViewBtn');
   deckUpgradesContainer = document.querySelector('.deckUpgradesContainer');
   playerCoreSubTabButton = document.querySelector(".playerCoreSubTabButton");
@@ -1084,8 +1029,6 @@ function initTabs() {
   }
 
 
-  if (deckViewBtn) deckViewBtn.addEventListener('click', showDeckListView);
-  if (jokerViewBtn) jokerViewBtn.addEventListener('click', showJokerView);
   if (locationsPanelBtn)
   locationsPanelBtn.addEventListener('click', () => {
     showTab(locationTab);
@@ -1111,10 +1054,6 @@ function initTabs() {
         setActiveTabButton(playerTabButton);
         respawnDealerStage();
       }
-    });
-  if (deckListContainer)
-    deckListContainer.addEventListener('deck-selected', e => {
-      showDeckCardsView(e.detail.id);
     });
 
   if (deckUpgradesViewBtn)
@@ -2651,92 +2590,7 @@ function triggerOrbFlash() {
   });
 }
 
-//=========card tab==========
-
-function renderMiniCard(card) {
-  const wrapper = document.createElement('div');
-  wrapper.classList.add('mini-card-wrapper');
-
-  const cardPane = document.createElement('div');
-  cardPane.classList.add('mini-card');
-  cardPane.innerHTML = `
-    <div class="card-value" style="color: ${card.color}">${card.value}</div>
-    <div class="card-suit" style="color: ${card.color}">${card.symbol}</div>
-    <div class="mini-card-level">Lv ${card.currentLevel}</div>
-  `;
-
-  card.deckLevelDisplay = cardPane.querySelector('.mini-card-level');
-  wrapper.appendChild(cardPane);
-  deckTabContainer.appendChild(wrapper);
-}
-
-// Synchronize XP bars and HP values for cards shown in the Deck tab
-function updateDeckDisplay() {
-  // Update ALL cards in the original deck, including those that have been drawn
-  pDeck.forEach(card => {
-    // Mini card level label
-    if (card.deckLevelDisplay) {
-      card.deckLevelDisplay.textContent = `Lv ${card.currentLevel}`;
-    }
-
-    // Full deck card elements
-    if (card.deckXpBarFill && card.deckXpLabel) {
-      const pct = (card.XpCurrent / card.XpReq) * 100;
-      card.deckXpBarFill.style.width = `${Math.min(pct, 100)}%`;
-      card.deckXpLabel.textContent =
-        `LV: ${card.currentLevel} ` +
-        `XP: ${formatNumber(card.XpCurrent)}/${formatNumber(Math.floor(card.XpReq))}`;
-    }
-
-    if (card.deckHpDisplay) {
-      card.deckHpDisplay.textContent = `HP: ${formatNumber(Math.round(card.currentHp))}/${formatNumber(Math.round(card.maxHp))}`;
-    }
-
-    // 4) If this card is currently on the field, update its HP too
-    if (card.hpDisplay) {
-      card.hpDisplay.textContent = `HP: ${formatNumber(Math.round(card.currentHp))}/${formatNumber(Math.round(card.maxHp))}`;
-    }
-  });
-  updateMasteryBars();
-}
-
-function renderDeckTop() {
-  if (!deckContainer) return;
-  deckContainer.innerHTML = '';
-  if (deck.length > 0) {
-    const top = deck[0];
-    const img = document.createElement('img');
-    img.alt = 'Deck';
-    img.src = cardBackImages[top.backType] || cardBackImages['basic-red'];
-    img.classList.add('card-back', top.backType);
-    deckContainer.appendChild(img);
-  }
-}
-
-function updatePileCounts() {
-  if (deckCountDisplay) deckCountDisplay.textContent = `Deck: ${deck.length}`;
-}
-
-function updateMasteryBars() {
-  if (!deckListContainer) return;
-  deckListContainer.querySelectorAll('.deck-row').forEach(row => {
-    const id = row.dataset.deckId;
-    const { level, pct, req } = getDeckMasteryInfo(id);
-    const fill = row.querySelector('.deckMasteryFill');
-    const name = row.querySelector('.deck-level');
-    const reqSpan = row.querySelector('.deck-req');
-    if (fill) fill.style.width = `${Math.min(1, pct) * 100}%`;
-    if (name) name.textContent = `${deckConfigs[id].name} Lv ${level}`;
-    if (reqSpan) reqSpan.textContent = formatNumber(req);
-  });
-}
-
 function hideDeckViews() {
-  if (deckListContainer) deckListContainer.style.display = 'none';
-  if (deckTabContainer) deckTabContainer.style.display = 'none';
-  if (jokerViewContainer) jokerViewContainer.style.display = 'none';
-  if (deckJobsContainer) deckJobsContainer.style.display = 'none';
-  if (jobCarouselContainer) jobCarouselContainer.style.display = 'none';
   if (deckUpgradesContainer) deckUpgradesContainer.style.display = 'none';
 }
 
@@ -2746,33 +2600,6 @@ function showDeckListView() {
     renderDeckList(deckListContainer);
     deckListContainer.style.display = 'flex';
   }
-}
-
-function showDeckCardsView(id) {
-  hideDeckViews();
-  if (!deckTabContainer) return;
-  deckTabContainer.innerHTML = '';
-  const cards = deckConfigs[id]?.cards || [];
-  cards.forEach(c => renderMiniCard(c));
-  deckTabContainer.style.display = 'flex';
-}
-
-function showJokerView() {
-  hideDeckViews();
-  if (jokerViewContainer) {
-    renderJokerView(jokerViewContainer);
-    jokerViewContainer.style.display = 'flex';
-  }
-}
-
-function showJobsView() {
-  hideDeckViews();
-  if (deckJobsContainer) deckJobsContainer.style.display = 'flex';
-}
-
-function showJobCarouselView() {
-  hideDeckViews();
-  if (jobCarouselContainer) jobCarouselContainer.style.display = 'flex';
 }
 
 
@@ -2971,7 +2798,6 @@ function renderGlobalStats() {
   const basics = document.createElement("div");
   basics.innerHTML = `
   <div>Times Prestiged: ${playerStats.timesPrestiged}</div>
-  <div>Decks Unlocked: ${playerStats.decksUnlocked}</div>
   <div>Total Boss Kills: ${formatNumber(playerStats.totalBossKills)}</div>
   `;
   container.appendChild(basics);
@@ -3644,65 +3470,6 @@ function dealerBarDeathAnimation(callback) {
   });
 }
 
-//========deck functions===========
-
-function cardXp(xpAmount) {
-  pDeck.forEach(card => {
-    if (!card) return;
-
-    const amount = drawnCards.includes(card)
-      ? xpAmount
-      : xpAmount * xpEfficiency;
-    const leveled = card.gainXp(amount, stats, barUpgrades);
-    if (leveled) {
-      cardPoints += 1;
-      if (card.wrapperElement) animateCardLevelUp(card);
-      addDeckMasteryProgress(selectedDeck, 1);
-      addLog(
-        `${card.value}${card.symbol} leveled up to level ${card.currentLevel}!`,
-        "level"
-      );
-    }
-  });
-  // refresh both UIs
-  updateHandDisplay(); // paints hand bars & HP
-  updateDeckDisplay(); // paints deck tab bars
-}
-
-function combatXp(xpAmount) {
-  activeDisciples.forEach(d => {
-    if (!d) return;
-    d.gainCombatXp(xpAmount);
-  });
-  updatePlayerStats();
-  updateHandDisplay();
-}
-
-/**
-* Draws the top card from `Deck` into `intoHand`.
-* Renders it with `renderFn` and then calls `updateFn`.
-* Returns the drawn card, or null if the deck was empty.
-*/
-// Draw the next card from the deck into the player's hand
-// drawing logic moved to cardManagement.js
-
-// Enable or disable the draw button depending on hand size
-function updateDrawButton() {
-  const drawBtn = document.getElementById('clickalipse');
-  if (!drawBtn) return;
-  if (stats.cardSlots === drawnCards.length) {
-    drawBtn.disabled = true;
-    drawBtn.style.background = "grey";
-  } else {
-    drawBtn.disabled = false;
-    drawBtn.style.background = "green";
-  }
-}
-
-function updateRedrawButton() {
-  // removed redraw button UI
-}
-
 function updateDiscipleStatsDisplay(d) {
   if (!d.statsElement) return;
   // Stats are now shown in the sect info panel rather than below the card
@@ -3779,7 +3546,6 @@ let gamePaused = false;
 let campOverlayOpen = false;
 let campOverlay = null; // overlay instance
 let inCombat = false;
-let redrawAllowed = false;
 let upgradeSelectionOpen = false;
 let upgradeOverlay = null; // overlay instance
 let redrawCost = 10;
@@ -3802,10 +3568,6 @@ function rarityClass(rarity) {
     default:
       return 'basic';
   }
-}
-
-function handleRedraw() {
-  // Deck system disabled - selecting disciples instead
 }
 
 function openCardUpgradeSelection(onCloseCallback = null) {
@@ -4036,12 +3798,6 @@ function animateCardHeal(card) {
   runAnimation(w, "heal-animate");
 }
 
-// Brief animation shown when a card levels up
-function animateCardLevelUp(card) {
-  const w = card.wrapperElement;
-  runAnimation(w, "levelup-animate");
-}
-
 function showUpgradePopup(id) {
   const def = cardUpgradeDefinitions[id];
   if (!def) return;
@@ -4078,47 +3834,6 @@ function healCardsOnKill() {
   updateDeckDisplay();
 }
 
-function renderJokers() {
-  if (!jokerContainers.length) return;
-  // Ensure mana system activates once the Healing Joker is obtained
-  if (unlockedJokers.some(j => j.id === "joker_heal") && !systems.manaUnlocked) {
-    unlockManaSystem();
-  }
-
-  // Ensure mana system visibility if the healing joker was just unlocked
-  if (
-    !systems.manaUnlocked &&
-    unlockedJokers.find(j => j.id === "joker_heal")
-  ) {
-    unlockManaSystem();
-  }
-
-  jokerContainers.forEach(container => {
-    container.innerHTML = "";
-    unlockedJokers.forEach(joker => {
-      const wrapper = document.createElement("div");
-      wrapper.classList.add("card-wrapper", "joker-wrapper");
-
-      const card = document.createElement("div");
-      card.classList.add("card");
-
-      const img = document.createElement("img");
-      img.classList.add("joker-image");
-      img.src = joker.image;
-      img.alt = joker.name;
-
-      card.appendChild(img);
-      wrapper.appendChild(card);
-      container.appendChild(wrapper);
-
-      wrapper.addEventListener("click", e => {
-        showJokerTooltip(joker, e.pageX + 10, e.pageY + 10);
-        useJoker(joker);
-      });
-    });
-  });
-}
-
 
 function showTooltip(html, x, y) {
   if (!tooltip) return;
@@ -4135,100 +3850,12 @@ function hideTooltip() {
 window.showTooltip = showTooltip;
 window.hideTooltip = hideTooltip;
 
-function showJokerTooltip(joker, x, y) {
-  showTooltip(
-    `<strong>${joker.name}</strong><br>${joker.description}<br>Mana Cost: ${joker.manaCost}`,
-    x,
-    y
-  );
-}
-
 document.addEventListener("click", e => {
   if (!e.target.closest(".joker-wrapper")) {
     hideTooltip();
   }
 });
 
-function useJoker(joker) {
-  if (stats.mana < joker.manaCost) {
-    addLog("Not enough mana!", "info");
-    return;
-  }
-  stats.mana -= joker.manaCost;
-  updateManaBar();
-
-  switch (joker.abilityType) {
-    case "heal": {
-      const healAmt = joker.getScaledPower();
-      drawnCards.forEach(card => {
-        if (!card) return;
-        card.currentHp = Math.round(Math.min(card.maxHp, card.currentHp + healAmt));
-        card.hpDisplay.textContent = `HP: ${formatNumber(Math.round(card.currentHp))}/${formatNumber(Math.round(card.maxHp))}`;
-        animateCardHeal(card);
-        updateBloodSplat(card);
-      });
-      addLog(`Healed ${healAmt} HP`,
-        "heal");
-      break;
-    }
-    case "damage": {
-        if (currentEnemy) {
-          const dmg = joker.getScaledPower();
-          currentEnemy.takeDamage(dmg);
-          updateDealerLifeBar(currentEnemy);
-          if (currentEnemy.isDefeated()) {
-            currentEnemy.onDefeat?.();
-          }
-          addLog(`Dealt ${dmg} damage`, "damage");
-        }
-        break;
-      }
-    case "shield": {
-        const sAmt = joker.getScaledPower();
-        stats.playerShield += sAmt;
-        addLog(`Gained ${sAmt} shield`, "info");
-        break;
-      }
-    case "buff": {
-        const {
-          finalMultiplier,
-          finalDuration
-        } = joker.getScaledPower();
-        stats.damageMultiplier *= finalMultiplier;
-        addLog(`Damage x${finalMultiplier} for ${finalDuration}s`, "info");
-        setTimeout(() => {
-          stats.damageMultiplier /= finalMultiplier;
-        }, finalDuration * 1000);
-        break;
-      }
-  }
-  updateHandDisplay();
-  updateDeckDisplay();
-}
-
-function awardJokerCardByWorld(w) {
-  const index = parseInt(w, 10) - 1;
-  const template = AllJokerTemplates[index];
-  if (!template) {
-    console.error("No joker template for world", w);
-    return;
-  }
-
-  if (unlockedJokers.find(j => j.id === template.id)) {
-    // ensure mana unlock persists even if the joker was already granted
-    if (template.id === "joker_heal" && !systems.manaUnlocked) {
-      unlockManaSystem();
-    }
-    return;
-  }
-
-  unlockedJokers.push(template);
-  addLog(`${template.name} unlocked!`, "info");
-  if (template.id === "joker_heal" && !systems.manaUnlocked) {
-    unlockManaSystem();
-  }
-  renderJokers();
-}
 
 const awardJokerCard = () => awardJokerCardByWorld(stageData.world);
 
@@ -4434,23 +4061,6 @@ function updatePlayerStats() {
 function saveGame() {
 if (typeof localStorage === "undefined") return;
 
-const deckData = pDeck.map(card => ({
-suit: card.suit,
-value: card.value,
-backType: card.backType,
-currentLevel: card.currentLevel,
-XpCurrent: card.XpCurrent,
-XpReq: card.XpReq,
-baseDamage: card.baseDamage,
-damage: card.damage,
-maxHp: card.maxHp,
-currentHp: card.currentHp,
-baseHpBoost: card.baseHpBoost,
-hpPerKill: card.hpPerKill,
-job: card.job,
-traits: card.traits
-}));
-
 const upgradeLevels = Object.fromEntries(
 Object.entries(upgrades).map(([k, u]) => [k, u.level])
 );
@@ -4649,7 +4259,6 @@ Object.values(upgrades).forEach(u => u.effect({ stats, pDeck, stageData, systems
   updatePlayerStats(stats);
 
 
-  renderJokers();
 updateUpgradeButtons();
   renderPlayerStats(stats);
   renderStageInfo();
@@ -4661,7 +4270,6 @@ updateUpgradeButtons();
   if (worldProgressPerSecDisplay)
     worldProgressPerSecDisplay.textContent = "Avg World Progress/sec: 0%";
 
-  updateManaBar();
 
   checkUpgradeUnlocks();
   updateUpgradePowerCost();
@@ -4760,7 +4368,6 @@ if (currentEnemy) {
   stats.maxMana,
   stats.mana + (stats.manaRegen * deltaTime) / 1000
 );
- updateManaBar();
 }
 
   // passive progress for bar upgrades
