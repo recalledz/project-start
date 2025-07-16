@@ -644,34 +644,34 @@ body.darkenshift-mode .tabsContainer button.active {
     font-size: 0.8rem;
 }
 
-.qi-regen-overlay {
+.water-regen-overlay {
     flex-direction: column;
     gap: 8px;
 }
 
-.qi-info {
+.water-info {
     width: 100%;
     text-align: center;
     font-size: 0.85rem;
 }
 
-.qi-regen-list {
+.water-regen-list {
     display: flex;
     flex-direction: column;
     gap: 4px;
     font-size: 0.9rem;
 }
 
-.qi-row {
+.water-row {
     display: flex;
     justify-content: space-between;
 }
 
-.qi-row.negative {
+.water-row.negative {
     color: #ff8888;
 }
 
-.qi-total {
+.water-total {
     margin-top: 4px;
     text-align: center;
     font-weight: bold;
@@ -3469,7 +3469,7 @@ body.darkenshift-mode .tabsContainer button.active {
     height: 100%;
     width: 0%;
 }
-.resource-fill.qi { background: #7fd9ff; }
+.resource-fill.water { background: #7fd9ff; }
 .resource-fill.thought { background: #c785ff; }
 .resource-fill.structure { background: #a97b5d; }
 .resource-fill.sound {
@@ -3481,7 +3481,7 @@ body.darkenshift-mode .tabsContainer button.active {
     text-align: center;
 }
 
-.construct-orb#orbQi {
+.construct-orb#orbWater {
     background: rgba(127,217,255,0.2);
     border-color: #7fd9ff;
     color: #7fd9ff;
@@ -3800,7 +3800,7 @@ body.darkenshift-mode .tabsContainer button.active {
 .sect-orb.flash {
     animation: sectGlow 3s infinite alternate, sectGlowFlash 0.5s;
 }
-.sect-orb.qi { background: rgba(127,217,255,0.6); }
+.sect-orb.water { background: rgba(127,217,255,0.6); }
 .sect-basket {
     position: absolute;
     width: 8px;
@@ -3903,7 +3903,7 @@ body.darkenshift-mode .tabsContainer button.active {
 .slot-word {
     pointer-events: none;
 }
-.construct-orb#orbQi .orb-fill {
+.construct-orb#orbWater .orb-fill {
     background: rgba(127,217,255,0.6);
 }
 

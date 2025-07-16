@@ -30,7 +30,7 @@ import {
   createConstructCard,
   createConstructInfo,
   recipes,
-  openQiRegenPopup,
+  openWaterRegenPopup,
   unlockConstruct,
   renderConstructCards,
   renderHotbar
@@ -1437,8 +1437,8 @@ function tickSect(delta) {
         updateSectDisplay();
       }
     } else if (task === 'Research') {
-      const spend = Math.min(speechState.resources.qi.current, 4 * dt);
-      speechState.resources.qi.current -= spend;
+      const spend = Math.min(speechState.resources.water.current, 4 * dt);
+      speechState.resources.water.current -= spend;
       sectState.researchProgress += spend;
       if (sectState.researchProgress >= 500) {
         const xp = sectState.discipleSkills[d.id]?.['Researching'] || 0;
@@ -1474,8 +1474,8 @@ function tickSect(delta) {
           addSkillXp(d, 'Chanting', CHANT_XP_PER_CYCLE);
         }
       }
-      const spend = Math.min(speechState.resources.qi.current, dt);
-      speechState.resources.qi.current -= spend;
+      const spend = Math.min(speechState.resources.water.current, dt);
+      speechState.resources.water.current -= spend;
     } else if (task === 'Hunt') {
       if (!sectState.discipleProgress[d.id]) sectState.discipleProgress[d.id] = 0;
       sectState.discipleProgress[d.id] += dt;
@@ -1663,15 +1663,15 @@ function updateSectDisplay() {
     orbs.innerHTML = '';
     const mobile = window.innerWidth <= 600;
     const positions = mobile
-      ? [{ cls: 'qi', left: '50%', top: '10%' }]
-      : [{ cls: 'qi', left: '50%', top: '5%' }];
+      ? [{ cls: 'water', left: '50%', top: '10%' }]
+      : [{ cls: 'water', left: '50%', top: '5%' }];
     positions.forEach(p => {
       const orb = document.createElement('div');
       orb.className = `sect-orb ${p.cls}`;
       orb.style.left = p.left;
       orb.style.top = p.top;
-      if (p.cls === 'qi') {
-        orb.addEventListener('click', openQiRegenPopup);
+      if (p.cls === 'water') {
+        orb.addEventListener('click', openWaterRegenPopup);
       }
       orbs.appendChild(orb);
     });
@@ -1771,7 +1771,7 @@ function startDiscipleMovement() {
       const el = sectDiscipleEls[d.id];
       if (!el) return;
       if (d.incapacitated) {
-        const orb = document.querySelector('#sectOrbs .qi');
+        const orb = document.querySelector('#sectOrbs .water');
         if (orb) {
           const bx = orb.offsetLeft + orb.offsetWidth / 2 - 2;
           const by = orb.offsetTop + orb.offsetHeight / 2 - 2;
@@ -2037,7 +2037,7 @@ function renderColonyResearchPanel() {
   const time = rate > 0 ? ((500 - prog) / rate).toFixed(1) : '∞';
   const info = document.createElement('div');
   info.className = 'research-progress-info';
-  info.textContent = `Qi Rate: ${rate}/s | Next RP in ${time}s`;
+  info.textContent = `Water Rate: ${rate}/s | Next RP in ${time}s`;
   colonyResearchPanel.appendChild(info);
   if (!systems.chantingHallUnlocked) {
     const btn = document.createElement('button');
@@ -4540,18 +4540,18 @@ Object.assign(playerStats, state.playerStats || {});
       const { upgrades: savedUpgrades, ...restSpeech } = state.speechState;
       Object.assign(speechState, restSpeech);
       // ensure orbs exist for older saves
-      if (!speechState.orbs || !speechState.orbs.qi) {
-        const qi = speechState.resources?.qi || {};
+      if (!speechState.orbs || !speechState.orbs.water) {
+        const water = speechState.resources?.water || {};
         speechState.orbs = {
-          qi: {
-            current: qi.current || 0,
-            max: qi.max || 2000,
-            regen: qi.regen || 6
+          water: {
+            current: water.current || 0,
+            max: water.max || 2000,
+            regen: water.regen || 6
           }
         };
       }
-      // maintain reference between qi resource and orb
-      speechState.resources.qi = speechState.orbs.qi;
+      // maintain reference between water resource and orb
+      speechState.resources.water = speechState.orbs.water;
       if (speechState.weather && speechState.weather.days !== undefined) {
         speechState.weather.duration = speechState.weather.days;
         delete speechState.weather.days;
@@ -4712,7 +4712,7 @@ function gameLoop(currentTime) {
 const rawDelta = currentTime - lastFrameTime;
 lastFrameTime = currentTime;
 const deltaTime = rawDelta * timeScale;
-const startQi = speechState.resources.qi.current;
+const startWater = speechState.resources.water.current;
 
 if (currentEnemy) {
     currentEnemy.tick(deltaTime);
@@ -4782,9 +4782,9 @@ if (currentEnemy) {
   tickSect(deltaTime);
   updateDiscipleOverlayBars();
   const dtSeconds = deltaTime / 1000;
-  speechState.gains.qi =
+  speechState.gains.water =
     dtSeconds > 0
-      ? (speechState.resources.qi.current - startQi) / dtSeconds
+      ? (speechState.resources.water.current - startWater) / dtSeconds
       : 0;
   requestAnimationFrame(gameLoop);
 }

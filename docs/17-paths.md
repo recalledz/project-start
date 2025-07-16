@@ -9,7 +9,7 @@ Each disciple chooses one Path after completing Foundation. Paths define their e
 
 Path	Element	Archetype	Focus
 
-Path of the Ember	Fire (火)	Mage	Combat Spells, Qi generation, culture speed
+Path of the Ember	Fire (火)	Mage	Combat Spells, Water generation, culture speed
 Path of the Emerald	Wood (木)	Ranger	Travel speed, gathering, stat boosts
 Path of the Azure Saint	Water (水)	Healer	Healing, crowd control, weather control
 Path of the Searing Shield	Fire (火)	Tank	Defense, resilience, frontline combat
@@ -24,7 +24,7 @@ After Foundation, disciples may choose any advanced Path:
 
 Path	Element	Archetype	Focus
 
-Path of the Ember	Fire (火)	Mage	Combat Spells, Qi generation, faster cultivation speed
+Path of the Ember	Fire (火)	Mage	Combat Spells, Water generation, faster cultivation speed
 Path of the Ruby Red Mage	Fire (火)	Mage	Offensive fire magic, area damage
 Path of the Thunder Thief	Fire (火)	Rogue	Lightning bursts, agility-based attacks
 Path of the Emerald Ranger	Wood (木)	Ranger	Marksmanship, tracking, resource gathering

@@ -68,7 +68,7 @@ Intelligence 🧙
 
 
 
-Affects Qi sense
+Affects Water sense
 
 
 
@@ -110,7 +110,7 @@ Determines maximium size of inner cauldron:
 
 Maximum size of Inner Cauldron = Innate Potential * 500 
 
-Min/Max of stat: 0.714 - 9.286 (Inner Cauldron size: 357 - 5143 Max Qi)
+Min/Max of stat: 0.714 - 9.286 (Inner Cauldron size: 357 - 5143 Max Water)
 
 
 

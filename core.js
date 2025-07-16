@@ -1,4 +1,4 @@
-import { speechState, renderXpBar, openQiRegenPopup } from './speech.js';
+import { speechState, renderXpBar, openWaterRegenPopup } from './speech.js';
 
 export const coreState = {
   coreLevel: 1,
@@ -42,15 +42,15 @@ const bodyPath = `M200 140
     <svg id="coreDiagram" viewBox="0 0 400 400" width="100%" height="100%">
       <defs>
         <clipPath id="bodyShapeClip"><path d="${bodyPath}" /></clipPath>
-        <clipPath id="qiClip"><circle cx="200" cy="80" r="20" /></clipPath>
+        <clipPath id="waterClip"><circle cx="200" cy="80" r="20" /></clipPath>
       </defs>
       <path d="${bodyPath}" fill="rgba(0,0,0,0.3)" stroke="#888" stroke-width="2" />
       <circle id="coreHalo" cx="200" cy="180" r="70" fill="none" stroke="gold" stroke-width="4" opacity="0" />
       <rect id="bodyFill" x="170" y="240" width="60" height="0" fill="rgba(255,255,255,0.4)" clip-path="url(#bodyShapeClip)" />
       <circle cx="200" cy="80" r="20" fill="rgba(127,217,255,0.3)" />
-      <rect id="qiFill" x="180" y="100" width="40" height="0" fill="rgba(127,217,255,0.6)" clip-path="url(#qiClip)" />
-      <circle id="qiOrb" cx="200" cy="80" r="20" fill="none" stroke="#7fd9ff" stroke-width="2" />
-      <text id="qiText" x="200" y="115" text-anchor="middle" class="orb-text"></text>
+      <rect id="waterFill" x="180" y="100" width="40" height="0" fill="rgba(127,217,255,0.6)" clip-path="url(#waterClip)" />
+      <circle id="waterOrb" cx="200" cy="80" r="20" fill="none" stroke="#7fd9ff" stroke-width="2" />
+      <text id="waterText" x="200" y="115" text-anchor="middle" class="orb-text"></text>
       <text id="coreProgressText" x="200" y="260" text-anchor="middle" class="orb-text"></text>
     </svg>
   `;
@@ -58,14 +58,14 @@ const bodyPath = `M200 140
   levelDisplay = container.querySelector('#coreLevelText');
   progressText = container.querySelector("#coreProgressText");
   window.addEventListener('orbs-changed', renderCore);
-  const qiOrb = container.querySelector('#qiOrb');
-  if (qiOrb) {
-    qiOrb.addEventListener('mouseenter', e => {
-      const orb = speechState.orbs.qi;
-      window.showTooltip(`Qi: ${Math.floor(orb.current)}/${orb.max}`, e.pageX + 10, e.pageY + 10);
+  const waterOrb = container.querySelector('#waterOrb');
+  if (waterOrb) {
+    waterOrb.addEventListener('mouseenter', e => {
+      const orb = speechState.orbs.water;
+      window.showTooltip(`Water: ${Math.floor(orb.current)}/${orb.max}`, e.pageX + 10, e.pageY + 10);
     });
-    qiOrb.addEventListener('mouseleave', window.hideTooltip);
-    qiOrb.addEventListener('click', openQiRegenPopup);
+    waterOrb.addEventListener('mouseleave', window.hideTooltip);
+    waterOrb.addEventListener('click', openWaterRegenPopup);
   }
   meditateBtn.addEventListener('click', toggleMeditation);
   meditateBtn.addEventListener('mouseenter', e => {
@@ -108,14 +108,14 @@ function breakthrough() {
   coreState.coreLevel += 1;
   coreState.meditationProgress = 0;
   // requirement could scale later; keep constant for now
-  speechState.orbs.qi.current = 0;
+  speechState.orbs.water.current = 0;
   meditateBtn.textContent = 'Meditate Core';
   renderCore();
 }
 
 function renderCore() {
   if (!container) return;
-  const qiFill = Math.min(1, speechState.orbs.qi.current / speechState.orbs.qi.max);
+  const waterFill = Math.min(1, speechState.orbs.water.current / speechState.orbs.water.max);
   const bodyFill = 0;
   const willFill = 0;
 
@@ -130,23 +130,23 @@ function renderCore() {
     rect.setAttribute('height', h);
   };
 
-  updateRect('#qiFill', 200, 80, 20, qiFill);
+  updateRect('#waterFill', 200, 80, 20, waterFill);
   updateRect('#bodyFill', 200, 180, 60, coreFill);
 
-  const qiOrbEl = container.querySelector('#qiOrb');
-  if (qiOrbEl) qiOrbEl.setAttribute('stroke', qiFill >= 1 ? '#7fafff' : '#7fd9ff');
+  const waterOrbEl = container.querySelector('#waterOrb');
+  if (waterOrbEl) waterOrbEl.setAttribute('stroke', waterFill >= 1 ? '#7fafff' : '#7fd9ff');
   const bodyOrb = null;
   const willOrb = null;
 
-  const qiText = container.querySelector('#qiText');
-  if (qiText) qiText.textContent = `${Math.floor(speechState.orbs.qi.current)}/${speechState.orbs.qi.max}`;
+  const waterText = container.querySelector('#waterText');
+  if (waterText) waterText.textContent = `${Math.floor(speechState.orbs.water.current)}/${speechState.orbs.water.max}`;
   const bodyText = null;
   const willText = null;
   const progressText = container.querySelector('#coreProgressText');
   if (progressText) progressText.textContent = `${Math.floor(coreState.meditationProgress)}/${coreState.requirement}`;
   levelDisplay.textContent = `Core Level: ${coreState.coreLevel}`;
   if (voiceLevelEl) voiceLevelEl.textContent = speechState.level;
-  if (mindValEl) mindValEl.textContent = `${Math.floor(speechState.orbs.qi.current)}/${speechState.orbs.qi.max}`;
+  if (mindValEl) mindValEl.textContent = `${Math.floor(speechState.orbs.water.current)}/${speechState.orbs.water.max}`;
   if (coreState.meditationProgress >= coreState.requirement) {
     meditateBtn.textContent = 'Breakthrough';
   } else {

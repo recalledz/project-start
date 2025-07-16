@@ -45,9 +45,9 @@ Unlocks creation of Elemental Cores (Brazen, Earthen, Aquatic, etc.).
 
 15.2 Cultivation Tree
 
-Qi Fonts
+Water Fonts
 
-Unlocks the Qi Fonts building, granting flat global Qi generation and a minor increase to Max Qi.
+Unlocks the Water Fonts building, granting flat global Water generation and a minor increase to Max Water.
 
 
 Chanting Halls

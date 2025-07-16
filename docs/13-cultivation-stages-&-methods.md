@@ -21,7 +21,7 @@ Cultivation Stages
 1. Foundation
 
 
-2. Qi Shaping
+2. Water Shaping
 
 
 3. Core Shaping

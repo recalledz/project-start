@@ -21,31 +21,31 @@ LearningSpeed = 0.5 + 0.15 × Intelligence
 
 ---
 
-21.2 Qi Regeneration (Qi/s)
+21.2 Water Regeneration (Water/s)
 
-Determines how much Qi the sect orb or a cultivator gains per second.
+Determines how much Water the sect orb or a cultivator gains per second.
 
-QiRegen = ([areaQi] × (4 + ElementStrength) × (0.5 + 0.05 × QiSense) / 320)
-        + (0.0002 × MaxQi)
-        + globalQi
+WaterRegen = ([areaWater] × (4 + ElementStrength) × (0.5 + 0.05 × WaterSense) / 320)
+        + (0.0002 × MaxWater)
+        + globalWater
 
 ElementStrength: +2 or –2 modifier based on elemental fengshui within the cultivation room.
 
-areaQi: Total ambient Qi from buildings, orb, relics, and dungeon factors.
+areaWater: Total ambient Water from buildings, orb, relics, and dungeon factors.
 
-QiSense: Cultivator’s Qi Sense skill level.
+WaterSense: Cultivator’s Water Sense skill level.
 
-globalQi: Flat Qi generation from sect-wide buffs (e.g. Qi Fonts levels).
+globalWater: Flat Water generation from sect-wide buffs (e.g. Water Fonts levels).
 
 
 
 ---
 
-21.3 Maximum Qi (MaxQi)
+21.3 Maximum Water (MaxWater)
 
 Formula:
 
-MaxQi = min(3 × QiSense + 10 × CeremoniousMonasteryLevel, 95)
+MaxWater = min(3 × WaterSense + 10 × CeremoniousMonasteryLevel, 95)
 
 CeremoniousMonasteryLevel: Each level adds +10 to the soft cap up to 95.
 

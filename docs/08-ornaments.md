@@ -2,7 +2,7 @@
 
 **Sunday, July 13, 2025 • 5:13 PM**
 
-| Name               | Element | Tier | Qi Regen | Source              | Materials Needed                            |
+| Name               | Element | Tier | Water Regen | Source              | Materials Needed                            |
 |--------------------|:-------:|:----:|---------:|---------------------|---------------------------------------------|
 | Sunflame Brazier   | Fire    | 1    | +3       | Ash Warden (Dungeon)| 1 × Brazen Core, 2 × Dry Bark, 1 × Charcoal   |
 | Woodbound Totem    | Wood    | 1    | +3       | Ancient Grove (60%) | 2 × Polished Bark, 1 × Phoenix Wood, 1 × Sticky Resin |

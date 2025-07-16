@@ -51,7 +51,7 @@ Table of Contents
 15. Research Trees
 
 
-16. [Qi Orb Mechanics](16-qi-orb.md)
+16. [Water Orb Mechanics](16-water-orb.md)
 
 
 17. [Paths & Attribute Affinities](17-paths.md)
