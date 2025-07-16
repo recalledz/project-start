@@ -10,13 +10,8 @@ export const coreState = {
 let container;
 let meditateBtn;
 let levelDisplay;
-let progressText;
-let meditationTimer; // unused now but kept for compatibility
-let speechLevelEl; // deprecated variable name for backward compatibility
 let voiceLevelEl;
 let mindValEl;
-let bodyValEl; // deprecated, retained for compatibility but unused
-let willValEl; // deprecated, retained for compatibility but unused
 
 export function initCore() {
   container = document.getElementById('coreTabContent');
@@ -56,7 +51,6 @@ const bodyPath = `M200 140
   `;
   meditateBtn = container.querySelector("#meditateCoreBtn");
   levelDisplay = container.querySelector('#coreLevelText');
-  progressText = container.querySelector("#coreProgressText");
   window.addEventListener('orbs-changed', renderCore);
   const waterOrb = container.querySelector('#waterOrb');
   if (waterOrb) {
@@ -72,8 +66,7 @@ const bodyPath = `M200 140
     window.showTooltip('Toggle meditation focus', e.pageX + 10, e.pageY + 10);
   });
   meditateBtn.addEventListener('mouseleave', window.hideTooltip);
-  speechLevelEl = container.querySelector('#voiceLevelValue');
-  voiceLevelEl = speechLevelEl;
+  voiceLevelEl = container.querySelector('#voiceLevelValue');
   mindValEl = container.querySelector('#mindValue');
   if (window.lucide) lucide.createIcons({ icons: lucide.icons });
   const voicePanel = document.getElementById('voiceSkillPanel');
@@ -101,10 +94,6 @@ function toggleMeditation() {
 }
 
 function breakthrough() {
-  if (meditationTimer) {
-    clearInterval(meditationTimer);
-    coreState.meditating = false;
-  }
   coreState.coreLevel += 1;
   coreState.meditationProgress = 0;
   // requirement could scale later; keep constant for now
@@ -116,9 +105,6 @@ function breakthrough() {
 function renderCore() {
   if (!container) return;
   const waterFill = Math.min(1, speechState.orbs.water.current / speechState.orbs.water.max);
-  const bodyFill = 0;
-  const willFill = 0;
-
   const coreFill = Math.min(1, coreState.meditationProgress / coreState.requirement);
 
   const updateRect = (id, cx, cy, r, fill) => {
@@ -135,13 +121,9 @@ function renderCore() {
 
   const waterOrbEl = container.querySelector('#waterOrb');
   if (waterOrbEl) waterOrbEl.setAttribute('stroke', waterFill >= 1 ? '#7fafff' : '#7fd9ff');
-  const bodyOrb = null;
-  const willOrb = null;
 
   const waterText = container.querySelector('#waterText');
   if (waterText) waterText.textContent = `${Math.floor(speechState.orbs.water.current)}/${speechState.orbs.water.max}`;
-  const bodyText = null;
-  const willText = null;
   const progressText = container.querySelector('#coreProgressText');
   if (progressText) progressText.textContent = `${Math.floor(coreState.meditationProgress)}/${coreState.requirement}`;
   levelDisplay.textContent = `Core Level: ${coreState.coreLevel}`;
