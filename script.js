@@ -196,6 +196,14 @@ export const systems = {
   explorationUnlocked: false
 };
 
+// Each disciple can gather fruit three times per day.
+// Seconds per cycle is 200, so disciples repeat the cycle every ~3.3 minutes.
+const FRUIT_CYCLE_SECONDS = 200;
+const FRUIT_CYCLE_AMOUNT = 10;
+const FRUIT_MAX_CAP = 120;
+const FRUIT_GROWTH_RATES = [60, 40, 30, 20, 0];
+
+
 export const sectState = {
   fruits: 0,
   pineLogs: 0,
@@ -215,12 +223,6 @@ export const sectState = {
   buildProgress: 0
 };
 
-// Each disciple can gather fruit three times per day.
-// Seconds per cycle is 200, so disciples repeat the cycle every ~3.3 minutes.
-const FRUIT_CYCLE_SECONDS = 200;
-const FRUIT_CYCLE_AMOUNT = 10;
-const FRUIT_MAX_CAP = 120;
-const FRUIT_GROWTH_RATES = [60, 40, 30, 20, 0];
 const HUNT_CYCLE_SECONDS = 200;
 const HUNT_XP_PER_SUCCESS = 30;
 const ANIMALS = [
