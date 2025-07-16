@@ -19,12 +19,12 @@ Utility Buildings
 
 Building	Cost (Materials)	Effect	Unlock
 
-Qi Fonts	Stone: 30 × (1.3^lvl)	+10% global Qi generation per level	Start
+Water Fonts	Stone: 30 × (1.3^lvl)	+10% global Water generation per level	Start
 Granary	Softwood: 50 × (1.2^lvl)	+400 food storage capacity	Farming research
 Storage	Softwood & Stone: 30 × (1.3^lvl) each	+100 wood cap, +200 stone cap per level	Granary Lv1
-Celestial Sanctum	Any: 200 × (1.4^lvl)	Unlocks Cultivation Rooms; +4% areaQi, +3% cult speed per level	Research Tree Lv5
+Celestial Sanctum	Any: 200 × (1.4^lvl)	Unlocks Cultivation Rooms; +4% areaWater, +3% cult speed per level	Research Tree Lv5
 Training Dummy	Softwood: 10	Foundation training station; +2× foundation XP	Start
-Research Table	Softwood: 30 × (lvl^1.3)	Convert 4% global Qi → Insight per level	Chanting research
+Research Table	Softwood: 30 × (lvl^1.3)	Convert 4% global Water → Insight per level	Chanting research
 Library	Wood: 200 × (lvl^1.1); Stone: 100 × (lvl^1.1)	Unlock learning/spell teaching; +4% teaching rate per level	Research Table Lv1
 Jadefire Pavilion	Softwood & Stone: 20 × (1.1^lvl) each	Enables Transmutation; +3% spell potency per level	Transmutation research
 Chanting Halls	Wood: 300 × (1.15^lvl)	–4% chant cooldown per level; +1 chanter per 3 levels	Library Lv2
@@ -34,14 +34,14 @@ Ornaments / Cultivation Enhancers
 
 Ornaments can be placed in Cultivation Rooms for elemental buffs (fengshui effects).
 
-Ornament	Element	Tier	Qi Regen	Source / Unlock
+Ornament	Element	Tier	Water Regen	Source / Unlock
 
-Ceremonious Monastery	—	1	+5 Qi/s	Celestial Sanctum unlocked
+Ceremonious Monastery	—	1	+5 Water/s	Celestial Sanctum unlocked
 Furnace	Fire	1	—	Transmutation research
-Woodbound Totem	Wood	1	+3 Qi/s	Exploration milestone / Blueprint
-Soulglass Gong	Metal	1	+3 Qi/s	Dungeon drop (Ironshade Vault)
-Moondrip Basin	Water	1	+3 Qi/s	Dungeon drop (Frozen Grotto)
-Sunflame Brazier	Fire	1	+3 Qi/s	Dungeon drop (Molten Vault)
+Woodbound Totem	Wood	1	+3 Water/s	Exploration milestone / Blueprint
+Soulglass Gong	Metal	1	+3 Water/s	Dungeon drop (Ironshade Vault)
+Moondrip Basin	Water	1	+3 Water/s	Dungeon drop (Frozen Grotto)
+Sunflame Brazier	Fire	1	+3 Water/s	Dungeon drop (Molten Vault)
 
 
 Spell Schools & Tags
@@ -90,6 +90,6 @@ Chanting Management
 
 After Chanting Halls unlocks, assign idle disciples to chant.
 
-UI shows available disciples and their chant rate (Qi/s).
+UI shows available disciples and their chant rate (Water/s).
 
 Unassigned chanters free up to perform other tasks.

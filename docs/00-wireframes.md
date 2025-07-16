@@ -20,8 +20,8 @@
 │                      │  │      workshops…)      │        │                                   │
 │                      │  └───────────────────────┘        │                                   │
 │                      │                                   │                                   │
-│                      │        [   Qi Orb: 3.34 Qi/s   ]  │                                   │
-│                      │        (current Qi rate here)    │                                   │
+│                      │        [   Water Orb: 3.34 Water/s   ]  │                                   │
+│                      │        (current Water rate here)    │                                   │
 │                      │                                   │                                   │
 │                      │  ┌───────────────────────┐        │                                   │
 │                      │  │  Storage / Items      │        │                                   │
@@ -73,7 +73,7 @@ Research Zone (lower-right)
 
 Center
 
-Qi Orb widget showing current Qi per second.
+Water Orb widget showing current Water per second.
 
 
 Footer
@@ -87,7 +87,7 @@ Footer
 │ ○ General  ○ Proficiency  ○ Constructs  ○ Moodlets  ○ Stats │
 ├────────────────────────────────────────────────────┤
 │ [Portrait]     Li Xuan            Path: Ember 🔥       │
-│ Core Stage: Qi Shaping       │
+│ Core Stage: Water Shaping       │
 ├────────────────────────────────────────────────────┤
 │ **Attributes**                                  │
 │ DEX: 8   (effect description)                     │
@@ -116,7 +116,7 @@ Footer
 ├────────────────────────────────────────────────────┤
 │ sort by [school, passive, spell]
   **learned Constructs**                          │
-│ [spell: fireball]   [passive:max Qi upgrade]       │
+│ [spell: fireball]   [passive:max Water upgrade]       │
 │                                                  │
 │
 └────────────────────────────────────────────────────┘
@@ -143,7 +143,7 @@ Footer
 │ • Chanting Multiplier: 1.20×                      │
 │ • Learning Speed: 1.5×                            │
 │ • Exploration Speed: 0.8×                         │
-│ • Qi Regen Rate: 3.34 Qi/s                        │
+│ • Water Regen Rate: 3.34 Water/s                        │
 │ • Health: 80 / 100                                │
 │ • Defense: 15                                    │
 └────────────────────────────────────────────────────┘

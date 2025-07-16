@@ -5,11 +5,11 @@ Each skill has its own progression, yield formula, and spot data. Skills gain XP
 
 ---
 
-09.1 Qi Sense
+09.1 Water Sense
 
-Max Qi Bonus: +2.4% of base Max Qi per level
+Max Water Bonus: +2.4% of base Max Water per level
 
-Qi Absorption: +5% of max absorption rate per level
+Water Absorption: +5% of max absorption rate per level
 
 Cultivation Speed: +4% of base speed per level
 
@@ -47,7 +47,7 @@ Cooldown:
 
 Cooldown = 30 s × (1 - 0.04 × ChantingHallsLevel)
 
-Generation Value: Builds additional Qi/sec based on building level.
+Generation Value: Builds additional Water/sec based on building level.
 
 
 

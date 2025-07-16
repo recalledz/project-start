@@ -8,16 +8,16 @@ import { createOverlay } from './ui/overlay.js';
 
 // Core state for the Constructs system. Orbs and upgrades from the
 // previous speech implementation remain intact.
-// Qi regeneration constants
-// Qi regen now scales with the Cohere upgrade using a saturating
+// Water regeneration constants
+// Water regen now scales with the Cohere upgrade using a saturating
 // logistic curve. This starts near zero and gradually approaches `R_MAX`
 // with diminishing returns as more Cohere levels are purchased. The curve
-// still tapers off as Qi accumulates.
+// still tapers off as Water accumulates.
 const R_MAX = 6;        // cap per-second regen
 const BASE_MIDPOINT = 1000;  // default inflection point
 const K = 150;          // controls steepness of taper
 
-function getQiMidpoint() {
+function getWaterMidpoint() {
   return systems.voiceOfThePeople ? 1500 : BASE_MIDPOINT;
 }
 
@@ -55,7 +55,7 @@ export function setSeasonBackdrop(season) {
 
 export const speechState = {
   orbs: {
-    qi: { current: 0, max: 2000, regen: R_MAX }
+    water: { current: 0, max: 2000, regen: R_MAX }
   },
   resources: {
     sound: { current: 0, max: 200, regen: 0, unlocked: true },
@@ -68,18 +68,18 @@ export const speechState = {
     waterEssence: { current: 0, max: 10, regen: 0, unlocked: false }
   },
   gains: {
-    qi: 0
+    water: 0
   },
   upgrades: {
-    // Cohere costs scale more steeply so high levels require larger qi
+    // Cohere costs scale more steeply so high levels require larger water
     // investment. This keeps Cohere from overwhelming Intone's impact.
     cohere: { level: 0, costFunc: lvl => Math.round(15 * Math.pow(1.2, lvl)) },
     vocalMaturity: { level: 0, baseCost: 2, unlocked: false },
-    capacityBoost: { level: 0, baseCost: { qi: 10 }, unlocked: false },
+    capacityBoost: { level: 0, baseCost: { water: 10 }, unlocked: false },
     expandMind: {
       level: 0,
       unlocked: true,
-      costFunc: lvl => ({ qi: 2 * Math.pow(lvl + 1, 2) })
+      costFunc: lvl => ({ water: 2 * Math.pow(lvl + 1, 2) })
     },
     soundExpansion: {
       level: 0,
@@ -113,7 +113,7 @@ export const speechState = {
   seasonDay: 0,
   seasonTimer: 0,
   weather: null,
-  qiRegenBase: 0,
+  waterRegenBase: 0,
   activeConstructs: [],
   savedConstructs: ['Murmur'],
   activeBuffs: {},
@@ -133,16 +133,16 @@ export const speechState = {
   murmurChain: 0
 };
 
-// use the same object for the qi resource and orb
-speechState.resources.qi = speechState.orbs.qi;
+// use the same object for the water resource and orb
+speechState.resources.water = speechState.orbs.water;
 
 // Basic construct recipe list. Additional constructs can be appended
 // later through unlocks or upgrades.
 export const recipes = [
   {
     name: 'Murmur',
-    // Increased cost to make early qi management more meaningful
-    input: { qi: 25 },
+    // Increased cost to make early water management more meaningful
+    input: { water: 25 },
     output: { sound: 1 },
     xp: { voice: 1 },
     tags: ['single-cast', 'generator'],
@@ -153,13 +153,13 @@ export const recipes = [
   },
   {
     name: 'Echo of Mind',
-    input: { sound: 1, qi: 1 },
+    input: { sound: 1, water: 1 },
     output: { thought: 1 },
     xp: { mind: 0.5, voice: 0.5 },
     tags: ['single-cast', 'generator', 'duration'],
     unlocked: false,
-    requirements: { voiceLevel: 3, qi: 1500 },
-    castCost: { sound: 25, qi: 500 },
+    requirements: { voiceLevel: 3, water: 1500 },
+    castCost: { sound: 25, water: 500 },
     duration: 5,
     cooldown: 5,
     potency: 1,
@@ -167,12 +167,12 @@ export const recipes = [
   },
   {
     name: 'Clarity Pulse',
-    input: { thought: 1, qi: 1 },
+    input: { thought: 1, water: 1 },
     output: {},
     xp: { mind: 1 },
     tags: ['single-cast', 'buff', 'duration'],
     unlocked: false,
-    requirements: { mindLevel: 2, qi: 1700 },
+    requirements: { mindLevel: 2, water: 1700 },
     castCost: { thought: 20, sound: 50 },
     duration: 30,
     cooldown: 30,
@@ -186,7 +186,7 @@ export const recipes = [
     xp: {},
     tags: ['duration', 'generator', 'drain'],
     unlocked: false,
-    requirements: { mindLevel: 3, qi: 2000 },
+    requirements: { mindLevel: 3, water: 2000 },
     duration: 30,
     cooldown: 30,
     potency: 1,
@@ -194,13 +194,13 @@ export const recipes = [
   },
   {
     name: 'Mental Construct',
-    input: { sound: 1, thought: 1, qi: 1 },
+    input: { sound: 1, thought: 1, water: 1 },
     output: {},
     xp: { invocation: 1 },
     tags: ['single-cast'],
     unlocked: false,
-    requirements: { voiceLevel: 5, mindLevel: 5, qi: 2300 },
-    castCost: { thought: 10, structure: 10, qi: 1000 },
+    requirements: { voiceLevel: 5, mindLevel: 5, water: 2300 },
+    castCost: { thought: 10, structure: 10, water: 1000 },
     cooldown: 10,
     potency: 1,
     battle: { damage: 6 }
@@ -257,7 +257,7 @@ recipes.forEach(r => {
 });
 
 const resourceIcons = {
-  qi: 'star',
+  water: 'star',
   sound: 'volume-2',
   thought: 'activity',
   structure: 'box',
@@ -275,9 +275,9 @@ const upgradeDescriptions = {
     const current = (R_MAX * (level / (level + 5))).toFixed(2);
     const next = (R_MAX * ((level + 1) / (level + 6))).toFixed(2);
     const inc = (next - current).toFixed(2);
-    return `Improves qi regeneration. Next +${inc}/s (now ${current}/s)`;
+    return `Improves water regeneration. Next +${inc}/s (now ${current}/s)`;
   },
-  expandMind: 'Increase max qi by 15% each level.',
+  expandMind: 'Increase max water by 15% each level.',
   soundExpansion: 'Raises sound capacity; Lv.2 grants an extra slot.',
   cognitiveLattice: 'Increase caps by +50 sound, +10 thought and +5 structure.',
   idleChatter: 'Bonus regen from idle disciples.',
@@ -290,7 +290,7 @@ const upgradeDescriptions = {
 export const constructEffectText = {
   'Murmur': 'Generates 1 Sound (+1 Voice XP)',
   'Echo of Mind': 'Generates 1 Thought per second for 5s',
-  'Clarity Pulse': 'Gain 1% Qi per s',
+  'Clarity Pulse': 'Gain 1% Water per s',
   'Symbol Seed': 'Gain 0.1 Structure per thought drained',
   'Intone': 'Press repeatedly to charge; 1.2× at 5, 1.5× at 10, 2× at 15 for 30s',
   'Mnemonic Rhythm': 'Grants ×2 XP to other constructs for 3s; +0.2× per potency',
@@ -392,8 +392,8 @@ function awardConstructXp(xpObj = {}, mult = 1) {
 // implementations to demonstrate the new constructs in action.
 const constructEffects = {
   Murmur(dt, pot = speechState.constructPotency['Murmur'] || 1) {
-    const amount = dt * pot; // 1 qi -> sound per second scaled
-    const ins = speechState.resources.qi;
+    const amount = dt * pot; // 1 water -> sound per second scaled
+    const ins = speechState.resources.water;
     const snd = speechState.resources.sound;
     if (ins.current >= amount) {
       ins.current -= amount;
@@ -401,7 +401,7 @@ const constructEffects = {
     }
   },
   'Echo of Mind'(dt, pot = speechState.constructPotency['Echo of Mind'] || 1) {
-    const ins = speechState.resources.qi;
+    const ins = speechState.resources.water;
     const th = speechState.resources.thought;
     const amount = dt * pot;
     if (ins.current >= amount) {
@@ -412,9 +412,9 @@ const constructEffects = {
   },
   'Clarity Pulse'(dt, pot = speechState.constructPotency['Clarity Pulse'] || 1) {
     const bonus = 0.01 * dt * pot;
-    speechState.resources.qi.current = Math.min(
-      speechState.resources.qi.max,
-      speechState.resources.qi.current + bonus
+    speechState.resources.water.current = Math.min(
+      speechState.resources.water.max,
+      speechState.resources.water.current + bonus
     );
   },
   'Symbol Seed'(dt, pot = speechState.constructPotency['Symbol Seed'] || 1) {
@@ -502,12 +502,12 @@ export function initSpeech() {
       <div class="orbs-section">
         <h3 class="section-title">Core Orbs</h3>
         <div class="construct-orbs construct-tab-orbs">
-          <div id="orbQiContainer" class="orb-wrapper">
+          <div id="orbWaterContainer" class="orb-wrapper">
             <div class="orb-container">
-              <div id="orbQi" class="construct-orb"><div class="orb-fill"></div></div>
+              <div id="orbWater" class="construct-orb"><div class="orb-fill"></div></div>
             </div>
-            <div id="orbQiValue" class="orb-value"></div>
-            <div id="orbQiRegen" class="orb-regen">
+            <div id="orbWaterValue" class="orb-value"></div>
+            <div id="orbWaterRegen" class="orb-regen">
               <span class="season-icon"></span><span class="regen-value"></span><span id="intoneMultiplier" class="mult-badge"></span>
             </div>
           </div>
@@ -572,8 +572,8 @@ export function initSpeech() {
   renderHotbar();
   renderSeasonBanner();
   if (window.lucide) lucide.createIcons({ icons: lucide.icons });
-  const qiOrbEl = container.querySelector('#orbQi');
-  if (qiOrbEl) qiOrbEl.addEventListener('click', openQiRegenPopup);
+  const waterOrbEl = container.querySelector('#orbWater');
+  if (waterOrbEl) waterOrbEl.addEventListener('click', openWaterRegenPopup);
   document.addEventListener('disciple-gained', renderChantDisciples);
 }
 
@@ -642,8 +642,8 @@ function renderConstructRequirements() {
   if (recipe.requirements.mindLevel) {
     reqs.push(`Mind Lv.${recipe.requirements.mindLevel}`);
   }
-  if (recipe.requirements.qi) {
-    reqs.push(`${recipe.requirements.qi} Qi`);
+  if (recipe.requirements.water) {
+    reqs.push(`${recipe.requirements.water} Water`);
   }
   reqEl.textContent = `Requires: ${reqs.join(' & ')}`;
   reqEl.style.display = 'block';
@@ -683,8 +683,8 @@ function performConstruct() {
       addLog(`Requires Mind Lv.${recipe.requirements.mindLevel}`, 'error');
       return;
     }
-    if (recipe.requirements.qi && speechState.resources.qi.current < recipe.requirements.qi) {
-      addLog(`Requires ${recipe.requirements.qi} Qi`, 'error');
+    if (recipe.requirements.water && speechState.resources.water.current < recipe.requirements.water) {
+      addLog(`Requires ${recipe.requirements.water} Water`, 'error');
       return;
     }
   }
@@ -959,8 +959,8 @@ export function castConstruct(name, el, powerMult = 1, caster = 'player') {
     addLog(`Requires Mind Lv.${def.requirements.mindLevel}`, 'error');
     return;
   }
-  if (def.requirements && def.requirements.qi && speechState.resources.qi.current < def.requirements.qi) {
-    addLog(`Requires ${def.requirements.qi} Qi`, 'error');
+  if (def.requirements && def.requirements.water && speechState.resources.water.current < def.requirements.water) {
+    addLog(`Requires ${def.requirements.water} Water`, 'error');
     return;
   }
   const cdKey = caster === 'player' ? name : `${name}:${caster}`;
@@ -1102,11 +1102,11 @@ function renderOrbs() {
             const gain = speechState.gains[gainKey] ?? 0;
             valEl.textContent = `+${gain.toFixed(3)}/s`;
           }
-          if (id === 'orbQi' && iconEl) {
+          if (id === 'orbWater' && iconEl) {
             const icon = seasonIcons[speechState.seasonIndex];
             iconEl.textContent = icon;
             regenLabel.onmouseenter = e => {
-              showTooltip(`Base: ${speechState.qiRegenBase.toFixed(3)}<br>Current: ${speechState.gains.qi.toFixed(3)}`, e.clientX + 10, e.clientY + 10);
+              showTooltip(`Base: ${speechState.waterRegenBase.toFixed(3)}<br>Current: ${speechState.gains.water.toFixed(3)}`, e.clientX + 10, e.clientY + 10);
             };
             regenLabel.onmouseleave = hideTooltip;
           }
@@ -1116,7 +1116,7 @@ function renderOrbs() {
         }
       }
     };
-    update('orbQi', speechState.orbs.qi);
+    update('orbWater', speechState.orbs.water);
   });
   window.dispatchEvent(new CustomEvent('orbs-changed'));
 }
@@ -1155,7 +1155,7 @@ function renderResources() {
     if (!panelRes) return;
     panelRes.innerHTML = '';
     Object.entries(speechState.resources).forEach(([key, res]) => {
-      if (key === 'qi' || res.unlocked === false) return;
+      if (key === 'water' || res.unlocked === false) return;
       const box = document.createElement('div');
       box.className = 'resource-box';
       const header = document.createElement('div');
@@ -1211,7 +1211,7 @@ function getUpgradeCost(name) {
 
 function canAfford(cost) {
   if (typeof cost === 'number') {
-    return speechState.orbs.qi.current >= cost;
+    return speechState.orbs.water.current >= cost;
   }
   for (const [k, v] of Object.entries(cost)) {
     const orb = speechState.orbs[k];
@@ -1235,7 +1235,7 @@ function updateUpgradeAffordability() {
     if (buy) buy.classList.toggle('disabled', !affordable);
     const spans = btn.querySelectorAll('.icon-row span');
     if (typeof cost === 'number') {
-      const have = speechState.orbs.qi.current;
+      const have = speechState.orbs.water.current;
       spans.forEach(span => span.classList.toggle('cost-missing', have < cost));
     } else {
       const entries = Object.entries(cost);
@@ -1254,8 +1254,8 @@ function purchaseUpgrade(name) {
   const cost = getUpgradeCost(name);
   const prevSlots = speechState.memorySlots;
   if (typeof cost === 'number') {
-    if (speechState.orbs.qi.current < cost) return;
-    speechState.orbs.qi.current -= cost;
+    if (speechState.orbs.water.current < cost) return;
+    speechState.orbs.water.current -= cost;
   } else {
     for (const [k, v] of Object.entries(cost)) {
       if (speechState.orbs[k] && speechState.orbs[k].current < v) return;
@@ -1274,7 +1274,7 @@ function purchaseUpgrade(name) {
   } else if (name === 'capacityBoost') {
     speechState.memorySlots += 1;
   } else if (name === 'expandMind') {
-    speechState.orbs.qi.max = Math.round(speechState.orbs.qi.max * 1.15);
+    speechState.orbs.water.max = Math.round(speechState.orbs.water.max * 1.15);
   } else if (name === 'soundExpansion') {
     speechState.resources.sound.max += 25;
     if (up.level === 2) {
@@ -1308,9 +1308,9 @@ export function renderUpgrades() {
     const up = speechState.upgrades[name];
     let costHtml = '';
     if (typeof cost === 'number') {
-      const have = speechState.orbs.qi.current;
+      const have = speechState.orbs.water.current;
       const cls = have >= cost ? '' : 'cost-missing';
-      costHtml = `<span class="icon-row"><span class="${cls}"><i data-lucide="${resourceIcons.qi}"></i> ${cost}</span></span>`;
+      costHtml = `<span class="icon-row"><span class="${cls}"><i data-lucide="${resourceIcons.water}"></i> ${cost}</span></span>`;
     } else {
       costHtml = `<span class="icon-row">` +
         Object.entries(cost).map(([r,a]) => {
@@ -1343,9 +1343,9 @@ export function renderUpgrades() {
     const btn = document.createElement('button');
     btn.dataset.upgrade = 'clarividence';
     const cost = getUpgradeCost('clarividence');
-    const cls = speechState.orbs.qi.current >= cost ? '' : 'cost-missing';
+    const cls = speechState.orbs.water.current >= cost ? '' : 'cost-missing';
     btn.classList.toggle('unaffordable', !canAfford(cost));
-    btn.innerHTML = `<span class="upg-info"><span class="upg-name">clarividence</span><span class="upgrade-level">Lv.0</span></span><div class="detail"><div class="cost"><span class="icon-row"><span class="${cls}"><i data-lucide="${resourceIcons.qi}"></i> ${cost}</span></span></div><div class="desc">${upgradeDescriptions.clarividence}</div><span class="buy-btn">Buy</span></div>`;
+    btn.innerHTML = `<span class="upg-info"><span class="upg-name">clarividence</span><span class="upgrade-level">Lv.0</span></span><div class="detail"><div class="cost"><span class="icon-row"><span class="${cls}"><i data-lucide="${resourceIcons.water}"></i> ${cost}</span></span></div><div class="desc">${upgradeDescriptions.clarividence}</div><span class="buy-btn">Buy</span></div>`;
     btn.addEventListener('click', e => {
       if (!btn.classList.contains('expanded')) {
         btn.classList.add('expanded');
@@ -1366,9 +1366,9 @@ export function renderUpgrades() {
     const btn = document.createElement('button');
     btn.dataset.upgrade = 'vocalMaturity';
     const cost = getUpgradeCost('vocalMaturity');
-    const cls = speechState.orbs.qi.current >= cost ? '' : 'cost-missing';
+    const cls = speechState.orbs.water.current >= cost ? '' : 'cost-missing';
     btn.classList.toggle('unaffordable', !canAfford(cost));
-    btn.innerHTML = `<span class="upg-info"><span class="upg-name">vocalMaturity</span><span class="upgrade-level">Lv.${speechState.upgrades.vocalMaturity.level}</span></span><div class="detail"><div class="cost"><span class="icon-row"><span class="${cls}"><i data-lucide="${resourceIcons.qi}"></i> ${cost}</span></span></div><div class="desc">${upgradeDescriptions.vocalMaturity}</div><span class="buy-btn">Buy</span></div>`;
+    btn.innerHTML = `<span class="upg-info"><span class="upg-name">vocalMaturity</span><span class="upgrade-level">Lv.${speechState.upgrades.vocalMaturity.level}</span></span><div class="detail"><div class="cost"><span class="icon-row"><span class="${cls}"><i data-lucide="${resourceIcons.water}"></i> ${cost}</span></span></div><div class="desc">${upgradeDescriptions.vocalMaturity}</div><span class="buy-btn">Buy</span></div>`;
     btn.addEventListener('click', e => {
       if (!btn.classList.contains('expanded')) {
         btn.classList.add('expanded');
@@ -1523,10 +1523,10 @@ export function tickSpeech(delta) {
     speechState.weather.duration -= dt;
     if (speechState.weather.duration <= 0) speechState.weather = null;
   }
-  const ins = speechState.resources.qi;
-  const startQi = ins.current;
+  const ins = speechState.resources.water;
+  const startWater = ins.current;
   const seasonMult = seasons[speechState.seasonIndex].multiplier;
-  const baseRateRaw = R_MAX / (1 + Math.exp((ins.current - getQiMidpoint()) / K));
+  const baseRateRaw = R_MAX / (1 + Math.exp((ins.current - getWaterMidpoint()) / K));
   const level = speechState.upgrades.cohere.level;
   // provide baseline regen at level 0 while still tapering off with higher levels
   const upgradeMult = (level + 1) / (level + 5);
@@ -1541,10 +1541,10 @@ export function tickSpeech(delta) {
   let regen = baseTotal * seasonMult;
   if (speechState.weather) regen *= speechState.weather.multiplier;
   regen = Math.min(R_MAX, regen) * getIntoneMultiplier();
-  speechState.qiRegenBase = baseTotal;
+  speechState.waterRegenBase = baseTotal;
   ins.current = Math.min(ins.max, ins.current + regen * dt);
-  // Unlock clarividence once the player demonstrates basic qi control
-  // by accumulating at least 50 qi.
+  // Unlock clarividence once the player demonstrates basic water control
+  // by accumulating at least 50 water.
   if (!speechState.upgrades.clarividence.unlocked && ins.current >= 50) {
     speechState.upgrades.clarividence.unlocked = true;
     if (hasUI) renderUpgrades();
@@ -1649,27 +1649,27 @@ function showConstructCloud(text, target, color) {
   setTimeout(() => el.remove(), 3000);
 }
 
-export function openQiRegenPopup() {
-  const overlay = createOverlay({ className: 'qi-regen-overlay' });
+export function openWaterRegenPopup() {
+  const overlay = createOverlay({ className: 'water-regen-overlay' });
   const box = overlay.box;
   const header = document.createElement('h2');
-  header.textContent = 'Qi Regeneration';
+  header.textContent = 'Water Regeneration';
   box.appendChild(header);
 
   const info = document.createElement('p');
-  info.className = 'qi-info';
+  info.className = 'water-info';
   info.textContent =
-    `Base qi regeneration follows a logistic curve that slows as your` +
-    ` total qi rises. At ${getQiMidpoint()} qi the base rate is half of its` +
+    `Base water regeneration follows a logistic curve that slows as your` +
+    ` total water rises. At ${getWaterMidpoint()} water the base rate is half of its` +
     ` ${R_MAX}/s maximum before multipliers.`;
   box.appendChild(info);
 
   const list = document.createElement('div');
-  list.className = 'qi-regen-list';
+  list.className = 'water-regen-list';
 
-  const ins = speechState.resources.qi;
+  const ins = speechState.resources.water;
   const season = seasons[speechState.seasonIndex];
-  const baseRateRaw = R_MAX / (1 + Math.exp((ins.current - getQiMidpoint()) / K));
+  const baseRateRaw = R_MAX / (1 + Math.exp((ins.current - getWaterMidpoint()) / K));
   const level = speechState.upgrades.cohere.level;
   const upgradeMult = (level + 1) / (level + 5);
   const idleCount =
@@ -1726,14 +1726,14 @@ export function openQiRegenPopup() {
     const isNeg =
       r.value.startsWith('-') ||
       (r.value.startsWith('×') && parseFloat(r.value.slice(1)) < 1);
-    row.className = 'qi-row' + (isNeg ? ' negative' : '');
+    row.className = 'water-row' + (isNeg ? ' negative' : '');
     row.innerHTML = `<span>${r.label}</span><span>${r.value}</span>`;
     list.appendChild(row);
   });
 
   const totalRow = document.createElement('div');
-  totalRow.className = 'qi-total';
-  totalRow.textContent = `Total: ${speechState.gains.qi.toFixed(3)}/s`;
+  totalRow.className = 'water-total';
+  totalRow.textContent = `Total: ${speechState.gains.water.toFixed(3)}/s`;
   list.appendChild(totalRow);
 
   box.appendChild(list);
