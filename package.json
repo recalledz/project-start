@@ -7,7 +7,7 @@
     "test": "mocha",
     "start": "node script.js",
     "dev": "live-server /storage/emulated/0/Documents/project-start",
-    "build": "echo 'No build step yet — just copying files manually.'",
+    "build": "parcel build index.html",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "simulate": "node simulate.js",
     "simulate:aggressive": "node simulate.js aggressive",
