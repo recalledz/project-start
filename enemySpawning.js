@@ -59,7 +59,7 @@ export function calculateRelativeEnemyStats(stage, world, opts = {}) {
  * @returns {Enemy} The modified enemy instance.
  */
 export function assignEnemyStats(enemy, stage, world, opts = {}) {
-  const { hp, damage } = calculateRelativeEnemyStats(stage, world, opts);
+  const { hp } = calculateRelativeEnemyStats(stage, world, opts);
   const { minDamage, maxDamage } = calculateEnemyBasicDamage(stage, world, opts);
   enemy.maxHp = hp;
   enemy.currentHp = hp;
@@ -134,7 +134,6 @@ export function spawnSpeaker(stageData, enemyAttackProgress, onAttack, onDefeat)
 }
 
 export function spawnEnemy(kind, stageData, enemyAttackProgress, onDefeat) {
-  const { stage, world } = stageData;
   let spawner = spawnDealer;
   if (kind === 'boss') {
     spawner = spawnBoss;

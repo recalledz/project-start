@@ -267,9 +267,6 @@ body.darkenshift-mode .tabsContainer button.active {
     overflow-y: auto; /* only sidebar scrolls */
 }
 
-.mainTab > * {
-    /*overflow: hidden;*/
-}
 
 .gameColumn {
     display: grid;
@@ -792,21 +789,21 @@ body.darkenshift-mode .tabsContainer button.active {
 }
 
 .rarity-basic {
-    border-color: #888 !important;
+    border-color: #888;
 }
 
 .rarity-rare {
-    border-color: #39f !important;
+    border-color: #39f;
     box-shadow: 0 0 8px rgba(51,102,255,0.6);
 }
 
 .rarity-epic {
-    border-color: #b450ff !important;
+    border-color: #b450ff;
     box-shadow: 0 0 8px rgba(180,80,255,0.6);
 }
 
 .rarity-legendary {
-    border-color: gold !important;
+    border-color: gold;
     box-shadow: 0 0 10px rgba(255,215,0,0.7);
 }
 
@@ -814,7 +811,7 @@ body.darkenshift-mode .tabsContainer button.active {
 .dCardWrapper {
     display: flex; /* horizontal layout */
     flex-direction: row; /* card on the left, abilities on the right */
-    align-items: top;
+    align-items: flex-start;
     justify-content: center;
     margin: 0 8px;
     transition:

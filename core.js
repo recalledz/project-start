@@ -68,7 +68,7 @@ const bodyPath = `M200 140
   meditateBtn.addEventListener('mouseleave', window.hideTooltip);
   voiceLevelEl = container.querySelector('#voiceLevelValue');
   mindValEl = container.querySelector('#mindValue');
-  if (window.lucide) lucide.createIcons({ icons: lucide.icons });
+  if (window.lucide) window.lucide.createIcons({ icons: window.lucide.icons });
   const voicePanel = document.getElementById('voiceSkillPanel');
   if (voicePanel) {
     voicePanel.addEventListener('click', () => {

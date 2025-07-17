@@ -313,7 +313,7 @@ export function createUpgradeCard(id) {
   return { upgradeId: id };
 }
 
-export function getCardUpgradeCost(id, stats = {}, stageData = {}) {
+export function getCardUpgradeCost(id, stageData = {}) {
   const def = cardUpgradeDefinitions[id];
   if (!def) return 0;
   const rarityMult = rarityCostMultiplier[def.rarity] || 1;
@@ -341,16 +341,16 @@ export function applyCardUpgrade(id, context) {
 
 export function renderCardUpgrades(container, options = {}) {
   if (!container) return;
-  const { stats = {}, stageData = {}, cash = 0, onPurchase = null } = options;
+  const { stageData = {}, cash = 0, onPurchase = null } = options;
   container.innerHTML = '';
   const ids = new Set([...activeCardUpgrades, ...Object.keys(upgradeLevels)]);
   const idArr = Array.from(ids);
-  const affordable = idArr.some(id => getCardUpgradeCost(id, stats, stageData) <= cash);
+  const affordable = idArr.some(id => getCardUpgradeCost(id, stageData) <= cash);
   const freeIndex = affordable ? -1 : 0;
   idArr.forEach((id, idx) => {
     const def = cardUpgradeDefinitions[id];
     const level = upgradeLevels[id] || 0;
-    const baseCost = getCardUpgradeCost(id, stats, stageData);
+    const baseCost = getCardUpgradeCost(id, stageData);
     const cost = idx === freeIndex ? 0 : baseCost;
     const wrapper = document.createElement('div');
     wrapper.classList.add('card-wrapper');

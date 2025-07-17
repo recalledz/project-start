@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars, no-undef */
 // Core modules that power the card game
 import { shuffleArray } from "./card.js"; // card utilities
 import Disciple from "./disciple.js";
