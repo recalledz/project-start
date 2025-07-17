@@ -3803,6 +3803,15 @@ body.darkenshift-mode .tabsContainer button.active {
     animation: sectGlow 3s infinite alternate, sectGlowFlash 0.5s;
 }
 .sect-orb.water { background: rgba(127,217,255,0.6); }
+.water-rate {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #fff;
+    text-shadow: 0 0 4px #000;
+    font-size: 0.75rem;
+    pointer-events: none;
+}
 .sect-basket {
     position: absolute;
     width: 8px;
