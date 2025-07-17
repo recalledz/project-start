@@ -716,6 +716,7 @@ let colonyResourcesTabButton;
 let colonyBuildTabButton;
 let colonyResearchTabButton;
 let locationsPanelBtn;
+let gateBtn;
 let sectDisciplesContainer;
 let sectDiscipleListContainer;
 let selectedDiscipleId = null;
@@ -969,6 +970,7 @@ function initTabs() {
   colonyBuildTabButton = document.getElementById('colonyBuildTabBtn');
   colonyResearchTabButton = document.getElementById('colonyResearchTabBtn');
   locationsPanelBtn = document.getElementById('locationsPanelBtn');
+  gateBtn = document.getElementById('gateBtn');
   statsOverviewSubTabButton = document.querySelector('.statsOverviewSubTabButton');
   statsEconomySubTabButton = document.querySelector('.statsEconomySubTabButton');
   statsOverviewContainer = document.getElementById('statsOverviewContainer');
@@ -1009,6 +1011,14 @@ function initTabs() {
     showTab(locationTab);
     setActiveTabButton(locationTabButton);
   });
+  if (gateBtn)
+    gateBtn.addEventListener('click', () => {
+      if (discoveredLocations.length === 0) {
+        LOCATION_DEFS.forEach(loc => addDiscoveredLocation(loc.name));
+      }
+      showTab(explorationTab);
+      setActiveTabButton(explorationTabButton);
+    });
   if (startDungeonBtn)
     startDungeonBtn.addEventListener('click', () => {
       if (!explorationListContainer) return;
