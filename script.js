@@ -712,7 +712,7 @@ let discipleInfoView = 'status';
 const sectDiscipleEls = {};
 const discipleGatherPhase = {};
 let discipleMoveInterval;
-let sectTabUnlocked = false;
+let sectTabUnlocked = true;
 let statsOverviewSubTabButton;
 let statsEconomySubTabButton;
 let statsOverviewContainer;
@@ -773,7 +773,11 @@ function setupTabHandlers() {
         refreshCore();
         showTab(playerTab);
         setActiveTabButton(playerTabButton);
-        if (playerConstructSubTabButton) playerConstructSubTabButton.click();
+        if (playerSectSubTabButton) {
+          playerSectSubTabButton.click();
+        } else if (playerConstructSubTabButton) {
+          playerConstructSubTabButton.click();
+        }
       }
     },
     {
@@ -961,7 +965,7 @@ function initTabs() {
   statsEconomyContainer = document.getElementById('statsEconomyContainer');
   if (colonyBuildTabButton) colonyBuildTabButton.style.display = systems.buildingUnlocked ? '' : 'none';
   if (colonyResearchTabButton) colonyResearchTabButton.style.display = systems.researchUnlocked ? '' : 'none';
-  if (playerSectSubTabButton) playerSectSubTabButton.style.display = sectTabUnlocked ? '' : 'none';
+  if (playerSectSubTabButton) playerSectSubTabButton.style.display = '';
   setupTabHandlers();
 
   if (colonyTasksTabButton) colonyTasksTabButton.addEventListener('click', () => showColonyTab('tasks'));
@@ -1076,9 +1080,14 @@ function initTabs() {
       // economy stats removed
     });
 
-  showTab(playerTab); // Start with construct panel visible
+  // Start with the sect panel
+  showTab(playerTab);
   setActiveTabButton(playerTabButton);
-  if (playerConstructSubTabButton) playerConstructSubTabButton.click();
+  if (playerSectSubTabButton) {
+    playerSectSubTabButton.click();
+  } else if (playerConstructSubTabButton) {
+    playerConstructSubTabButton.click();
+  }
 }
 
 function initPollen() {
@@ -1192,7 +1201,6 @@ function updateUpgradePowerCost() {
 }
 
 function tickSect(delta) {
-  if (!sectTabUnlocked) return;
   const dt = delta / 1000;
   speechState.disciples.forEach(d => {
     ensureDiscipleSkills(d.id);
@@ -1461,7 +1469,7 @@ function updateTaskProgressDisplay() {
 }
 
 function updateSectDisplay() {
-  if (!sectTabUnlocked || !playerSectPanel) return;
+  if (!playerSectPanel) return;
   const total = speechState.disciples.length;
   const assigned = Object.values(sectState.discipleTasks).filter(t => t && t !== 'Idle').length;
   if (sectSummaryDisplay) {
@@ -2505,6 +2513,14 @@ document.addEventListener("DOMContentLoaded", () => {
   initPollen();
   window.addEventListener('location-discovered', e => addDiscoveredLocation(e.detail.name));
   loadGame();
+  // After loading the save, ensure the Player tab opens with the sect panel
+  showTab(playerTab);
+  setActiveTabButton(playerTabButton);
+  if (playerSectSubTabButton) {
+    playerSectSubTabButton.click();
+  } else if (playerConstructSubTabButton) {
+    playerConstructSubTabButton.click();
+  }
   checkBuildingUnlock();
   if (systems.researchUnlocked && colonyResearchTabButton) {
     colonyResearchTabButton.style.display = '';
@@ -2549,11 +2565,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
   document.addEventListener('disciple-gained', e => {
-    if (!sectTabUnlocked && e.detail.count >= 1) {
-      sectTabUnlocked = true;
-      if (playerSectSubTabButton) playerSectSubTabButton.style.display = '';
-      addLog('A presence stirs. The first disciple has heard the Calling.', 'info');
-    }
+    addLog('A presence stirs. The first disciple has heard the Calling.', 'info');
+    // Automatically open the sect panel on first disciple gained
+    showTab(playerTab);
+    setActiveTabButton(playerTabButton);
+    if (playerSectSubTabButton) playerSectSubTabButton.click();
     if (playerSectSubTabButton && !playerSectSubTabButton.classList.contains('active')) {
       playerSectSubTabButton.classList.add('glow-notify');
     }
@@ -3890,11 +3906,8 @@ Object.assign(playerStats, state.playerStats || {});
     });
   }
 
-  if (state.sectTabUnlocked ||
-      (speechState.disciples && speechState.disciples.length > 0)) {
-    sectTabUnlocked = true;
-    if (playerSectSubTabButton) playerSectSubTabButton.style.display = '';
-  }
+  sectTabUnlocked = true;
+  if (playerSectSubTabButton) playerSectSubTabButton.style.display = '';
    
 if (state.upgrades) {
 Object.entries(state.upgrades).forEach(([k, lvl]) => {
