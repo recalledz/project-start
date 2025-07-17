@@ -1191,38 +1191,6 @@ function updateUpgradePowerCost() {
   if (btn) btn.textContent = `Buy Upgrade Point ($${formatNumber(upgradePowerCost())})`;
 }
 
-function updateBarUI(key) {
-  const bar = barUpgrades[key];
-  const wrapper = document.querySelector(`.bar-upgrade[data-key="${key}"]`);
-  if (!wrapper) return;
-  const fill = wrapper.querySelector('.bar-fill');
-  const info = wrapper.querySelector('.bar-info');
-  const pointsEl = wrapper.querySelector('.bar-points');
-  const req = 10 + bar.level * 5;
-  if (fill) fill.style.width = `${(bar.progress / req) * 100}%`;
-  if (info) info.textContent = `Lv. ${bar.level} ×${bar.multiplier.toFixed(2)}`;
-  if (pointsEl) pointsEl.textContent = bar.points;
-}
-
-
-function tickBarProgress(delta) {
-  Object.entries(barUpgrades).forEach(([key, bar]) => {
-    if (bar.points <= 0) return;
-    bar.progress += (bar.points * BAR_PROGRESS_RATE * delta) / 1000;
-    const req = 10 + bar.level * 5;
-    if (bar.progress >= req) {
-      bar.progress -= req;
-      bar.level += 1;
-      bar.multiplier = computeBarMultiplier(bar.level);
-      if (key === 'maxHp') {
-        recalcAllCardHp();
-      }
-      updatePlayerStats();
-    }
-    updateBarUI(key);
-  });
-}
-
 function tickSect(delta) {
   if (!sectTabUnlocked) return;
   const dt = delta / 1000;
@@ -3757,7 +3725,6 @@ function updatePlayerStats() {
   // Reset base stats
   stats.pDamage = 0;
   stats.damageMultiplier =
-    stats.upgradeDamageMultiplier * barUpgrades.damage.multiplier * stats.extraDamageMultiplier;
   stats.pRegen = 0;
   stats.avgCombatLevel = 0;
   stats.avgProficiencyLevel = 0;
@@ -3929,13 +3896,7 @@ Object.assign(playerStats, state.playerStats || {});
     sectTabUnlocked = true;
     if (playerSectSubTabButton) playerSectSubTabButton.style.display = '';
   }
-
-  if (state.barUpgrades) {
-    Object.entries(state.barUpgrades).forEach(([k, v]) => {
-      if (barUpgrades[k]) Object.assign(barUpgrades[k], v);
-    });
-  }
-
+   
 if (state.upgrades) {
 Object.entries(state.upgrades).forEach(([k, lvl]) => {
 if (upgrades[k]) upgrades[k].level = lvl;
