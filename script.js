@@ -2256,6 +2256,69 @@ function buildDiscipleGearView() {
   return body;
 }
 
+function buildDiscipleProficiencyView(d) {
+  const container = document.createElement('div');
+  const groups = {
+    Gathering: ['Gather Fruit'],
+    Logging: ['Log Pine'],
+    Building: ['Building'],
+    Chanting: ['Chant'],
+    Researching: ['Research']
+  };
+  const effects = {
+    Gathering: 'yield',
+    Logging: 'yield',
+    Building: 'speed',
+    Chanting: 'potency',
+    Researching: 'research pts'
+  };
+  Object.entries(groups).forEach(([name, tasks]) => {
+    const xp = sectState.discipleSkills[d.id]?.[name] || 0;
+    const prog = getTaskSkillProgress(xp);
+    const entry = document.createElement('div');
+    entry.className = 'skill-group';
+    const head = document.createElement('div');
+    const isGather = name === 'Gathering' || name === 'Logging';
+    const mult = 1 + (isGather ? 0.05 : 0.02) * prog.level;
+    const effect = effects[name];
+    head.textContent = `${name} Lv ${prog.level}` +
+      (effect ? ` (×${mult.toFixed(2)} ${effect})` : '');
+    const bar = document.createElement('div');
+    bar.className = 'disciple-skill-progress';
+    const fill = document.createElement('div');
+    fill.className = 'disciple-skill-progress-fill';
+    fill.style.width = `${Math.floor(prog.progress * 100)}%`;
+    bar.appendChild(fill);
+    head.appendChild(bar);
+    entry.appendChild(head);
+    container.appendChild(entry);
+  });
+  return container;
+}
+
+function buildDiscipleConstructsView() {
+  const container = document.createElement('div');
+  const list = document.createElement('div');
+  list.className = 'saved-constructs';
+  speechState.savedConstructs.forEach(name => {
+    const wrap = document.createElement('div');
+    wrap.className = 'construct-card-wrapper';
+    const card = createConstructCard(name);
+    wrap.appendChild(card);
+    const info = createConstructInfo(name);
+    if (info) wrap.appendChild(info);
+    list.appendChild(wrap);
+  });
+  container.appendChild(list);
+  return container;
+}
+
+function buildDiscipleMoodletsView() {
+  const container = document.createElement('div');
+  container.textContent = 'No active moodlets';
+  return container;
+}
+
 function renderSectDiscipleList() {
   if (!sectDiscipleListContainer) return;
   sectDiscipleListContainer.innerHTML = '';
@@ -2277,6 +2340,10 @@ function openDiscipleOverlay(d) {
     discipleOverlay.close();
   } else {
     discipleOverlayActiveTab = d.lastTab || 'general';
+    if (discipleOverlayActiveTab === 'skills') discipleOverlayActiveTab = 'proficiency';
+    if (discipleOverlayActiveTab === 'inventory' || discipleOverlayActiveTab === 'gear') {
+      discipleOverlayActiveTab = 'general';
+    }
   }
   discipleOverlay = createOverlay({ className: 'disciple-overlay' });
   const { box } = discipleOverlay;
@@ -2295,10 +2362,10 @@ function openDiscipleOverlay(d) {
 
   const defs = [
     { key: 'general', label: 'General' },
-    { key: 'stats', label: 'Stats' },
-    { key: 'skills', label: 'Skills' },
-    { key: 'inventory', label: 'Inventory' },
-    { key: 'gear', label: 'Gear' }
+    { key: 'proficiency', label: 'Proficiency' },
+    { key: 'constructs', label: 'Constructs' },
+    { key: 'moodlets', label: 'Moodlets' },
+    { key: 'stats', label: 'Stats' }
   ];
   let active = discipleOverlayActiveTab;
   function render() {
@@ -2318,6 +2385,12 @@ function openDiscipleOverlay(d) {
           hungerVal: rows[2].lastElementChild
         };
       }
+    } else if (active === 'proficiency') {
+      content.appendChild(buildDiscipleProficiencyView(d));
+    } else if (active === 'constructs') {
+      content.appendChild(buildDiscipleConstructsView(d));
+    } else if (active === 'moodlets') {
+      content.appendChild(buildDiscipleMoodletsView(d));
     } else if (active === 'stats') {
       const c = document.createElement('div');
       const genSection = document.createElement('div');
@@ -2335,12 +2408,6 @@ function openDiscipleOverlay(d) {
       c.appendChild(genSection);
       c.appendChild(combatSection);
       content.appendChild(c);
-    } else if (active === 'skills') {
-      content.appendChild(buildDiscipleSkillsList(d));
-    } else if (active === 'inventory') {
-      content.appendChild(buildDiscipleInventoryView(d));
-    } else if (active === 'gear') {
-      content.appendChild(buildDiscipleGearView());
     }
     if (window.lucide) lucide.createIcons({ icons: lucide.icons });
   }
