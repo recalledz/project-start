@@ -1486,6 +1486,14 @@ function updateSectDisplay() {
         orb.addEventListener('click', openWaterRegenPopup);
       }
       orbs.appendChild(orb);
+      if (p.cls === 'water') {
+        const rateEl = document.getElementById('waterRate');
+        if (rateEl) {
+          const orbSize = mobile ? 30 : 50;
+          rateEl.style.top = `calc(${p.top} + ${orbSize}px)`;
+          rateEl.textContent = `${speechState.gains.water.toFixed(2)}/s`;
+        }
+      }
     });
   }
 
