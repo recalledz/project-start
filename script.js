@@ -521,7 +521,6 @@ let stageData = {
   dealerLifeCurrent: 10,
   stageDamageMultiplier: 1.05,
   kills: 0,
-  cardXp: 1,
   playerXp: 1,
   attackspeed: 10000 //10 sec at start
 };
@@ -774,6 +773,7 @@ function setupTabHandlers() {
         showTab(playerTab);
         setActiveTabButton(playerTabButton);
         if (playerSectSubTabButton) {
+
           playerSectSubTabButton.click();
         } else if (playerConstructSubTabButton) {
           playerConstructSubTabButton.click();
@@ -1079,11 +1079,11 @@ function initTabs() {
       if (statsOverviewSubTabButton) statsOverviewSubTabButton.classList.remove('active');
       // economy stats removed
     });
-
   // Start with the sect panel
   showTab(playerTab);
   setActiveTabButton(playerTabButton);
   if (playerSectSubTabButton) {
+
     playerSectSubTabButton.click();
   } else if (playerConstructSubTabButton) {
     playerConstructSubTabButton.click();
@@ -2517,6 +2517,7 @@ document.addEventListener("DOMContentLoaded", () => {
   showTab(playerTab);
   setActiveTabButton(playerTabButton);
   if (playerSectSubTabButton) {
+
     playerSectSubTabButton.click();
   } else if (playerConstructSubTabButton) {
     playerConstructSubTabButton.click();
@@ -3149,9 +3150,6 @@ function onDealerDefeat() {
   enemyAttackProgress = currentEnemy.attackTimer / currentEnemy.attackInterval;
   // clear enemy immediately to prevent repeated callbacks
   currentEnemy = null;
-  cardXp(calculateKillXp(stageData.stage, stageData.world));
-  combatXp(calculateKillXp(stageData.stage, stageData.world));
-  healCardsOnKill();
   stageData.kills += 1;
   playerStats.stageKills[stageData.stage] = stageData.kills;
   killsDisplay.textContent = `Kills: ${formatNumber(stageData.kills)}`;
@@ -3184,7 +3182,6 @@ function onSpeakerDefeat() {
   dealerBarDeathAnimation(() => {
     inCombat = false;
     currentEnemy = null;
-    combatXp(calculateKillXp(stageData.stage, stageData.world));
     updateDealerLifeDisplay();
     hidePlayerAttackBar();
     respawnDealerStage();
@@ -3195,7 +3192,6 @@ function onSpeakerDefeat() {
 function onBossDefeat(boss) {
   // capture remaining attack progress before resetting
   enemyAttackProgress = boss.attackTimer / boss.attackInterval;
-  cardXp(boss.xp);
   const data = worldProgress[stageData.world];
   data.bossDefeated = true;
   data.rewardClaimed = false;
@@ -3216,7 +3212,6 @@ function onBossDefeat(boss) {
   playerStats.totalBossKills += 1;
   renderGlobalStats();
 
-  healCardsOnKill();
   stats.upgradePower += 5;
   renderPurchasedUpgrades();
   checkSpeakerEncounter();
@@ -3228,7 +3223,6 @@ function onBossDefeat(boss) {
   dealerBarDeathAnimation(() => {
     inCombat = false;
     currentEnemy = null;
-    combatXp(boss.xp);
     hidePlayerAttackBar();
     nextWorld();
   });
