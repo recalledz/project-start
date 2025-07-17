@@ -521,7 +521,6 @@ let stageData = {
   dealerLifeCurrent: 10,
   stageDamageMultiplier: 1.05,
   kills: 0,
-  cardXp: 1,
   playerXp: 1,
   attackspeed: 10000 //10 sec at start
 };
@@ -3142,7 +3141,6 @@ function onDealerDefeat() {
   enemyAttackProgress = currentEnemy.attackTimer / currentEnemy.attackInterval;
   // clear enemy immediately to prevent repeated callbacks
   currentEnemy = null;
-  cardXp(calculateKillXp(stageData.stage, stageData.world));
   combatXp(calculateKillXp(stageData.stage, stageData.world));
   healCardsOnKill();
   stageData.kills += 1;
@@ -3188,7 +3186,6 @@ function onSpeakerDefeat() {
 function onBossDefeat(boss) {
   // capture remaining attack progress before resetting
   enemyAttackProgress = boss.attackTimer / boss.attackInterval;
-  cardXp(boss.xp);
   const data = worldProgress[stageData.world];
   data.bossDefeated = true;
   data.rewardClaimed = false;
