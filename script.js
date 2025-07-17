@@ -3141,7 +3141,6 @@ function onDealerDefeat() {
   enemyAttackProgress = currentEnemy.attackTimer / currentEnemy.attackInterval;
   // clear enemy immediately to prevent repeated callbacks
   currentEnemy = null;
-  combatXp(calculateKillXp(stageData.stage, stageData.world));
   healCardsOnKill();
   stageData.kills += 1;
   playerStats.stageKills[stageData.stage] = stageData.kills;
@@ -3175,7 +3174,6 @@ function onSpeakerDefeat() {
   dealerBarDeathAnimation(() => {
     inCombat = false;
     currentEnemy = null;
-    combatXp(calculateKillXp(stageData.stage, stageData.world));
     updateDealerLifeDisplay();
     hidePlayerAttackBar();
     respawnDealerStage();
@@ -3218,7 +3216,6 @@ function onBossDefeat(boss) {
   dealerBarDeathAnimation(() => {
     inCombat = false;
     currentEnemy = null;
-    combatXp(boss.xp);
     hidePlayerAttackBar();
     nextWorld();
   });
