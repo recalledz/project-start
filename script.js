@@ -450,30 +450,27 @@ function createDiscipleCard(d) {
 function createSectDiscipleCard(d) {
   const card = document.createElement('div');
   card.className = 'sect-disciple-card';
-  const icon = document.createElement('div');
-  icon.className = 'disciple-icon';
-  icon.textContent = (d.name || `Disciple ${d.id}`).charAt(0);
-  card.appendChild(icon);
 
-  const name = document.createElement('div');
-  name.textContent = d.name || `Disciple ${d.id}`;
-  card.appendChild(name);
+  const lifeBar = makeBar(d.health, DISCIPLE_MAX_HEALTH, '#a33');
+  lifeBar.classList.add('life-bar');
+  const nameLabel = document.createElement('div');
+  nameLabel.className = 'bar-label';
+  nameLabel.textContent = d.name || `Disciple ${d.id}`;
+  lifeBar.appendChild(nameLabel);
+  card.appendChild(lifeBar);
 
+  const wrapper = document.createElement('div');
+  wrapper.id = `disciple-task-${d.id}`;
+  wrapper.className = 'disciple-progress';
+  const fill = document.createElement('div');
+  fill.className = 'disciple-progress-fill';
+  wrapper.appendChild(fill);
+  const label = document.createElement('div');
+  label.className = 'disciple-progress-label';
   const curTask = d.incapacitated ? 'Resting' : sectState.discipleTasks[d.id] || 'Idle';
-  const task = document.createElement('div');
-  task.className = 'disciple-task';
-  task.textContent = curTask;
-  card.appendChild(task);
-
-  const bars = [
-    { val: d.health, max: DISCIPLE_MAX_HEALTH, color: '#a33' },
-    { val: d.stamina, max: calculateMaxStamina(d.endurance), color: '#cc3' },
-    { val: d.hunger, max: 20, color: '#996633' }
-  ];
-  bars.forEach(b => {
-    const bar = makeBar(b.val, b.max, b.color);
-    card.appendChild(bar);
-  });
+  label.textContent = curTask;
+  wrapper.appendChild(label);
+  card.appendChild(wrapper);
 
   return card;
 }
@@ -786,7 +783,6 @@ function addDiscoveredLocation(name) {
   if (map && def) {
     const icon = document.createElement('div');
     icon.className = 'location-icon';
-    icon.textContent = '📍';
     icon.style.left = def.x;
     icon.style.top = def.y;
     map.appendChild(icon);
@@ -1446,7 +1442,7 @@ function updateSectDisplay() {
     const upkeep = DAILY_FRUIT_CONSUMPTION * sectSystem.disciples.length;
     sectSummaryDisplay.innerHTML = `
       <span>👥 ${total - assigned}/${total}</span>
-      <span>🍎 ${sectState.fruits}</span>
+      <span>${sectState.fruits}</span>
       <span>🪵 ${sectState.pineLogs}</span>
       <span>⚖️ -${upkeep}/day (${mm}:${ss})</span>`;
   }
