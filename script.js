@@ -446,6 +446,38 @@ function createDiscipleCard(d) {
   return card;
 }
 
+// Simplified card used in the sect overview list
+function createSectDiscipleCard(d) {
+  const card = document.createElement('div');
+  card.className = 'sect-disciple-card';
+  const icon = document.createElement('div');
+  icon.className = 'disciple-icon';
+  icon.textContent = (d.name || `Disciple ${d.id}`).charAt(0);
+  card.appendChild(icon);
+
+  const name = document.createElement('div');
+  name.textContent = d.name || `Disciple ${d.id}`;
+  card.appendChild(name);
+
+  const curTask = d.incapacitated ? 'Resting' : sectState.discipleTasks[d.id] || 'Idle';
+  const task = document.createElement('div');
+  task.className = 'disciple-task';
+  task.textContent = curTask;
+  card.appendChild(task);
+
+  const bars = [
+    { val: d.health, max: DISCIPLE_MAX_HEALTH, color: '#a33' },
+    { val: d.stamina, max: calculateMaxStamina(d.endurance), color: '#cc3' },
+    { val: d.hunger, max: 20, color: '#996633' }
+  ];
+  bars.forEach(b => {
+    const bar = makeBar(b.val, b.max, b.color);
+    card.appendChild(bar);
+  });
+
+  return card;
+}
+
 function ensureDiscipleSkills(id) {
   if (!sectState.discipleSkills[id]) {
     sectState.discipleSkills[id] = {
@@ -1517,6 +1549,9 @@ function updateSectDisplay() {
     startDiscipleMovement();
   }
 
+  // Refresh the simplified disciple list
+  renderSectDiscipleList();
+
   if (colonyTasksPanel) renderColonyTasks();
   if (colonyInfoPanel) renderColonyInfo();
   if (colonyResourcesPanel) renderColonyResources();
@@ -2333,7 +2368,7 @@ function renderSectDiscipleList() {
   const list = document.createElement('div');
   list.className = 'sect-disciple-list';
   sectSystem.disciples.forEach(d => {
-    const card = createDiscipleCard(d);
+    const card = createSectDiscipleCard(d);
     card.addEventListener('click', () => openDiscipleOverlay(d));
     list.appendChild(card);
   });
