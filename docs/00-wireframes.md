@@ -32,7 +32,7 @@
 │                      │  │  (tree + library UI)  │        │                                   │
 │                      │  └───────────────────────┘        │                                   │
 └──────────────────────┴───────────────────────────────────┴───────────────────────────────────┘
-                                   [ Gate → Map / Exploration / Tasks ]
+                                   [ Gate → Map / Exploration / Tasks ] (located at the bottom of the sect map)
 
 
                                    Notes on each region
@@ -46,6 +46,7 @@ inside sect tab:
 left top: current season, date, weather.
 
 center top: disciple list with name, task and fill for each bar.
+This row appears above the sect map. The previous row of disciple cards beneath the map has been removed for clarity.
 
 Left panel (Resource / Items)
 
@@ -133,7 +134,8 @@ Footer
 │ ⚡ Energized   (+5 stamina/sec regen)             │
 └────────────────────────────────────────────────────┘
 
--stats tab
+Stats tab
+Displays derived multipliers and vital statistics as a compact list matching the simplified UI.
 ┌────────────────────────────────────────────────────┐
 │ ○ General  ○ Proficiency  ○ Constructs  ○ Moodlets  ○ Stats │
 ├────────────────────────────────────────────────────┤
