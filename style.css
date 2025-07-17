@@ -3590,6 +3590,17 @@ body.darkenshift-mode .tabsContainer button.active {
     padding: 0 4px;
 }
 
+.sect-resource-display {
+    position: absolute;
+    right: 4px;
+    top: 4px;
+    width: 150px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    z-index: 5;
+}
+
 .zone {
     position: absolute;
     pointer-events: none;
@@ -3693,6 +3704,13 @@ body.darkenshift-mode .tabsContainer button.active {
     display: flex;
     flex-direction: column;
     gap: 6px;
+}
+
+.sect-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
 }
 
 .colony-map {
