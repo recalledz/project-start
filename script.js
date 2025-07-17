@@ -2513,6 +2513,12 @@ document.addEventListener("DOMContentLoaded", () => {
   initPollen();
   window.addEventListener('location-discovered', e => addDiscoveredLocation(e.detail.name));
   loadGame();
+  // After loading the save, open the Sect panel if it is unlocked
+  if (sectTabUnlocked && playerSectSubTabButton) {
+    playerSectSubTabButton.click();
+  } else if (playerConstructSubTabButton) {
+    playerConstructSubTabButton.click();
+  }
   checkBuildingUnlock();
   if (systems.researchUnlocked && colonyResearchTabButton) {
     colonyResearchTabButton.style.display = '';
