@@ -3310,7 +3310,7 @@ body.darkenshift-mode .tabsContainer button.active {
     width: 100%;
 }
 
-/* Speech resource panels */
+/* Sect resource panels */
 .construct-gains, .construct-upgrades, .secondary-resources {
     display: flex;
     flex-direction: column;

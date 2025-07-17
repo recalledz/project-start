@@ -14,9 +14,9 @@ import {
   initStarChart
 } from "./starChart.js"; // optional star chart tab
 import {
-  initSpeech,
-  tickSpeech,
-  speechState,
+  initSect,
+  tickSectSystem,
+  sectSystem,
   DAY_LENGTH_SECONDS,
   castConstruct,
   createConstructCard,
@@ -26,7 +26,7 @@ import {
   unlockConstruct,
   renderConstructCards,
   renderHotbar
-} from "./speech.js";
+} from "./sect.js";
 import RateTracker from "./utils/rateTracker.js";
 import { formatNumber } from "./utils/numberFormat.js";
 import { runAnimation } from "./utils/animation.js";
@@ -364,14 +364,14 @@ function getTaskEta(d) {
     const cycleSeconds = baseSeconds * (gatherAmt / (cycleAmount * yieldMult));
     return cycleSeconds - progress;
   } else if (task === 'Research') {
-    const researcherCount = speechState.disciples.filter(x => sectState.discipleTasks[x.id] === 'Research').length;
+    const researcherCount = sectSystem.disciples.filter(x => sectState.discipleTasks[x.id] === 'Research').length;
     const researchRate = researcherCount * 4;
     const researchProg = sectState.researchProgress % 500;
     return researchRate > 0 ? (500 - researchProg) / researchRate : Infinity;
   } else if (task === 'Building') {
     const buildKey = sectState.currentBuild;
     const buildData = buildKey ? BUILDINGS[buildKey] : null;
-    const builderCount = speechState.disciples.filter(x => sectState.discipleTasks[x.id] === 'Building').length;
+    const builderCount = sectSystem.disciples.filter(x => sectState.discipleTasks[x.id] === 'Building').length;
     return buildData && builderCount > 0 ? ((1 - sectState.buildProgress) * buildData.time) / builderCount : Infinity;
   } else if (task === 'Exploration') {
     const progress = sectState.discipleProgress[d.id] || 0;
@@ -469,7 +469,7 @@ function ensureDiscipleConstructXp(id) {
 
 function calculateDailyFruitGain() {
   let total = 0;
-  speechState.disciples.forEach(d => {
+  sectSystem.disciples.forEach(d => {
     if (sectState.discipleTasks[d.id] === 'Gather Fruit') {
       ensureDiscipleSkills(d.id);
       ensureDiscipleConstructXp(d.id);
@@ -1030,7 +1030,7 @@ function initTabs() {
       if (currentExplorationParty.length > 0) {
         clearActiveDisciples();
         currentExplorationParty.forEach(id => {
-          const d = speechState.disciples.find(x => x.id === id);
+          const d = sectSystem.disciples.find(x => x.id === id);
           if (d) {
             selectDisciple(d);
           }
@@ -1172,7 +1172,7 @@ function tickBarProgress(delta) {
 function tickSect(delta) {
   if (!sectTabUnlocked) return;
   const dt = delta / 1000;
-  speechState.disciples.forEach(d => {
+  sectSystem.disciples.forEach(d => {
     ensureDiscipleSkills(d.id);
     ensureDiscipleConstructXp(d.id);
     const maxStamina = calculateMaxStamina(d.endurance);
@@ -1249,8 +1249,8 @@ function tickSect(delta) {
         updateSectDisplay();
       }
     } else if (task === 'Research') {
-      const spend = Math.min(speechState.resources.water.current, 4 * dt);
-      speechState.resources.water.current -= spend;
+      const spend = Math.min(sectSystem.resources.water.current, 4 * dt);
+      sectSystem.resources.water.current -= spend;
       sectState.researchProgress += spend;
       if (sectState.researchProgress >= 500) {
         const xp = sectState.discipleSkills[d.id]?.['Researching'] || 0;
@@ -1286,8 +1286,8 @@ function tickSect(delta) {
           addSkillXp(d, 'Chanting', CHANT_XP_PER_CYCLE);
         }
       }
-      const spend = Math.min(speechState.resources.water.current, dt);
-      speechState.resources.water.current -= spend;
+      const spend = Math.min(sectSystem.resources.water.current, dt);
+      sectSystem.resources.water.current -= spend;
     } else if (task === 'Hunt') {
       if (!sectState.discipleProgress[d.id]) sectState.discipleProgress[d.id] = 0;
       sectState.discipleProgress[d.id] += dt;
@@ -1321,7 +1321,7 @@ function tickSect(delta) {
       if (sectState.discipleProgress[d.id] >= EXPLORATION_CYCLE_SECONDS) {
         sectState.discipleProgress[d.id] -= EXPLORATION_CYCLE_SECONDS;
         const maxDistance = d.stamina * 10;
-        const seasonBonus = speechState.seasonIndex === 0 ? 0.05 : speechState.seasonIndex === 4 ? -0.05 : 0;
+        const seasonBonus = sectSystem.seasonIndex === 0 ? 0.05 : sectSystem.seasonIndex === 4 ? -0.05 : 0;
         const eligible = LOCATION_DEFS.filter(l => !discoveredLocations.includes(l.name) && l.reqDistance <= maxDistance);
         shuffleArray(eligible);
         let found = null;
@@ -1352,7 +1352,7 @@ function tickSect(delta) {
 
 function updateTaskProgressDisplay() {
   if (!colonyTasksPanel) return;
-  const researcherCount = speechState.disciples.filter(
+  const researcherCount = sectSystem.disciples.filter(
     d => sectState.discipleTasks[d.id] === 'Research'
   ).length;
   const researchRate = researcherCount * 4;
@@ -1362,14 +1362,14 @@ function updateTaskProgressDisplay() {
 
   const buildKey = sectState.currentBuild;
   const buildData = buildKey ? BUILDINGS[buildKey] : null;
-  const builderCount = speechState.disciples.filter(
+  const builderCount = sectSystem.disciples.filter(
     d => sectState.discipleTasks[d.id] === 'Building'
   ).length;
   const buildPct = buildData ? sectState.buildProgress * 100 : 0;
   const buildTime = buildData && builderCount > 0
     ? ((1 - sectState.buildProgress) * buildData.time) / builderCount
     : 0;
-  speechState.disciples.forEach(d => {
+  sectSystem.disciples.forEach(d => {
     const wrapper = document.getElementById(`disciple-task-${d.id}`);
     if (!wrapper) return;
     const fill = wrapper.querySelector('.disciple-progress-fill');
@@ -1440,13 +1440,13 @@ function updateTaskProgressDisplay() {
 
 function updateSectDisplay() {
   if (!sectTabUnlocked || !playerSectPanel) return;
-  const total = speechState.disciples.length;
+  const total = sectSystem.disciples.length;
   const assigned = Object.values(sectState.discipleTasks).filter(t => t && t !== 'Idle').length;
   if (sectSummaryDisplay) {
-    const remaining = Math.max(0, DAY_LENGTH_SECONDS - speechState.seasonTimer);
+    const remaining = Math.max(0, DAY_LENGTH_SECONDS - sectSystem.seasonTimer);
     const mm = String(Math.floor(remaining / 60)).padStart(2, '0');
     const ss = String(Math.floor(remaining % 60)).padStart(2, '0');
-    const upkeep = DAILY_FRUIT_CONSUMPTION * speechState.disciples.length;
+    const upkeep = DAILY_FRUIT_CONSUMPTION * sectSystem.disciples.length;
     sectSummaryDisplay.innerHTML = `
       <span>👥 ${total - assigned}/${total}</span>
       <span>🍎 ${sectState.fruits}</span>
@@ -1491,14 +1491,14 @@ function updateSectDisplay() {
         if (rateEl) {
           const orbSize = mobile ? 30 : 50;
           rateEl.style.top = `calc(${p.top} + ${orbSize}px)`;
-          rateEl.textContent = `${speechState.gains.water.toFixed(2)}/s`;
+          rateEl.textContent = `${sectSystem.gains.water.toFixed(2)}/s`;
         }
       }
     });
   }
 
   if (sectDisciplesContainer) {
-    speechState.disciples.forEach(d => {
+    sectSystem.disciples.forEach(d => {
       if (!sectDiscipleEls[d.id]) {
         const el = document.createElement('div');
         el.className = 'sect-disciple';
@@ -1509,7 +1509,7 @@ function updateSectDisplay() {
       }
     });
     Object.keys(sectDiscipleEls).forEach(id => {
-      if (!speechState.disciples.find(d => d.id == id)) {
+      if (!sectSystem.disciples.find(d => d.id == id)) {
         sectDiscipleEls[id].remove();
         delete sectDiscipleEls[id];
       }
@@ -1545,7 +1545,7 @@ function updateDiscipleGather(id, el) {
     task === 'Log Pine' ? PINE_LOG_CYCLE_SECONDS : FRUIT_CYCLE_SECONDS;
   const cycleAmount =
     task === 'Log Pine' ? PINE_LOG_CYCLE_AMOUNT : FRUIT_CYCLE_AMOUNT;
-  const d = speechState.disciples.find(x => x.id === id);
+  const d = sectSystem.disciples.find(x => x.id === id);
   const group = TASK_GROUPS[task];
   const lvl = getTaskSkillProgress(
     sectState.discipleSkills[id]?.[group] || 0
@@ -1587,7 +1587,7 @@ function updateDiscipleGather(id, el) {
 function startDiscipleMovement() {
   if (discipleMoveInterval) return;
   discipleMoveInterval = setInterval(() => {
-    speechState.disciples.forEach(d => {
+    sectSystem.disciples.forEach(d => {
       const el = sectDiscipleEls[d.id];
       if (!el) return;
       if (d.incapacitated) {
@@ -1616,7 +1616,7 @@ function renderColonyTasks() {
   heading.textContent = 'Tasks';
   colonyTasksPanel.appendChild(heading);
 
-  speechState.disciples.forEach(d => {
+  sectSystem.disciples.forEach(d => {
     const row = document.createElement('div');
     row.className = 'task-entry';
     if (d.id === selectedDiscipleId) row.classList.add('selected');
@@ -1678,7 +1678,7 @@ function renderColonyInfo() {
   heading.className = 'panel-heading';
   heading.textContent = 'Proficiencies';
   colonyInfoPanel.appendChild(heading);
-  const d = speechState.disciples.find(x => x.id === selectedDiscipleId);
+  const d = sectSystem.disciples.find(x => x.id === selectedDiscipleId);
   if (!d) {
     const info = document.createElement('div');
     info.textContent = 'Select a disciple';
@@ -1772,7 +1772,7 @@ function startBuilding(key) {
 function tickBuilding(dt) {
   if (!sectState.currentBuild) return;
   let speed = 0;
-  speechState.disciples.forEach(d => {
+  sectSystem.disciples.forEach(d => {
     const t = sectState.discipleTasks[d.id];
     if (!t || t === 'Idle' || t === 'Building') {
       ensureDiscipleSkills(d.id);
@@ -1850,7 +1850,7 @@ function renderColonyResearchPanel() {
   bar.appendChild(fill);
   colonyResearchPanel.appendChild(bar);
 
-  const researchers = speechState.disciples.filter(
+  const researchers = sectSystem.disciples.filter(
     d => sectState.discipleTasks[d.id] === 'Research'
   ).length;
   const rate = researchers * 4;
@@ -1909,7 +1909,7 @@ function renderColonyResearchPanel() {
 function renderDiscipleList() {
   if (!colonyInfoPanel) return;
   colonyInfoPanel.innerHTML = '';
-  speechState.disciples.forEach(d => {
+  sectSystem.disciples.forEach(d => {
     const row = document.createElement('div');
     row.className = 'task-entry';
     if (d.id === selectedDiscipleId) row.classList.add('selected');
@@ -1927,7 +1927,7 @@ function renderDiscipleList() {
 function renderDiscipleDetails() {
   if (!colonyResourcesPanel) return;
   colonyResourcesPanel.innerHTML = '';
-  const d = speechState.disciples.find(x => x.id === selectedDiscipleId);
+  const d = sectSystem.disciples.find(x => x.id === selectedDiscipleId);
   if (!d) {
     colonyResourcesPanel.textContent = 'Select a disciple';
     return;
@@ -2081,8 +2081,8 @@ function buildDiscipleLifeStatsView(d) {
 
 function buildDiscipleCastingStatsView(d) {
   const body = document.createElement('div');
-  Object.keys(speechState.constructPotency).forEach(name => {
-    const mult = speechState.constructPotency[name] || 1;
+  Object.keys(sectSystem.constructPotency).forEach(name => {
+    const mult = sectSystem.constructPotency[name] || 1;
     const row = document.createElement('div');
     row.className = 'disciple-skill-option';
     row.textContent = `${name} ×${mult.toFixed(2)}`;
@@ -2308,7 +2308,7 @@ function buildDiscipleConstructsView() {
   const container = document.createElement('div');
   const list = document.createElement('div');
   list.className = 'saved-constructs';
-  speechState.savedConstructs.forEach(name => {
+  sectSystem.savedConstructs.forEach(name => {
     const wrap = document.createElement('div');
     wrap.className = 'construct-card-wrapper';
     const card = createConstructCard(name);
@@ -2332,7 +2332,7 @@ function renderSectDiscipleList() {
   sectDiscipleListContainer.innerHTML = '';
   const list = document.createElement('div');
   list.className = 'sect-disciple-list';
-  speechState.disciples.forEach(d => {
+  sectSystem.disciples.forEach(d => {
     const card = createDiscipleCard(d);
     card.addEventListener('click', () => openDiscipleOverlay(d));
     list.appendChild(card);
@@ -2524,7 +2524,7 @@ function buildDiscipleSkillsList(d) {
 function renderExplorationTab() {
   if (!explorationListContainer) return;
   explorationListContainer.innerHTML = '';
-  speechState.disciples.forEach(d => {
+  sectSystem.disciples.forEach(d => {
     const row = document.createElement('label');
     row.className = 'exploration-entry';
     const cb = document.createElement('input');
@@ -2553,7 +2553,7 @@ function triggerOrbFlash() {
 //========render functions==========
 document.addEventListener("DOMContentLoaded", () => {
   // now the DOM is in, and lucide.js has run, so window.lucide is defined
-  initSpeech();
+  initSect();
   initTabs();
   initPollen();
   window.addEventListener('location-discovered', e => addDiscoveredLocation(e.detail.name));
@@ -2571,7 +2571,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initCore();
   renderConstructLexicon();
   document.addEventListener('day-passed', () => {
-    speechState.disciples.forEach(d => {
+    sectSystem.disciples.forEach(d => {
       if (sectState.fruits >= DAILY_FRUIT_CONSUMPTION) {
         sectState.fruits -= DAILY_FRUIT_CONSUMPTION;
         d.hunger = 20;
@@ -2588,7 +2588,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     sectState.availableFruits = Math.min(
       FRUIT_MAX_CAP,
-      sectState.availableFruits + FRUIT_GROWTH_RATES[speechState.seasonIndex]
+      sectState.availableFruits + FRUIT_GROWTH_RATES[sectSystem.seasonIndex]
     );
     ANIMALS.forEach(a => {
       const count = sectState.animals[a.name] || 0;
@@ -3440,7 +3440,7 @@ function updateHandDisplay() {
 }
 
 function updateSectCardInfo() {
-  speechState.disciples.forEach(d => {
+  sectSystem.disciples.forEach(d => {
     if (d.etaLabel) {
       d.etaLabel.textContent = `ETA: ${formatTime(getTaskEta(d))}`;
     }
@@ -3711,7 +3711,7 @@ function respawnPlayer() {
 
 function returnPartyToSect() {
   currentExplorationParty.forEach(id => {
-    const d = speechState.disciples.find(x => x.id === id);
+    const d = sectSystem.disciples.find(x => x.id === id);
     if (d) {
       d.currentHp = 0;
       d.health = 0;
@@ -3823,13 +3823,13 @@ function updatePlayerStats() {
 
 
   // Calculate average proficiency level of disciples
-  if (speechState && Array.isArray(speechState.disciples)) {
+  if (sectSystem && Array.isArray(sectSystem.disciples)) {
     let total = 0;
-    speechState.disciples.forEach(d => {
+    sectSystem.disciples.forEach(d => {
       total += d.globalLevel || 0;
     });
-    if (speechState.disciples.length > 0) {
-      stats.avgProficiencyLevel = total / speechState.disciples.length;
+    if (sectSystem.disciples.length > 0) {
+      stats.avgProficiencyLevel = total / sectSystem.disciples.length;
     }
   }
 
@@ -3868,7 +3868,7 @@ Object.entries(upgrades).map(([k, u]) => [k, u.unlocked])
     worldProgress,
     barUpgrades,
     lifeCore,
-    speechState,
+    sectSystem,
     sectState,
     sectTabUnlocked,
     systems: {
@@ -3920,13 +3920,13 @@ Object.assign(playerStats, state.playerStats || {});
     Object.assign(lifeCore, state.lifeCore);
   }
 
-    if (state.speechState) {
-      const { upgrades: savedUpgrades, ...restSpeech } = state.speechState;
-      Object.assign(speechState, restSpeech);
+    if (state.sectSystem) {
+      const { upgrades: savedUpgrades, ...restSect } = state.sectSystem;
+      Object.assign(sectSystem, restSect);
       // ensure orbs exist for older saves
-      if (!speechState.orbs || !speechState.orbs.water) {
-        const water = speechState.resources?.water || {};
-        speechState.orbs = {
+      if (!sectSystem.orbs || !sectSystem.orbs.water) {
+        const water = sectSystem.resources?.water || {};
+        sectSystem.orbs = {
           water: {
             current: water.current || 0,
             max: water.max || 2000,
@@ -3935,37 +3935,37 @@ Object.assign(playerStats, state.playerStats || {});
         };
       }
       // maintain reference between water resource and orb
-      speechState.resources.water = speechState.orbs.water;
-      if (speechState.weather && speechState.weather.days !== undefined) {
-        speechState.weather.duration = speechState.weather.days;
-        delete speechState.weather.days;
+      sectSystem.resources.water = sectSystem.orbs.water;
+      if (sectSystem.weather && sectSystem.weather.days !== undefined) {
+        sectSystem.weather.duration = sectSystem.weather.days;
+        delete sectSystem.weather.days;
       }
     if (savedUpgrades) {
       Object.entries(savedUpgrades).forEach(([name, data]) => {
-        if (speechState.upgrades[name]) {
-          Object.assign(speechState.upgrades[name], data);
+        if (sectSystem.upgrades[name]) {
+          Object.assign(sectSystem.upgrades[name], data);
         } else {
-          speechState.upgrades[name] = data;
+          sectSystem.upgrades[name] = data;
         }
       });
     }
 
-    if (!Array.isArray(speechState.savedConstructs)) {
-      speechState.savedConstructs = ['Murmur'];
-    } else if (!speechState.savedConstructs.includes('Murmur')) {
-      speechState.savedConstructs.unshift('Murmur');
+    if (!Array.isArray(sectSystem.savedConstructs)) {
+      sectSystem.savedConstructs = ['Murmur'];
+    } else if (!sectSystem.savedConstructs.includes('Murmur')) {
+      sectSystem.savedConstructs.unshift('Murmur');
     }
 
     // ensure the default Murmur card is active if no constructs are active
-    if (!Array.isArray(speechState.activeConstructs)) {
-      speechState.activeConstructs = ['Murmur'];
-    } else if (speechState.activeConstructs.length === 0) {
-      speechState.activeConstructs.push('Murmur');
+    if (!Array.isArray(sectSystem.activeConstructs)) {
+      sectSystem.activeConstructs = ['Murmur'];
+    } else if (sectSystem.activeConstructs.length === 0) {
+      sectSystem.activeConstructs.push('Murmur');
     }
 
     // ensure disciples have required stats when loading older saves
-    if (Array.isArray(speechState.disciples)) {
-      speechState.disciples.forEach(d => initializeDisciple(d));
+    if (Array.isArray(sectSystem.disciples)) {
+      sectSystem.disciples.forEach(d => initializeDisciple(d));
     }
   }
 
@@ -3975,15 +3975,15 @@ Object.assign(playerStats, state.playerStats || {});
   }
 
   // synchronize disciple global levels with saved skill data
-  if (Array.isArray(speechState.disciples)) {
-    speechState.disciples.forEach(d => {
+  if (Array.isArray(sectSystem.disciples)) {
+    sectSystem.disciples.forEach(d => {
       const lvl = computeGlobalSkillLevel(d.id);
       if (lvl > d.globalLevel) d.globalLevel = lvl;
     });
   }
 
   if (state.sectTabUnlocked ||
-      (speechState.disciples && speechState.disciples.length > 0)) {
+      (sectSystem.disciples && sectSystem.disciples.length > 0)) {
     sectTabUnlocked = true;
     if (playerSectSubTabButton) playerSectSubTabButton.style.display = '';
   }
@@ -4053,7 +4053,7 @@ function gameLoop(currentTime) {
 const rawDelta = currentTime - lastFrameTime;
 lastFrameTime = currentTime;
 const deltaTime = rawDelta * timeScale;
-const startWater = speechState.resources.water.current;
+const startWater = sectSystem.resources.water.current;
 
 if (currentEnemy) {
     currentEnemy.tick(deltaTime);
@@ -4118,13 +4118,13 @@ if (currentEnemy) {
 
   // passive progress for bar upgrades
   tickBarProgress(deltaTime);
-  tickSpeech(deltaTime);
+  tickSectSystem(deltaTime);
   tickSect(deltaTime);
   updateDiscipleOverlayBars();
   const dtSeconds = deltaTime / 1000;
-  speechState.gains.water =
+  sectSystem.gains.water =
     dtSeconds > 0
-      ? (speechState.resources.water.current - startWater) / dtSeconds
+      ? (sectSystem.resources.water.current - startWater) / dtSeconds
       : 0;
   requestAnimationFrame(gameLoop);
 }
