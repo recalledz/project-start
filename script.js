@@ -47,6 +47,7 @@ import {
   calculateStaminaRegen
 } from './utils/stamina.js';
 import { initializeDisciple } from './utils/discipleInit.js';
+import { initializeSect } from './utils/sectInit.js';
 import {
   // calculateEnemyHp,
   calculateEnemyBasicDamage,
@@ -72,9 +73,8 @@ import {
 // Active disciples engaged in combat
 let activeDisciples = [];
 // Available disciples under the player's control
-// Start with three disciples as outlined in the recruitment docs
-let disciples = [new Disciple({ id: 1 }), new Disciple({ id: 2 }), new Disciple({ id: 3 })];
-disciples.forEach(initializeDisciple);
+// Initialized with three disciples ("frogs") per the documentation
+let { disciples } = initializeSect();
 // Functions to manage which disciples are active in combat
 function selectDisciple(d) {
   if (!activeDisciples.includes(d) && activeDisciples.length < stats.cardSlots) {
