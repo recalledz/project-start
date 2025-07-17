@@ -1,4 +1,4 @@
-import { speechState, renderXpBar, openWaterRegenPopup } from './speech.js';
+import { sectSystem, renderXpBar, openWaterRegenPopup } from './sect.js';
 
 export const coreState = {
   coreLevel: 1,
@@ -55,7 +55,7 @@ const bodyPath = `M200 140
   const waterOrb = container.querySelector('#waterOrb');
   if (waterOrb) {
     waterOrb.addEventListener('mouseenter', e => {
-      const orb = speechState.orbs.water;
+      const orb = sectSystem.orbs.water;
       window.showTooltip(`Water: ${Math.floor(orb.current)}/${orb.max}`, e.pageX + 10, e.pageY + 10);
     });
     waterOrb.addEventListener('mouseleave', window.hideTooltip);
@@ -97,14 +97,14 @@ function breakthrough() {
   coreState.coreLevel += 1;
   coreState.meditationProgress = 0;
   // requirement could scale later; keep constant for now
-  speechState.orbs.water.current = 0;
+  sectSystem.orbs.water.current = 0;
   meditateBtn.textContent = 'Meditate Core';
   renderCore();
 }
 
 function renderCore() {
   if (!container) return;
-  const waterFill = Math.min(1, speechState.orbs.water.current / speechState.orbs.water.max);
+  const waterFill = Math.min(1, sectSystem.orbs.water.current / sectSystem.orbs.water.max);
   const coreFill = Math.min(1, coreState.meditationProgress / coreState.requirement);
 
   const updateRect = (id, cx, cy, r, fill) => {
@@ -123,12 +123,12 @@ function renderCore() {
   if (waterOrbEl) waterOrbEl.setAttribute('stroke', waterFill >= 1 ? '#7fafff' : '#7fd9ff');
 
   const waterText = container.querySelector('#waterText');
-  if (waterText) waterText.textContent = `${Math.floor(speechState.orbs.water.current)}/${speechState.orbs.water.max}`;
+  if (waterText) waterText.textContent = `${Math.floor(sectSystem.orbs.water.current)}/${sectSystem.orbs.water.max}`;
   const progressText = container.querySelector('#coreProgressText');
   if (progressText) progressText.textContent = `${Math.floor(coreState.meditationProgress)}/${coreState.requirement}`;
   levelDisplay.textContent = `Core Level: ${coreState.coreLevel}`;
-  if (voiceLevelEl) voiceLevelEl.textContent = speechState.level;
-  if (mindValEl) mindValEl.textContent = `${Math.floor(speechState.orbs.water.current)}/${speechState.orbs.water.max}`;
+  if (voiceLevelEl) voiceLevelEl.textContent = sectSystem.level;
+  if (mindValEl) mindValEl.textContent = `${Math.floor(sectSystem.orbs.water.current)}/${sectSystem.orbs.water.max}`;
   if (coreState.meditationProgress >= coreState.requirement) {
     meditateBtn.textContent = 'Breakthrough';
   } else {

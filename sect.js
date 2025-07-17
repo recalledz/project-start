@@ -7,7 +7,7 @@ import { initializeDisciple } from './utils/discipleInit.js';
 import { createOverlay } from './ui/overlay.js';
 
 // Core state for the Constructs system. Orbs and upgrades from the
-// previous speech implementation remain intact.
+// previous implementation remains intact.
 // Water regeneration constants
 // Water regen now scales with the Cohere upgrade using a saturating
 // logistic curve. This starts near zero and gradually approaches `R_MAX`
@@ -53,7 +53,7 @@ export function setSeasonBackdrop(season) {
 }
 
 
-export const speechState = {
+export const sectSystem = {
   orbs: {
     water: { current: 0, max: 2000, regen: R_MAX }
   },
@@ -134,7 +134,7 @@ export const speechState = {
 };
 
 // use the same object for the water resource and orb
-speechState.resources.water = speechState.orbs.water;
+sectSystem.resources.water = sectSystem.orbs.water;
 
 // Basic construct recipe list. Additional constructs can be appended
 // later through unlocks or upgrades.
@@ -253,7 +253,7 @@ export const recipes = [
 
 // initialize potency for each construct
 recipes.forEach(r => {
-  speechState.constructPotency[r.name] = r.potency || 1.0;
+  sectSystem.constructPotency[r.name] = r.potency || 1.0;
 });
 
 const resourceIcons = {
@@ -340,8 +340,8 @@ function getSkillProgress(xp) {
 }
 
 function getIntoneMultiplier() {
-  if (speechState.intoneTimer > 0) return 2.0;
-  const p = speechState.intonePresses;
+  if (sectSystem.intoneTimer > 0) return 2.0;
+  const p = sectSystem.intonePresses;
   if (p >= 15) return 2.0;
   if (p >= 10) return 1.5;
   if (p >= 5) return 1.2;
@@ -353,7 +353,7 @@ function getIntoneMultiplier() {
 function getConstructLevel(caster = 'player', name) {
   const xp =
     caster === 'player'
-      ? speechState.playerConstructXp[name] || 0
+      ? sectSystem.playerConstructXp[name] || 0
       : sectState.discipleConstructXp[caster]?.[name] || 0;
   return getSkillProgress(xp).level;
 }
@@ -361,22 +361,22 @@ function getConstructLevel(caster = 'player', name) {
 function awardXp(amount, tags) {
   if (!tags || tags.length === 0) return;
   const split = amount / tags.length;
-  const prevSlots = speechState.memorySlots;
+  const prevSlots = sectSystem.memorySlots;
   tags.forEach(tag => {
-    const skill = speechState.skills[tag];
+    const skill = sectSystem.skills[tag];
       if (skill) {
         skill.xp += split;
         const progress = getSkillProgress(skill.xp);
         if (progress.level > skill.level) {
           skill.level = progress.level;
-          if (tag === 'mind' && progress.level >= 1 && !speechState.mindSlotAwarded) {
-            speechState.memorySlots += 1;
-            speechState.mindSlotAwarded = true;
+          if (tag === 'mind' && progress.level >= 1 && !sectSystem.mindSlotAwarded) {
+            sectSystem.memorySlots += 1;
+            sectSystem.mindSlotAwarded = true;
           }
         }
     }
   });
-  if (speechState.memorySlots !== prevSlots) {
+  if (sectSystem.memorySlots !== prevSlots) {
     renderConstructCards();
   }
   window.dispatchEvent(new CustomEvent('voice-xp-changed'));
@@ -391,18 +391,18 @@ function awardConstructXp(xpObj = {}, mult = 1) {
 // Per-tick effects for active constructs. These are simplified
 // implementations to demonstrate the new constructs in action.
 const constructEffects = {
-  Murmur(dt, pot = speechState.constructPotency['Murmur'] || 1) {
+  Murmur(dt, pot = sectSystem.constructPotency['Murmur'] || 1) {
     const amount = dt * pot; // 1 water -> sound per second scaled
-    const ins = speechState.resources.water;
-    const snd = speechState.resources.sound;
+    const ins = sectSystem.resources.water;
+    const snd = sectSystem.resources.sound;
     if (ins.current >= amount) {
       ins.current -= amount;
       snd.current = Math.min(snd.max, snd.current + amount);
     }
   },
-  'Echo of Mind'(dt, pot = speechState.constructPotency['Echo of Mind'] || 1) {
-    const ins = speechState.resources.water;
-    const th = speechState.resources.thought;
+  'Echo of Mind'(dt, pot = sectSystem.constructPotency['Echo of Mind'] || 1) {
+    const ins = sectSystem.resources.water;
+    const th = sectSystem.resources.thought;
     const amount = dt * pot;
     if (ins.current >= amount) {
       ins.current -= amount;
@@ -410,16 +410,16 @@ const constructEffects = {
       th.unlocked = true;
     }
   },
-  'Clarity Pulse'(dt, pot = speechState.constructPotency['Clarity Pulse'] || 1) {
+  'Clarity Pulse'(dt, pot = sectSystem.constructPotency['Clarity Pulse'] || 1) {
     const bonus = 0.01 * dt * pot;
-    speechState.resources.water.current = Math.min(
-      speechState.resources.water.max,
-      speechState.resources.water.current + bonus
+    sectSystem.resources.water.current = Math.min(
+      sectSystem.resources.water.max,
+      sectSystem.resources.water.current + bonus
     );
   },
-  'Symbol Seed'(dt, pot = speechState.constructPotency['Symbol Seed'] || 1) {
-    const th = speechState.resources.thought;
-    const str = speechState.resources.structure;
+  'Symbol Seed'(dt, pot = sectSystem.constructPotency['Symbol Seed'] || 1) {
+    const th = sectSystem.resources.thought;
+    const str = sectSystem.resources.structure;
     const drain = dt * 1;
     if (th.current >= drain) {
       th.current -= drain;
@@ -430,39 +430,39 @@ const constructEffects = {
   },
   'Mental Construct'(dt, pot = 1) {
     const gain = 0.1 * pot;
-    const season = seasons[speechState.seasonIndex].name;
+    const season = seasons[sectSystem.seasonIndex].name;
     let key = '';
     if (season === 'Verdantia') key = 'woodEssence';
     else if (season === 'Solaria') key = 'fireEssence';
     else if (season === 'Aurora') key = 'earthEssence';
     else if (season === 'Aurelia') key = 'summerEssence';
     else key = 'waterEssence';
-    const res = speechState.resources[key];
+    const res = sectSystem.resources[key];
     if (res) {
       res.current = Math.min(res.max, res.current + gain);
       res.unlocked = true;
     }
   },
   Intone(dt, pot = 1) {
-    if (speechState.intoneTimer > 0) return;
-    if (speechState.intonePresses < 15) {
-      speechState.intonePresses += 1;
+    if (sectSystem.intoneTimer > 0) return;
+    if (sectSystem.intonePresses < 15) {
+      sectSystem.intonePresses += 1;
     }
-    speechState.intoneIdle = 0;
-    if (speechState.intonePresses >= 15) {
-      speechState.intoneTimer = 30;
+    sectSystem.intoneIdle = 0;
+    if (sectSystem.intonePresses >= 15) {
+      sectSystem.intoneTimer = 30;
       const rec = recipes.find(r => r.name === 'Intone');
-      if (rec && rec.cooldown) speechState.cooldowns['Intone'] = rec.cooldown;
+      if (rec && rec.cooldown) sectSystem.cooldowns['Intone'] = rec.cooldown;
     }
   },
   'Mnemonic Rhythm'(dt, pot = 1) {
-    speechState.mnemonicTimer = 3;
-    speechState.mnemonicBeats = 0;
-    speechState.mnemonicPotency = pot;
+    sectSystem.mnemonicTimer = 3;
+    sectSystem.mnemonicBeats = 0;
+    sectSystem.mnemonicPotency = pot;
   },
-  'The Calling'(dt, pot = speechState.constructPotency['The Calling'] || 1) {
+  'The Calling'(dt, pot = sectSystem.constructPotency['The Calling'] || 1) {
     const callPower = pot;
-    const targetIdx = speechState.disciples.length + 1;
+    const targetIdx = sectSystem.disciples.length + 1;
     const reqPower = Math.pow(1.8, targetIdx - 1);
     const chance = Math.max(0.05, Math.min(1, callPower / reqPower));
     if (Math.random() < chance) {
@@ -475,12 +475,12 @@ const constructEffects = {
       };
       const newDisc = new Disciple({ id: targetIdx, name: `Disciple ${targetIdx}`, attributes: attrs });
       initializeDisciple(newDisc);
-      speechState.disciples.push(newDisc);
+      sectSystem.disciples.push(newDisc);
       sectState.discipleConstructXp[targetIdx] = {};
       addLog('A new Disciple has answered your call!', 'info');
       if (lastConstructTarget) showConstructCloud('+1', lastConstructTarget);
       document.dispatchEvent(
-        new CustomEvent('disciple-gained', { detail: { count: speechState.disciples.length } })
+        new CustomEvent('disciple-gained', { detail: { count: sectSystem.disciples.length } })
       );
     } else {
       addLog('Your call went unanswered.', 'info');
@@ -494,7 +494,7 @@ let panel;
 let selectedChanter = null;
 let lastConstructTarget = null;
 
-export function initSpeech() {
+export function initSect() {
   container = document.getElementById('constructTabCardContainer');
   if (!container) return;
   container.innerHTML = `
@@ -593,17 +593,17 @@ function togglePanel() {
 }
 
 function addResourceToPot(name) {
-  if (speechState.pot.includes(name)) return;
-  if (speechState.pot.length >= 3) return;
-  speechState.pot.push(name);
+  if (sectSystem.pot.includes(name)) return;
+  if (sectSystem.pot.length >= 3) return;
+  sectSystem.pot.push(name);
   renderPot();
 }
 
 function renderPot() {
   const pot = container.querySelector('#constructPot');
   if (!pot) return;
-  if (speechState.pot.length) {
-    pot.innerHTML = speechState.pot
+  if (sectSystem.pot.length) {
+    pot.innerHTML = sectSystem.pot
       .map(r => `<i data-lucide="${resourceIcons[r] || 'package'}"></i>`)
       .join(' ');
     if (window.lucide) lucide.createIcons({ icons: lucide.icons });
@@ -617,10 +617,10 @@ function renderPot() {
 function updateConstructButtonValidity() {
   const btn = panel.querySelector('#performConstruct');
   if (!btn) return;
-  const unique = new Set(speechState.pot);
-  const valid = speechState.pot.length > 0 &&
-                speechState.pot.length <= 3 &&
-                unique.size === speechState.pot.length;
+  const unique = new Set(sectSystem.pot);
+  const valid = sectSystem.pot.length > 0 &&
+                sectSystem.pot.length <= 3 &&
+                unique.size === sectSystem.pot.length;
   btn.classList.toggle('invalid', !valid);
 }
 
@@ -630,7 +630,7 @@ function renderConstructRequirements() {
   reqEl.textContent = '';
   reqEl.style.display = 'none';
   const counts = {};
-  speechState.pot.forEach(r => {
+  sectSystem.pot.forEach(r => {
     counts[r] = (counts[r] || 0) + 1;
   });
   const recipe = recipes.find(r => Object.entries(r.input).every(([k,v]) => counts[k] >= v));
@@ -653,7 +653,7 @@ function renderResourcesUI() {
   const cont = container.querySelector('#resourceButtons');
   if (!cont) return;
   cont.innerHTML = '';
-  Object.entries(speechState.resources).forEach(([name, res]) => {
+  Object.entries(sectSystem.resources).forEach(([name, res]) => {
     if (res.unlocked === false) return;
     const btn = document.createElement('button');
     btn.className = 'cast-button';
@@ -664,38 +664,38 @@ function renderResourcesUI() {
 }
 
 function performConstruct() {
-  if (!speechState.pot.length) return;
+  if (!sectSystem.pot.length) return;
   const counts = {};
-  speechState.pot.forEach(r => {
+  sectSystem.pot.forEach(r => {
     counts[r] = (counts[r] || 0) + 1;
   });
   const recipe = recipes.find(r => r.unlocked && Object.entries(r.input).every(([k,v]) => counts[k] >= v));
-  speechState.pot = [];
+  sectSystem.pot = [];
   renderPot();
   renderConstructRequirements();
   if (!recipe) return;
   if (recipe.requirements) {
-    if (recipe.requirements.voiceLevel && speechState.skills.voice.level < recipe.requirements.voiceLevel) {
+    if (recipe.requirements.voiceLevel && sectSystem.skills.voice.level < recipe.requirements.voiceLevel) {
       addLog(`Requires Voice Lv.${recipe.requirements.voiceLevel}`, 'error');
       return;
     }
-    if (recipe.requirements.mindLevel && speechState.skills.mind.level < recipe.requirements.mindLevel) {
+    if (recipe.requirements.mindLevel && sectSystem.skills.mind.level < recipe.requirements.mindLevel) {
       addLog(`Requires Mind Lv.${recipe.requirements.mindLevel}`, 'error');
       return;
     }
-    if (recipe.requirements.water && speechState.resources.water.current < recipe.requirements.water) {
+    if (recipe.requirements.water && sectSystem.resources.water.current < recipe.requirements.water) {
       addLog(`Requires ${recipe.requirements.water} Water`, 'error');
       return;
     }
   }
   for (const [res, amt] of Object.entries(recipe.input)) {
-    if (!speechState.resources[res] || speechState.resources[res].current < amt) return;
+    if (!sectSystem.resources[res] || sectSystem.resources[res].current < amt) return;
   }
   for (const [res, amt] of Object.entries(recipe.input)) {
-    speechState.resources[res].current -= amt;
+    sectSystem.resources[res].current -= amt;
   }
   for (const [res, amt] of Object.entries(recipe.output)) {
-    const r = speechState.resources[res];
+    const r = sectSystem.resources[res];
     if (r) r.current = Math.min(r.max, r.current + amt);
   }
   awardConstructXp(recipe.xp);
@@ -706,16 +706,16 @@ function performConstruct() {
 }
 
 function addConstruct(name) {
-  if (!speechState.savedConstructs.includes(name)) {
-    speechState.savedConstructs.push(name);
+  if (!sectSystem.savedConstructs.includes(name)) {
+    sectSystem.savedConstructs.push(name);
     const def = recipes.find(r => r.name === name);
     if (
       def &&
       def.tags &&
       def.tags.includes('buff') &&
-      speechState.activeConstructs.length < speechState.memorySlots
+      sectSystem.activeConstructs.length < sectSystem.memorySlots
     ) {
-      speechState.activeConstructs.push(name);
+      sectSystem.activeConstructs.push(name);
     }
   }
   if (panel && container) {
@@ -739,18 +739,18 @@ export function renderConstructCards() {
   if (!cont || !slotCont) return;
   cont.innerHTML = '';
   slotCont.innerHTML = '';
-  for (let i = 0; i < speechState.memorySlots; i++) {
+  for (let i = 0; i < sectSystem.memorySlots; i++) {
     const ms = document.createElement('div');
     ms.className = 'memory-slot';
-    if (i < speechState.activeConstructs.length) ms.classList.add('filled');
+    if (i < sectSystem.activeConstructs.length) ms.classList.add('filled');
     slotCont.appendChild(ms);
   }
-  speechState.savedConstructs.forEach(c => {
+  sectSystem.savedConstructs.forEach(c => {
     const wrapper = document.createElement('div');
     wrapper.className = 'construct-card-wrapper';
     wrapper.dataset.name = c;
     const card = createConstructCard(c);
-    if (speechState.activeConstructs.includes(c)) card.classList.add('active');
+    if (sectSystem.activeConstructs.includes(c)) card.classList.add('active');
     card.addEventListener('click', () => {
       toggleConstructActive(c);
       showConstructStats(c);
@@ -763,7 +763,7 @@ export function renderConstructCards() {
     const assign = document.createElement('div');
     assign.className = 'construct-assignment';
     if (assignedId) {
-      const disc = speechState.disciples.find(x => x.id == assignedId);
+      const disc = sectSystem.disciples.find(x => x.id == assignedId);
       assign.textContent = `Chanter: ${disc ? disc.name : assignedId}`;
     } else {
       assign.textContent = 'Assign';
@@ -787,8 +787,8 @@ export function renderConstructCards() {
     cont.appendChild(wrapper);
   });
   if (window.lucide) lucide.createIcons({ icons: lucide.icons });
-  if (speechState.savedConstructs.length > 0) {
-    showConstructStats(speechState.savedConstructs[0]);
+  if (sectSystem.savedConstructs.length > 0) {
+    showConstructStats(sectSystem.savedConstructs[0]);
   }
   renderChantDisciples();
 }
@@ -851,7 +851,7 @@ function renderChantDisciples() {
   const cont = panel.querySelector('#constructDisciples');
   if (!cont) return;
   cont.innerHTML = '';
-  const chanters = speechState.disciples.filter(
+  const chanters = sectSystem.disciples.filter(
     d => sectState.discipleTasks[d.id] === 'Chant'
   );
   const available = chanters.filter(d => !sectState.chantAssignments[d.id]);
@@ -885,7 +885,7 @@ export function createConstructInfo(name) {
     .map(([res, amt]) => `${amt} <i data-lucide="${resourceIcons[res] || 'package'}"></i>`)
     .join(' ');
   const cd = recipe.cooldown || 0;
-  const pot = (speechState.constructPotency[name] || 1).toFixed(2);
+  const pot = (sectSystem.constructPotency[name] || 1).toFixed(2);
   const eff = getConstructEffect(name) || '';
   info.innerHTML = `<div class="stat-line"><span class="stat-cost">Cost: ${costHtml || '—'}</span> <span class="stat-cd">CD: ${cd} s</span> <span class="stat-potency">Potency: ${pot}</span></div><div class="stat-line">Effect: ${eff}</div>`;
   if (window.lucide) lucide.createIcons({ icons: lucide.icons });
@@ -915,28 +915,28 @@ function showConstructStats(name) {
     .map(([res, amt]) => `${amt} <i data-lucide="${resourceIcons[res] || 'package'}"></i>`)
     .join(' ');
   const cd = recipe.cooldown || 0;
-  const pot = (speechState.constructPotency[name] || 1).toFixed(2);
+  const pot = (sectSystem.constructPotency[name] || 1).toFixed(2);
   const eff = getConstructEffect(name) || '';
   statsEl.innerHTML = `<div class="stat-line"><span class="stat-cost">Cost: ${costHtml || '—'}</span> <span class="stat-cd">CD: ${cd} s</span> <span class="stat-potency">Potency: ${pot}</span></div><div class="stat-line">Effect: ${eff}</div>`;
   if (window.lucide) lucide.createIcons({ icons: lucide.icons });
 }
 
 function toggleConstructActive(name) {
-  const idx = speechState.activeConstructs.indexOf(name);
+  const idx = sectSystem.activeConstructs.indexOf(name);
   if (idx >= 0) {
-    speechState.activeConstructs.splice(idx, 1);
-  } else if (speechState.activeConstructs.length < speechState.memorySlots) {
-    speechState.activeConstructs.push(name);
+    sectSystem.activeConstructs.splice(idx, 1);
+  } else if (sectSystem.activeConstructs.length < sectSystem.memorySlots) {
+    sectSystem.activeConstructs.push(name);
   }
   const slotCont = panel.querySelector('#memorySlotsDisplay');
   if (slotCont) {
     [...slotCont.children].forEach((slot, i) => {
-      slot.classList.toggle('filled', i < speechState.activeConstructs.length);
+      slot.classList.toggle('filled', i < sectSystem.activeConstructs.length);
     });
   }
   const cardEl = panel.querySelector(`.construct-card[data-name="${name}"]`);
   if (cardEl) {
-    const active = speechState.activeConstructs.includes(name);
+    const active = sectSystem.activeConstructs.includes(name);
     cardEl.classList.toggle('active', active);
   }
   renderHotbar();
@@ -949,8 +949,8 @@ export function castConstruct(name, el, powerMult = 1, caster = 'player') {
     addLog('Cannot use this construct in combat', 'error');
     return;
   }
-  const voiceSkill = speechState.skills.voice;
-  const mindSkill = speechState.skills.mind;
+  const voiceSkill = sectSystem.skills.voice;
+  const mindSkill = sectSystem.skills.mind;
   if (def.requirements && def.requirements.voiceLevel && voiceSkill.level < def.requirements.voiceLevel) {
     addLog(`Requires Voice Lv.${def.requirements.voiceLevel}`, 'error');
     return;
@@ -959,59 +959,59 @@ export function castConstruct(name, el, powerMult = 1, caster = 'player') {
     addLog(`Requires Mind Lv.${def.requirements.mindLevel}`, 'error');
     return;
   }
-  if (def.requirements && def.requirements.water && speechState.resources.water.current < def.requirements.water) {
+  if (def.requirements && def.requirements.water && sectSystem.resources.water.current < def.requirements.water) {
     addLog(`Requires ${def.requirements.water} Water`, 'error');
     return;
   }
   const cdKey = caster === 'player' ? name : `${name}:${caster}`;
-  if (speechState.cooldowns[cdKey] > 0) return;
+  if (sectSystem.cooldowns[cdKey] > 0) return;
   const cost = def.castCost || def.input;
   for (const [res, amt] of Object.entries(cost)) {
-    const r = speechState.resources[res];
+    const r = sectSystem.resources[res];
     if (!r || r.current < amt) return;
   }
   for (const [res, amt] of Object.entries(cost)) {
-    speechState.resources[res].current -= amt;
+    sectSystem.resources[res].current -= amt;
   }
   for (const [res, amt] of Object.entries(def.output)) {
-    const r = speechState.resources[res];
+    const r = sectSystem.resources[res];
     if (r) r.current = Math.min(r.max, r.current + amt);
   }
   if (name === 'Murmur') {
-    speechState.murmurCasts += 1;
-    speechState.murmurChain += 1;
+    sectSystem.murmurCasts += 1;
+    sectSystem.murmurChain += 1;
     const intone = recipes.find(r => r.name === 'Intone');
-    if (intone && !intone.unlocked && speechState.murmurCasts >= 10) {
+    if (intone && !intone.unlocked && sectSystem.murmurCasts >= 10) {
       intone.unlocked = true;
       addLog('Intone construct unlocked!', 'info');
       addConstruct('Intone');
     }
   } else {
-    speechState.murmurChain = 0;
+    sectSystem.murmurChain = 0;
   }
   const mnemonic = recipes.find(r => r.name === 'Mnemonic Rhythm');
-  if (mnemonic && !mnemonic.unlocked && speechState.murmurChain >= 3) {
+  if (mnemonic && !mnemonic.unlocked && sectSystem.murmurChain >= 3) {
     mnemonic.unlocked = true;
     addLog('Mnemonic Rhythm construct unlocked!', 'info');
     addConstruct('Mnemonic Rhythm');
   }
   let xpMult = 1;
-  if (speechState.mnemonicTimer > 0 && name !== 'Mnemonic Rhythm') {
-    xpMult = 2 + 0.2 * (speechState.mnemonicPotency - 1);
-    speechState.mnemonicBeats += 1;
+  if (sectSystem.mnemonicTimer > 0 && name !== 'Mnemonic Rhythm') {
+    xpMult = 2 + 0.2 * (sectSystem.mnemonicPotency - 1);
+    sectSystem.mnemonicBeats += 1;
   }
   awardConstructXp(def.xp, xpMult);
   lastConstructTarget = el;
   showConstructCloud(name, el);
-  const basePot = speechState.constructPotency[name] || 1;
+  const basePot = sectSystem.constructPotency[name] || 1;
   const levelPot = Math.pow(1.05, getConstructLevel(caster, name));
   let voiceMult = 1;
   if (caster === 'player' && def.tags && def.tags.includes('generator')) {
-    voiceMult = Math.pow(1.05, speechState.skills.voice.level);
+    voiceMult = Math.pow(1.05, sectSystem.skills.voice.level);
   }
   const finalMult = powerMult * basePot * levelPot * voiceMult;
   if (def.duration) {
-    speechState.activeBuffs[name] = { time: def.duration, mult: finalMult };
+    sectSystem.activeBuffs[name] = { time: def.duration, mult: finalMult };
   } else {
     const effect = constructEffects[name];
     if (effect) effect(1, finalMult);
@@ -1021,7 +1021,7 @@ export function castConstruct(name, el, powerMult = 1, caster = 'player') {
     currentEnemy.takeDamage(def.battle.damage * finalMult);
   }
   if (def.cooldown && name !== 'Intone') {
-    speechState.cooldowns[cdKey] = def.cooldown;
+    sectSystem.cooldowns[cdKey] = def.cooldown;
   }
   renderResources();
   renderXpBar();
@@ -1039,7 +1039,7 @@ export function renderHotbar() {
   bars.forEach(bar => {
     bar.innerHTML = '';
     const combatOnly = bar.id === 'combatHotbar';
-    speechState.activeConstructs.forEach(c => {
+    sectSystem.activeConstructs.forEach(c => {
       const recipe = recipes.find(r => r.name === c);
       if (combatOnly && (!recipe || !recipe.tags || !recipe.tags.includes('combat'))) return;
       const wrapper = document.createElement('div');
@@ -1060,7 +1060,7 @@ export function renderXpBar() {
   const lvlEl = document.getElementById('voiceLevel');
   const detailEl = document.getElementById('voiceDetail');
   if (!barFill || !lvlEl) return;
-  const skill = speechState.skills.voice;
+  const skill = sectSystem.skills.voice;
   const prog = getSkillProgress(skill.xp);
   skill.level = prog.level;
   barFill.style.width = `${(prog.progress * 100).toFixed(1)}%`;
@@ -1086,7 +1086,7 @@ function renderOrbs() {
       const el = root.querySelector(`#${id}`);
       if (el) {
         const gainKey = id.replace('orb', '').toLowerCase();
-        const gain = speechState.gains[gainKey] ?? 0;
+        const gain = sectSystem.gains[gainKey] ?? 0;
         el.title = `${Math.floor(orb.current)}/${orb.max} (${gain.toFixed(1)}/sec)`;
         el.classList.toggle('full', orb.current >= orb.max);
       }
@@ -1094,19 +1094,19 @@ function renderOrbs() {
       if (label) label.textContent = `${Math.floor(orb.current)}/${orb.max}`;
       const regenLabel = root.querySelector(`#${id}Regen`);
       if (regenLabel) {
-        if (speechState.upgrades.clarividence.level > 0) {
+        if (sectSystem.upgrades.clarividence.level > 0) {
           const iconEl = regenLabel.querySelector('.season-icon');
           const valEl = regenLabel.querySelector('.regen-value');
           if (valEl) {
             const gainKey = id.replace('orb', '').toLowerCase();
-            const gain = speechState.gains[gainKey] ?? 0;
+            const gain = sectSystem.gains[gainKey] ?? 0;
             valEl.textContent = `+${gain.toFixed(3)}/s`;
           }
           if (id === 'orbWater' && iconEl) {
-            const icon = seasonIcons[speechState.seasonIndex];
+            const icon = seasonIcons[sectSystem.seasonIndex];
             iconEl.textContent = icon;
             regenLabel.onmouseenter = e => {
-              showTooltip(`Base: ${speechState.waterRegenBase.toFixed(3)}<br>Current: ${speechState.gains.water.toFixed(3)}`, e.clientX + 10, e.clientY + 10);
+              showTooltip(`Base: ${sectSystem.waterRegenBase.toFixed(3)}<br>Current: ${sectSystem.gains.water.toFixed(3)}`, e.clientX + 10, e.clientY + 10);
             };
             regenLabel.onmouseleave = hideTooltip;
           }
@@ -1116,7 +1116,7 @@ function renderOrbs() {
         }
       }
     };
-    update('orbWater', speechState.orbs.water);
+    update('orbWater', sectSystem.orbs.water);
   });
   window.dispatchEvent(new CustomEvent('orbs-changed'));
 }
@@ -1124,10 +1124,10 @@ function renderOrbs() {
 function renderSeasonBanner() {
   const banner = document.getElementById('seasonBanner');
   if (!banner) return;
-  const idx = speechState.seasonIndex;
+  const idx = sectSystem.seasonIndex;
   const season = seasons[idx];
   setSeasonBackdrop(season.name);
-  const day = speechState.seasonDay + 1;
+  const day = sectSystem.seasonDay + 1;
   const daysLeft = SEASON_LENGTH_DAYS - day;
   const temp = seasonTemps[idx];
   banner.textContent = `${season.name} Day ${day} (${daysLeft}d) ${temp}°C`;
@@ -1141,8 +1141,8 @@ function renderSeasonBanner() {
       container.classList.remove('verdantia-bg');
     }
   }
-  if (speechState.weather) {
-    banner.innerHTML = `${season.name} Day ${day} (${daysLeft}d) ${temp}°C<span class="weather-icon">${speechState.weather.icon}</span>`;
+  if (sectSystem.weather) {
+    banner.innerHTML = `${season.name} Day ${day} (${daysLeft}d) ${temp}°C<span class="weather-icon">${sectSystem.weather.icon}</span>`;
   }
 }
 
@@ -1154,7 +1154,7 @@ function renderResources() {
   panels.forEach(panelRes => {
     if (!panelRes) return;
     panelRes.innerHTML = '';
-    Object.entries(speechState.resources).forEach(([key, res]) => {
+    Object.entries(sectSystem.resources).forEach(([key, res]) => {
       if (key === 'water' || res.unlocked === false) return;
       const box = document.createElement('div');
       box.className = 'resource-box';
@@ -1188,7 +1188,7 @@ function renderResources() {
 }
 
 function getUpgradeCost(name) {
-  const up = speechState.upgrades[name];
+  const up = sectSystem.upgrades[name];
   if (typeof up.costFunc === 'function') {
     return up.costFunc(up.level);
   }
@@ -1211,11 +1211,11 @@ function getUpgradeCost(name) {
 
 function canAfford(cost) {
   if (typeof cost === 'number') {
-    return speechState.orbs.water.current >= cost;
+    return sectSystem.orbs.water.current >= cost;
   }
   for (const [k, v] of Object.entries(cost)) {
-    const orb = speechState.orbs[k];
-    const res = speechState.resources[k];
+    const orb = sectSystem.orbs[k];
+    const res = sectSystem.resources[k];
     const have = orb ? orb.current : res ? res.current : 0;
     if (have < v) return false;
   }
@@ -1235,14 +1235,14 @@ function updateUpgradeAffordability() {
     if (buy) buy.classList.toggle('disabled', !affordable);
     const spans = btn.querySelectorAll('.icon-row span');
     if (typeof cost === 'number') {
-      const have = speechState.orbs.water.current;
+      const have = sectSystem.orbs.water.current;
       spans.forEach(span => span.classList.toggle('cost-missing', have < cost));
     } else {
       const entries = Object.entries(cost);
       spans.forEach((span, idx) => {
         const [res, amt] = entries[idx] || [];
         const have =
-          (speechState.orbs[res]?.current ?? speechState.resources[res]?.current ?? 0);
+          (sectSystem.orbs[res]?.current ?? sectSystem.resources[res]?.current ?? 0);
         span.classList.toggle('cost-missing', have < amt);
       });
     }
@@ -1250,46 +1250,46 @@ function updateUpgradeAffordability() {
 }
 
 function purchaseUpgrade(name) {
-  const up = speechState.upgrades[name];
+  const up = sectSystem.upgrades[name];
   const cost = getUpgradeCost(name);
-  const prevSlots = speechState.memorySlots;
+  const prevSlots = sectSystem.memorySlots;
   if (typeof cost === 'number') {
-    if (speechState.orbs.water.current < cost) return;
-    speechState.orbs.water.current -= cost;
+    if (sectSystem.orbs.water.current < cost) return;
+    sectSystem.orbs.water.current -= cost;
   } else {
     for (const [k, v] of Object.entries(cost)) {
-      if (speechState.orbs[k] && speechState.orbs[k].current < v) return;
-      if (speechState.resources[k] && speechState.resources[k].current < v) return;
+      if (sectSystem.orbs[k] && sectSystem.orbs[k].current < v) return;
+      if (sectSystem.resources[k] && sectSystem.resources[k].current < v) return;
     }
     for (const [k, v] of Object.entries(cost)) {
-      if (speechState.orbs[k]) speechState.orbs[k].current -= v;
-      if (speechState.resources[k]) speechState.resources[k].current -= v;
+      if (sectSystem.orbs[k]) sectSystem.orbs[k].current -= v;
+      if (sectSystem.resources[k]) sectSystem.resources[k].current -= v;
     }
   }
   up.level += 1;
   if (name === 'cohere') {
-    // regen handled in tickSpeech based on upgrade level
+    // regen handled in tickSect based on upgrade level
   } else if (name === 'vocalMaturity') {
     awardXp(5, ['voice']);
   } else if (name === 'capacityBoost') {
-    speechState.memorySlots += 1;
+    sectSystem.memorySlots += 1;
   } else if (name === 'expandMind') {
-    speechState.orbs.water.max = Math.round(speechState.orbs.water.max * 1.15);
+    sectSystem.orbs.water.max = Math.round(sectSystem.orbs.water.max * 1.15);
   } else if (name === 'soundExpansion') {
-    speechState.resources.sound.max += 25;
+    sectSystem.resources.sound.max += 25;
     if (up.level === 2) {
-      speechState.memorySlots += 1;
+      sectSystem.memorySlots += 1;
     }
   } else if (name === 'cognitiveLattice') {
-    speechState.resources.sound.max += 50;
-    speechState.resources.thought.max += 10;
-    speechState.resources.structure.max += 5;
+    sectSystem.resources.sound.max += 50;
+    sectSystem.resources.thought.max += 10;
+    sectSystem.resources.structure.max += 5;
   }
   renderUpgrades();
   renderGains();
   renderOrbs();
   renderResources();
-  if (speechState.memorySlots !== prevSlots) {
+  if (sectSystem.memorySlots !== prevSlots) {
     renderConstructCards();
   }
 }
@@ -1305,16 +1305,16 @@ export function renderUpgrades() {
     const btn = document.createElement('button');
     btn.dataset.upgrade = name;
     const cost = getUpgradeCost(name);
-    const up = speechState.upgrades[name];
+    const up = sectSystem.upgrades[name];
     let costHtml = '';
     if (typeof cost === 'number') {
-      const have = speechState.orbs.water.current;
+      const have = sectSystem.orbs.water.current;
       const cls = have >= cost ? '' : 'cost-missing';
       costHtml = `<span class="icon-row"><span class="${cls}"><i data-lucide="${resourceIcons.water}"></i> ${cost}</span></span>`;
     } else {
       costHtml = `<span class="icon-row">` +
         Object.entries(cost).map(([r,a]) => {
-          const have = (speechState.orbs[r]?.current ?? speechState.resources[r]?.current ?? 0);
+          const have = (sectSystem.orbs[r]?.current ?? sectSystem.resources[r]?.current ?? 0);
           const cls = have >= a ? '' : 'cost-missing';
           return `<span class="${cls}"><i data-lucide="${resourceIcons[r] || 'package'}"></i> ${a}</span>`;
         }).join(' ') +
@@ -1339,11 +1339,11 @@ export function renderUpgrades() {
     });
     coreGroup.appendChild(btn);
   });
-  if (speechState.upgrades.clarividence.unlocked && speechState.upgrades.clarividence.level === 0) {
+  if (sectSystem.upgrades.clarividence.unlocked && sectSystem.upgrades.clarividence.level === 0) {
     const btn = document.createElement('button');
     btn.dataset.upgrade = 'clarividence';
     const cost = getUpgradeCost('clarividence');
-    const cls = speechState.orbs.water.current >= cost ? '' : 'cost-missing';
+    const cls = sectSystem.orbs.water.current >= cost ? '' : 'cost-missing';
     btn.classList.toggle('unaffordable', !canAfford(cost));
     btn.innerHTML = `<span class="upg-info"><span class="upg-name">clarividence</span><span class="upgrade-level">Lv.0</span></span><div class="detail"><div class="cost"><span class="icon-row"><span class="${cls}"><i data-lucide="${resourceIcons.water}"></i> ${cost}</span></span></div><div class="desc">${upgradeDescriptions.clarividence}</div><span class="buy-btn">Buy</span></div>`;
     btn.addEventListener('click', e => {
@@ -1359,16 +1359,16 @@ export function renderUpgrades() {
     });
     coreGroup.appendChild(btn);
   }
-  if (speechState.upgrades.vocalMaturity.unlocked || speechState.failCount >= 5) {
+  if (sectSystem.upgrades.vocalMaturity.unlocked || sectSystem.failCount >= 5) {
     const vocal = document.createElement('div');
     vocal.className = 'upgrade-group';
     panelUp.appendChild(vocal);
     const btn = document.createElement('button');
     btn.dataset.upgrade = 'vocalMaturity';
     const cost = getUpgradeCost('vocalMaturity');
-    const cls = speechState.orbs.water.current >= cost ? '' : 'cost-missing';
+    const cls = sectSystem.orbs.water.current >= cost ? '' : 'cost-missing';
     btn.classList.toggle('unaffordable', !canAfford(cost));
-    btn.innerHTML = `<span class="upg-info"><span class="upg-name">vocalMaturity</span><span class="upgrade-level">Lv.${speechState.upgrades.vocalMaturity.level}</span></span><div class="detail"><div class="cost"><span class="icon-row"><span class="${cls}"><i data-lucide="${resourceIcons.water}"></i> ${cost}</span></span></div><div class="desc">${upgradeDescriptions.vocalMaturity}</div><span class="buy-btn">Buy</span></div>`;
+    btn.innerHTML = `<span class="upg-info"><span class="upg-name">vocalMaturity</span><span class="upgrade-level">Lv.${sectSystem.upgrades.vocalMaturity.level}</span></span><div class="detail"><div class="cost"><span class="icon-row"><span class="${cls}"><i data-lucide="${resourceIcons.water}"></i> ${cost}</span></span></div><div class="desc">${upgradeDescriptions.vocalMaturity}</div><span class="buy-btn">Buy</span></div>`;
     btn.addEventListener('click', e => {
       if (!btn.classList.contains('expanded')) {
         btn.classList.add('expanded');
@@ -1393,16 +1393,16 @@ function renderGains() {
 function tickActiveConstructs(dt) {
   // Constructs no longer auto-cast when slotted. Only active buffs
   // from previously cast constructs are processed each tick.
-  for (const name of Object.keys(speechState.activeBuffs)) {
-    const data = speechState.activeBuffs[name];
+  for (const name of Object.keys(sectSystem.activeBuffs)) {
+    const data = sectSystem.activeBuffs[name];
     const effect = constructEffects[name];
     if (effect) effect(dt, data.mult || 1);
     data.time -= dt;
-    if (data.time <= 0) delete speechState.activeBuffs[name];
+    if (data.time <= 0) delete sectSystem.activeBuffs[name];
   }
-  for (const name of Object.keys(speechState.cooldowns)) {
-    speechState.cooldowns[name] = Math.max(0, speechState.cooldowns[name] - dt);
-    if (speechState.cooldowns[name] === 0) delete speechState.cooldowns[name];
+  for (const name of Object.keys(sectSystem.cooldowns)) {
+    sectSystem.cooldowns[name] = Math.max(0, sectSystem.cooldowns[name] - dt);
+    if (sectSystem.cooldowns[name] === 0) delete sectSystem.cooldowns[name];
   }
 }
 
@@ -1413,13 +1413,13 @@ function updateCooldownOverlays() {
     const name = card.dataset.name;
     const def = recipes.find(r => r.name === name);
     if (!def) return;
-    const remaining = def.cooldown ? (speechState.cooldowns[name] || 0) : 0;
+    const remaining = def.cooldown ? (sectSystem.cooldowns[name] || 0) : 0;
     const ratio = def.cooldown ? 1 - remaining / def.cooldown : 1;
     const fill = card.querySelector('.cooldown-bar-fill');
     if (fill) fill.style.width = `${ratio * 100}%`;
     const cost = def.castCost || def.input || {};
     const affordable = Object.entries(cost).every(([res, amt]) => {
-      const r = speechState.resources[res];
+      const r = sectSystem.resources[res];
       return r && r.current >= amt;
     });
     const ready = remaining === 0 && affordable;
@@ -1437,14 +1437,14 @@ function updateIntoneUI() {
   if (card) {
     const meter = card.querySelectorAll('.intone-seg');
     meter.forEach((seg, idx) => {
-      const filled = speechState.intoneTimer > 0 || speechState.intonePresses > idx;
+      const filled = sectSystem.intoneTimer > 0 || sectSystem.intonePresses > idx;
       seg.classList.toggle('filled', filled);
     });
     const timer = card.querySelector('.intone-timer');
     if (timer) {
-      if (speechState.intoneTimer > 0) {
+      if (sectSystem.intoneTimer > 0) {
         timer.style.display = 'flex';
-        timer.textContent = `${Math.ceil(speechState.intoneTimer)}s`;
+        timer.textContent = `${Math.ceil(sectSystem.intoneTimer)}s`;
       } else {
         timer.style.display = 'none';
       }
@@ -1463,50 +1463,50 @@ function updateMnemonicUI() {
   if (!card) return;
   const fill = card.querySelector('.mnemonic-bar-fill');
   if (fill) {
-    const ratio = Math.max(0, Math.min(1, speechState.mnemonicTimer / 3));
+    const ratio = Math.max(0, Math.min(1, sectSystem.mnemonicTimer / 3));
     fill.style.width = `${ratio * 100}%`;
   }
   const beats = card.querySelector('.mnemonic-beats');
   if (beats) {
-    beats.textContent = speechState.mnemonicTimer > 0 ? speechState.mnemonicBeats : '';
+    beats.textContent = sectSystem.mnemonicTimer > 0 ? sectSystem.mnemonicBeats : '';
   }
-  card.classList.toggle('mnemonic-active', speechState.mnemonicTimer > 0);
+  card.classList.toggle('mnemonic-active', sectSystem.mnemonicTimer > 0);
 }
 
-export function tickSpeech(delta) {
+export function tickSectSystem(delta) {
   const hasUI = !!container;
   const dt = delta / 1000;
-  const activeDisc = speechState.disciples.filter(d => !d.incapacitated).length;
-  if (speechState.intoneTimer > 0) {
-    speechState.intoneTimer = Math.max(0, speechState.intoneTimer - dt);
-    if (speechState.intoneTimer === 0) {
-      speechState.intonePresses = 0;
+  const activeDisc = sectSystem.disciples.filter(d => !d.incapacitated).length;
+  if (sectSystem.intoneTimer > 0) {
+    sectSystem.intoneTimer = Math.max(0, sectSystem.intoneTimer - dt);
+    if (sectSystem.intoneTimer === 0) {
+      sectSystem.intonePresses = 0;
     }
   } else {
-    speechState.intoneIdle += dt;
-    if (speechState.intonePresses < 15 && speechState.intoneIdle >= 2) {
-      const dec = Math.floor(speechState.intoneIdle / 2);
-      speechState.intonePresses = Math.max(0, speechState.intonePresses - dec);
-      speechState.intoneIdle -= dec * 2;
+    sectSystem.intoneIdle += dt;
+    if (sectSystem.intonePresses < 15 && sectSystem.intoneIdle >= 2) {
+      const dec = Math.floor(sectSystem.intoneIdle / 2);
+      sectSystem.intonePresses = Math.max(0, sectSystem.intonePresses - dec);
+      sectSystem.intoneIdle -= dec * 2;
     }
   }
-  if (speechState.mnemonicTimer > 0) {
-    speechState.mnemonicTimer = Math.max(0, speechState.mnemonicTimer - dt);
-    if (speechState.mnemonicTimer === 0) {
-      speechState.mnemonicBeats = 0;
+  if (sectSystem.mnemonicTimer > 0) {
+    sectSystem.mnemonicTimer = Math.max(0, sectSystem.mnemonicTimer - dt);
+    if (sectSystem.mnemonicTimer === 0) {
+      sectSystem.mnemonicBeats = 0;
     }
   }
-  speechState.seasonTimer += dt;
-  if (speechState.seasonTimer >= DAY_LENGTH_SECONDS) {
-    speechState.seasonTimer -= DAY_LENGTH_SECONDS;
-    speechState.seasonDay += 1;
+  sectSystem.seasonTimer += dt;
+  if (sectSystem.seasonTimer >= DAY_LENGTH_SECONDS) {
+    sectSystem.seasonTimer -= DAY_LENGTH_SECONDS;
+    sectSystem.seasonDay += 1;
     document.dispatchEvent(new CustomEvent('day-passed', {
-      detail: { day: speechState.seasonDay, season: speechState.seasonIndex }
+      detail: { day: sectSystem.seasonDay, season: sectSystem.seasonIndex }
     }));
-    if (!speechState.weather && Math.random() < 0.01) {
+    if (!sectSystem.weather && Math.random() < 0.01) {
       const type = Math.random() < 0.5 ? 'clear' : 'torment';
       const duration = 180 + Math.floor(Math.random() * 121); // 3-5 minutes
-      speechState.weather = {
+      sectSystem.weather = {
         type,
         multiplier: type === 'clear' ? 1.25 : 0.5,
         icon: type === 'clear' ? '\u2728' : '\uD83D\uDE2D',
@@ -1514,46 +1514,46 @@ export function tickSpeech(delta) {
       };
       addLog(type === 'clear' ? 'Clear minded day!' : 'Torment sets in!', 'info');
     }
-    if (speechState.seasonDay >= SEASON_LENGTH_DAYS) {
-      speechState.seasonDay = 0;
-      speechState.seasonIndex = (speechState.seasonIndex + 1) % seasons.length;
+    if (sectSystem.seasonDay >= SEASON_LENGTH_DAYS) {
+      sectSystem.seasonDay = 0;
+      sectSystem.seasonIndex = (sectSystem.seasonIndex + 1) % seasons.length;
     }
   }
-  if (speechState.weather) {
-    speechState.weather.duration -= dt;
-    if (speechState.weather.duration <= 0) speechState.weather = null;
+  if (sectSystem.weather) {
+    sectSystem.weather.duration -= dt;
+    if (sectSystem.weather.duration <= 0) sectSystem.weather = null;
   }
-  const ins = speechState.resources.water;
+  const ins = sectSystem.resources.water;
   const startWater = ins.current;
-  const seasonMult = seasons[speechState.seasonIndex].multiplier;
+  const seasonMult = seasons[sectSystem.seasonIndex].multiplier;
   const baseRateRaw = R_MAX / (1 + Math.exp((ins.current - getWaterMidpoint()) / K));
-  const level = speechState.upgrades.cohere.level;
+  const level = sectSystem.upgrades.cohere.level;
   // provide baseline regen at level 0 while still tapering off with higher levels
   const upgradeMult = (level + 1) / (level + 5);
   const idleCount =
-    speechState.upgrades.idleChatter.level > 0
-      ? speechState.disciples.filter(
+    sectSystem.upgrades.idleChatter.level > 0
+      ? sectSystem.disciples.filter(
           d => (sectState.discipleTasks[d.id] || 'Idle') === 'Idle'
         ).length
       : 0;
   const idleMult = 1 + idleCount * 0.05;
   const baseTotal = baseRateRaw * upgradeMult * idleMult;
   let regen = baseTotal * seasonMult;
-  if (speechState.weather) regen *= speechState.weather.multiplier;
+  if (sectSystem.weather) regen *= sectSystem.weather.multiplier;
   regen = Math.min(R_MAX, regen) * getIntoneMultiplier();
-  speechState.waterRegenBase = baseTotal;
+  sectSystem.waterRegenBase = baseTotal;
   ins.current = Math.min(ins.max, ins.current + regen * dt);
   // Unlock clarividence once the player demonstrates basic water control
   // by accumulating at least 50 water.
-  if (!speechState.upgrades.clarividence.unlocked && ins.current >= 50) {
-    speechState.upgrades.clarividence.unlocked = true;
+  if (!sectSystem.upgrades.clarividence.unlocked && ins.current >= 50) {
+    sectSystem.upgrades.clarividence.unlocked = true;
     if (hasUI) renderUpgrades();
   }
   const echo = recipes.find(r => r.name === 'Echo of Mind');
   if (
     echo &&
     !echo.unlocked &&
-    speechState.skills.voice.level >= 3 &&
+    sectSystem.skills.voice.level >= 3 &&
     ins.current >= 1500
   ) {
     echo.unlocked = true;
@@ -1561,15 +1561,15 @@ export function tickSpeech(delta) {
     addLog('Echo of Mind construct unlocked!', 'info');
     if (hasUI) {
       addConstruct('Echo of Mind');
-    } else if (!speechState.savedConstructs.includes('Echo of Mind')) {
-      speechState.savedConstructs.push('Echo of Mind');
+    } else if (!sectSystem.savedConstructs.includes('Echo of Mind')) {
+      sectSystem.savedConstructs.push('Echo of Mind');
     }
   }
   const pulse = recipes.find(r => r.name === 'Clarity Pulse');
   if (
     pulse &&
     !pulse.unlocked &&
-    speechState.skills.mind.level >= 2 &&
+    sectSystem.skills.mind.level >= 2 &&
     ins.current >= 1700
   ) {
     pulse.unlocked = true;
@@ -1577,15 +1577,15 @@ export function tickSpeech(delta) {
     addLog('Clarity Pulse construct unlocked!', 'info');
     if (hasUI) {
       addConstruct('Clarity Pulse');
-    } else if (!speechState.savedConstructs.includes('Clarity Pulse')) {
-      speechState.savedConstructs.push('Clarity Pulse');
+    } else if (!sectSystem.savedConstructs.includes('Clarity Pulse')) {
+      sectSystem.savedConstructs.push('Clarity Pulse');
     }
   }
   const seed = recipes.find(r => r.name === 'Symbol Seed');
   if (
     seed &&
     !seed.unlocked &&
-    speechState.skills.mind.level >= 3 &&
+    sectSystem.skills.mind.level >= 3 &&
     ins.current >= 2000
   ) {
     seed.unlocked = true;
@@ -1593,16 +1593,16 @@ export function tickSpeech(delta) {
     addLog('Symbol Seed construct unlocked!', 'info');
     if (hasUI) {
       addConstruct('Symbol Seed');
-    } else if (!speechState.savedConstructs.includes('Symbol Seed')) {
-      speechState.savedConstructs.push('Symbol Seed');
+    } else if (!sectSystem.savedConstructs.includes('Symbol Seed')) {
+      sectSystem.savedConstructs.push('Symbol Seed');
     }
   }
   const mental = recipes.find(r => r.name === 'Mental Construct');
   if (
     mental &&
     !mental.unlocked &&
-    speechState.skills.voice.level >= 5 &&
-    speechState.skills.mind.level >= 5 &&
+    sectSystem.skills.voice.level >= 5 &&
+    sectSystem.skills.mind.level >= 5 &&
     ins.current >= 2300
   ) {
     mental.unlocked = true;
@@ -1610,18 +1610,18 @@ export function tickSpeech(delta) {
     addLog('Mental Construct unlocked!', 'info');
     if (hasUI) {
       addConstruct('Mental Construct');
-    } else if (!speechState.savedConstructs.includes('Mental Construct')) {
-      speechState.savedConstructs.push('Mental Construct');
+    } else if (!sectSystem.savedConstructs.includes('Mental Construct')) {
+      sectSystem.savedConstructs.push('Mental Construct');
     }
   }
   const call = recipes.find(r => r.name === 'The Calling');
-  if (call && !call.unlocked && speechState.resources.sound.current >= 100) {
+  if (call && !call.unlocked && sectSystem.resources.sound.current >= 100) {
     call.unlocked = true;
     addLog('The Calling construct unlocked!', 'info');
     if (hasUI) {
       addConstruct('The Calling');
-    } else if (!speechState.savedConstructs.includes('The Calling')) {
-      speechState.savedConstructs.push('The Calling');
+    } else if (!sectSystem.savedConstructs.includes('The Calling')) {
+      sectSystem.savedConstructs.push('The Calling');
     }
   }
   tickActiveConstructs(dt);
@@ -1667,25 +1667,25 @@ export function openWaterRegenPopup() {
   const list = document.createElement('div');
   list.className = 'water-regen-list';
 
-  const ins = speechState.resources.water;
-  const season = seasons[speechState.seasonIndex];
+  const ins = sectSystem.resources.water;
+  const season = seasons[sectSystem.seasonIndex];
   const baseRateRaw = R_MAX / (1 + Math.exp((ins.current - getWaterMidpoint()) / K));
-  const level = speechState.upgrades.cohere.level;
+  const level = sectSystem.upgrades.cohere.level;
   const upgradeMult = (level + 1) / (level + 5);
   const idleCount =
-    speechState.upgrades.idleChatter.level > 0
-      ? speechState.disciples.filter(
+    sectSystem.upgrades.idleChatter.level > 0
+      ? sectSystem.disciples.filter(
           d => (sectState.discipleTasks[d.id] || 'Idle') === 'Idle'
         ).length
       : 0;
   const idleMult = 1 + idleCount * 0.05;
   const seasonMult = season.multiplier;
-  const weatherMult = speechState.weather ? speechState.weather.multiplier : 1;
+  const weatherMult = sectSystem.weather ? sectSystem.weather.multiplier : 1;
   const intoneMult = getIntoneMultiplier();
-  const researcherCount = speechState.disciples.filter(
+  const researcherCount = sectSystem.disciples.filter(
     d => sectState.discipleTasks[d.id] === 'Research'
   ).length;
-  const chanterCount = speechState.disciples.filter(
+  const chanterCount = sectSystem.disciples.filter(
     d => sectState.discipleTasks[d.id] === 'Chant'
   ).length;
 
@@ -1704,8 +1704,8 @@ export function openWaterRegenPopup() {
     rows.push({ label: `Idle Disciples (${idleCount})`, value: `×${idleMult.toFixed(2)}` });
   }
   rows.push({ label: `Season (${season.name})`, value: `×${seasonMult.toFixed(2)}` });
-  if (speechState.weather) {
-    rows.push({ label: `Weather (${speechState.weather.type})`, value: `×${weatherMult.toFixed(2)}` });
+  if (sectSystem.weather) {
+    rows.push({ label: `Weather (${sectSystem.weather.type})`, value: `×${weatherMult.toFixed(2)}` });
   }
   rows.push({ label: 'Intone', value: `×${intoneMult.toFixed(2)}` });
   if (researcherCount > 0) {
@@ -1733,7 +1733,7 @@ export function openWaterRegenPopup() {
 
   const totalRow = document.createElement('div');
   totalRow.className = 'water-total';
-  totalRow.textContent = `Total: ${speechState.gains.water.toFixed(3)}/s`;
+  totalRow.textContent = `Total: ${sectSystem.gains.water.toFixed(3)}/s`;
   list.appendChild(totalRow);
 
   box.appendChild(list);
