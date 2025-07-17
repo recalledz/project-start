@@ -119,7 +119,6 @@ function clearActiveDisciples() {
 // theme state
 let isDarkenshift = false;
 // resources and progress trackers
-let cardPoints = 0;
 export let currentEnemy = null
 
 
@@ -510,16 +509,6 @@ const BUILDINGS = {
 
 const lifeCore = { real: false };
 
-const barUpgrades = {
-  damage: { level: 0, progress: 0, points: 0, multiplier: 1 },
-  maxHp: { level: 0, progress: 0, points: 0, multiplier: 1 }
-};
-
-// Card HP adjustments moved to card.js utilities
-
-function computeBarMultiplier(level) {
-  return 1 + (level / (level + 20)) * 9;
-}
 
 // progress gained per second for each point invested in a bar
 const BAR_PROGRESS_RATE = 0.1;
@@ -587,9 +576,6 @@ const playerStats = {
 // Debug time scaling
 const FAST_MODE_SCALE = 10;
 let timeScale = 1;
-
-// Definitions for purchasable upgrades and their effects are
-// centralized in cardUpgrades.js
 
 // Utility to colorize the enemy icon based on stage level
 function getDealerIconStyle(stage) {
@@ -3333,14 +3319,13 @@ function cDealerDamage(damageAmount = null, ability = null, source = "dealer") {
   updateBloodSplat(card);
   // if it’s dead, remove it
   if (card.currentHp === 0) {
-    if (targets === drawnCards) {
+    if (targets === activeDisciples) {
       // immediately remove from data so new draws don't shift the wrong card
-      drawnCards.splice(idx, 1);
       animateCardDeath(card, () => {
         removeBloodSplat(card);
         card.wrapperElement?.remove();
         updatePlayerStats(stats);
-        if (drawnCards.length === 0) {
+        if (targets.length === 0) {
           playerStats.hasDied = true;
           showRestartScreen(returnPartyToSect);
         }
@@ -3509,7 +3494,7 @@ function openCamp(onCloseCallback = null) {
   addBtn('▶ Continue', () => closeCamp(), 'Resume journey');
 
   addBtn('♥ Heal Party', () => {
-    drawnCards.forEach(c => {
+    activeDisciples.forEach(c => {
       if (!c) return;
       c.currentHp = Math.min(c.maxHp, c.currentHp + c.maxHp * 0.5);
     });
@@ -3519,7 +3504,7 @@ function openCamp(onCloseCallback = null) {
 
   const handRow = document.createElement('div');
   handRow.classList.add('overlay-hand');
-  drawnCards.forEach(c => {
+  activeDisciples.forEach(c => {
     if (!c || !c.wrapperElement) return;
     handRow.appendChild(c.wrapperElement.cloneNode(true));
   });
@@ -3782,15 +3767,6 @@ function updatePlayerStats() {
     stats.damageBuffMultiplier = 1;
   }
 
-  for (const card of drawnCards) {
-    if (!card) continue;
-    recalcCardHp(card, stats, barUpgrades);
-
-    stats.pDamage += card.damage;
-    stats.attackSpeed += card.attackSpeed;
-    stats.avgCombatLevel += card.combatLevel;
-  }
-
   // Calculate average proficiency level of disciples
   if (speechState && Array.isArray(speechState.disciples)) {
     let total = 0;
@@ -3807,9 +3783,9 @@ function updatePlayerStats() {
     stats.damageBuffMultiplier *
     attributes.Strength.meleeDamageMultiplier;
 
-  if (drawnCards.length > 0) {
-    stats.attackSpeed /= drawnCards.length;
-    stats.avgCombatLevel /= drawnCards.length;
+  if (activeDisciples.length > 0) {
+    stats.attackSpeed /= activeDisciples.length;
+    stats.avgCombatLevel /= activeDisciples.length;
   } else {
     stats.attackSpeed = BASE_STATS.attackSpeed;
   }
@@ -3834,18 +3810,14 @@ Object.entries(upgrades).map(([k, u]) => [k, u.unlocked])
     stats,
     stageData,
     upgradePowerPurchased,
-    cardPoints,
     upgrades: upgradeLevels,
-    unlockedJokers: unlockedJokers.map(j => j.id),
     playerStats,
     worldProgress,
-    barUpgrades,
     lifeCore,
     speechState,
     sectState,
     sectTabUnlocked,
     systems: {
-      manaUnlocked: systems.manaUnlocked,
       buildingUnlocked: systems.buildingUnlocked,
       researchUnlocked: systems.researchUnlocked,
       chantingHallUnlocked: systems.chantingHallUnlocked,
@@ -3870,8 +3842,6 @@ if (!json) return;
 
 try {
 const state = JSON.parse(json);
-  // legacy cash/chip values are ignored
-  cardPoints = state.cardPoints || 0;
   upgradePowerPurchased = state.upgradePowerPurchased || 0;
   Object.assign(stats, state.stats || {});
   if (state.systems) {
