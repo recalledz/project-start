@@ -773,7 +773,11 @@ function setupTabHandlers() {
         refreshCore();
         showTab(playerTab);
         setActiveTabButton(playerTabButton);
-        if (playerConstructSubTabButton) playerConstructSubTabButton.click();
+        if (sectTabUnlocked && playerSectSubTabButton) {
+          playerSectSubTabButton.click();
+        } else if (playerConstructSubTabButton) {
+          playerConstructSubTabButton.click();
+        }
       }
     },
     {
@@ -1076,9 +1080,14 @@ function initTabs() {
       // economy stats removed
     });
 
-  showTab(playerTab); // Start with construct panel visible
+  // Start with the sect panel if unlocked, otherwise default to the construct panel
+  showTab(playerTab);
   setActiveTabButton(playerTabButton);
-  if (playerConstructSubTabButton) playerConstructSubTabButton.click();
+  if (sectTabUnlocked && playerSectSubTabButton) {
+    playerSectSubTabButton.click();
+  } else if (playerConstructSubTabButton) {
+    playerConstructSubTabButton.click();
+  }
 }
 
 function initPollen() {
@@ -2505,6 +2514,12 @@ document.addEventListener("DOMContentLoaded", () => {
   initPollen();
   window.addEventListener('location-discovered', e => addDiscoveredLocation(e.detail.name));
   loadGame();
+  // After loading the save, open the Sect panel if it is unlocked
+  if (sectTabUnlocked && playerSectSubTabButton) {
+    playerSectSubTabButton.click();
+  } else if (playerConstructSubTabButton) {
+    playerConstructSubTabButton.click();
+  }
   checkBuildingUnlock();
   if (systems.researchUnlocked && colonyResearchTabButton) {
     colonyResearchTabButton.style.display = '';
