@@ -2558,8 +2558,8 @@ document.addEventListener("DOMContentLoaded", () => {
   initPollen();
   window.addEventListener('location-discovered', e => addDiscoveredLocation(e.detail.name));
   loadGame();
-  if (speechState.disciples.length === 0) {
-    speechState.disciples.push(...disciples);
+  if (sectSystem.disciples.length === 0) {
+    sectSystem.disciples.push(...disciples);
     sectTabUnlocked = true;
     if (playerSectSubTabButton) playerSectSubTabButton.style.display = '';
     updateSectDisplay();
