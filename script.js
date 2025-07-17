@@ -2598,7 +2598,6 @@ document.addEventListener("DOMContentLoaded", () => {
       openCamp(() => openCardUpgradeSelection(nextStage));
     });
   }
-  renderJokers();
   const buttons = document.querySelector('.buttonsContainer');
   playerAttackFill = renderPlayerAttackBar(buttons);
   hidePlayerAttackBar();
