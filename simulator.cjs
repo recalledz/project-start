@@ -1,4 +1,6 @@
 // simulator.cjs
+/* eslint-env node */
+/* global process */
 const { saveCSV } = require('./utils/logger.cjs');
 
 class GameSimulator {

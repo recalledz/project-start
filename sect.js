@@ -1,5 +1,5 @@
 import addLog from './log.js';
-import { coreState, refreshCore } from './core.js';
+import { refreshCore } from './core.js';
 import { sectState, systems, currentEnemy } from './script.js';
 import { generateDiscipleAttributes } from './discipleAttributes.js';
 import Disciple from './disciple.js';
@@ -443,7 +443,7 @@ const constructEffects = {
       res.unlocked = true;
     }
   },
-  Intone(dt, pot = 1) {
+    Intone() {
     if (sectSystem.intoneTimer > 0) return;
     if (sectSystem.intonePresses < 15) {
       sectSystem.intonePresses += 1;
@@ -571,7 +571,7 @@ export function initSect() {
   renderChantDisciples();
   renderHotbar();
   renderSeasonBanner();
-  if (window.lucide) lucide.createIcons({ icons: lucide.icons });
+  if (window.lucide) window.lucide.createIcons({ icons: window.lucide.icons });
   const waterOrbEl = container.querySelector('#orbWater');
   if (waterOrbEl) waterOrbEl.addEventListener('click', openWaterRegenPopup);
   document.addEventListener('disciple-gained', renderChantDisciples);
@@ -606,7 +606,7 @@ function renderPot() {
     pot.innerHTML = sectSystem.pot
       .map(r => `<i data-lucide="${resourceIcons[r] || 'package'}"></i>`)
       .join(' ');
-    if (window.lucide) lucide.createIcons({ icons: lucide.icons });
+    if (window.lucide) window.lucide.createIcons({ icons: window.lucide.icons });
   } else {
     pot.textContent = '⚗️';
   }
@@ -759,7 +759,7 @@ export function renderConstructCards() {
     const timer = document.createElement('div');
     timer.className = 'cooldown-timer';
     wrapper.appendChild(timer);
-    const assignedId = Object.entries(sectState.chantAssignments).find(([id, n]) => n === c)?.[0];
+    const assignedId = Object.entries(sectState.chantAssignments).find(([, n]) => n === c)?.[0];
     const assign = document.createElement('div');
     assign.className = 'construct-assignment';
     if (assignedId) {
@@ -786,7 +786,7 @@ export function renderConstructCards() {
     wrapper.appendChild(assign);
     cont.appendChild(wrapper);
   });
-  if (window.lucide) lucide.createIcons({ icons: lucide.icons });
+  if (window.lucide) window.lucide.createIcons({ icons: window.lucide.icons });
   if (sectSystem.savedConstructs.length > 0) {
     showConstructStats(sectSystem.savedConstructs[0]);
   }
@@ -888,7 +888,7 @@ export function createConstructInfo(name) {
   const pot = (sectSystem.constructPotency[name] || 1).toFixed(2);
   const eff = getConstructEffect(name) || '';
   info.innerHTML = `<div class="stat-line"><span class="stat-cost">Cost: ${costHtml || '—'}</span> <span class="stat-cd">CD: ${cd} s</span> <span class="stat-potency">Potency: ${pot}</span></div><div class="stat-line">Effect: ${eff}</div>`;
-  if (window.lucide) lucide.createIcons({ icons: lucide.icons });
+  if (window.lucide) window.lucide.createIcons({ icons: window.lucide.icons });
   return info;
 }
 
@@ -918,7 +918,7 @@ function showConstructStats(name) {
   const pot = (sectSystem.constructPotency[name] || 1).toFixed(2);
   const eff = getConstructEffect(name) || '';
   statsEl.innerHTML = `<div class="stat-line"><span class="stat-cost">Cost: ${costHtml || '—'}</span> <span class="stat-cd">CD: ${cd} s</span> <span class="stat-potency">Potency: ${pot}</span></div><div class="stat-line">Effect: ${eff}</div>`;
-  if (window.lucide) lucide.createIcons({ icons: lucide.icons });
+  if (window.lucide) window.lucide.createIcons({ icons: window.lucide.icons });
 }
 
 function toggleConstructActive(name) {
@@ -1106,9 +1106,9 @@ function renderOrbs() {
             const icon = seasonIcons[sectSystem.seasonIndex];
             iconEl.textContent = icon;
             regenLabel.onmouseenter = e => {
-              showTooltip(`Base: ${sectSystem.waterRegenBase.toFixed(3)}<br>Current: ${sectSystem.gains.water.toFixed(3)}`, e.clientX + 10, e.clientY + 10);
+              window.showTooltip(`Base: ${sectSystem.waterRegenBase.toFixed(3)}<br>Current: ${sectSystem.gains.water.toFixed(3)}`, e.clientX + 10, e.clientY + 10);
             };
-            regenLabel.onmouseleave = hideTooltip;
+            regenLabel.onmouseleave = window.hideTooltip;
           }
           regenLabel.style.display = 'flex';
         } else {
@@ -1182,7 +1182,7 @@ function renderResources() {
       panelRes.appendChild(box);
     });
   });
-  if (window.lucide) lucide.createIcons({ icons: lucide.icons });
+  if (window.lucide) window.lucide.createIcons({ icons: window.lucide.icons });
   window.dispatchEvent(new CustomEvent('resources-changed'));
   updateUpgradeAffordability();
 }
@@ -1476,7 +1476,6 @@ function updateMnemonicUI() {
 export function tickSectSystem(delta) {
   const hasUI = !!container;
   const dt = delta / 1000;
-  const activeDisc = sectSystem.disciples.filter(d => !d.incapacitated).length;
   if (sectSystem.intoneTimer > 0) {
     sectSystem.intoneTimer = Math.max(0, sectSystem.intoneTimer - dt);
     if (sectSystem.intoneTimer === 0) {
@@ -1524,7 +1523,6 @@ export function tickSectSystem(delta) {
     if (sectSystem.weather.duration <= 0) sectSystem.weather = null;
   }
   const ins = sectSystem.resources.water;
-  const startWater = ins.current;
   const seasonMult = seasons[sectSystem.seasonIndex].multiplier;
   const baseRateRaw = R_MAX / (1 + Math.exp((ins.current - getWaterMidpoint()) / K));
   const level = sectSystem.upgrades.cohere.level;

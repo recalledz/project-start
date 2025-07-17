@@ -1,4 +1,5 @@
 // starChart.js
+/* global PIXI */
 
 let initialized = false;
 let app = null;
