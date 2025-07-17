@@ -3141,7 +3141,6 @@ function onDealerDefeat() {
   enemyAttackProgress = currentEnemy.attackTimer / currentEnemy.attackInterval;
   // clear enemy immediately to prevent repeated callbacks
   currentEnemy = null;
-  healCardsOnKill();
   stageData.kills += 1;
   playerStats.stageKills[stageData.stage] = stageData.kills;
   killsDisplay.textContent = `Kills: ${formatNumber(stageData.kills)}`;
@@ -3204,7 +3203,6 @@ function onBossDefeat(boss) {
   playerStats.totalBossKills += 1;
   renderGlobalStats();
 
-  healCardsOnKill();
   stats.upgradePower += 5;
   renderPurchasedUpgrades();
   checkSpeakerEncounter();
