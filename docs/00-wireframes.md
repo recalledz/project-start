@@ -157,7 +157,8 @@ Footer
 │ ┌───────────────────────────────┐  ┌────────────────────────────┐ │
 │ │ **Regions to Explore**       │  │ **Selection: Verdantia**   │ │
 │ │                               │  │                            │ │
-│ │ • Verdantia       35%         │  │ Distance: 0.5 units        │ │
+│ │ • esoteric dungeon 100%
+    • Verdantia       35%         │  │ Distance: 0.5 units        │ │
 │ │ • Greenridge      12%         │  │ Danger: Low                │ │
 │ │ • Stoneveil       0%          │  │ Discovery: 35 / 75 pts     │ │
 │ │ • Frostvale       0%          │  │                            │ │
