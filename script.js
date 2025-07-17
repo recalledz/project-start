@@ -724,7 +724,7 @@ let discipleInfoView = 'status';
 const sectDiscipleEls = {};
 const discipleGatherPhase = {};
 let discipleMoveInterval;
-let sectTabUnlocked = false;
+let sectTabUnlocked = true;
 let statsOverviewSubTabButton;
 let statsEconomySubTabButton;
 let statsOverviewContainer;
