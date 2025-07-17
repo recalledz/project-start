@@ -3719,6 +3719,7 @@ body.darkenshift-mode .tabsContainer button.active {
     align-items: flex-start;
     gap: 4px;
     pointer-events: none;
+    z-index: 2;
 }
 .sect-header > * { pointer-events: auto; }
 
