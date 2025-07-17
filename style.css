@@ -4466,3 +4466,34 @@ body.darkenshift-mode .tabsContainer button.active {
   padding: 2px 0;
 }
 
+/* Exploration overlay styles */
+.exploration-overlay .overlay-box {
+  max-width: 700px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.exploration-map {
+  width: 100%;
+  max-height: 200px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+.exploration-overlay-tabs {
+  display: flex;
+  gap: 4px;
+}
+.exploration-overlay-tabs button.active {
+  background: #444;
+}
+.exploration-overlay-content .exploration-tab-content {
+  display: none;
+}
+.exploration-overlay-content .exploration-tab-content.active {
+  display: block;
+}
+.explore-wrap {
+  display: flex;
+  gap: 8px;
+}
+

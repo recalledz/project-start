@@ -750,6 +750,7 @@ let colonyBuildTabButton;
 let colonyResearchTabButton;
 let locationsPanelBtn;
 let gateBtn;
+let explorationOverlay = null;
 let sectDisciplesContainer;
 let sectDiscipleListContainer;
 let selectedDiscipleId = null;
@@ -819,21 +820,6 @@ function setupTabHandlers() {
         showTab(playerTab);
         setActiveTabButton(playerTabButton);
         if (playerConstructSubTabButton) playerConstructSubTabButton.click();
-      }
-    },
-    {
-      buttonSelector: '.explorationTabButton',
-      onClick: () => {
-        renderExplorationTab();
-        showTab(explorationTab);
-        setActiveTabButton(explorationTabButton);
-      }
-    },
-    {
-      buttonSelector: '.locationTabButton',
-      onClick: () => {
-        showTab(locationTab);
-        setActiveTabButton(locationTabButton);
       }
     },
     {
@@ -1041,39 +1027,16 @@ function initTabs() {
 
 
   if (locationsPanelBtn)
-  locationsPanelBtn.addEventListener('click', () => {
-    showTab(locationTab);
-    setActiveTabButton(locationTabButton);
-  });
+    locationsPanelBtn.addEventListener('click', openExplorationOverlay);
   if (gateBtn)
     gateBtn.addEventListener('click', () => {
       if (discoveredLocations.length === 0) {
         LOCATION_DEFS.forEach(loc => addDiscoveredLocation(loc.name));
       }
-      showTab(explorationTab);
-      setActiveTabButton(explorationTabButton);
+      openExplorationOverlay();
     });
   if (startDungeonBtn)
-    startDungeonBtn.addEventListener('click', () => {
-      if (!explorationListContainer) return;
-      explorationParty.clear();
-      explorationListContainer
-        .querySelectorAll('input[type="checkbox"]:checked')
-        .forEach(cb => explorationParty.add(parseInt(cb.value)));
-      currentExplorationParty = Array.from(explorationParty);
-      if (currentExplorationParty.length > 0) {
-        clearActiveDisciples();
-        currentExplorationParty.forEach(id => {
-          const d = sectSystem.disciples.find(x => x.id === id);
-          if (d) {
-            selectDisciple(d);
-          }
-        });
-        showTab(mainTab);
-        setActiveTabButton(playerTabButton);
-        respawnDealerStage();
-      }
-    });
+    startDungeonBtn.addEventListener('click', startExploration);
   if (playerCoreSubTabButton)
     playerCoreSubTabButton.addEventListener("click", () => {
       if (playerCorePanel) playerCorePanel.style.display = "flex";
@@ -2578,6 +2541,110 @@ function renderExplorationTab() {
     row.appendChild(createDiscipleCard(d));
     explorationListContainer.appendChild(row);
   });
+}
+
+function startExploration() {
+  if (!explorationListContainer) return;
+  explorationParty.clear();
+  explorationListContainer
+    .querySelectorAll('input[type="checkbox"]:checked')
+    .forEach(cb => explorationParty.add(parseInt(cb.value)));
+  currentExplorationParty = Array.from(explorationParty);
+  if (currentExplorationParty.length > 0) {
+    clearActiveDisciples();
+    currentExplorationParty.forEach(id => {
+      const d = sectSystem.disciples.find(x => x.id === id);
+      if (d) {
+        selectDisciple(d);
+      }
+    });
+    if (explorationOverlay) explorationOverlay.close();
+    showTab(mainTab);
+    setActiveTabButton(playerTabButton);
+    respawnDealerStage();
+  }
+}
+
+let explorationOverlayActiveTab = 'explore';
+function openExplorationOverlay() {
+  if (explorationOverlay) return;
+  explorationOverlay = createOverlay({ className: 'exploration-overlay' });
+  explorationOverlay.onClose(() => {
+    explorationOverlay = null;
+  });
+  const { box } = explorationOverlay;
+
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 'close-btn';
+  closeBtn.innerHTML = '&times;';
+  closeBtn.addEventListener('click', explorationOverlay.close);
+  box.appendChild(closeBtn);
+
+  const map = document.createElement('img');
+  map.src = 'img/Map.jpg';
+  map.className = 'exploration-map';
+  box.appendChild(map);
+
+  const tabs = document.createElement('div');
+  tabs.className = 'exploration-overlay-tabs';
+  box.appendChild(tabs);
+  const content = document.createElement('div');
+  content.className = 'exploration-overlay-content';
+  box.appendChild(content);
+
+  const defs = [
+    { key: 'explore', label: 'Exploration' },
+    { key: 'wood', label: 'Woodcutting' },
+    { key: 'mining', label: 'Mining' }
+  ];
+  const containers = {};
+  defs.forEach(def => {
+    const btn = document.createElement('button');
+    btn.textContent = def.label;
+    tabs.appendChild(btn);
+    const pane = document.createElement('div');
+    pane.className = 'exploration-tab-content';
+    content.appendChild(pane);
+    containers[def.key] = pane;
+    btn.addEventListener('click', () => {
+      explorationOverlayActiveTab = def.key;
+      update();
+    });
+  });
+
+  // exploration tab elements
+  locationListContainer = document.createElement('div');
+  locationListContainer.className = 'location-list casino-section';
+  explorationListContainer = document.createElement('div');
+  explorationListContainer.className = 'exploration-list casino-section';
+  startDungeonBtn = document.createElement('button');
+  startDungeonBtn.className = 'startDungeonBtn';
+  startDungeonBtn.textContent = 'Start';
+  startDungeonBtn.addEventListener('click', startExploration);
+
+  const exploreWrap = document.createElement('div');
+  exploreWrap.className = 'explore-wrap';
+  exploreWrap.appendChild(locationListContainer);
+  exploreWrap.appendChild(explorationListContainer);
+  containers.explore.appendChild(exploreWrap);
+  containers.explore.appendChild(startDungeonBtn);
+
+  // simple placeholders for other tabs
+  containers.wood.textContent = 'Woodcutting coming soon.';
+  containers.mining.textContent = 'Mining coming soon.';
+
+  function update() {
+    Array.from(tabs.children).forEach((b, i) => {
+      const key = defs[i].key;
+      b.classList.toggle('active', key === explorationOverlayActiveTab);
+      containers[key].classList.toggle('active', key === explorationOverlayActiveTab);
+    });
+    if (explorationOverlayActiveTab === 'explore') {
+      renderExplorationTab();
+    }
+  }
+
+  update();
 }
 
 function triggerOrbFlash() {
