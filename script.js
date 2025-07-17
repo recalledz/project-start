@@ -2513,7 +2513,8 @@ document.addEventListener("DOMContentLoaded", () => {
   initPollen();
   window.addEventListener('location-discovered', e => addDiscoveredLocation(e.detail.name));
   loadGame();
-  // After loading the save, open the Sect panel if it is unlocked
+  showTab(playerTab);
+  setActiveTabButton(playerTabButton);
   if (sectTabUnlocked && playerSectSubTabButton) {
     playerSectSubTabButton.click();
   } else if (playerConstructSubTabButton) {
@@ -2567,6 +2568,10 @@ document.addEventListener("DOMContentLoaded", () => {
       sectTabUnlocked = true;
       if (playerSectSubTabButton) playerSectSubTabButton.style.display = '';
       addLog('A presence stirs. The first disciple has heard the Calling.', 'info');
+      // Automatically open the sect panel on first unlock
+      showTab(playerTab);
+      setActiveTabButton(playerTabButton);
+      if (playerSectSubTabButton) playerSectSubTabButton.click();
     }
     if (playerSectSubTabButton && !playerSectSubTabButton.classList.contains('active')) {
       playerSectSubTabButton.classList.add('glow-notify');
