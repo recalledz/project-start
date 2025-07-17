@@ -737,6 +737,7 @@ let playerSectSubTabButton;
 let playerSectPanel;
 let constructLexiconContainer;
 let sectSummaryDisplay;
+let resourceDisplay;
 let colonyTasksPanel;
 let colonyInfoPanel;
 let colonyResourcesPanel;
@@ -989,6 +990,7 @@ function initTabs() {
   playerSectPanel = document.querySelector('.player-sect-panel');
   constructLexiconContainer = document.getElementById('constructLexicon');
   sectSummaryDisplay = document.getElementById('sectSummary');
+  resourceDisplay = document.getElementById('resourceDisplay');
   sectDisciplesContainer = document.getElementById('sectDisciplesContainer');
   sectDiscipleListContainer = document.getElementById('sectDiscipleList');
   colonyTasksPanel = document.getElementById('colonyTasksPanel');
@@ -1778,7 +1780,9 @@ function renderColonyInfo() {
 function renderColonyResources() {
   colonyResourcesPanel.innerHTML = '';
   renderSectDiscipleList();
-  if (sectSummaryDisplay) colonyResourcesPanel.appendChild(sectSummaryDisplay);
+  if (sectSummaryDisplay && resourceDisplay) {
+    resourceDisplay.appendChild(sectSummaryDisplay);
+  }
   checkBuildingUnlock();
 }
 
