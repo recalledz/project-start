@@ -773,7 +773,11 @@ function setupTabHandlers() {
         refreshCore();
         showTab(playerTab);
         setActiveTabButton(playerTabButton);
-        if (playerConstructSubTabButton) playerConstructSubTabButton.click();
+        if (sectTabUnlocked && playerSectSubTabButton) {
+          playerSectSubTabButton.click();
+        } else if (playerConstructSubTabButton) {
+          playerConstructSubTabButton.click();
+        }
       }
     },
     {
@@ -1076,9 +1080,14 @@ function initTabs() {
       // economy stats removed
     });
 
-  showTab(playerTab); // Start with construct panel visible
+  // Start with the sect panel if unlocked, otherwise default to the construct panel
+  showTab(playerTab);
   setActiveTabButton(playerTabButton);
-  if (playerConstructSubTabButton) playerConstructSubTabButton.click();
+  if (sectTabUnlocked && playerSectSubTabButton) {
+    playerSectSubTabButton.click();
+  } else if (playerConstructSubTabButton) {
+    playerConstructSubTabButton.click();
+  }
 }
 
 function initPollen() {
@@ -2505,6 +2514,15 @@ document.addEventListener("DOMContentLoaded", () => {
   initPollen();
   window.addEventListener('location-discovered', e => addDiscoveredLocation(e.detail.name));
   loadGame();
+  // After loading the save, ensure the Player tab opens with the sect panel if
+  // it has been unlocked, otherwise fall back to the construct panel
+  showTab(playerTab);
+  setActiveTabButton(playerTabButton);
+  if (sectTabUnlocked && playerSectSubTabButton) {
+    playerSectSubTabButton.click();
+  } else if (playerConstructSubTabButton) {
+    playerConstructSubTabButton.click();
+  }
   checkBuildingUnlock();
   if (systems.researchUnlocked && colonyResearchTabButton) {
     colonyResearchTabButton.style.display = '';
@@ -2553,6 +2571,10 @@ document.addEventListener("DOMContentLoaded", () => {
       sectTabUnlocked = true;
       if (playerSectSubTabButton) playerSectSubTabButton.style.display = '';
       addLog('A presence stirs. The first disciple has heard the Calling.', 'info');
+      // Automatically open the sect panel on first unlock
+      showTab(playerTab);
+      setActiveTabButton(playerTabButton);
+      if (playerSectSubTabButton) playerSectSubTabButton.click();
     }
     if (playerSectSubTabButton && !playerSectSubTabButton.classList.contains('active')) {
       playerSectSubTabButton.classList.add('glow-notify');
