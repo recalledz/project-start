@@ -4033,7 +4033,6 @@ if (currentEnemy) {
 }
 
   // passive progress for bar upgrades
-  tickBarProgress(deltaTime);
   tickSpeech(deltaTime);
   tickSect(deltaTime);
   updateDiscipleOverlayBars();
