@@ -244,7 +244,7 @@ const DISCIPLE_MAX_HEALTH = 10;
 const REST_TIME_SECONDS = 300; // health fully restored over 5 minutes
 
 const TASK_ICONS = {
-  'Gather Fruit': '🍎',
+  'Gather Fruit': '',
   'Log Pine': '🪵',
   Hunt: '🏹',
   Building: '⚒️',
@@ -792,6 +792,7 @@ let colonyBuildTabButton;
 let colonyResearchTabButton;
 let locationsPanelBtn;
 let sectDisciplesContainer;
+let discipleStatusEl;
 let sectDiscipleListContainer;
 let selectedDiscipleId = null;
 let discipleInfoView = 'status';
@@ -828,7 +829,7 @@ function addDiscoveredLocation(name) {
   if (map && def) {
     const icon = document.createElement('div');
     icon.className = 'location-icon';
-    icon.textContent = '📍';
+    icon.textContent = '';
     icon.style.left = def.x;
     icon.style.top = def.y;
     map.appendChild(icon);
@@ -1040,6 +1041,7 @@ function initTabs() {
   constructLexiconContainer = document.getElementById('constructLexicon');
   sectSummaryDisplay = document.getElementById('sectSummary');
   sectDisciplesContainer = document.getElementById('sectDisciplesContainer');
+  discipleStatusEl = document.getElementById('discipleStatus');
   sectDiscipleListContainer = document.getElementById('sectDiscipleList');
   colonyTasksPanel = document.getElementById('colonyTasksPanel');
   colonyInfoPanel = document.getElementById('colonyInfoPanel');
@@ -1626,6 +1628,52 @@ function updateTaskProgressDisplay() {
   });
 }
 
+function updateDiscipleStatus() {
+  if (!discipleStatusEl) return;
+  const d = speechState.disciples.find(x => x.id === selectedDiscipleId);
+  if (!d) {
+    discipleStatusEl.style.display = 'none';
+    return;
+  }
+  discipleStatusEl.style.display = 'flex';
+  const lifeFill = discipleStatusEl.querySelector('.life-bar .bar-fill');
+  const lifeText = discipleStatusEl.querySelector('.life-bar .bar-text');
+  if (lifeFill) lifeFill.style.width = `${(d.health / DISCIPLE_MAX_HEALTH) * 100}%`;
+  if (lifeText) lifeText.textContent = d.name || `Disciple ${d.id}`;
+  const taskFill = discipleStatusEl.querySelector('.task-bar .bar-fill');
+  const taskText = discipleStatusEl.querySelector('.task-bar .bar-text');
+  const task = d.incapacitated ? 'Resting' : sectState.discipleTasks[d.id] || 'Idle';
+  let pct = 0;
+  if (task === 'Gather Fruit' || task === 'Log Pine') {
+    const progress = sectState.discipleProgress[d.id] || 0;
+    const baseSeconds = task === 'Gather Fruit' ? FRUIT_CYCLE_SECONDS : PINE_LOG_CYCLE_SECONDS;
+    const cycleAmount = task === 'Gather Fruit' ? FRUIT_CYCLE_AMOUNT : PINE_LOG_CYCLE_AMOUNT;
+    const group = TASK_GROUPS[task];
+    const skillXp = sectState.discipleSkills[d.id]?.[group] || 0;
+    const lvl = getTaskSkillProgress(skillXp).level;
+    const yieldMult = 1 + 0.05 * lvl;
+    const gatherAmt = Math.min(cycleAmount * yieldMult, d.inventorySlots);
+    const cycleSeconds = baseSeconds * (gatherAmt / (cycleAmount * yieldMult));
+    pct = ((progress % cycleSeconds) / cycleSeconds);
+  } else if (task === 'Research') {
+    const researcherCount = speechState.disciples.filter(x => sectState.discipleTasks[x.id] === 'Research').length;
+    const rate = researcherCount * 4;
+    const prog = sectState.researchProgress % 500;
+    pct = prog / 500;
+  } else if (task === 'Building') {
+    const buildData = sectState.currentBuild ? BUILDINGS[sectState.currentBuild] : null;
+    pct = buildData ? sectState.buildProgress : 0;
+  } else if (task === 'Hunt') {
+    const progress = sectState.discipleProgress[d.id] || 0;
+    pct = progress / HUNT_CYCLE_SECONDS;
+  } else if (task === 'Exploration') {
+    const progress = sectState.discipleProgress[d.id] || 0;
+    pct = progress / EXPLORATION_CYCLE_SECONDS;
+  }
+  if (taskFill) taskFill.style.width = `${Math.min(pct,1) * 100}%`;
+  if (taskText) taskText.textContent = task;
+}
+
 function updateSectDisplay() {
   if (!sectTabUnlocked || !playerSectPanel) return;
   const total = speechState.disciples.length;
@@ -1637,7 +1685,7 @@ function updateSectDisplay() {
     const upkeep = DAILY_FRUIT_CONSUMPTION * speechState.disciples.length;
     sectSummaryDisplay.innerHTML = `
       <span>👥 ${total - assigned}/${total}</span>
-      <span>🍎 ${sectState.fruits}</span>
+      <span>${sectState.fruits}</span>
       <span>🪵 ${sectState.pineLogs}</span>
       <span>⚖️ -${upkeep}/day (${mm}:${ss})</span>`;
   }
@@ -1700,6 +1748,7 @@ function updateSectDisplay() {
   if (colonyTasksPanel) renderColonyTasks();
   if (colonyInfoPanel) renderColonyInfo();
   if (colonyResourcesPanel) renderColonyResources();
+  updateDiscipleStatus();
 }
 
 function moveDisciple(el) {
@@ -1808,6 +1857,7 @@ function renderColonyTasks() {
       selectedDiscipleId = d.id;
       renderColonyTasks();
       renderColonyInfo();
+      updateDiscipleStatus();
     });
     const icon = document.createElement('span');
     icon.textContent = TASK_ICONS[current] || '⚪️';
@@ -2099,6 +2149,7 @@ function renderDiscipleList() {
       discipleInfoView = 'status';
       renderDiscipleList();
       renderDiscipleDetails();
+      updateDiscipleStatus();
     });
     colonyInfoPanel.appendChild(row);
   });
@@ -2466,7 +2517,7 @@ function openDiscipleOverlay(d) {
   } else {
     discipleOverlayActiveTab = d.lastTab || 'general';
   }
-  discipleOverlay = createOverlay({ className: 'disciple-overlay' });
+  discipleOverlay = createOverlay({ className: 'disciple-overlay', container: sectDisciplesContainer });
   const { box } = discipleOverlay;
 
   const closeBtn = document.createElement('button');

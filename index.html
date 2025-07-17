@@ -239,16 +239,21 @@
         </div>
         <div class="player-sect-panel" style="display:none;">
           <div class="colony-main">
-            <div id="colonyMap" class="colony-map">
-              <div class="colony-tabs">
+            <div class="colony-map-area">
+              <div id="colonyMap" class="colony-map">
+                <div class="colony-tabs">
                 <button id="colonyTasksTabBtn" style="display:none;">👤</button>
                 <button id="colonyInfoTabBtn" style="display:none;">ℹ️</button>
-                <button id="colonyResourcesTabBtn">🍎</button>
+                <button id="colonyResourcesTabBtn">Resources</button>
                 <button id="colonyBuildTabBtn" style="display:none;">🏠</button>
                 <button id="colonyResearchTabBtn" style="display:none;">🔬</button>
-                <button id="locationsPanelBtn">📍</button>
+                <button id="locationsPanelBtn">Locations</button>
               </div>
               <div id="sectDisciplesContainer" class="sect-disciples-container">
+                <div id="discipleStatus" class="disciple-status" style="display:none;">
+                  <div class="status-bar life-bar"><div class="bar-fill"></div><span class="bar-text"></span></div>
+                  <div class="status-bar task-bar"><div class="bar-fill"></div><span class="bar-text"></span></div>
+                </div>
                 <div class="zone orchard"></div>
                 <div class="zone lumberyard"></div>
                 <div class="zone meditation"></div>
@@ -263,6 +268,7 @@
               </div>
             </div>
             <div id="sectDiscipleList" class="sect-disciple-list"></div>
+            </div>
             <div class="colony-side">
               <div id="colonyTasksPanel" class="colony-panel"></div>
               <div id="colonyInfoPanel" class="colony-panel"></div>
