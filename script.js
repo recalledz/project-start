@@ -2796,7 +2796,6 @@ function unlockManaSystem() {
   Object.values(upgrades).forEach(u => u.effect({ stats, stageData, systems }));
   updatePlayerStats(stats);
   updateManaBar();
-  checkUpgradeUnlocks();
 }
 
 //stage
@@ -3118,7 +3117,6 @@ function nextStage() {
   updateNextStageAvailability();
   renderGlobalStats();
   renderStageInfo();
-  checkUpgradeUnlocks();
   checkSpeakerEncounter();
   inCombat = false;
   currentEnemy = null;
@@ -3150,7 +3148,6 @@ function nextWorld() {
   updateNextStageAvailability();
   renderGlobalStats();
   renderStageInfo();
-  checkUpgradeUnlocks();
   inCombat = false;
   currentEnemy = null;
   redrawAllowed = false;
@@ -3176,7 +3173,6 @@ function goToWorld(id) {
   updateBossProgress();
   renderGlobalStats();
   renderStageInfo();
-  checkUpgradeUnlocks();
   inCombat = false;
   currentEnemy = null;
   redrawAllowed = false;
@@ -4128,7 +4124,6 @@ updatePlayerStats(stats);
 
   updateManaBar();
 
-  checkUpgradeUnlocks();
   updateUpgradePowerCost();
   applyWorldTheme();
 
