@@ -47,6 +47,10 @@ import {
   calculateMaxStamina,
   calculateStaminaRegen
 } from './utils/stamina.js';
+import {
+  calculateMaxWater,
+  calculateWaterRegen
+} from './utils/water.js';
 import { initializeDisciple } from './utils/discipleInit.js';
 import { initializeSect } from './utils/sectInit.js';
 import {
@@ -487,7 +491,8 @@ function ensureDiscipleSkills(id) {
       Building: 0,
       Researching: 0,
       Chanting: 0,
-      Exploration: 0
+      Exploration: 0,
+      WaterSense: 0
     };
   }
 }
@@ -1194,6 +1199,11 @@ function tickSect(delta) {
   sectSystem.disciples.forEach(d => {
     ensureDiscipleSkills(d.id);
     ensureDiscipleConstructXp(d.id);
+    const waterXp = sectState.discipleSkills[d.id].WaterSense || 0;
+    const waterLvl = getTaskSkillProgress(waterXp).level;
+    const maxWater = calculateMaxWater(waterLvl);
+    const waterRegen = calculateWaterRegen(waterLvl);
+    d.water = Math.min(maxWater, Math.max(0, d.water + waterRegen * dt));
     const maxStamina = calculateMaxStamina(d.endurance);
     const regenRate = calculateStaminaRegen(d.endurance);
     d.stamina = Math.min(maxStamina, Math.max(0, d.stamina));
@@ -2179,6 +2189,19 @@ function buildDiscipleGeneralView(d) {
   stamRate.textContent = ` (+${calculateStaminaRegen(d.endurance).toFixed(2)}/s)`;
   staminaRow.appendChild(stamRate);
   vit.appendChild(staminaRow);
+  const waterLvl = getTaskSkillProgress(
+    sectState.discipleSkills[d.id]?.WaterSense || 0
+  ).level;
+  const waterRow = makeStatRow(
+    'Water',
+    d.water,
+    calculateMaxWater(waterLvl),
+    'linear-gradient(90deg,#39f,#6cf)'
+  );
+  const waterRate = document.createElement('span');
+  waterRate.textContent = ` (+${calculateWaterRegen(waterLvl).toFixed(2)}/s)`;
+  waterRow.appendChild(waterRate);
+  vit.appendChild(waterRow);
   const hungerRow = makeStatRow(
     'Hunger',
     d.hunger,
@@ -2315,14 +2338,16 @@ function buildDiscipleProficiencyView(d) {
     Logging: ['Gather Softwood'],
     Building: ['Building'],
     Chanting: ['Chant'],
-    Researching: ['Research']
+    Researching: ['Research'],
+    WaterSense: []
   };
   const effects = {
     Gathering: 'yield',
     Logging: 'yield',
     Building: 'speed',
     Chanting: 'potency',
-    Researching: 'research pts'
+    Researching: 'research pts',
+    WaterSense: 'water'
   };
   Object.entries(groups).forEach(([name, tasks]) => {
     const xp = sectState.discipleSkills[d.id]?.[name] || 0;
@@ -2427,14 +2452,16 @@ function openDiscipleOverlay(d) {
       const view = buildDiscipleGeneralView(d);
       content.appendChild(view);
       const rows = view.querySelectorAll('.stat-row');
-      if (rows.length >= 3) {
+      if (rows.length >= 4) {
         discipleOverlayData.bars = {
           healthFill: rows[0].querySelector('.bar-fill'),
           healthVal: rows[0].lastElementChild,
           staminaFill: rows[1].querySelector('.bar-fill'),
           staminaVal: rows[1].lastElementChild,
-          hungerFill: rows[2].querySelector('.bar-fill'),
-          hungerVal: rows[2].lastElementChild
+          waterFill: rows[2].querySelector('.bar-fill'),
+          waterVal: rows[2].lastElementChild,
+          hungerFill: rows[3].querySelector('.bar-fill'),
+          hungerVal: rows[3].lastElementChild
         };
       }
     } else if (active === 'proficiency') {
@@ -2491,6 +2518,10 @@ function updateDiscipleOverlayBars() {
   if (!data.disciple || !data.bars) return;
   const d = data.disciple;
   const maxStamina = calculateMaxStamina(d.endurance);
+  const waterLvl = getTaskSkillProgress(
+    sectState.discipleSkills[d.id]?.WaterSense || 0
+  ).level;
+  const maxWater = calculateMaxWater(waterLvl);
   if (data.bars.healthFill)
     data.bars.healthFill.style.width = `${(d.health / DISCIPLE_MAX_HEALTH) * 100}%`;
   if (data.bars.healthVal)
@@ -2499,6 +2530,10 @@ function updateDiscipleOverlayBars() {
     data.bars.staminaFill.style.width = `${(d.stamina / maxStamina) * 100}%`;
   if (data.bars.staminaVal)
     data.bars.staminaVal.textContent = `${Math.round(d.stamina)}/${Math.round(maxStamina)}`;
+  if (data.bars.waterFill)
+    data.bars.waterFill.style.width = `${(d.water / maxWater) * 100}%`;
+  if (data.bars.waterVal)
+    data.bars.waterVal.textContent = `${Math.round(d.water)}/${Math.round(maxWater)}`;
   if (data.bars.hungerFill)
     data.bars.hungerFill.style.width = `${(d.hunger / 20) * 100}%`;
   if (data.bars.hungerVal)
