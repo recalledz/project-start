@@ -6,7 +6,7 @@ Housing Buildings
 
 Building	Cost (Softwood)	Capacity	Unlock
 
-Outer Quarters	20 × (2^lvl)	+1 disciple	Start
+Bohio	20 × (2^lvl)	+1 disciple	Start/ allows building research desk
 Inner Hall	20 × (2^lvl)	+1 disciple	Outer Quarters Lv1
 Meditation Hall	20 × (2^lvl)	+1 disciple	Inner Hall Lv2
 Immortal Sanctum	20 × (2^lvl)	+1 disciple	Meditation Hall Lv2
