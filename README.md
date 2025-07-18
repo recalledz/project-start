@@ -1,7 +1,7 @@
 # Project Start
 This repository contains the initial project files.
 
-# 🐸 Leaping Lotus Sect: A Coquí Cultivation Game
+## 🐸 Leaping Lotus Sect: A Coquí Cultivation Game
 
 Welcome to **Leaping Lotus Sect**, a Wuxia-inspired idle/simulation game with a Puerto Rican twist. You play as a colony of **coquís**—the iconic frogs of Puerto Rico—who aren’t just hopping around: they’re **cultivating spiritual energy**, mastering ancient **Paths**, and striving to ascend into **immortality**.
 

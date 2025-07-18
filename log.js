@@ -1,6 +1,11 @@
 
 function addLog(message, type = "default") {
-  const logContainer = document.getElementById("game-log");
+  let logContainer = document.getElementById("game-log");
+  if (!logContainer) {
+    logContainer = document.createElement("div");
+    logContainer.id = "game-log";
+    document.body.appendChild(logContainer);
+  }
   const entry = document.createElement("div");
 
   const colorMap = {
