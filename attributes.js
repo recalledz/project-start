@@ -31,6 +31,21 @@ export const attributes = {
     get constructPotencyMultiplier() {
       return 1 + 0.03 * this.points;
     }
+  },
+  Charisma: {
+    points: 0,
+    get recruitChanceMultiplier() {
+      return 1 + 0.05 * this.points;
+    },
+    get diplomacyBonus() {
+      return 1 + 0.05 * this.points;
+    }
+  },
+  Potential: {
+    value: 0,
+    get innerCauldronSize() {
+      return Math.round(this.value * 500);
+    }
   }
 };
 

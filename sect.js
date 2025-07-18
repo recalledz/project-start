@@ -471,7 +471,9 @@ const constructEffects = {
         strength: 1 + bonus.strength,
         dexterity: 1 + bonus.dexterity,
         endurance: 1 + bonus.endurance,
-        intelligence: 1 + bonus.intelligence
+        intelligence: 1 + bonus.intelligence,
+        charisma: 1 + bonus.charisma,
+        potential: bonus.potential
       };
       const newDisc = new Disciple({ id: targetIdx, name: `Disciple ${targetIdx}`, attributes: attrs });
       initializeDisciple(newDisc);

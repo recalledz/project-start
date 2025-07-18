@@ -11,6 +11,7 @@ export function initializeDisciple(d) {
   if (d.endurance === undefined) d.endurance = 1;
   if (d.intelligence === undefined) d.intelligence = 1;
   if (d.charisma === undefined) d.charisma = 1;
+  if (d.potential === undefined) d.potential = 1;
   if (d.globalLevel === undefined) d.globalLevel = 0;
   if (d.combatXp === undefined) d.combatXp = 0;
   if (d.baseStrength === undefined) d.baseStrength = d.strength;
@@ -18,6 +19,7 @@ export function initializeDisciple(d) {
   if (d.baseEndurance === undefined) d.baseEndurance = d.endurance;
   if (d.baseIntelligence === undefined) d.baseIntelligence = d.intelligence;
   if (d.baseCharisma === undefined) d.baseCharisma = d.charisma;
+  if (d.basePotential === undefined) d.basePotential = d.potential;
   if (d.incapacitated === undefined) d.incapacitated = false;
   if (!d.name) d.name = `Disciple ${d.id}`;
   if (d.inventorySlots === undefined) d.inventorySlots = 10;
