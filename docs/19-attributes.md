@@ -19,6 +19,7 @@ Character basic attributes which are difficult to change. They determine many in
 - Affects Water Sense
 - Determines initial learning speed
 - Affects Chanting and Researching
+- Only Intelligence modifies skill XP gain. Other attributes no longer increase proficiency XP rates.
 
 ## Charisma 🗣️
 - Improves disciple recruitment chances and influences their potential
