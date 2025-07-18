@@ -72,38 +72,21 @@ import {
 
 import { init as initCombat } from "./game/combat.js";
 import { init as initUi } from "./game/ui.js";
-import { init as initDisciples } from "./game/disciples.js";
+import {
+  init as initDisciples,
+  activeDisciples,
+  selectDisciple,
+  deselectDisciple,
+  clearActiveDisciples
+} from "./game/disciples.js";
 import { init as initDebug } from "./game/debug.js";
 
 
 
 // --- Game State ---
-// Active disciples engaged in combat
-let activeDisciples = [];
 // Available disciples under the player's control
 // Initialized with three disciples ("frogs") per the documentation
 let { disciples } = initializeSect();
-// Functions to manage which disciples are active in combat
-function selectDisciple(d) {
-  if (!activeDisciples.includes(d) && activeDisciples.length < stats.cardSlots) {
-    activeDisciples.push(d);
-    discipleAttackTimers[d.id] = 0;
-    renderCombatDisciples();
-  }
-}
-
-function deselectDisciple(d) {
-  const idx = activeDisciples.indexOf(d);
-  if (idx >= 0) activeDisciples.splice(idx, 1);
-  delete discipleAttackTimers[d.id];
-  renderCombatDisciples();
-}
-
-function clearActiveDisciples() {
-  activeDisciples.length = 0;
-  discipleAttackTimers = {};
-  if (handContainer) handContainer.innerHTML = '';
-}
 // mapping of card back styles
 const cardBackImages = {
   "basic-red": "img/basic deck.png"
@@ -672,7 +655,7 @@ const nextStageProgress = document.getElementById("nextStageProgress");
 const fightBossBtn = document.getElementById("fightBossBtn");
 const bossProgress = document.getElementById("bossProgress");
 const campBtn = document.getElementById("campBtn");
-const handContainer = document.getElementsByClassName("handContainer")[0];
+export const handContainer = document.getElementsByClassName("handContainer")[0];
 const dealerLifeDisplay =
 document.getElementsByClassName("dealerLifeDisplay")[0];
 const killsDisplay = document.getElementById("kills");
@@ -722,7 +705,7 @@ function hidePlayerAttackBar() {
 // attack progress bars
 let playerAttackFill = null;
 let enemyAttackFill = null;
-let discipleAttackTimers = {}; // map disciple id -> elapsed attack time
+export let discipleAttackTimers = {}; // map disciple id -> elapsed attack time
 let enemyAttackProgress = 0; // carryover ratio of enemy attack timer
 let worldProgressTimer = 0;
 let discipleEtaTimer = 0;
@@ -4015,7 +3998,7 @@ function updateSectCardInfo() {
   });
 }
 
-function renderCombatDisciples() {
+export function renderCombatDisciples() {
   if (!handContainer) return;
   handContainer.innerHTML = '';
   activeDisciples.forEach(d => {
