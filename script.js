@@ -69,7 +69,13 @@ import {
   updateBloodSplat
 } from "./rendering.js";
 
-import { init as initCombat } from "./game/combat.js";
+import {
+  init as initCombat,
+  discipleAttackTimers,
+  enemyAttackProgress,
+  setEnemyAttackProgress,
+  attack
+} from "./game/combat.js";
 import {
   init as initUi,
   handContainer,
@@ -700,8 +706,6 @@ const dpsDisplay = document.getElementById("dpsDisplay");
 // attack progress bars
 let playerAttackFill = null;
 let enemyAttackFill = null;
-export let discipleAttackTimers = {}; // map disciple id -> elapsed attack time
-let enemyAttackProgress = 0; // carryover ratio of enemy attack timer
 let worldProgressTimer = 0;
 let discipleEtaTimer = 0;
 //let sanityTimer = 0;
@@ -3707,7 +3711,9 @@ export function respawnDealerStage() {
 function onDealerDefeat() {
   if (!currentEnemy) return;
   // capture remaining attack progress before resetting
-  enemyAttackProgress = currentEnemy.attackTimer / currentEnemy.attackInterval;
+  setEnemyAttackProgress(
+    currentEnemy.attackTimer / currentEnemy.attackInterval
+  );
   // clear enemy immediately to prevent repeated callbacks
   currentEnemy = null;
   combatXp(calculateKillXp(stageData.stage, stageData.world));
@@ -3753,7 +3759,7 @@ function onSpeakerDefeat() {
 // Called when the player defeats a boss enemy
 function onBossDefeat(boss) {
   // capture remaining attack progress before resetting
-  enemyAttackProgress = boss.attackTimer / boss.attackInterval;
+  setEnemyAttackProgress(boss.attackTimer / boss.attackInterval);
   const data = worldProgress[stageData.world];
   data.bossDefeated = true;
   data.rewardClaimed = false;
@@ -4179,7 +4185,7 @@ function spawnPlayer() {
 }
 
 function respawnPlayer() {
-  enemyAttackProgress = 0;
+  setEnemyAttackProgress(0);
   playerStats.hasDied = false;
   Object.assign(stats, BASE_STATS);
   stats.cardSlots = BASE_STATS.cardSlots + attributes.Strength.inventorySlots;
@@ -4261,39 +4267,6 @@ location.reload();
 // Shuffle all current cards back into the deck and draw a new hand
 // redraw logic moved to cardManagement.js
 
-// Player auto-attack; deals combined damage to the current enemy
-function attack(deltaTime = 0) {
-  const enemy = currentEnemy;
-  if (!enemy) return;
-
-  activeDisciples.forEach(d => {
-    if (!discipleAttackTimers[d.id]) discipleAttackTimers[d.id] = 0;
-    discipleAttackTimers[d.id] += deltaTime;
-
-    if (d.attackFill) {
-      const pratio = Math.min(1, discipleAttackTimers[d.id] / d.attackSpeed);
-      d.attackFill.style.width = `${pratio * 100}%`;
-    }
-
-    if (discipleAttackTimers[d.id] >= d.attackSpeed && !enemy.isDefeated()) {
-      enemy.takeDamage(d.damage);
-      discipleAttackTimers[d.id] = 0;
-      if (d.attackFill) d.attackFill.style.width = '0%';
-    }
-
-  });
-
-  stageData.dealerLifeCurrent = enemy.currentHp;
-
-  if (enemy.isDefeated()) {
-    enemy.onDefeat?.();
-  } else {
-    dealerLifeDisplay.textContent = `Life: ${formatNumber(Math.floor(
-      enemy.currentHp
-    ))}/${formatNumber(enemy.maxHp)}`;
-    renderDealerLifeBarFill(enemy);
-  }
-}
 
 
 
