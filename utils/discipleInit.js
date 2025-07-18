@@ -1,9 +1,12 @@
 import Disciple from '../disciple.js';
+import { calculateMaxWater } from './water.js';
 
 export function initializeDisciple(d) {
   if (!d) return d;
   if (d.health === undefined) d.health = 10;
   if (d.stamina === undefined) d.stamina = 10;
+  if (d.water === undefined) d.water = calculateMaxWater(0);
+  if (d.waterSenseXp === undefined) d.waterSenseXp = 0;
   if (d.hunger === undefined) d.hunger = 20;
   if (d.power === undefined) d.power = 1;
   if (d.strength === undefined) d.strength = 1;
