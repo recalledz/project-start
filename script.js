@@ -167,7 +167,7 @@ export const systems = {
 // Each disciple can gather fruit three times per day.
 // Seconds per cycle is 200, so disciples repeat the cycle every ~3.3 minutes.
 const FRUIT_CYCLE_SECONDS = 200;
-const FRUIT_CYCLE_AMOUNT = 10;
+const FRUIT_CYCLE_AMOUNT = 10; // legacy constants
 const FRUIT_MAX_CAP = 120;
 const FRUIT_GROWTH_RATES = [60, 40, 30, 20, 0];
 
@@ -212,6 +212,16 @@ const EXPLORATION_CYCLE_SECONDS = 150;
 const STAMINA_DRAIN_PER_EXPLORATION = 1;
 const DISCIPLE_MAX_HEALTH = 10;
 const REST_TIME_SECONDS = 300; // health fully restored over 5 minutes
+
+// Gathering constants based on documentation
+const GATHER_WORK_SECONDS = 120; // WorkDuration per slot
+const MIN_TRAVEL_SECONDS = 1; // minimum travel/haul time
+const TRAVEL_SECONDS_PER_UNIT = 5; // seconds per travel distance unit
+
+const GATHER_SPOTS = {
+  'Gather Fruit': { baseYield: 0.1038, travel: 0 }, // Berry Bush
+  'Gather Softwood': { baseYield: 0.09, travel: 0.5 } // Scrubland Trees
+};
 
 const TASK_ICONS = {
   'Gather Fruit': '🍎',
@@ -357,14 +367,9 @@ function getTaskEta(d) {
   const task = d.incapacitated ? 'Resting' : sectState.discipleTasks[d.id] || 'Idle';
   if (task === 'Gather Fruit' || task === 'Gather Softwood') {
     const progress = sectState.discipleProgress[d.id] || 0;
-    const baseSeconds = task === 'Gather Fruit' ? FRUIT_CYCLE_SECONDS : SOFTWOOD_CYCLE_SECONDS;
-    const cycleAmount = task === 'Gather Fruit' ? FRUIT_CYCLE_AMOUNT : SOFTWOOD_CYCLE_AMOUNT;
-    const group = TASK_GROUPS[task];
-    const skillXp = sectState.discipleSkills[d.id]?.[group] || 0;
-    const lvl = getTaskSkillProgress(skillXp).level;
-    const yieldMult = 1 + 0.05 * lvl;
-    const gatherAmt = Math.min(cycleAmount * yieldMult, d.inventorySlots);
-    const cycleSeconds = baseSeconds * (gatherAmt / (cycleAmount * yieldMult));
+    const spot = GATHER_SPOTS[task];
+    const travel = Math.max(MIN_TRAVEL_SECONDS, spot.travel * TRAVEL_SECONDS_PER_UNIT);
+    const cycleSeconds = travel * 2 + GATHER_WORK_SECONDS;
     return cycleSeconds - progress;
   } else if (task === 'Research') {
     const researcherCount = sectSystem.disciples.filter(x => sectState.discipleTasks[x.id] === 'Research').length;
@@ -509,13 +514,16 @@ function calculateDailyFruitGain() {
       ensureDiscipleConstructXp(d.id);
       const xp = sectState.discipleSkills[d.id]['Gathering'];
       const lvl = getTaskSkillProgress(xp).level;
-      const yieldMult = 1 + 0.05 * lvl;
+      const yieldMult = 1 + 0.05 * d.dexterity + 0.02 * lvl;
       const gatherAmt = Math.min(
-        FRUIT_CYCLE_AMOUNT * yieldMult,
+        GATHER_SPOTS['Gather Fruit'].baseYield * yieldMult * GATHER_WORK_SECONDS,
         d.inventorySlots
       );
-      const cycleSeconds =
-        FRUIT_CYCLE_SECONDS * (gatherAmt / (FRUIT_CYCLE_AMOUNT * yieldMult));
+      const travel = Math.max(
+        MIN_TRAVEL_SECONDS,
+        GATHER_SPOTS['Gather Fruit'].travel * TRAVEL_SECONDS_PER_UNIT
+      );
+      const cycleSeconds = travel * 2 + GATHER_WORK_SECONDS;
       const perSecond = gatherAmt / cycleSeconds;
       total += perSecond * DAY_LENGTH_SECONDS;
     }
@@ -1260,21 +1268,23 @@ function tickSect(delta) {
     if (task === 'Gather Fruit' || task === 'Gather Softwood') {
       if (!sectState.discipleProgress[d.id]) sectState.discipleProgress[d.id] = 0;
       sectState.discipleProgress[d.id] += dt;
-      const baseSeconds = task === 'Gather Fruit' ? FRUIT_CYCLE_SECONDS : SOFTWOOD_CYCLE_SECONDS;
-      const cycleAmount = task === 'Gather Fruit' ? FRUIT_CYCLE_AMOUNT : SOFTWOOD_CYCLE_AMOUNT;
       const prog = sectState.discipleProgress[d.id];
       const group = TASK_GROUPS[task];
       const skillXp = sectState.discipleSkills[d.id]?.[group] || 0;
       const lvl = getTaskSkillProgress(skillXp).level;
-      const yieldMult = 1 + 0.05 * lvl;
-      const gatherAmt = Math.min(cycleAmount * yieldMult, d.inventorySlots);
-      const cycleSeconds =
-        baseSeconds * (gatherAmt / (cycleAmount * yieldMult));
-      const phaseLength = cycleSeconds / 4;
+      const spot = GATHER_SPOTS[task];
+      const attr = ATTRIBUTE_FOR_GROUP[group];
+      const yieldMult = 1 + 0.05 * (d[attr] || 0) + 0.02 * lvl;
+      const gatherAmt = Math.min(
+        spot.baseYield * yieldMult * GATHER_WORK_SECONDS,
+        d.inventorySlots
+      );
+      const travel = Math.max(MIN_TRAVEL_SECONDS, spot.travel * TRAVEL_SECONDS_PER_UNIT);
+      const cycleSeconds = travel * 2 + GATHER_WORK_SECONDS;
       const resKey = task === 'Gather Fruit' ? 'fruit' : 'softwood';
-      if (prog < phaseLength) {
+      if (prog < travel) {
         d.inventory = {};
-      } else if (prog < phaseLength * 3) {
+      } else if (prog < travel + GATHER_WORK_SECONDS) {
         d.inventory = { [resKey]: gatherAmt };
       } else {
         d.inventory = {};
@@ -1430,20 +1440,36 @@ function updateTaskProgressDisplay() {
       : sectState.discipleTasks[d.id] || 'Idle';
     if (taskName === 'Gather Fruit' || taskName === 'Gather Softwood') {
       const progress = sectState.discipleProgress[d.id] || 0;
-      const baseSeconds =
-        taskName === 'Gather Fruit' ? FRUIT_CYCLE_SECONDS : SOFTWOOD_CYCLE_SECONDS;
-      const cycleAmount =
-        taskName === 'Gather Fruit' ? FRUIT_CYCLE_AMOUNT : SOFTWOOD_CYCLE_AMOUNT;
       const group = TASK_GROUPS[taskName];
       const skillXp = sectState.discipleSkills[d.id]?.[group] || 0;
       const lvl = getTaskSkillProgress(skillXp).level;
-      const yieldMult = 1 + 0.05 * lvl;
-      const gatherAmt = Math.min(cycleAmount * yieldMult, d.inventorySlots);
-      const cycleSeconds = baseSeconds * (gatherAmt / (cycleAmount * yieldMult));
-      const phaseLength = cycleSeconds / 4;
-      const phase = Math.floor(progress / phaseLength) % 4;
-      const pct = ((progress % phaseLength) / phaseLength) * 100;
-      const phaseNames = ['Travelling', 'Gathering', 'Hauling', 'Storing'];
+      const spot = GATHER_SPOTS[taskName];
+      const attr = ATTRIBUTE_FOR_GROUP[group];
+      const yieldMult = 1 + 0.05 * (d[attr] || 0) + 0.02 * lvl;
+      const gatherAmt = Math.min(
+        spot.baseYield * yieldMult * GATHER_WORK_SECONDS,
+        d.inventorySlots
+      );
+      const travel = Math.max(MIN_TRAVEL_SECONDS, spot.travel * TRAVEL_SECONDS_PER_UNIT);
+      const cycleSeconds = travel * 2 + GATHER_WORK_SECONDS;
+      let phase = 0;
+      let phaseStart = 0;
+      let phaseDur = travel;
+      if (progress < travel) {
+        phase = 0;
+        phaseStart = 0;
+        phaseDur = travel;
+      } else if (progress < travel + GATHER_WORK_SECONDS) {
+        phase = 1;
+        phaseStart = travel;
+        phaseDur = GATHER_WORK_SECONDS;
+      } else {
+        phase = 2;
+        phaseStart = travel + GATHER_WORK_SECONDS;
+        phaseDur = travel;
+      }
+      const pct = ((progress - phaseStart) / phaseDur) * 100;
+      const phaseNames = ['Travelling', 'Gathering', 'Hauling'];
       if (fill) fill.style.width = `${pct}%`;
       if (label) label.textContent = phaseNames[phase];
       if (rateEl) {
@@ -1630,20 +1656,24 @@ function updateDiscipleGather(id, el) {
 
   const progress = sectState.discipleProgress[id] || 0;
   const task = sectState.discipleTasks[id];
-  const baseSeconds =
-    task === 'Gather Softwood' ? SOFTWOOD_CYCLE_SECONDS : FRUIT_CYCLE_SECONDS;
-  const cycleAmount =
-    task === 'Gather Softwood' ? SOFTWOOD_CYCLE_AMOUNT : FRUIT_CYCLE_AMOUNT;
   const d = sectSystem.disciples.find(x => x.id === id);
   const group = TASK_GROUPS[task];
   const lvl = getTaskSkillProgress(
     sectState.discipleSkills[id]?.[group] || 0
   ).level;
-  const yieldMult = 1 + 0.05 * lvl;
-  const gatherAmt = Math.min(cycleAmount * yieldMult, d?.inventorySlots || 10);
-  const cycleSeconds = baseSeconds * (gatherAmt / (cycleAmount * yieldMult));
-  const phaseLength = cycleSeconds / 4;
-  const phase = Math.floor(progress / phaseLength) % 4;
+  const spot = GATHER_SPOTS[task];
+  const attr = ATTRIBUTE_FOR_GROUP[group];
+  const yieldMult = 1 + 0.05 * (d[attr] || 0) + 0.02 * lvl;
+  const gatherAmt = Math.min(
+    spot.baseYield * yieldMult * GATHER_WORK_SECONDS,
+    d?.inventorySlots || 10
+  );
+  const travel = Math.max(MIN_TRAVEL_SECONDS, spot.travel * TRAVEL_SECONDS_PER_UNIT);
+  const cycleSeconds = travel * 2 + GATHER_WORK_SECONDS;
+  let phase = 0;
+  if (progress < travel) phase = 0;
+  else if (progress < travel + GATHER_WORK_SECONDS) phase = 1;
+  else phase = 2;
 
   if (discipleGatherPhase[id] === phase) return;
   discipleGatherPhase[id] = phase;
@@ -1663,10 +1693,6 @@ function updateDiscipleGather(id, el) {
       el.style.transform = `translate(${px}px, ${py}px)`;
       break;
     case 2: // hauling back
-      el.style.opacity = '1';
-      el.style.transform = `translate(${bx}px, ${by}px)`;
-      break;
-    case 3: // storing at basket
       el.style.opacity = '1';
       el.style.transform = `translate(${bx}px, ${by}px)`;
       break;
@@ -2893,7 +2919,11 @@ function openResourceOverlay() {
 
   const total = sectSystem.disciples.length;
   const gatherFruit = sectSystem.disciples.filter(d => sectState.discipleTasks[d.id] === 'Gather Fruit').length;
-  const fruitProd = gatherFruit * (FRUIT_CYCLE_AMOUNT / FRUIT_CYCLE_SECONDS) * DAY_LENGTH_SECONDS;
+  const spotFruit = GATHER_SPOTS['Gather Fruit'];
+  const travelFruit = Math.max(MIN_TRAVEL_SECONDS, spotFruit.travel * TRAVEL_SECONDS_PER_UNIT);
+  const cycleFruit = travelFruit * 2 + GATHER_WORK_SECONDS;
+  const baseYieldFruit = spotFruit.baseYield * GATHER_WORK_SECONDS;
+  const fruitProd = gatherFruit * (baseYieldFruit / cycleFruit) * DAY_LENGTH_SECONDS;
   const fruitCons = DAILY_FRUIT_CONSUMPTION * total;
   const fruitBal = fruitProd - fruitCons;
   const fruitRow = document.createElement('div');
@@ -2901,7 +2931,11 @@ function openResourceOverlay() {
   list.appendChild(fruitRow);
 
   const gatherWood = sectSystem.disciples.filter(d => sectState.discipleTasks[d.id] === 'Gather Softwood').length;
-  const woodProd = gatherWood * (SOFTWOOD_CYCLE_AMOUNT / SOFTWOOD_CYCLE_SECONDS) * DAY_LENGTH_SECONDS;
+  const spotWood = GATHER_SPOTS['Gather Softwood'];
+  const travelWood = Math.max(MIN_TRAVEL_SECONDS, spotWood.travel * TRAVEL_SECONDS_PER_UNIT);
+  const cycleWood = travelWood * 2 + GATHER_WORK_SECONDS;
+  const baseYieldWood = spotWood.baseYield * GATHER_WORK_SECONDS;
+  const woodProd = gatherWood * (baseYieldWood / cycleWood) * DAY_LENGTH_SECONDS;
   const woodRow = document.createElement('div');
   woodRow.textContent = `Softwood: +${woodProd.toFixed(1)}/day`;
   list.appendChild(woodRow);
