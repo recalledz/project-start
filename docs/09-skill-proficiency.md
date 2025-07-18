@@ -6,7 +6,7 @@
 | Task         | Base XP/s  |
 |--------------|-----------:|
 | Gather Fruit | 0.005      |
-| Log Pine     | 0.0047     |
+| Gather Softwood     | 0.0047     |
 | Research     | 0.008      |
 | Chant        | 0.333      |
 | Building     | 1.000      |
@@ -15,7 +15,7 @@
 | Task        | To Lv 10   | To Lv 30    |
 |-------------|-----------:|------------:|
 | Gather Fruit| ~3 days    | ~137 days   |
-| Log Pine    | ~3 days 5 h| ~146 days   |
+| Gather Softwood    | ~3 days 5 h| ~146 days   |
 | Research    | ~1 day 21 h| ~85 days    |
 | Chant       | ~1 h       | ~2 days     |
 | Building    | ~21 min    | ~16 h       |
