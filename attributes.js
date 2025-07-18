@@ -35,7 +35,7 @@ export const attributes = {
 };
 
 export function strengthXpMultiplier(task) {
-  const affected = ['Log Pine', 'Mining', 'Smithing'];
+  const affected = ['Gather Softwood', 'Mining', 'Smithing'];
   return affected.includes(task) ? 1 + attributes.Strength.points * 0.1 : 1;
 }
 
@@ -45,7 +45,7 @@ export function enduranceXpMultiplier(task) {
 }
 
 export function dexterityXpMultiplier(task) {
-  const affected = ['Woodcutting', 'Gather Fruit'];
+  const affected = ['Gather Softwood', 'Gather Fruit'];
   return affected.includes(task) ? 1 + attributes.Dexterity.points * 0.1 : 1;
 }
 

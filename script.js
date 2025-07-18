@@ -213,7 +213,7 @@ const REST_TIME_SECONDS = 300; // health fully restored over 5 minutes
 
 const TASK_ICONS = {
   'Gather Fruit': '🍎',
-  'Log Pine': '🪵',
+  'Gather Softwood': '🪵',
   Hunt: '🏹',
   Building: '⚒️',
   Research: '🔬',
@@ -225,7 +225,7 @@ const TASK_ICONS = {
 
 const TASK_GROUPS = {
   'Gather Fruit': 'Gathering',
-  'Log Pine': 'Logging',
+  'Gather Softwood': 'Logging',
   Hunt: 'Hunting',
   'Building': 'Building',
   'Research': 'Researching',
@@ -353,7 +353,7 @@ function createLabeledBar(icon, value, max, color) {
 
 function getTaskEta(d) {
   const task = d.incapacitated ? 'Resting' : sectState.discipleTasks[d.id] || 'Idle';
-  if (task === 'Gather Fruit' || task === 'Log Pine') {
+  if (task === 'Gather Fruit' || task === 'Gather Softwood') {
     const progress = sectState.discipleProgress[d.id] || 0;
     const baseSeconds = task === 'Gather Fruit' ? FRUIT_CYCLE_SECONDS : PINE_LOG_CYCLE_SECONDS;
     const cycleAmount = task === 'Gather Fruit' ? FRUIT_CYCLE_AMOUNT : PINE_LOG_CYCLE_AMOUNT;
@@ -1222,7 +1222,7 @@ function tickSect(delta) {
     } else {
       d.stamina = Math.min(maxStamina, d.stamina + regenRate * dt);
     }
-    if (task === 'Gather Fruit' || task === 'Log Pine') {
+    if (task === 'Gather Fruit' || task === 'Gather Softwood') {
       if (!sectState.discipleProgress[d.id]) sectState.discipleProgress[d.id] = 0;
       sectState.discipleProgress[d.id] += dt;
       const baseSeconds = task === 'Gather Fruit' ? FRUIT_CYCLE_SECONDS : PINE_LOG_CYCLE_SECONDS;
@@ -1397,7 +1397,7 @@ function updateTaskProgressDisplay() {
     const taskName = d.incapacitated
       ? 'Resting'
       : sectState.discipleTasks[d.id] || 'Idle';
-    if (taskName === 'Gather Fruit' || taskName === 'Log Pine') {
+    if (taskName === 'Gather Fruit' || taskName === 'Gather Softwood') {
       const progress = sectState.discipleProgress[d.id] || 0;
       const baseSeconds =
         taskName === 'Gather Fruit' ? FRUIT_CYCLE_SECONDS : PINE_LOG_CYCLE_SECONDS;
@@ -1564,9 +1564,9 @@ function updateDiscipleGather(id, el) {
   const progress = sectState.discipleProgress[id] || 0;
   const task = sectState.discipleTasks[id];
   const baseSeconds =
-    task === 'Log Pine' ? PINE_LOG_CYCLE_SECONDS : FRUIT_CYCLE_SECONDS;
+    task === 'Gather Softwood' ? PINE_LOG_CYCLE_SECONDS : FRUIT_CYCLE_SECONDS;
   const cycleAmount =
-    task === 'Log Pine' ? PINE_LOG_CYCLE_AMOUNT : FRUIT_CYCLE_AMOUNT;
+    task === 'Gather Softwood' ? PINE_LOG_CYCLE_AMOUNT : FRUIT_CYCLE_AMOUNT;
   const d = sectSystem.disciples.find(x => x.id === id);
   const group = TASK_GROUPS[task];
   const lvl = getTaskSkillProgress(
@@ -1623,7 +1623,7 @@ function startDiscipleMovement() {
       } else {
         el.classList.remove('incapacitated');
         const task = sectState.discipleTasks[d.id];
-        if (task === 'Gather Fruit' || task === 'Log Pine')
+        if (task === 'Gather Fruit' || task === 'Gather Softwood')
           updateDiscipleGather(d.id, el);
         else moveDisciple(el);
       }
@@ -1709,7 +1709,7 @@ function renderColonyInfo() {
   }
   const taskList = document.createElement('div');
   taskList.className = 'disciple-skill-list';
-  const tasks = ['Idle', 'Gather Fruit', 'Log Pine', 'Hunt', 'Building'];
+  const tasks = ['Idle', 'Gather Fruit', 'Gather Softwood', 'Hunt', 'Building'];
   if (sectState.buildings.researchTable > 0) tasks.push('Research');
   if (sectState.buildings.chantingHall > 0) tasks.push('Chant');
   if (systems.explorationUnlocked) tasks.push('Exploration');
@@ -2042,14 +2042,14 @@ function buildDiscipleStatusView(d) {
       effect:
         `Melee Damage ×${(1 + 0.05 * (d.strength - 1)).toFixed(2)}, ` +
         `+${Math.floor((d.strength - 1) / 2)} Inventory Slots`,
-      skills: 'Log Pine, Mining & Smithing'
+      skills: 'Gather Softwood, Mining & Smithing'
     },
     {
       label: 'Dexterity',
       value: d.dexterity,
       base: d.baseDexterity ?? 1,
       effect: `Attack Speed ×${(1 + 0.05 * (d.dexterity - 1)).toFixed(2)}`,
-      skills: 'Woodcutting & Gather Fruit'
+      skills: 'Gather Softwood & Gather Fruit'
     },
     {
       label: 'Intelligence',
@@ -2086,7 +2086,7 @@ function buildDiscipleLifeStatsView(d) {
   const skillMap = sectState.discipleSkills[d.id] || {};
   const tasks = [
     { name: 'Gather Fruit', effect: 'yield' },
-    { name: 'Log Pine', effect: 'yield' },
+    { name: 'Gather Softwood', effect: 'yield' },
     { name: 'Building', effect: 'speed' },
     { name: 'Research', effect: 'research pts' },
     { name: 'Chant', effect: 'potency' }
@@ -2096,7 +2096,7 @@ function buildDiscipleLifeStatsView(d) {
     const xp = skillMap[groupKey] || 0;
     const prog = getTaskSkillProgress(xp);
     const row = document.createElement('div');
-    const isGather = t.name === 'Gather Fruit' || t.name === 'Log Pine';
+    const isGather = t.name === 'Gather Fruit' || t.name === 'Gather Softwood';
     const mult = 1 + (isGather ? 0.05 : 0.02) * prog.level;
     row.textContent = `${t.name} Lv ${prog.level} (×${mult.toFixed(2)} ${t.effect})`;
     body.appendChild(row);
@@ -2293,7 +2293,7 @@ function buildDiscipleProficiencyView(d) {
   const container = document.createElement('div');
   const groups = {
     Gathering: ['Gather Fruit'],
-    Logging: ['Log Pine'],
+    Logging: ['Gather Softwood'],
     Building: ['Building'],
     Chanting: ['Chant'],
     Researching: ['Research']
@@ -2490,7 +2490,7 @@ function buildDiscipleSkillsList(d) {
   const container = document.createElement('div');
   const groups = {
     Gathering: ['Gather Fruit'],
-    Logging: ['Log Pine'],
+    Logging: ['Gather Softwood'],
     Building: ['Building'],
     Chanting: ['Chant'],
     Researching: ['Research']
@@ -2672,31 +2672,74 @@ function openExplorationOverlay() {
 }
 
 let workOverlay = null;
+let workOverlaySelected = null;
 function openWorkOverlay() {
   if (workOverlay) return;
-  workOverlay = createOverlay({ className: "work-overlay" });
-  workOverlay.onClose(() => { workOverlay = null; });
-  const { box } = workOverlay;
-  const closeBtn = document.createElement("button");
-  closeBtn.className = "close-btn";
-  closeBtn.innerHTML = "&times;";
-  closeBtn.addEventListener("click", workOverlay.close);
-  box.appendChild(closeBtn);
-  const header = document.createElement("div");
-  header.className = "panel-heading";
-  header.textContent = "Work";
-  box.appendChild(header);
-  const gf = document.createElement("button");
-  gf.textContent = "Gather Fruit";
-  gf.addEventListener("click", () => {
-    sectSystem.disciples.forEach(d => {
-      sectState.discipleTasks[d.id] = "Gather Fruit";
-    });
-    if (typeof renderColonyTasks === "function") renderColonyTasks();
-    if (typeof renderColonyInfo === "function") renderColonyInfo();
-    workOverlay.close();
+  workOverlay = createOverlay({ className: 'work-overlay' });
+  workOverlay.onClose(() => {
+    workOverlay = null;
+    workOverlaySelected = null;
   });
-  box.appendChild(gf);
+  const { box } = workOverlay;
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 'close-btn';
+  closeBtn.innerHTML = '&times;';
+  closeBtn.addEventListener('click', workOverlay.close);
+  box.appendChild(closeBtn);
+
+  const header = document.createElement('div');
+  header.className = 'panel-heading';
+  header.textContent = 'Work';
+  box.appendChild(header);
+
+  const content = document.createElement('div');
+  content.className = 'work-content';
+  box.appendChild(content);
+
+  const left = document.createElement('div');
+  left.className = 'work-disciples';
+  content.appendChild(left);
+
+  const right = document.createElement('div');
+  right.className = 'work-tasks';
+  content.appendChild(right);
+
+  function render() {
+    left.innerHTML = '';
+    sectSystem.disciples.forEach(d => {
+      const card = createSectDiscipleCard(d);
+      if (d.id === workOverlaySelected) card.classList.add('selected');
+      card.addEventListener('click', () => {
+        workOverlaySelected = d.id;
+        render();
+      });
+      left.appendChild(card);
+    });
+
+    right.innerHTML = '';
+    const tasks = ['Gather Fruit', 'Gather Softwood'];
+    tasks.forEach(t => {
+      const btn = document.createElement('button');
+      btn.textContent = t;
+      btn.addEventListener('click', () => {
+        if (workOverlaySelected == null) return;
+        const prev = sectState.discipleTasks[workOverlaySelected];
+        sectState.discipleTasks[workOverlaySelected] = t;
+        discipleGatherPhase[workOverlaySelected] = -1;
+        if (prev === 'Chant' && t !== 'Chant') {
+          delete sectState.chantAssignments[workOverlaySelected];
+          if (typeof renderConstructCards === 'function') {
+            renderConstructCards();
+          }
+        }
+        if (typeof renderColonyTasks === 'function') renderColonyTasks();
+        render();
+      });
+      right.appendChild(btn);
+    });
+  }
+
+  render();
 }
 
 function openPlaceholderOverlay(title) {
