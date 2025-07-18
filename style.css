@@ -703,6 +703,22 @@ body.darkenshift-mode .tabsContainer button.active {
     cursor: pointer;
 }
 
+.schedule-overlay .overlay-box {
+    max-width: 300px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.schedule-table {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.schedule-row.current {
+    color: var(--verdantia-highlight);
+    font-weight: bold;
+}
+
 .work-disciples .sect-disciple-card.selected {
     background: #fbf6e0;
     color: #000;

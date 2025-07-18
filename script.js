@@ -28,6 +28,7 @@ import {
   renderConstructCards,
   renderHotbar
 } from "./sect.js";
+import { SECT_SCHEDULE, getCurrentSchedule } from "./sect.js";
 import RateTracker from "./utils/rateTracker.js";
 import { formatNumber } from "./utils/numberFormat.js";
 import { runAnimation } from "./utils/animation.js";
@@ -772,6 +773,7 @@ let sectNavMapBtn;
 let sectNavInfluenceBtn;
 let sectNavResearchBtn;
 let sectNavCultivationBtn;
+let sectNavScheduleBtn;
 
 const discoveredLocations = [];
 const explorationParty = new Set();
@@ -1008,6 +1010,7 @@ function initTabs() {
   sectNavInfluenceBtn = document.getElementById("sectNavInfluenceBtn");
   sectNavResearchBtn = document.getElementById("sectNavResearchBtn");
   sectNavCultivationBtn = document.getElementById("sectNavCultivationBtn");
+  sectNavScheduleBtn = document.getElementById("sectNavScheduleBtn");
   statsOverviewSubTabButton = document.querySelector('.statsOverviewSubTabButton');
   statsEconomySubTabButton = document.querySelector('.statsEconomySubTabButton');
   statsOverviewContainer = document.getElementById('statsOverviewContainer');
@@ -1052,7 +1055,7 @@ function initTabs() {
       }
       openExplorationOverlay();
     });
-  const navButtons = [sectNavWorkBtn, sectNavResourceBtn, sectNavBuildBtn, sectNavChantBtn, sectNavMapBtn, sectNavInfluenceBtn, sectNavResearchBtn, sectNavCultivationBtn];
+  const navButtons = [sectNavWorkBtn, sectNavResourceBtn, sectNavBuildBtn, sectNavScheduleBtn, sectNavChantBtn, sectNavMapBtn, sectNavInfluenceBtn, sectNavResearchBtn, sectNavCultivationBtn];
   function setActiveNavBtn(btn) {
     navButtons.forEach(b => b && b.classList.remove("active"));
     if (btn) btn.classList.add("active");
@@ -1064,6 +1067,11 @@ function initTabs() {
       setActiveNavBtn(sectNavBuildBtn);
       if (systems.buildingUnlocked) openBuildOverlay();
       else openPlaceholderOverlay("Building");
+    });
+  if (sectNavScheduleBtn)
+    sectNavScheduleBtn.addEventListener("click", () => {
+      setActiveNavBtn(sectNavScheduleBtn);
+      openScheduleOverlay();
     });
   if (sectNavChantBtn) sectNavChantBtn.addEventListener("click", () => { setActiveNavBtn(sectNavChantBtn); openPlaceholderOverlay("Chanting"); });
   if (sectNavMapBtn) sectNavMapBtn.addEventListener("click", () => { setActiveNavBtn(sectNavMapBtn); openExplorationOverlay(); });
@@ -1204,6 +1212,7 @@ function tickBarProgress(delta) {
 function tickSect(delta) {
   if (!sectTabUnlocked) return;
   const dt = delta / 1000;
+  const scheduleAction = getCurrentSchedule().action;
   sectSystem.disciples.forEach(d => {
     ensureDiscipleSkills(d.id);
     ensureDiscipleConstructXp(d.id);
@@ -1230,6 +1239,14 @@ function tickSect(delta) {
           sectState.discipleRest[d.id] = 0;
         }
       }
+      return;
+    }
+
+    if (scheduleAction === 'Training') {
+      d.foundationXp = (d.foundationXp || 0) + 0.4 * d.potential * d.potential * dt;
+      return;
+    }
+    if (scheduleAction !== 'Work') {
       return;
     }
 
@@ -1562,6 +1579,38 @@ function updateSectDisplay() {
   if (colonyResourcesPanel) renderColonyResources();
 }
 
+function updateMapBrightness(phase) {
+  const map = document.getElementById('colonyMap');
+  if (!map) return;
+  const values = {
+    Morning: 1,
+    Midday: 1.2,
+    Afternoon: 1,
+    Evening: 0.6,
+    Night: 0.3
+  };
+  map.style.filter = `brightness(${values[phase] || 1})`;
+}
+
+function feedDisciples() {
+  sectSystem.disciples.forEach(d => {
+    if (sectState.fruits >= DAILY_FRUIT_CONSUMPTION) {
+      sectState.fruits -= DAILY_FRUIT_CONSUMPTION;
+      d.hunger = 20;
+    } else {
+      d.hunger = Math.max(0, d.hunger - 1);
+      if (d.hunger === 0) {
+        d.health = Math.max(0, d.health - 5);
+        if (d.health === 0) {
+          sectState.discipleTasks[d.id] = 'Idle';
+          d.incapacitated = true;
+        }
+      }
+    }
+  });
+  updateSectDisplay();
+}
+
 function moveDisciple(el) {
   const cont = el.parentElement;
   if (!cont) return;
@@ -1640,10 +1689,20 @@ function startDiscipleMovement() {
         el.classList.add('incapacitated');
       } else {
         el.classList.remove('incapacitated');
-        const task = sectState.discipleTasks[d.id];
-        if (task === 'Gather Fruit' || task === 'Gather Softwood')
-          updateDiscipleGather(d.id, el);
-        else moveDisciple(el);
+        const phase = getCurrentSchedule().action;
+        if (phase === 'Sleep' || phase === 'Training') {
+          const orb = document.querySelector('#sectOrbs .water');
+          if (orb) {
+            const bx = orb.offsetLeft + orb.offsetWidth / 2 - 2;
+            const by = orb.offsetTop + orb.offsetHeight / 2 - 2;
+            el.style.transform = `translate(${bx}px, ${by}px)`;
+          }
+        } else {
+          const task = sectState.discipleTasks[d.id];
+          if (task === 'Gather Fruit' || task === 'Gather Softwood')
+            updateDiscipleGather(d.id, el);
+          else moveDisciple(el);
+        }
       }
     });
   }, 3000);
@@ -2912,6 +2971,53 @@ function openBuildOverlay() {
   render();
 }
 
+let scheduleOverlay = null;
+function openScheduleOverlay() {
+  if (scheduleOverlay) return;
+  scheduleOverlay = createOverlay({ className: 'schedule-overlay' });
+  let interval;
+  scheduleOverlay.onClose(() => {
+    if (interval) clearInterval(interval);
+    scheduleOverlay = null;
+  });
+  const { box } = scheduleOverlay;
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 'close-btn';
+  closeBtn.innerHTML = '&times;';
+  closeBtn.addEventListener('click', scheduleOverlay.close);
+  box.appendChild(closeBtn);
+
+  const header = document.createElement('div');
+  header.className = 'panel-heading';
+  header.textContent = 'Schedule';
+  box.appendChild(header);
+
+  const timeEl = document.createElement('div');
+  box.appendChild(timeEl);
+
+  const table = document.createElement('div');
+  table.className = 'schedule-table';
+  SECT_SCHEDULE.forEach(ph => {
+    const row = document.createElement('div');
+    row.className = 'schedule-row';
+    row.textContent = `${ph.phase}: ${ph.action}`;
+    table.appendChild(row);
+  });
+  box.appendChild(table);
+
+  function update() {
+    const cur = getCurrentSchedule();
+    const remaining =
+      cur.duration - sectSystem.scheduleTimer;
+    timeEl.textContent = `${cur.phase} - ${Math.ceil(remaining)}s left`;
+    [...table.children].forEach((row, i) => {
+      row.classList.toggle('current', i === sectSystem.scheduleIndex);
+    });
+  }
+  update();
+  interval = setInterval(update, 1000);
+}
+
 function openPlaceholderOverlay(title) {
   const ov = createOverlay({});
   const { box } = ov;
@@ -2961,21 +3067,10 @@ document.addEventListener("DOMContentLoaded", () => {
   renderConstructLexicon();
   document.addEventListener('day-passed', () => {
     sectSystem.disciples.forEach(d => {
-      if (sectState.fruits >= DAILY_FRUIT_CONSUMPTION) {
-        sectState.fruits -= DAILY_FRUIT_CONSUMPTION;
-
-
-        d.hunger = 20;
-      } else {
-        d.hunger = Math.max(0, d.hunger - 1);
-        if (d.hunger === 0) {
-          d.health = Math.max(0, d.health - 5);
-          if (d.health === 0) {
-            sectState.discipleTasks[d.id] = 'Idle';
-            d.incapacitated = true;
-          }
-        }
-      }
+      d.stamina = Math.min(
+        calculateMaxStamina(d.endurance),
+        d.stamina + calculateStaminaRegen(d.endurance)
+      );
     });
     sectState.availableFruits = Math.min(
       FRUIT_MAX_CAP,
@@ -2991,6 +3086,10 @@ document.addEventListener("DOMContentLoaded", () => {
     if (colonyResourcesPanel && colonyResourcesPanel.style.display !== 'none') {
       renderDiscipleDetails();
     }
+  });
+  document.addEventListener('schedule-phase', e => {
+    updateMapBrightness(e.detail.phase);
+    if (e.detail.phase === 'Evening') feedDisciples();
   });
   document.addEventListener('disciple-gained', e => {
     if (!sectTabUnlocked && e.detail.count >= 1) {

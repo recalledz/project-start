@@ -22,9 +22,9 @@ function getWaterMidpoint() {
 }
 
 // Seasonal cycle configuration
-// A full in-game day lasts 10 real minutes (600 seconds). Each season spans
-// 28 of these days, so a complete season cycle takes 16,800 seconds.
-export const DAY_LENGTH_SECONDS = 600;
+// A full in-game day lasts 5 real minutes (300 seconds). Each season spans
+// 28 of these days, so a complete season cycle takes 8,400 seconds.
+export const DAY_LENGTH_SECONDS = 300;
 export const SEASON_LENGTH_DAYS = 28;
 const seasons = [
   { name: 'Verdantia', multiplier: 1.20 },
@@ -36,6 +36,14 @@ const seasons = [
 const seasonIcons = ['\uD83C\uDF31', '\u2600\uFE0F', '\u2728', '\uD83C\uDF42', '\u2744\uFE0F'];
 const seasonClasses = ['spring','summer','aurora','autumn','winter'];
 const seasonTemps = [15, 25, 20, 10, -5];
+
+export const SECT_SCHEDULE = [
+  { phase: 'Morning', duration: 60, action: 'Training' },
+  { phase: 'Midday', duration: 60, action: 'Work' },
+  { phase: 'Afternoon', duration: 60, action: 'Work' },
+  { phase: 'Evening', duration: 60, action: 'Eat' },
+  { phase: 'Night', duration: 60, action: 'Sleep' }
+];
 
 export const SEASON_COLORS = {
   Verdantia: ['rgba(80,160,80,0.9)', 'rgba(30,70,30,1.0)'],
@@ -130,8 +138,14 @@ export const sectSystem = {
   mnemonicTimer: 0,
   mnemonicBeats: 0,
   mnemonicPotency: 1,
-  murmurChain: 0
+  murmurChain: 0,
+  scheduleIndex: 0,
+  scheduleTimer: 0
 };
+
+export function getCurrentSchedule() {
+  return SECT_SCHEDULE[sectSystem.scheduleIndex];
+}
 
 // use the same object for the water resource and orb
 sectSystem.resources.water = sectSystem.orbs.water;
@@ -1497,9 +1511,26 @@ export function tickSectSystem(delta) {
       sectSystem.mnemonicBeats = 0;
     }
   }
+  sectSystem.scheduleTimer += dt;
+  if (
+    sectSystem.scheduleTimer >= SECT_SCHEDULE[sectSystem.scheduleIndex].duration
+  ) {
+    sectSystem.scheduleTimer -=
+      SECT_SCHEDULE[sectSystem.scheduleIndex].duration;
+    sectSystem.scheduleIndex =
+      (sectSystem.scheduleIndex + 1) % SECT_SCHEDULE.length;
+    document.dispatchEvent(
+      new CustomEvent('schedule-phase', { detail: getCurrentSchedule() })
+    );
+  }
   sectSystem.seasonTimer += dt;
   if (sectSystem.seasonTimer >= DAY_LENGTH_SECONDS) {
     sectSystem.seasonTimer -= DAY_LENGTH_SECONDS;
+    sectSystem.scheduleIndex = 0;
+    sectSystem.scheduleTimer = 0;
+    document.dispatchEvent(
+      new CustomEvent('schedule-phase', { detail: getCurrentSchedule() })
+    );
     sectSystem.seasonDay += 1;
     document.dispatchEvent(new CustomEvent('day-passed', {
       detail: { day: sectSystem.seasonDay, season: sectSystem.seasonIndex }

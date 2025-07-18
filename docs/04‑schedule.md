@@ -2,7 +2,8 @@
 
 **Saturday, July 12, 2025 • 7:06 PM**
 
-## Default Daily Routine
+A full in-game day lasts **300 seconds** (five minutes). Each phase below spans one minute.
+
 | Phase     | Duration (s) | Action               |
 |-----------|-------------:|----------------------|
 | Morning   |           60 | Meditate / Foundation |
