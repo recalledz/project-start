@@ -3599,6 +3599,7 @@ body.darkenshift-mode .tabsContainer button.active {
     gap: 4px;
     z-index: 5;
 }
+
 .sect-nav-panel {
     position: absolute;
     right: 4px;
@@ -3606,20 +3607,29 @@ body.darkenshift-mode .tabsContainer button.active {
     display: flex;
     flex-direction: column;
     gap: 6px;
-    z-index: 5;
+    z-index: 15; /* above map overlay */
 }
 
 .sect-nav-panel button {
-    width: 28px;
-    height: 28px;
+    width: 24px;
+    height: 24px;
     border-radius: 50%;
     background: rgba(0,0,0,0.5);
     border: 1px solid var(--verdantia-highlight);
     color: var(--verdantia-parchment);
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    font-size: 0.75rem;
+    gap: 2px;
+    font-size: 0.55rem;
+}
+.sect-nav-panel button svg {
+    width: 16px;
+    height: 16px;
+}
+.sect-nav-panel button span {
+    line-height: 1;
 }
 
 .sect-nav-panel button.active {
