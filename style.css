@@ -2378,10 +2378,10 @@ body.darkenshift-mode .tabsContainer button.active {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    font-size: 0.52rem; /* reduced by ~20% */
-    min-width: 128px; /* reduced by ~20% */
-    flex: 0 0 16%;
-    max-width: 16%;
+    font-size: 0.42rem; /* further reduced by ~20% */
+    min-width: 100px; /* further reduced by ~20% */
+    flex: 0 0 13%;
+    max-width: 13%;
     color: var(--core-text);
 }
 .core-resources, .core-upgrades {
@@ -2396,8 +2396,8 @@ body.darkenshift-mode .tabsContainer button.active {
     gap: 4px;
 }
 .core-resources .resource-entry i {
-    width: 14px;
-    height: 14px;
+    width: 11px; /* reduced by ~20% */
+    height: 11px;
 }
 #coreTabContent {
     display: flex;
@@ -3312,7 +3312,7 @@ body.darkenshift-mode .tabsContainer button.active {
     display: flex;
     flex-direction: column;
     gap: 4px;
-    font-size: 0.8rem;
+    font-size: 0.64rem; /* reduced by ~20% */
 }
 .construct-upgrades button {
     padding: 6px;
@@ -3433,7 +3433,7 @@ body.darkenshift-mode .tabsContainer button.active {
     align-items: flex-start;
     gap: 6px;
     padding-left: 8px;
-    font-size: 0.8rem;
+    font-size: 0.64rem; /* reduced by ~20% */
     align-self: flex-start;
 }
 .secondary-resources .resource-box {
@@ -3448,7 +3448,7 @@ body.darkenshift-mode .tabsContainer button.active {
     display: flex;
     align-items: center;
     gap: 4px;
-    font-size: 0.7rem;
+    font-size: 0.56rem; /* reduced by ~20% */
 }
 
 .resource-bar {
@@ -3476,7 +3476,7 @@ body.darkenshift-mode .tabsContainer button.active {
 }
 
 .resource-text {
-    font-size: 0.7rem;
+    font-size: 0.56rem; /* reduced by ~20% */
     text-align: center;
 }
 
@@ -3577,7 +3577,7 @@ body.darkenshift-mode .tabsContainer button.active {
     justify-content: flex-start;
     gap: 4px;
     padding: 4px;
-    font-size: 0.7rem;
+    font-size: 0.56rem; /* reduced by ~20% */
     background: rgba(0,0,0,0.25);
     box-shadow: 0 2px 6px rgba(0,0,0,0.4);
     border-top: 1px solid rgba(0,0,0,0.6);
@@ -3593,7 +3593,7 @@ body.darkenshift-mode .tabsContainer button.active {
     position: absolute;
     left: 4px;
     top: 40px;
-    width: 150px;
+    width: 120px; /* reduced by ~20% */
     display: flex;
     flex-direction: column;
     gap: 4px;
