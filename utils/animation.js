@@ -1,5 +1,15 @@
 export function runAnimation(el, className, timeout) {
   if (!el) return Promise.resolve();
+
+  // Allow passing a NodeList/Array of elements
+  if (typeof el.forEach === 'function' && !el.classList) {
+    return Promise.all(
+      Array.from(el, node => runAnimation(node, className, timeout))
+    );
+  }
+
+  if (!el.classList) return Promise.resolve();
+
   // Restart the animation if the class is already present
   el.classList.remove(className);
   // Force reflow so the removal is applied
