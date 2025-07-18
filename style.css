@@ -40,6 +40,7 @@ body {
     --verdantia-highlight: #c5f2d4;
     --verdantia-jade: #52795c;
     --verdantia-parchment: #fefae0;
+    --daylight: 1;
 }
 
 body.darkenshift-mode {
@@ -732,6 +733,23 @@ body.darkenshift-mode .tabsContainer button.active {
 .camp-buttons {
     display: flex;
     gap: 8px;
+}
+
+/* Schedule overlay */
+.schedule-overlay table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.schedule-overlay td {
+    padding: 2px 4px;
+    font-size: 0.7rem;
+}
+.schedule-overlay tr.active {
+    background: rgba(255,255,255,0.1);
+}
+.schedule-time {
+    text-align: center;
+    margin-bottom: 4px;
 }
 
 .camp-btn {
@@ -3594,6 +3612,7 @@ body.darkenshift-mode .tabsContainer button.active {
     background-position: center;
     background-repeat: no-repeat;
     overflow: hidden;
+    filter: brightness(var(--daylight));
 }
 
 .sect-disciples-container::before {

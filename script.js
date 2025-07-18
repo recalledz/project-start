@@ -765,6 +765,7 @@ let statsEconomyContainer;
 let sectNavWorkBtn;
 let sectNavResourceBtn;
 let sectNavBuildBtn;
+let sectNavScheduleBtn;
 let sectNavChantBtn;
 let sectNavMapBtn;
 let sectNavInfluenceBtn;
@@ -1001,6 +1002,7 @@ function initTabs() {
   sectNavWorkBtn = document.getElementById("sectNavWorkBtn");
   sectNavResourceBtn = document.getElementById("sectNavResourceBtn");
   sectNavBuildBtn = document.getElementById("sectNavBuildBtn");
+  sectNavScheduleBtn = document.getElementById("sectNavScheduleBtn");
   sectNavChantBtn = document.getElementById("sectNavChantBtn");
   sectNavMapBtn = document.getElementById("sectNavMapBtn");
   sectNavInfluenceBtn = document.getElementById("sectNavInfluenceBtn");
@@ -1050,7 +1052,7 @@ function initTabs() {
       }
       openExplorationOverlay();
     });
-  const navButtons = [sectNavWorkBtn, sectNavResourceBtn, sectNavBuildBtn, sectNavChantBtn, sectNavMapBtn, sectNavInfluenceBtn, sectNavResearchBtn, sectNavCultivationBtn];
+  const navButtons = [sectNavWorkBtn, sectNavResourceBtn, sectNavBuildBtn, sectNavScheduleBtn, sectNavChantBtn, sectNavMapBtn, sectNavInfluenceBtn, sectNavResearchBtn, sectNavCultivationBtn];
   function setActiveNavBtn(btn) {
     navButtons.forEach(b => b && b.classList.remove("active"));
     if (btn) btn.classList.add("active");
@@ -1058,6 +1060,7 @@ function initTabs() {
   if (sectNavWorkBtn) sectNavWorkBtn.addEventListener("click", () => { setActiveNavBtn(sectNavWorkBtn); openWorkOverlay(); });
   if (sectNavResourceBtn) sectNavResourceBtn.addEventListener("click", () => { setActiveNavBtn(sectNavResourceBtn); openResourceOverlay(); });
   if (sectNavBuildBtn) sectNavBuildBtn.addEventListener("click", () => { setActiveNavBtn(sectNavBuildBtn); openPlaceholderOverlay("Building"); });
+  if (sectNavScheduleBtn) sectNavScheduleBtn.addEventListener("click", () => { setActiveNavBtn(sectNavScheduleBtn); openScheduleOverlay(); });
   if (sectNavChantBtn) sectNavChantBtn.addEventListener("click", () => { setActiveNavBtn(sectNavChantBtn); openPlaceholderOverlay("Chanting"); });
   if (sectNavMapBtn) sectNavMapBtn.addEventListener("click", () => { setActiveNavBtn(sectNavMapBtn); openExplorationOverlay(); });
   if (sectNavInfluenceBtn) sectNavInfluenceBtn.addEventListener("click", () => { setActiveNavBtn(sectNavInfluenceBtn); openPlaceholderOverlay("Influence"); });
@@ -1194,9 +1197,19 @@ function tickBarProgress(delta) {
   });
 }
 
+function updateDaylight() {
+  const cont = sectDisciplesContainer;
+  if (!cont) return;
+  const t = sectSystem.seasonTimer % DAY_LENGTH_SECONDS;
+  const ratio = t / DAY_LENGTH_SECONDS;
+  const brightness = 0.3 + 0.7 * Math.sin(Math.PI * ratio);
+  cont.style.setProperty('--daylight', brightness);
+}
+
 function tickSect(delta) {
   if (!sectTabUnlocked) return;
   const dt = delta / 1000;
+  updateDaylight();
   sectSystem.disciples.forEach(d => {
     ensureDiscipleSkills(d.id);
     ensureDiscipleConstructXp(d.id);
@@ -2807,6 +2820,59 @@ function openResourceOverlay() {
   const woodRow = document.createElement('div');
   woodRow.textContent = `Softwood: +${woodProd.toFixed(1)}/day`;
   list.appendChild(woodRow);
+}
+
+let scheduleOverlay = null;
+function openScheduleOverlay() {
+  if (scheduleOverlay) return;
+  scheduleOverlay = createOverlay({ className: 'schedule-overlay' });
+  scheduleOverlay.onClose(() => {
+    clearInterval(interval);
+    scheduleOverlay = null;
+  });
+  const { box } = scheduleOverlay;
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 'close-btn';
+  closeBtn.innerHTML = '&times;';
+  closeBtn.addEventListener('click', scheduleOverlay.close);
+  box.appendChild(closeBtn);
+
+  const header = document.createElement('div');
+  header.className = 'panel-heading';
+  header.textContent = 'Schedule';
+  box.appendChild(header);
+
+  const timeEl = document.createElement('div');
+  timeEl.className = 'schedule-time';
+  box.appendChild(timeEl);
+
+  const table = document.createElement('table');
+  const phases = [
+    ['Morning', 'Meditate / Foundation'],
+    ['Midday', 'Work'],
+    ['Afternoon', 'Work'],
+    ['Evening', 'Eat'],
+    ['Night', 'Sleep']
+  ];
+  phases.forEach(p => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${p[0]}</td><td>${p[1]}</td>`;
+    table.appendChild(tr);
+  });
+  box.appendChild(table);
+
+  function render() {
+    const t = sectSystem.seasonTimer % DAY_LENGTH_SECONDS;
+    const mm = String(Math.floor(t / 60)).padStart(2, '0');
+    const ss = String(Math.floor(t % 60)).padStart(2, '0');
+    timeEl.textContent = `Time: ${mm}:${ss}`;
+    const idx = Math.floor(t / 60);
+    Array.from(table.rows).forEach((r, i) => {
+      r.classList.toggle('active', i === idx);
+    });
+  }
+  const interval = setInterval(render, 500);
+  render();
 }
 
 function openPlaceholderOverlay(title) {

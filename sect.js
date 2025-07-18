@@ -22,9 +22,9 @@ function getWaterMidpoint() {
 }
 
 // Seasonal cycle configuration
-// A full in-game day lasts 10 real minutes (600 seconds). Each season spans
-// 28 of these days, so a complete season cycle takes 16,800 seconds.
-export const DAY_LENGTH_SECONDS = 600;
+// A full in-game day lasts 5 real minutes (300 seconds). Each season spans
+// 28 of these days, so a complete season cycle takes 8,400 seconds.
+export const DAY_LENGTH_SECONDS = 300;
 export const SEASON_LENGTH_DAYS = 28;
 const seasons = [
   { name: 'Verdantia', multiplier: 1.20 },
