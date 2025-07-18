@@ -1,4 +1,4 @@
-import { stats } from "../script.js";
+import { stats } from './state.js';
 import { discipleAttackTimers } from "./combat.js";
 import { handContainer, renderCombatDisciples } from "./ui.js";
 

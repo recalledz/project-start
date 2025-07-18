@@ -1,4 +1,4 @@
-import { currentEnemy, stageData } from '../script.js';
+import { currentEnemy, stageData } from './state.js';
 import { dealerLifeDisplay } from './ui.js';
 import { renderDealerLifeBarFill } from '../rendering.js';
 import { formatNumber } from '../utils/numberFormat.js';

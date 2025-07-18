@@ -69,6 +69,7 @@ import {
   updateBloodSplat
 } from "./rendering.js";
 
+// combat mechanics and timers
 import {
   init as initCombat,
   discipleAttackTimers,
@@ -76,6 +77,7 @@ import {
   setEnemyAttackProgress,
   attack
 } from "./game/combat.js";
+// in-combat UI helpers
 import {
   init as initUi,
   handContainer,
@@ -87,6 +89,7 @@ import {
   updateDealerLifeDisplay,
   renderCombatDisciples
 } from "./game/ui.js";
+// disciple selection for combat
 import {
   init as initDisciples,
   activeDisciples,
@@ -94,7 +97,20 @@ import {
   deselectDisciple,
   clearActiveDisciples
 } from "./game/disciples.js";
+// developer debug tools
 import { init as initDebug } from "./game/debug.js";
+// Shared game state and configuration
+import {
+  currentEnemy,
+  setCurrentEnemy,
+  stats,
+  systems,
+  sectState,
+  stageData,
+  FAST_MODE_SCALE,
+  timeScale,
+  setTimeScale
+} from "./game/state.js";
 
 
 
@@ -110,8 +126,6 @@ const cardBackImages = {
 let isDarkenshift = false;
 // resources and progress trackers
 let cardPoints = 0;
-export let currentEnemy = null
-
 
 // track how many upgrade power points have been bought total
 let upgradePowerPurchased = 0;
@@ -155,46 +169,6 @@ const BASE_STATS = {
 };
 
 // Persistent player stats affecting combat and rewards
-export const stats = { ...BASE_STATS };
-stats.cardSlots = BASE_STATS.cardSlots + attributes.Strength.inventorySlots;
-
-export const systems = {
-  manaUnlocked: false,
-  buildingUnlocked: false,
-  researchUnlocked: false,
-  chantingHallUnlocked: false,
-  voiceOfThePeople: false,
-  explorationUnlocked: false
-};
-
-// Each disciple can gather fruit three times per day.
-// Seconds per cycle is 200, so disciples repeat the cycle every ~3.3 minutes.
-const FRUIT_CYCLE_SECONDS = 200;
-const FRUIT_CYCLE_AMOUNT = 10; // legacy constants
-const FRUIT_MAX_CAP = 120;
-const FRUIT_GROWTH_RATES = [60, 40, 30, 20, 0];
-
-
-export const sectState = {
-  fruits: 0,
-  softwood: 0,
-  availableFruits: FRUIT_MAX_CAP,
-  animals: { Chicken: 3, Boar: 1, Deer: 0 },
-  discipleTasks: {}, // map disciple id -> current task
-  taskTimers: { gatherFruits: 0 },
-  discipleProgress: {}, // map disciple id -> progress seconds in current cycle
-  discipleSkills: {}, // map disciple id -> skill levels per task
-  discipleConstructXp: {}, // map disciple id -> construct XP
-  chantAssignments: {}, // map disciple id -> assigned construct
-  discipleRest: {}, // map disciple id -> time spent resting
-  maxDisciples: 3,
-  housingBonus: 0,
-  buildings: { bohio: 0, researchDesk: 0, chantingHall: 0 },
-  researchPoints: 0,
-  researchProgress: 0,
-  currentBuild: null,
-  buildProgress: 0
-};
 
 const HUNT_CYCLE_SECONDS = 200;
 const HUNT_XP_PER_SUCCESS = 30;
@@ -578,17 +552,6 @@ function computeBarMultiplier(level) {
 const BAR_PROGRESS_RATE = 0.1;
 
 // Data for the current stage and world progression
-export let stageData = {
-  world: 1,
-  stage: 1,
-  dealerLifeMax: 10,
-  dealerLifeCurrent: 10,
-  stageDamageMultiplier: 1.05,
-  kills: 0,
-  cardXp: 1,
-  playerXp: 1,
-  attackspeed: 10000 //10 sec at start
-};
 
 const STAGE_KILL_REQUIREMENT = 10;
 const PROGRESS_CIRCUMFERENCE = 2 * Math.PI * 22;
@@ -639,11 +602,6 @@ const playerStats = {
 };
 
 // Debug time scaling
-export const FAST_MODE_SCALE = 10;
-export let timeScale = 1;
-export function setTimeScale(value) {
-  timeScale = value;
-}
 
 // Definitions for purchasable upgrades and their effects are
 // centralized in cardUpgrades.js
@@ -3556,7 +3514,7 @@ export function nextStage() {
   renderStageInfo();
   checkSpeakerEncounter();
   inCombat = false;
-  currentEnemy = null;
+  setCurrentEnemy(null);
   redrawAllowed = false;
   if (nextStageArea) nextStageArea.classList.remove('glow-notify');
   if (isBossStage) {
@@ -3586,7 +3544,7 @@ function nextWorld() {
   renderGlobalStats();
   renderStageInfo();
   inCombat = false;
-  currentEnemy = null;
+  setCurrentEnemy(null);
   redrawAllowed = false;
   if (nextStageArea) nextStageArea.classList.remove('glow-notify');
   respawnDealerStage();
@@ -3611,7 +3569,7 @@ function goToWorld(id) {
   renderGlobalStats();
   renderStageInfo();
   inCombat = false;
-  currentEnemy = null;
+  setCurrentEnemy(null);
   redrawAllowed = false;
   if (nextStageArea) nextStageArea.classList.remove('glow-notify');
   renderWorldsMenu();
@@ -3664,7 +3622,7 @@ export function spawnDealerEvent(powerMult = 1) {
   inCombat = true;
   removeDealerLifeBar();
   const temp = { ...stageData, stage: Math.round(stageData.stage * powerMult) };
-  currentEnemy = spawnEnemy('dealer', temp, enemyAttackProgress, onDealerDefeat);
+  setCurrentEnemy(spawnEnemy('dealer', temp, enemyAttackProgress, onDealerDefeat));
   updateDealerLifeDisplay();
   enemyAttackFill = renderEnemyAttackBar();
   showPlayerAttackBar();
@@ -3677,7 +3635,7 @@ export function spawnBossEvent() {
   const data = worldProgress[stageData.world];
   const bossStage = 10 * (data?.level || 1);
   const temp = { ...stageData, stage: bossStage };
-  currentEnemy = spawnEnemy('boss', temp, enemyAttackProgress, () => onBossDefeat(currentEnemy));
+  setCurrentEnemy(spawnEnemy('boss', temp, enemyAttackProgress, () => onBossDefeat(currentEnemy)));
   updateDealerLifeDisplay();
   enemyAttackFill = renderEnemyAttackBar();
   showPlayerAttackBar();
@@ -3697,9 +3655,9 @@ export function respawnDealerStage() {
   removeDealerLifeBar();
   if (speakerEncounterPending) {
     speakerEncounterPending = false;
-    currentEnemy = spawnEnemy('speaker', stageData, enemyAttackProgress, onSpeakerDefeat);
+    setCurrentEnemy(spawnEnemy('speaker', stageData, enemyAttackProgress, onSpeakerDefeat));
   } else {
-    currentEnemy = spawnEnemy('dealer', stageData, enemyAttackProgress, onDealerDefeat);
+    setCurrentEnemy(spawnEnemy('dealer', stageData, enemyAttackProgress, onDealerDefeat));
   }
   updateDealerLifeDisplay();
   enemyAttackFill = renderEnemyAttackBar();
@@ -3715,7 +3673,7 @@ function onDealerDefeat() {
     currentEnemy.attackTimer / currentEnemy.attackInterval
   );
   // clear enemy immediately to prevent repeated callbacks
-  currentEnemy = null;
+  setCurrentEnemy(null);
   combatXp(calculateKillXp(stageData.stage, stageData.world));
   stageData.kills += 1;
   playerStats.stageKills[stageData.stage] = stageData.kills;
@@ -3748,7 +3706,7 @@ function onSpeakerDefeat() {
   dealerDeathAnimation();
   dealerBarDeathAnimation(() => {
     inCombat = false;
-    currentEnemy = null;
+    setCurrentEnemy(null);
     combatXp(calculateKillXp(stageData.stage, stageData.world));
     updateDealerLifeDisplay();
     hidePlayerAttackBar(playerAttackFill);
@@ -3775,7 +3733,7 @@ function onBossDefeat(boss) {
   renderWorldsMenu();
   renderStageInfo();
   addLog(`${boss.name} was defeated!`);
-  currentEnemy = null;
+  setCurrentEnemy(null);
 
   playerStats.totalBossKills += 1;
   renderGlobalStats();
@@ -3789,7 +3747,7 @@ function onBossDefeat(boss) {
   dealerDeathAnimation();
   dealerBarDeathAnimation(() => {
     inCombat = false;
-    currentEnemy = null;
+    setCurrentEnemy(null);
     combatXp(boss.xp);
     hidePlayerAttackBar(playerAttackFill);
     nextWorld();
@@ -4221,7 +4179,7 @@ function returnPartyToSect() {
   currentExplorationParty = [];
   clearActiveDisciples();
   inCombat = false;
-  currentEnemy = null;
+  setCurrentEnemy(null);
   removeDealerLifeBar();
   hidePlayerAttackBar(playerAttackFill);
   playerStats.hasDied = false;
