@@ -152,7 +152,7 @@ const BASE_STATS = {
 };
 
 // Persistent player stats affecting combat and rewards
-const stats = { ...BASE_STATS };
+export const stats = { ...BASE_STATS };
 stats.cardSlots = BASE_STATS.cardSlots + attributes.Strength.inventorySlots;
 
 export const systems = {
@@ -575,7 +575,7 @@ function computeBarMultiplier(level) {
 const BAR_PROGRESS_RATE = 0.1;
 
 // Data for the current stage and world progression
-let stageData = {
+export let stageData = {
   world: 1,
   stage: 1,
   dealerLifeMax: 10,
@@ -636,8 +636,8 @@ const playerStats = {
 };
 
 // Debug time scaling
-const FAST_MODE_SCALE = 10;
-let timeScale = 1;
+export const FAST_MODE_SCALE = 10;
+export let timeScale = 1;
 
 // Definitions for purchasable upgrades and their effects are
 // centralized in cardUpgrades.js
@@ -811,7 +811,7 @@ function setActiveTabButton(btn) {
   });
 }
 
-function addDiscoveredLocation(name) {
+export function addDiscoveredLocation(name) {
   if (discoveredLocations.includes(name)) return;
   discoveredLocations.push(name);
   if (locationListContainer) {
@@ -3243,7 +3243,7 @@ function unlockManaSystem() {
 
 //stage
 
-function renderStageInfo() {
+export function renderStageInfo() {
   const stageDisplay = document.getElementById("stage");
   stageData.kills = playerStats.stageKills[stageData.stage] || stageData.kills || 0;
   const lvl = worldProgress[stageData.world]?.level || 1;
@@ -3253,7 +3253,7 @@ function renderStageInfo() {
   updateBossProgress();
 }
 
-function renderPlayerStats(stats) {
+export function renderPlayerStats(stats) {
   const damageDisplay = document.getElementById("damageDisplay");
   const hpPerKillDisplay = document.getElementById("hpPerKillDisplay");
   const attackSpeedDisplay = document.getElementById("attackSpeedDisplay");
@@ -3549,7 +3549,7 @@ function updateWorldTabNotification() {
 
 // ===== Stage and world management =====
 // Advance to the next stage after defeating enough enemies
-function nextStage() {
+export function nextStage() {
   playerStats.stageKills[stageData.stage] = stageData.kills;
   stageData.stage += 1;
   stageData.kills = playerStats.stageKills[stageData.stage] || 0;
@@ -3682,7 +3682,7 @@ function removeDealerLifeBar() {
   dealerLifeDisplay.textContent = "";
 }
 
-function spawnDealerEvent(powerMult = 1) {
+export function spawnDealerEvent(powerMult = 1) {
   inCombat = true;
   removeDealerLifeBar();
   const temp = { ...stageData, stage: Math.round(stageData.stage * powerMult) };
@@ -3693,7 +3693,7 @@ function spawnDealerEvent(powerMult = 1) {
   dealerDeathAnimation();
 }
 
-function spawnBossEvent() {
+export function spawnBossEvent() {
   inCombat = true;
   removeDealerLifeBar();
   const data = worldProgress[stageData.world];
@@ -3715,7 +3715,7 @@ function spawnBossEvent() {
 //function moveForward() {}
 
 // After a kill, decide whether to spawn a dealer or a boss
-function respawnDealerStage() {
+export function respawnDealerStage() {
   removeDealerLifeBar();
   if (speakerEncounterPending) {
     speakerEncounterPending = false;
@@ -3834,7 +3834,7 @@ function updateDealerLifeDisplay() {
 // enemy scaling moved to enemySpawning.js
 
 // Apply damage from the enemy to the first card in the player's hand
-function cDealerDamage(damageAmount = null, ability = null, source = "dealer") {
+export function cDealerDamage(damageAmount = null, ability = null, source = "dealer") {
   const targets = activeDisciples;
   if (targets.length === 0) {
     playerStats.hasDied = true;
@@ -4305,7 +4305,7 @@ function hideSpeakerQuote() {
 }
 
 // Fully wipe saved data and reload the page
-function startNewGame() {
+export function startNewGame() {
 if (typeof localStorage !== "undefined") {
 localStorage.removeItem("gameSave");
 }
@@ -4394,7 +4394,7 @@ function updatePlayerStats() {
 
 //=========save/load functions===========
 // Serialize the current game state to localStorage
-function saveGame() {
+export function saveGame() {
 if (typeof localStorage === "undefined") return;
 
 
@@ -4438,7 +4438,7 @@ console.error("Save failed", e);
 }
 
 // Restore game state from localStorage if available
-function loadGame() {
+export function loadGame() {
 if (typeof localStorage === "undefined") return;
 const json = localStorage.getItem("gameSave");
 if (!json) return;
@@ -4713,58 +4713,3 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
-// Developer helpers exposed on the console for testing
-window.devTools = {
-  spawnBoss: () => spawnBossEvent(),
-  spawnDealer: () => spawnDealerEvent(),
-cDealerDamage,
-killEnemy: () => {
-if (!currentEnemy) return;
-currentEnemy.takeDamage(currentEnemy.maxHp);
-if (currentEnemy instanceof Boss) {
-currentEnemy.onDefeat?.();
-}
-},
-killBoss: () => {
-if (currentEnemy instanceof Boss) {
-currentEnemy.takeDamage(currentEnemy.maxHp);
-currentEnemy.onDefeat?.();
-}
-},
-logEnemy: () => console.log(currentEnemy),
-advanceStage: () => nextStage(),
-
-
-setStageWorld: () => {
-const stage = parseInt(document.getElementById("debugStage").value);
-const world = parseInt(document.getElementById("debugWorld").value);
-if (!isNaN(stage)) stageData.stage = stage;
-if (!isNaN(world)) stageData.world = world;
-renderStage();
-respawnDealerStage();
-},
-
-setDamageMult: () => {
-const mult = parseFloat(
-document.getElementById("debugDamageMult").value
-);
-if (!isNaN(mult)) {
-stats.damageMultiplier = mult;
-renderPlayerStats(stats);
-}
-},
-addManaRegen: () => {
-const amt = parseFloat(document.getElementById("debugManaRegen").value) || 0;
-stats.manaRegen += amt;
-renderPlayerStats(stats);
-},
-  toggleFastMode: () => {
-    timeScale = timeScale === 1 ? FAST_MODE_SCALE: 1;
-  },
-  unlockExploration: () => {
-    systems.explorationUnlocked = true;
-    addDiscoveredLocation('Esoteric Dungeon');
-    unlockConstruct('Sonic Boom');
-  },
-  save: saveGame,
-  load: loadGame,  newGame: startNewGame};
