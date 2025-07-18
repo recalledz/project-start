@@ -3599,6 +3599,35 @@ body.darkenshift-mode .tabsContainer button.active {
     gap: 4px;
     z-index: 5;
 }
+.sect-nav-panel {
+    position: absolute;
+    right: 4px;
+    top: 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    z-index: 5;
+}
+
+.sect-nav-panel button {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.5);
+    border: 1px solid var(--verdantia-highlight);
+    color: var(--verdantia-parchment);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+}
+
+.sect-nav-panel button.active {
+    background: var(--verdantia-jade);
+    color: #fff;
+    box-shadow: 0 0 6px var(--verdantia-highlight);
+}
+
 
 .zone {
     position: absolute;

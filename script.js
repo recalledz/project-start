@@ -762,6 +762,13 @@ let statsOverviewSubTabButton;
 let statsEconomySubTabButton;
 let statsOverviewContainer;
 let statsEconomyContainer;
+let sectNavWorkBtn;
+let sectNavChantBtn;
+let sectNavMapBtn;
+let sectNavInfluenceBtn;
+let sectNavResearchBtn;
+let sectNavCultivationBtn;
+
 const discoveredLocations = [];
 const explorationParty = new Set();
 let currentExplorationParty = [];
@@ -989,6 +996,12 @@ function initTabs() {
   colonyResearchTabButton = document.getElementById('colonyResearchTabBtn');
   locationsPanelBtn = document.getElementById('locationsPanelBtn');
   gateBtn = document.getElementById('gateBtn');
+  sectNavWorkBtn = document.getElementById("sectNavWorkBtn");
+  sectNavChantBtn = document.getElementById("sectNavChantBtn");
+  sectNavMapBtn = document.getElementById("sectNavMapBtn");
+  sectNavInfluenceBtn = document.getElementById("sectNavInfluenceBtn");
+  sectNavResearchBtn = document.getElementById("sectNavResearchBtn");
+  sectNavCultivationBtn = document.getElementById("sectNavCultivationBtn");
   statsOverviewSubTabButton = document.querySelector('.statsOverviewSubTabButton');
   statsEconomySubTabButton = document.querySelector('.statsEconomySubTabButton');
   statsOverviewContainer = document.getElementById('statsOverviewContainer');
@@ -1033,6 +1046,17 @@ function initTabs() {
       }
       openExplorationOverlay();
     });
+  const navButtons = [sectNavWorkBtn, sectNavChantBtn, sectNavMapBtn, sectNavInfluenceBtn, sectNavResearchBtn, sectNavCultivationBtn];
+  function setActiveNavBtn(btn) {
+    navButtons.forEach(b => b && b.classList.remove("active"));
+    if (btn) btn.classList.add("active");
+  }
+  if (sectNavWorkBtn) sectNavWorkBtn.addEventListener("click", () => { setActiveNavBtn(sectNavWorkBtn); openWorkOverlay(); });
+  if (sectNavChantBtn) sectNavChantBtn.addEventListener("click", () => { setActiveNavBtn(sectNavChantBtn); openPlaceholderOverlay("Chanting"); });
+  if (sectNavMapBtn) sectNavMapBtn.addEventListener("click", () => { setActiveNavBtn(sectNavMapBtn); openExplorationOverlay(); });
+  if (sectNavInfluenceBtn) sectNavInfluenceBtn.addEventListener("click", () => { setActiveNavBtn(sectNavInfluenceBtn); openPlaceholderOverlay("Influence"); });
+  if (sectNavResearchBtn) sectNavResearchBtn.addEventListener("click", () => { setActiveNavBtn(sectNavResearchBtn); openPlaceholderOverlay("Research"); });
+  if (sectNavCultivationBtn) sectNavCultivationBtn.addEventListener("click", () => { setActiveNavBtn(sectNavCultivationBtn); openPlaceholderOverlay("Cultivation"); });
   if (startDungeonBtn)
     startDungeonBtn.addEventListener('click', startExploration);
   if (playerCoreSubTabButton)
@@ -2644,8 +2668,49 @@ function openExplorationOverlay() {
   }
 
   update();
+
 }
 
+let workOverlay = null;
+function openWorkOverlay() {
+  if (workOverlay) return;
+  workOverlay = createOverlay({ className: "work-overlay" });
+  workOverlay.onClose(() => { workOverlay = null; });
+  const { box } = workOverlay;
+  const closeBtn = document.createElement("button");
+  closeBtn.className = "close-btn";
+  closeBtn.innerHTML = "&times;";
+  closeBtn.addEventListener("click", workOverlay.close);
+  box.appendChild(closeBtn);
+  const header = document.createElement("div");
+  header.className = "panel-heading";
+  header.textContent = "Work";
+  box.appendChild(header);
+  const gf = document.createElement("button");
+  gf.textContent = "Gather Fruit";
+  gf.addEventListener("click", () => {
+    sectSystem.disciples.forEach(d => {
+      sectState.discipleTasks[d.id] = "Gather Fruit";
+    });
+    if (typeof renderColonyTasks === "function") renderColonyTasks();
+    if (typeof renderColonyInfo === "function") renderColonyInfo();
+    workOverlay.close();
+  });
+  box.appendChild(gf);
+}
+
+function openPlaceholderOverlay(title) {
+  const ov = createOverlay({});
+  const { box } = ov;
+  const closeBtn = document.createElement("button");
+  closeBtn.className = "close-btn";
+  closeBtn.innerHTML = "&times;";
+  closeBtn.addEventListener("click", ov.close);
+  box.appendChild(closeBtn);
+  const msg = document.createElement("div");
+  msg.textContent = `${title} coming soon`;
+  box.appendChild(msg);
+}
 function triggerOrbFlash() {
   const orbs = document.querySelectorAll('#sectOrbs .sect-orb');
   orbs.forEach(o => {
@@ -2685,6 +2750,8 @@ document.addEventListener("DOMContentLoaded", () => {
     sectSystem.disciples.forEach(d => {
       if (sectState.fruits >= DAILY_FRUIT_CONSUMPTION) {
         sectState.fruits -= DAILY_FRUIT_CONSUMPTION;
+
+
         d.hunger = 20;
       } else {
         d.hunger = Math.max(0, d.hunger - 1);
