@@ -1,9 +1,5 @@
-import {
-  stats,
-  discipleAttackTimers,
-  handContainer,
-  renderCombatDisciples
-} from "../script.js";
+import { stats, discipleAttackTimers } from "../script.js";
+import { handContainer, renderCombatDisciples } from "./ui.js";
 
 export function init() {}
 

@@ -61,7 +61,6 @@ import {
 import {
   renderCard,
   renderDiscipleCard,
-  renderDealerLifeBar,
   renderEnemyAttackBar,
   renderPlayerAttackBar,
   renderDealerLifeBarFill,
@@ -71,7 +70,17 @@ import {
 } from "./rendering.js";
 
 import { init as initCombat } from "./game/combat.js";
-import { init as initUi } from "./game/ui.js";
+import {
+  init as initUi,
+  handContainer,
+  dealerLifeDisplay,
+  showPlayerAttackBar,
+  hidePlayerAttackBar,
+  updateDealerLifeBar,
+  removeDealerLifeBar,
+  updateDealerLifeDisplay,
+  renderCombatDisciples
+} from "./game/ui.js";
 import {
   init as initDisciples,
   activeDisciples,
@@ -655,9 +664,6 @@ const nextStageProgress = document.getElementById("nextStageProgress");
 const fightBossBtn = document.getElementById("fightBossBtn");
 const bossProgress = document.getElementById("bossProgress");
 const campBtn = document.getElementById("campBtn");
-export const handContainer = document.getElementsByClassName("handContainer")[0];
-const dealerLifeDisplay =
-document.getElementsByClassName("dealerLifeDisplay")[0];
 const killsDisplay = document.getElementById("kills");
 const worldProgressPerSecDisplay = document.getElementById("worldProgressPerSecDisplay");
 const dCardContainer = document.getElementsByClassName("dCardContainer")[0];
@@ -681,17 +687,6 @@ const manaText = document.getElementById("manaText");
 //let lowSanityOverlayShown = false;
 const manaRegenDisplay = document.getElementById("manaRegenDisplay");
 const dpsDisplay = document.getElementById("dpsDisplay");
-
-function showPlayerAttackBar() {
-  const bar = document.getElementById('playerAttackBar');
-  if (bar) bar.style.display = 'block';
-}
-
-function hidePlayerAttackBar() {
-  const bar = document.getElementById('playerAttackBar');
-  if (bar) bar.style.display = 'none';
-  if (playerAttackFill) playerAttackFill.style.width = '0%';
-}
 
 //function hideStageProgressBar() {
 //  if (stageProgressBar) stageProgressBar.style.display = "none";
@@ -3196,7 +3191,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   const buttons = document.querySelector('.buttonsContainer');
   playerAttackFill = renderPlayerAttackBar(buttons);
-  hidePlayerAttackBar();
+  hidePlayerAttackBar(playerAttackFill);
   requestAnimationFrame(gameLoop);
 });
 
@@ -3660,22 +3655,6 @@ function updateBossProgress() {
 // Spawn logic moved to enemySpawning.js
 
 // Adjust the width of the dealer's HP bar
-function updateDealerLifeBar(enemy) {
-  const barFill = document.getElementById("dealerBarFill");
-  if (!barFill || !enemy) return;
-
-  const hpRatio = enemy.currentHp / enemy.maxHp;
-  barFill.style.width = `${Math.max(0, Math.min(1, hpRatio)) * 100}%`;
-} // for healing bosses
-
-// Clean up HP/attack bars when an enemy dies
-function removeDealerLifeBar() {
-  const bar = document.querySelector(".dealerLifeContainer");
-  if (bar) bar.remove();
-  const atk = document.querySelector(".enemyAttackBar");
-  if (atk) atk.remove();
-  dealerLifeDisplay.textContent = "";
-}
 
 export function spawnDealerEvent(powerMult = 1) {
   inCombat = true;
@@ -3742,7 +3721,7 @@ function onDealerDefeat() {
     dealerBarDeathAnimation(() => {
       inCombat = false;
       updateDealerLifeDisplay();
-      hidePlayerAttackBar();
+      hidePlayerAttackBar(playerAttackFill);
       respawnDealerStage();
     });
 }
@@ -3766,7 +3745,7 @@ function onSpeakerDefeat() {
     currentEnemy = null;
     combatXp(calculateKillXp(stageData.stage, stageData.world));
     updateDealerLifeDisplay();
-    hidePlayerAttackBar();
+    hidePlayerAttackBar(playerAttackFill);
     respawnDealerStage();
   });
 }
@@ -3806,7 +3785,7 @@ function onBossDefeat(boss) {
     inCombat = false;
     currentEnemy = null;
     combatXp(boss.xp);
-    hidePlayerAttackBar();
+    hidePlayerAttackBar(playerAttackFill);
     nextWorld();
   });
 }
@@ -3814,16 +3793,6 @@ function onBossDefeat(boss) {
 // Spawn the boss that appears every 10 stages
 // Spawn logic moved to enemySpawning.js
 
-// Update text and bar UI for the current enemy's health
-function updateDealerLifeDisplay() {
-  if (!currentEnemy) {
-    removeDealerLifeBar();
-    return;
-  }
-  dealerLifeDisplay.textContent = `Life: ${formatNumber(currentEnemy.currentHp)}/${formatNumber(currentEnemy.maxHp)}`;
-  renderDealerLifeBar(dealerLifeDisplay, currentEnemy);
-  renderDealerLifeBarFill(currentEnemy);
-}
 
 // Determine how much health an enemy or boss should have
 // enemy scaling moved to enemySpawning.js
@@ -3956,11 +3925,6 @@ function updateDrawButton() {
 }
 
 
-function updateDiscipleStatsDisplay(d) {
-  if (!d.statsElement) return;
-  // Stats are now shown in the sect info panel rather than below the card
-  d.statsElement.innerHTML = '';
-}
 
 // Refresh the cards currently shown in the player's hand
 function updateHandDisplay() {
@@ -3998,21 +3962,6 @@ function updateSectCardInfo() {
   });
 }
 
-export function renderCombatDisciples() {
-  if (!handContainer) return;
-  handContainer.innerHTML = '';
-  activeDisciples.forEach(d => {
-    renderDiscipleCard(d, handContainer);
-    const bar = document.createElement('div');
-    bar.className = 'disciple-attack-bar';
-    const fill = document.createElement('div');
-    fill.className = 'disciple-attack-fill';
-    bar.appendChild(fill);
-    d.wrapperElement.insertBefore(bar, d.xpBar);
-    d.attackFill = fill;
-    updateDiscipleStatsDisplay(d);
-  });
-}
 
 // Create DOM elements for a card in the player's hand
 // card rendering moved to rendering.js
@@ -4051,7 +4000,7 @@ function openCamp(onCloseCallback = null) {
   campOverlayOpen = true;
   redrawAllowed = true;
   gamePaused = true;
-  hidePlayerAttackBar();
+  hidePlayerAttackBar(playerAttackFill);
   campOverlay = createOverlay({ className: 'camp-overlay' });
   campOverlay.onClose(() => {
     campOverlayOpen = false;
@@ -4268,7 +4217,7 @@ function returnPartyToSect() {
   inCombat = false;
   currentEnemy = null;
   removeDealerLifeBar();
-  hidePlayerAttackBar();
+  hidePlayerAttackBar(playerAttackFill);
   playerStats.hasDied = false;
   showTab(playerTab);
   setActiveTabButton(playerTabButton);
