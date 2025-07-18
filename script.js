@@ -1062,7 +1062,12 @@ function initTabs() {
   }
   if (sectNavWorkBtn) sectNavWorkBtn.addEventListener("click", () => { setActiveNavBtn(sectNavWorkBtn); openWorkOverlay(); });
   if (sectNavResourceBtn) sectNavResourceBtn.addEventListener("click", () => { setActiveNavBtn(sectNavResourceBtn); openResourceOverlay(); });
-  if (sectNavBuildBtn) sectNavBuildBtn.addEventListener("click", () => { setActiveNavBtn(sectNavBuildBtn); openPlaceholderOverlay("Building"); });
+  if (sectNavBuildBtn)
+    sectNavBuildBtn.addEventListener("click", () => {
+      setActiveNavBtn(sectNavBuildBtn);
+      if (systems.buildingUnlocked) openBuildOverlay();
+      else openPlaceholderOverlay("Building");
+    });
   if (sectNavChantBtn) sectNavChantBtn.addEventListener("click", () => { setActiveNavBtn(sectNavChantBtn); openPlaceholderOverlay("Chanting"); });
   if (sectNavMapBtn) sectNavMapBtn.addEventListener("click", () => { setActiveNavBtn(sectNavMapBtn); openExplorationOverlay(); });
   if (sectNavInfluenceBtn) sectNavInfluenceBtn.addEventListener("click", () => { setActiveNavBtn(sectNavInfluenceBtn); openPlaceholderOverlay("Influence"); });
@@ -1812,6 +1817,7 @@ function startBuilding(key) {
   sectState.buildProgress = 0;
   renderColonyResources();
   renderColonyBuildPanel();
+  if (updateBuildOverlay) updateBuildOverlay();
 }
 
 function tickBuilding(dt) {
@@ -1847,6 +1853,10 @@ function tickBuilding(dt) {
       if (colonyResearchTabButton) colonyResearchTabButton.style.display = '';
     }
     renderColonyBuildPanel();
+    if (updateBuildOverlay) updateBuildOverlay();
+  }
+  else {
+    if (updateBuildOverlay) updateBuildOverlay();
   }
 }
 
@@ -2842,6 +2852,70 @@ function openResourceOverlay() {
   const woodRow = document.createElement('div');
   woodRow.textContent = `Softwood: +${woodProd.toFixed(1)}/day`;
   list.appendChild(woodRow);
+}
+
+let buildOverlay = null;
+let updateBuildOverlay = null;
+function openBuildOverlay() {
+  if (buildOverlay) return;
+  buildOverlay = createOverlay({ className: 'build-overlay' });
+  buildOverlay.onClose(() => {
+    buildOverlay = null;
+    updateBuildOverlay = null;
+  });
+  const { box } = buildOverlay;
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 'close-btn';
+  closeBtn.innerHTML = '&times;';
+  closeBtn.addEventListener('click', buildOverlay.close);
+  box.appendChild(closeBtn);
+
+  const header = document.createElement('div');
+  header.className = 'panel-heading';
+  header.textContent = 'Build';
+  box.appendChild(header);
+
+  const list = document.createElement('div');
+  box.appendChild(list);
+
+  function render() {
+    list.innerHTML = '';
+    Object.entries(BUILDINGS).forEach(([key, b]) => {
+      if (b.requires && sectState.buildings[b.requires] < b.max) return;
+      if (key === 'chantingHall' && !systems.chantingHallUnlocked) return;
+      const row = document.createElement('div');
+      const btn = document.createElement('button');
+      const built = sectState.buildings[key] || 0;
+      btn.textContent = `${b.name} (${built}/${b.max})`;
+      btn.disabled = built >= b.max || sectState.currentBuild;
+      btn.addEventListener('click', () => {
+        startBuilding(key);
+        render();
+      });
+      row.appendChild(btn);
+      if (sectState.currentBuild === key) {
+        const bar = document.createElement('div');
+        bar.className = 'disciple-progress';
+        const fill = document.createElement('div');
+        fill.className = 'disciple-progress-fill';
+        fill.style.width = `${(sectState.buildProgress * 100).toFixed(0)}%`;
+        const text = document.createElement('div');
+        text.className = 'disciple-progress-label';
+        text.textContent = `${(sectState.buildProgress * 100).toFixed(0)}%`;
+        bar.appendChild(fill);
+        bar.appendChild(text);
+        row.appendChild(bar);
+      } else {
+        const cost = document.createElement('div');
+        cost.textContent = `Cost: ${b.cost} Softwood`;
+        row.appendChild(cost);
+      }
+      list.appendChild(row);
+    });
+  }
+
+  updateBuildOverlay = render;
+  render();
 }
 
 function openPlaceholderOverlay(title) {
