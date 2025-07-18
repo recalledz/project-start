@@ -2792,6 +2792,7 @@ function openWorkOverlay() {
 
     right.innerHTML = '';
     const tasks = ['Gather Fruit', 'Gather Softwood'];
+    if (systems.buildingUnlocked) tasks.push('Building');
     tasks.forEach(t => {
       const btn = document.createElement('button');
       btn.textContent = t;
