@@ -3611,36 +3611,29 @@ body.darkenshift-mode .tabsContainer button.active {
 .zone.orchard {
     left: 2%;
     top: 2%;
-    width: 30%;
-    height: 40%;
+    width: 46%;
+    height: 46%;
     background: radial-gradient(circle, rgba(160,220,160,0.15), transparent 80%);
 }
 .zone.lumberyard {
     right: 2%;
     top: 2%;
-    width: 30%;
-    height: 40%;
+    width: 46%;
+    height: 46%;
     background: radial-gradient(circle, rgba(200,170,120,0.15), transparent 80%);
-}
-.zone.meditation {
-    left: 20%;
-    bottom: 2%;
-    width: 60%;
-    height: 40%;
-    background: radial-gradient(circle, rgba(250,250,200,0.1), transparent 80%);
 }
 .zone.storage {
     left: 2%;
     bottom: 2%;
-    width: 30%;
-    height: 40%;
+    width: 46%;
+    height: 46%;
     background: radial-gradient(circle, rgba(180,180,180,0.15), transparent 80%);
 }
 .zone.research {
     right: 2%;
     bottom: 2%;
-    width: 30%;
-    height: 40%;
+    width: 46%;
+    height: 46%;
     background: radial-gradient(circle, rgba(180,160,220,0.15), transparent 80%);
 }
 
@@ -3675,10 +3668,12 @@ body.darkenshift-mode .tabsContainer button.active {
 }
 .colony-tabs {
     position: absolute;
-    top: 2px;
-    left: 2px;
+    top: 50%;
+    right: 2px;
+    transform: translateY(-50%);
     display: flex;
-    gap: 2px;
+    flex-direction: column;
+    gap: 4px;
     z-index: 10;
     margin: 0;
 }
