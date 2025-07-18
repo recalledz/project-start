@@ -17,7 +17,8 @@ import {
   loadGame,
   startNewGame,
   currentEnemy,
-  cDealerDamage
+  cDealerDamage,
+  setTimeScale
 } from './script.js';
 
 export const devTools = {
@@ -62,7 +63,7 @@ export const devTools = {
     renderPlayerStats(stats);
   },
   toggleFastMode: () => {
-    timeScale = timeScale === 1 ? FAST_MODE_SCALE : 1;
+    setTimeScale(timeScale === 1 ? FAST_MODE_SCALE : 1);
   },
   unlockExploration: () => {
     systems.explorationUnlocked = true;
