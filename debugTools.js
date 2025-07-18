@@ -4,22 +4,24 @@ import {
   spawnBossEvent,
   spawnDealerEvent,
   nextStage,
-  stageData,
   respawnDealerStage,
   renderStageInfo,
   renderPlayerStats,
-  stats,
-  timeScale,
-  FAST_MODE_SCALE,
-  systems,
   addDiscoveredLocation,
   saveGame,
   loadGame,
   startNewGame,
-  currentEnemy,
-  cDealerDamage,
-  setTimeScale
+  cDealerDamage
 } from './script.js';
+import {
+  stageData,
+  stats,
+  timeScale,
+  FAST_MODE_SCALE,
+  systems,
+  currentEnemy,
+  setTimeScale
+} from './game/state.js';
 
 export const devTools = {
   spawnBoss: () => spawnBossEvent(),
