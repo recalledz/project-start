@@ -3642,6 +3642,15 @@ body.darkenshift-mode .tabsContainer button.active {
     z-index: 5;
 }
 
+.sect-resource-display .vignette-toggle {
+    width: auto;
+    padding: 0;
+    background: none;
+    border: none;
+    box-shadow: none;
+    align-self: flex-start;
+}
+
 .sect-nav-panel {
     position: absolute;
     right: 4px;
