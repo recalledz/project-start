@@ -49,22 +49,18 @@ export const attributes = {
   }
 };
 
-export function strengthXpMultiplier(task) {
-  const affected = ['Gather Softwood', 'Mining', 'Smithing'];
-  return affected.includes(task) ? 1 + attributes.Strength.points * 0.1 : 1;
+export function strengthXpMultiplier() {
+  return 1;
 }
 
-export function enduranceXpMultiplier(task) {
-  const affected = ['Building', 'Defending', 'Combat'];
-  return affected.includes(task) ? 1 + attributes.Endurance.points * 0.1 : 1;
+export function enduranceXpMultiplier() {
+  return 1;
 }
 
-export function dexterityXpMultiplier(task) {
-  const affected = ['Gather Softwood', 'Gather Fruit'];
-  return affected.includes(task) ? 1 + attributes.Dexterity.points * 0.1 : 1;
+export function dexterityXpMultiplier() {
+  return 1;
 }
 
-export function intelligenceXpMultiplier(task) {
-  const affected = ['Chant', 'Research'];
-  return affected.includes(task) ? 1 + attributes.Intelligence.points * 0.1 : 1;
+export function intelligenceXpMultiplier() {
+  return 0.5 + 0.15 * attributes.Intelligence.points;
 }

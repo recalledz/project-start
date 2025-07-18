@@ -22,5 +22,9 @@
 
 ### Affinity & Intelligence Example
 - **Formula**: `XP = BaseXP × IntMultiplier × Affinity`
-- E.g. Int=5 → 1.5×, Gathering affinity=3× → total **4.5×**  
+- E.g. Int=5 → 1.5×, Gathering affinity=3× → total **4.5×**
   – 10 XP action → 45 XP actual
+
+Each disciple rolls two random skill affinities when created. These grant either
+1.5× or 3× XP for the chosen skills. Attributes other than Intelligence do not
+affect proficiency gain.

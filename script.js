@@ -34,9 +34,6 @@ import { runAnimation } from "./utils/animation.js";
 import { initCore, refreshCore } from './core.js';
 import {
   attributes,
-  strengthXpMultiplier,
-  enduranceXpMultiplier,
-  dexterityXpMultiplier,
   intelligenceXpMultiplier
 } from './attributes.js';
 import { createOverlay } from './ui/overlay.js';
@@ -204,12 +201,12 @@ const SOFTWOOD_CYCLE_SECONDS = 215;
 const SOFTWOOD_CYCLE_AMOUNT = 10;
 const DAILY_FRUIT_CONSUMPTION = 20; // fruits eaten by each disciple per day
 
-// XP earned for disciple tasks
-const FRUIT_XP_PER_CYCLE = 25;
-const LOG_XP_PER_CYCLE = 25;
-const BUILD_XP_RATE = 0.1; // per second
-const RESEARCH_XP_PER_CYCLE = 20;
-const CHANT_XP_PER_CYCLE = 0.5;
+// XP earned for disciple tasks (BaseXP × cycle length)
+const FRUIT_XP_PER_CYCLE = 1; // 0.005 XP/s × 200s
+const LOG_XP_PER_CYCLE = 1; // 0.0047 XP/s × 215s ≈ 1
+const BUILD_XP_RATE = 1; // per second
+const RESEARCH_XP_PER_CYCLE = 1; // 0.008 XP/s × ~125s ≈ 1
+const CHANT_XP_PER_CYCLE = 1.665; // 0.333 XP/s × 5s
 const EXPLORATION_CYCLE_SECONDS = 150;
 const STAMINA_DRAIN_PER_EXPLORATION = 1;
 const DISCIPLE_MAX_HEALTH = 10;
@@ -1277,11 +1274,7 @@ function tickSect(delta) {
           sectState.softwood += deposit;
         }
         checkBuildingUnlock();
-        const mult =
-          strengthXpMultiplier(task) *
-          enduranceXpMultiplier(task) *
-          dexterityXpMultiplier(task) *
-          intelligenceXpMultiplier(task);
+        const mult = intelligenceXpMultiplier();
         const baseXp = task === 'Gather Fruit' ? FRUIT_XP_PER_CYCLE : LOG_XP_PER_CYCLE;
         const groupKey = TASK_GROUPS[task];
         addSkillXp(d, groupKey, cycles * baseXp * mult);
@@ -1302,7 +1295,7 @@ function tickSect(delta) {
         addSkillXp(
           d,
           'Researching',
-          ptsBase * RESEARCH_XP_PER_CYCLE
+          ptsBase * RESEARCH_XP_PER_CYCLE * intelligenceXpMultiplier()
         );
         if (!systems.researchUnlocked) {
           systems.researchUnlocked = true;
@@ -1323,7 +1316,7 @@ function tickSect(delta) {
           const lvl = getTaskSkillProgress(xp).level;
           const pot = 0.3 * (1 + 0.02 * lvl) * attributes.Intelligence.constructPotencyMultiplier;
           castConstruct(target, null, pot, d.id);
-          addSkillXp(d, 'Chanting', CHANT_XP_PER_CYCLE);
+            addSkillXp(d, 'Chanting', CHANT_XP_PER_CYCLE * intelligenceXpMultiplier());
         }
       }
       const spend = Math.min(sectSystem.resources.water.current, dt);
@@ -1831,7 +1824,7 @@ function tickBuilding(dt) {
       const xp = sectState.discipleSkills[d.id]['Building'];
       const lvl = getTaskSkillProgress(xp).level;
       speed += 1 + 0.02 * lvl;
-      addSkillXp(d, 'Building', BUILD_XP_RATE * dt);
+        addSkillXp(d, 'Building', BUILD_XP_RATE * dt * intelligenceXpMultiplier());
     }
   });
   if (speed === 0) return;
