@@ -83,72 +83,118 @@ Footer
 
 #dicsiple overlay card on pressing disciple
 
-- general tab
+Here’s the updated **Disciple Overlay UI wireframe** with the added `Cultivation` tab and clean layout for all six tabs:
+
+---
+
+## 🧘‍♂️ Disciple Overlay – Tabbed Interface Wireframe
+
+```plaintext
+┌────────────────────────────────────────────────────────────────────────────┐
+│ ○ General  ○ Proficiency  ○ Constructs  ○ Moodlets  ○ Stats  ○ Cultivation │
+├────────────────────────────────────────────────────────────────────────────┤
+
+[Content based on selected tab shown below]
+
+```
+
+---
+
+### 🧍 **General Tab**
+
+```plaintext
 ┌────────────────────────────────────────────────────┐
-│ ○ General  ○ Proficiency  ○ Constructs  ○ Moodlets  ○ Stats │
+│ [Portrait]         disciple                        │
+│ Path:  🔥          Core Stage: egg  │
 ├────────────────────────────────────────────────────┤
-│ [Portrait]     Li Xuan            Path: Ember 🔥       │
-│ Core Stage: Water Shaping       │
-├────────────────────────────────────────────────────┤
-│ **Attributes**                                  │
-│ DEX: 8   (effect description)                     │
-│ END: 6   (effect description)                     │
-│ STR: 5   (effect description)                     │
-│ INT: 9   (effect description)                     │
-│ CHA: 4   (effect description)
-  POT: 4   (effect description)               │
+│ **Attributes**                                     │
+│ DEX: 8   – (affects movement, crit rate, evade)    │
+│ END: 6   – (max stamina, stamina regen)            │
+│ STR: 5   – (physical damage, mining power)         │
+│ INT: 9   – (learning rate, spell potency)          │
+│ CHA: 4   – (affects persuasion, mood sharing)      │
+│ POT: 4   – (breakthrough success chance)           │
 └────────────────────────────────────────────────────┘
+```
 
-- proficiency tab
+---
+
+### 📚 **Proficiency Tab**
+
+```plaintext
 ┌────────────────────────────────────────────────────┐
-│ ○ General  ○ Proficiency  ○ Constructs  ○ Moodlets  ○ Stats │
-├────────────────────────────────────────────────────┤
-│ **Proficiency Levels & XP Rates**                │
-│ • Gathering     Lv 15   → 25 XP/s  (+3× affinity) │
-│ • Chanting      Lv 8    → 0.6 XP/s                │
-│ • Building      Lv 6    → 0.8 XP/s                │
-│ • Research      Lv 8    → 1.2 XP/s                │
-│ • Exploration   Lv 4    → 0.4 XP/s                │
+│ **Proficiency Levels & XP Rates**                 │
+│ • Gathering     Lv 15   → 25 XP/s   (+3× affinity) │
+│ • Chanting      Lv 8    → 0.6 XP/s                 │
+│ • Building      Lv 6    → 0.8 XP/s                 │
+│ • Research      Lv 8    → 1.2 XP/s                 │
+│ • Exploration   Lv 4    → 0.4 XP/s                 │
 └────────────────────────────────────────────────────┘
+```
 
--constructs tab
+---
+
+### 🔮 **Constructs Tab**
+
+
 ┌────────────────────────────────────────────────────┐
-│ ○ General  ○ Proficiency  ○ Constructs  ○ Moodlets  ○ Stats │
+│ Sort by [ School ▼ | Passive | Spell ]             │
 ├────────────────────────────────────────────────────┤
-│ sort by [school, passive, spell]
-  **learned Constructs**                          │
-│ [spell: fireball]   [passive:max Water upgrade]       │
-│                                                  │
-│
+│ **Learned Constructs**                             │
+│ [🔥 Fireball]    [💧 Max Water Upgrade]             │
+│ [🌿 Verdant Pulse] [🌀 Wind Barrier]                │
+│ (Hover for tags, XP, effects)                      │
 └────────────────────────────────────────────────────┘
+```
 
--moodlets tab
+---
+
+### 😊 **Moodlets Tab**
+
 
 ┌────────────────────────────────────────────────────┐
-│ ○ General  ○ Proficiency  ○ Constructs  ○ Moodlets  ○ Stats │
-├────────────────────────────────────────────────────┤
-│ **Active Moodlets**                              │
-│ 🙂 Inspired    (+10% cultivation speed)           │
-│ 😴 Tired       (–20% work speed)                  │
-│ 🍽️ Hungry       (–50% happiness; seeks food)       │
-│ ⚡ Energized   (+5 stamina/sec regen)             │
+│ **Active Moodlets**                                │
+│ 🙂 Inspired      (+10% cultivation speed)           │
+│ 😴 Tired         (–20% work speed)                  │
+│ 🍽 Hungry        (–50% happiness; seeks food)       │
+│ ⚡ Energized     (+5 stamina/sec regen)             │
 └────────────────────────────────────────────────────┘
+```
 
-Stats tab
-Displays derived multipliers and vital statistics as a compact list matching the simplified UI.
+---
+
+### 📊 **Stats Tab**
+
+
 ┌────────────────────────────────────────────────────┐
-│ ○ General  ○ Proficiency  ○ Constructs  ○ Moodlets  ○ Stats │
-├────────────────────────────────────────────────────┤
 │ **Derived Stats & Multipliers**                   │
 │ • Travel Speed: 1.2 units/s                       │
 │ • Woodcut Multiplier: 1.05×                       │
 │ • Chanting Multiplier: 1.20×                      │
 │ • Learning Speed: 1.5×                            │
 │ • Exploration Speed: 0.8×                         │
-│ • Water Regen Rate: 3.34 Water/s                        │
+│ • Water Regen Rate: 3.34 Water/s                  │
 │ • Health: 80 / 100                                │
-│ • Defense: 15                                    │
+│ • Defense: 15                                     │
 └────────────────────────────────────────────────────┘
+```
+
+
+### 🌱 **Cultivation Tab (NEW)**
+
+```plaintext
+┌────────────────────────────────────────────────────┐
+│        🧘‍♂️ Cultivation Progress Display             │
+├────────────────────────────────────────────────────┤
+│ • Body Figure UI → [Center visual silhouette]      │
+│ • Cultivation Room → Room 1                        │
+│ • Progress Bar: [██████████░░░░░░░░] 2500 / 5000 XP │
+│ • Estimated Completion: 1m 20s                     │
+│ • Bonus from room: +10% speed (Phoenix Ornament)   │
+│ • Seasonal Mod: Spring +5%                         │
+└────────────────────────────────────────────────────┘
+
+
 
 # Exploration overlay
 
