@@ -172,7 +172,7 @@ const FRUIT_GROWTH_RATES = [60, 40, 30, 20, 0];
 
 export const sectState = {
   fruits: 0,
-  pineLogs: 0,
+  softwood: 0,
   availableFruits: FRUIT_MAX_CAP,
   animals: { Chicken: 3, Boar: 1, Deer: 0 },
   discipleTasks: {}, // map disciple id -> current task
@@ -182,7 +182,7 @@ export const sectState = {
   discipleConstructXp: {}, // map disciple id -> construct XP
   chantAssignments: {}, // map disciple id -> assigned construct
   discipleRest: {}, // map disciple id -> time spent resting
-  buildings: { pineShack: 0, researchTable: 0, chantingHall: 0 },
+  buildings: { bohio: 0, researchDesk: 0, chantingHall: 0 },
   researchPoints: 0,
   researchProgress: 0,
   currentBuild: null,
@@ -196,8 +196,8 @@ const ANIMALS = [
   { name: 'Boar', level: 3, yield: 7, spawnRate: 0.4, max: 3 },
   { name: 'Deer', level: 5, yield: 10, spawnRate: 0.2, max: 2 }
 ];
-const PINE_LOG_CYCLE_SECONDS = 215;
-const PINE_LOG_CYCLE_AMOUNT = 10;
+const SOFTWOOD_CYCLE_SECONDS = 215;
+const SOFTWOOD_CYCLE_AMOUNT = 10;
 const DAILY_FRUIT_CONSUMPTION = 20; // fruits eaten by each disciple per day
 
 // XP earned for disciple tasks
@@ -355,8 +355,8 @@ function getTaskEta(d) {
   const task = d.incapacitated ? 'Resting' : sectState.discipleTasks[d.id] || 'Idle';
   if (task === 'Gather Fruit' || task === 'Gather Softwood') {
     const progress = sectState.discipleProgress[d.id] || 0;
-    const baseSeconds = task === 'Gather Fruit' ? FRUIT_CYCLE_SECONDS : PINE_LOG_CYCLE_SECONDS;
-    const cycleAmount = task === 'Gather Fruit' ? FRUIT_CYCLE_AMOUNT : PINE_LOG_CYCLE_AMOUNT;
+    const baseSeconds = task === 'Gather Fruit' ? FRUIT_CYCLE_SECONDS : SOFTWOOD_CYCLE_SECONDS;
+    const cycleAmount = task === 'Gather Fruit' ? FRUIT_CYCLE_AMOUNT : SOFTWOOD_CYCLE_AMOUNT;
     const group = TASK_GROUPS[task];
     const skillXp = sectState.discipleSkills[d.id]?.[group] || 0;
     const lvl = getTaskSkillProgress(skillXp).level;
@@ -524,9 +524,9 @@ function calculateDailyFruitGain() {
 
 
 const BUILDINGS = {
-  pineShack: { name: 'Pine Shack', cost: 30, time: 600, max: 1 },
-  researchTable: { name: 'Research Table', cost: 15, time: 300, max: 1, requires: 'pineShack' },
-  chantingHall: { name: 'Chanting Hall', cost: 50, time: 600, max: 1, requires: 'researchTable' }
+  bohio: { name: 'Bohio', cost: 30, time: 600, max: 1 },
+  researchDesk: { name: 'Research Desk', cost: 15, time: 300, max: 1, requires: 'bohio' },
+  chantingHall: { name: 'Chanting Hall', cost: 50, time: 600, max: 1, requires: 'researchDesk' }
 };
 
 const lifeCore = { real: false };
@@ -1225,8 +1225,8 @@ function tickSect(delta) {
     if (task === 'Gather Fruit' || task === 'Gather Softwood') {
       if (!sectState.discipleProgress[d.id]) sectState.discipleProgress[d.id] = 0;
       sectState.discipleProgress[d.id] += dt;
-      const baseSeconds = task === 'Gather Fruit' ? FRUIT_CYCLE_SECONDS : PINE_LOG_CYCLE_SECONDS;
-      const cycleAmount = task === 'Gather Fruit' ? FRUIT_CYCLE_AMOUNT : PINE_LOG_CYCLE_AMOUNT;
+      const baseSeconds = task === 'Gather Fruit' ? FRUIT_CYCLE_SECONDS : SOFTWOOD_CYCLE_SECONDS;
+      const cycleAmount = task === 'Gather Fruit' ? FRUIT_CYCLE_AMOUNT : SOFTWOOD_CYCLE_AMOUNT;
       const prog = sectState.discipleProgress[d.id];
       const group = TASK_GROUPS[task];
       const skillXp = sectState.discipleSkills[d.id]?.[group] || 0;
@@ -1236,7 +1236,7 @@ function tickSect(delta) {
       const cycleSeconds =
         baseSeconds * (gatherAmt / (cycleAmount * yieldMult));
       const phaseLength = cycleSeconds / 4;
-      const resKey = task === 'Gather Fruit' ? 'fruit' : 'pineLog';
+      const resKey = task === 'Gather Fruit' ? 'fruit' : 'softwood';
       if (prog < phaseLength) {
         d.inventory = {};
       } else if (prog < phaseLength * 3) {
@@ -1253,7 +1253,7 @@ function tickSect(delta) {
           sectState.availableFruits -= actual;
           sectState.fruits += actual;
         } else {
-          sectState.pineLogs += deposit;
+          sectState.softwood += deposit;
         }
         checkBuildingUnlock();
         const mult =
@@ -1400,9 +1400,9 @@ function updateTaskProgressDisplay() {
     if (taskName === 'Gather Fruit' || taskName === 'Gather Softwood') {
       const progress = sectState.discipleProgress[d.id] || 0;
       const baseSeconds =
-        taskName === 'Gather Fruit' ? FRUIT_CYCLE_SECONDS : PINE_LOG_CYCLE_SECONDS;
+        taskName === 'Gather Fruit' ? FRUIT_CYCLE_SECONDS : SOFTWOOD_CYCLE_SECONDS;
       const cycleAmount =
-        taskName === 'Gather Fruit' ? FRUIT_CYCLE_AMOUNT : PINE_LOG_CYCLE_AMOUNT;
+        taskName === 'Gather Fruit' ? FRUIT_CYCLE_AMOUNT : SOFTWOOD_CYCLE_AMOUNT;
       const group = TASK_GROUPS[taskName];
       const skillXp = sectState.discipleSkills[d.id]?.[group] || 0;
       const lvl = getTaskSkillProgress(skillXp).level;
@@ -1469,7 +1469,7 @@ function updateSectDisplay() {
     sectSummaryDisplay.innerHTML = `
       <span>👥 ${total - assigned}/${total}</span>
       <span>${sectState.fruits}</span>
-      <span>🪵 ${sectState.pineLogs}</span>
+      <span>🪵 ${sectState.softwood}</span>
       <span>⚖️ -${upkeep}/day (${mm}:${ss})</span>`;
   }
 
@@ -1564,9 +1564,9 @@ function updateDiscipleGather(id, el) {
   const progress = sectState.discipleProgress[id] || 0;
   const task = sectState.discipleTasks[id];
   const baseSeconds =
-    task === 'Gather Softwood' ? PINE_LOG_CYCLE_SECONDS : FRUIT_CYCLE_SECONDS;
+    task === 'Gather Softwood' ? SOFTWOOD_CYCLE_SECONDS : FRUIT_CYCLE_SECONDS;
   const cycleAmount =
-    task === 'Gather Softwood' ? PINE_LOG_CYCLE_AMOUNT : FRUIT_CYCLE_AMOUNT;
+    task === 'Gather Softwood' ? SOFTWOOD_CYCLE_AMOUNT : FRUIT_CYCLE_AMOUNT;
   const d = sectSystem.disciples.find(x => x.id === id);
   const group = TASK_GROUPS[task];
   const lvl = getTaskSkillProgress(
@@ -1710,7 +1710,7 @@ function renderColonyInfo() {
   const taskList = document.createElement('div');
   taskList.className = 'disciple-skill-list';
   const tasks = ['Idle', 'Gather Fruit', 'Gather Softwood', 'Hunt', 'Building'];
-  if (sectState.buildings.researchTable > 0) tasks.push('Research');
+  if (sectState.buildings.researchDesk > 0) tasks.push('Research');
   if (sectState.buildings.chantingHall > 0) tasks.push('Chant');
   if (systems.explorationUnlocked) tasks.push('Exploration');
   tasks.forEach(t => {
@@ -1773,7 +1773,7 @@ function renderColonyResources() {
 }
 
 function checkBuildingUnlock() {
-  if (!systems.buildingUnlocked && sectState.pineLogs >= 10) {
+  if (!systems.buildingUnlocked && sectState.softwood >= 20) {
     systems.buildingUnlocked = true;
     if (colonyBuildTabButton) colonyBuildTabButton.style.display = '';
   }
@@ -1782,12 +1782,12 @@ function checkBuildingUnlock() {
 function startBuilding(key) {
   const b = BUILDINGS[key];
   if (!b) return;
-  if (sectState.pineLogs < b.cost) return;
+  if (sectState.softwood < b.cost) return;
   if (sectState.buildings[key] >= b.max) return;
   if (sectState.currentBuild) return;
   if (b.requires && sectState.buildings[b.requires] < b.max) return;
   if (key === 'chantingHall' && !systems.chantingHallUnlocked) return;
-  sectState.pineLogs -= b.cost;
+  sectState.softwood -= b.cost;
   sectState.currentBuild = key;
   sectState.buildProgress = 0;
   renderColonyResources();
@@ -1812,14 +1812,19 @@ function tickBuilding(dt) {
   const b = BUILDINGS[sectState.currentBuild];
   sectState.buildProgress += (dt * speed) / b.time;
   if (sectState.buildProgress >= 1) {
-    sectState.buildings[sectState.currentBuild]++;
+    const builtKey = sectState.currentBuild;
+    sectState.buildings[builtKey]++;
     sectState.currentBuild = null;
     sectState.buildProgress = 0;
-    if (sectState.buildings.pineShack >= 1) {
+    if (sectState.buildings.bohio >= 1) {
       const basket = document.getElementById('sectBasket');
-      const shack = document.getElementById('sectShack');
+      const shack = document.getElementById('sectBohio');
       if (basket) basket.style.display = 'none';
       if (shack) shack.style.display = 'block';
+    }
+    if (builtKey === 'researchDesk' && !systems.researchUnlocked) {
+      systems.researchUnlocked = true;
+      if (colonyResearchTabButton) colonyResearchTabButton.style.display = '';
     }
     renderColonyBuildPanel();
   }
@@ -1852,7 +1857,7 @@ function renderColonyBuildPanel() {
       row.appendChild(bar);
     } else {
       const cost = document.createElement('div');
-      cost.textContent = `Cost: ${b.cost} Pine Logs`;
+      cost.textContent = `Cost: ${b.cost} Softwood`;
       row.appendChild(cost);
     }
   colonyBuildPanel.appendChild(row);

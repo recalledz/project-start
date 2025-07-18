@@ -3942,7 +3942,7 @@ body.darkenshift-mode .tabsContainer button.active {
     top: 25%;
     transform: translate(-50%, -50%);
 }
-.sect-shack {
+.sect-bohio {
     position: absolute;
     width: 30px;
     height: 24px;
@@ -4184,7 +4184,7 @@ body.darkenshift-mode .tabsContainer button.active {
   .disciple-orb { width: 12px; height: 12px; }
   .sect-disciple { width: 3px; height: 3px; font-size: 0; }
   .sect-basket { width: 6px; height: 4px; }
-  .sect-shack { width: 24px; height: 18px; }
+  .sect-bohio { width: 24px; height: 18px; }
 #colonyTasksPanel .task-entry { width: 100%; flex-direction: column; gap: 4px; }
 }
 
