@@ -4284,6 +4284,11 @@ body.darkenshift-mode .tabsContainer button.active {
     font-size: 0.55rem;
 }
 
+.sect-disciple-card .disciple-name {
+    font-size: 0.55rem;
+    margin-bottom: 1px;
+}
+
 .disciple-tabs {
     display: flex;
     gap: 4px;

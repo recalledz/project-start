@@ -452,12 +452,13 @@ function createSectDiscipleCard(d) {
   const card = document.createElement('div');
   card.className = 'sect-disciple-card';
 
+  const nameLabel = document.createElement('div');
+  nameLabel.className = 'bar-label disciple-name';
+  nameLabel.textContent = d.name || `Disciple ${d.id}`;
+  card.appendChild(nameLabel);
+
   const lifeBar = makeBar(d.health, DISCIPLE_MAX_HEALTH, '#a33');
   lifeBar.classList.add('life-bar');
-  const nameLabel = document.createElement('div');
-  nameLabel.className = 'bar-label';
-  nameLabel.textContent = d.name || `Disciple ${d.id}`;
-  lifeBar.appendChild(nameLabel);
   card.appendChild(lifeBar);
 
   const wrapper = document.createElement('div');
