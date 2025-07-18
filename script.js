@@ -2067,6 +2067,20 @@ function buildDiscipleStatusView(d) {
         `Regen ×${(1 + 0.01 * (d.endurance - 1)).toFixed(2)}, ` +
         `+${10 * (d.endurance - 1)} HP`,
       skills: 'Building, Defending & Combat'
+    },
+    {
+      label: 'Charisma',
+      value: d.charisma,
+      base: d.baseCharisma ?? 1,
+      effect: `Recruit Chance ×${(1 + 0.05 * (d.charisma - 1)).toFixed(2)}`,
+      skills: 'Recruiting & Diplomacy'
+    },
+    {
+      label: 'Potential',
+      value: d.potential,
+      base: d.basePotential ?? d.potential,
+      effect: `Inner Cauldron Size ${d.potential * 500}`,
+      skills: 'Cultivation'
     }
   ];
   const attrContainer = document.createElement('div');
