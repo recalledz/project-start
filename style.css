@@ -3592,7 +3592,7 @@ body.darkenshift-mode .tabsContainer button.active {
 .sect-resource-display {
     position: absolute;
     left: 4px;
-    top: 4px;
+    top: 40px;
     width: 150px;
     display: flex;
     flex-direction: column;

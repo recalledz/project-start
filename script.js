@@ -1741,7 +1741,8 @@ function renderColonyResources() {
   colonyResourcesPanel.innerHTML = '';
   renderSectDiscipleList();
   if (sectSummaryDisplay && resourceDisplay) {
-    resourceDisplay.appendChild(sectSummaryDisplay);
+    const content = resourceDisplay.querySelector('.vignette-content');
+    (content || resourceDisplay).appendChild(sectSummaryDisplay);
   }
   checkBuildingUnlock();
 }
