@@ -184,6 +184,8 @@ export const sectState = {
   discipleConstructXp: {}, // map disciple id -> construct XP
   chantAssignments: {}, // map disciple id -> assigned construct
   discipleRest: {}, // map disciple id -> time spent resting
+  maxDisciples: 3,
+  housingBonus: 0,
   buildings: { bohio: 0, researchDesk: 0, chantingHall: 0 },
   researchPoints: 0,
   researchProgress: 0,
@@ -535,10 +537,26 @@ function calculateDailyFruitGain() {
 
 
 const BUILDINGS = {
-  bohio: { name: 'Bohio', cost: 30, time: 600, max: 1 },
+  bohio: {
+    name: 'Bohio',
+    time: 600,
+    max: 80,
+    costFunc: lvl => 20 * Math.pow(2, lvl)
+  },
   researchDesk: { name: 'Research Desk', cost: 15, time: 300, max: 1, requires: 'bohio' },
   chantingHall: { name: 'Chanting Hall', cost: 50, time: 600, max: 1, requires: 'researchDesk' }
 };
+
+function getHousingName(level) {
+  if (level <= 10) return 'Bohio';
+  if (level <= 20) return 'Outer Quarters';
+  if (level <= 30) return 'Meditation Hall';
+  if (level <= 40) return 'Inner Hall';
+  if (level <= 50) return 'Immortal Sanctum';
+  if (level <= 60) return 'Meditation Hall';
+  if (level <= 70) return 'Sky Pavilion';
+  return 'Immortal Sanctum';
+}
 
 const lifeCore = { real: false };
 
@@ -1524,7 +1542,7 @@ function updateSectDisplay() {
     const ss = String(Math.floor(remaining % 60)).padStart(2, '0');
     const upkeep = DAILY_FRUIT_CONSUMPTION * sectSystem.disciples.length;
     sectSummaryDisplay.innerHTML = `
-      <span>👥 ${total - assigned}/${total}</span>
+      <span>👥 ${total - assigned}/${total} / ${sectState.maxDisciples}</span>
       <span>${sectState.fruits}</span>
       <span>🪵 ${sectState.softwood}</span>`;
     const timer = document.getElementById('resourceTimer');
@@ -1885,12 +1903,14 @@ function checkBuildingUnlock() {
 function startBuilding(key) {
   const b = BUILDINGS[key];
   if (!b) return;
-  if (sectState.softwood < b.cost) return;
-  if (sectState.buildings[key] >= b.max) return;
+  const built = sectState.buildings[key] || 0;
+  const cost = b.costFunc ? b.costFunc(built + 1) : b.cost;
+  if (sectState.softwood < cost) return;
+  if (built >= b.max) return;
   if (sectState.currentBuild) return;
   if (b.requires && sectState.buildings[b.requires] < b.max) return;
   if (key === 'chantingHall' && !systems.chantingHallUnlocked) return;
-  sectState.softwood -= b.cost;
+  sectState.softwood -= cost;
   sectState.currentBuild = key;
   sectState.buildProgress = 0;
   renderColonyResources();
@@ -1920,6 +1940,10 @@ function tickBuilding(dt) {
     sectState.buildings[builtKey]++;
     sectState.currentBuild = null;
     sectState.buildProgress = 0;
+    if (builtKey === 'bohio') {
+      sectState.maxDisciples = 3 + sectState.buildings.bohio;
+      sectState.housingBonus = 0.05 * Math.floor(sectState.buildings.bohio / 10);
+    }
     if (sectState.buildings.bohio >= 1) {
       const basket = document.getElementById('sectBasket');
       const shack = document.getElementById('sectBohio');
@@ -1947,7 +1971,8 @@ function renderColonyBuildPanel() {
     const row = document.createElement('div');
     const btn = document.createElement('button');
     const built = sectState.buildings[key] || 0;
-    btn.textContent = `${b.name} (${built}/${b.max})`;
+    const name = key === 'bohio' ? getHousingName(built + 1) : b.name;
+    btn.textContent = `${name} (${built}/${b.max})`;
     btn.disabled = built >= b.max || sectState.currentBuild;
     btn.addEventListener('click', () => startBuilding(key));
     row.appendChild(btn);
@@ -1965,7 +1990,8 @@ function renderColonyBuildPanel() {
       row.appendChild(bar);
     } else {
       const cost = document.createElement('div');
-      cost.textContent = `Cost: ${b.cost} Softwood`;
+      const c = b.costFunc ? b.costFunc(built + 1) : b.cost;
+      cost.textContent = `Cost: ${c} Softwood`;
       row.appendChild(cost);
     }
   colonyBuildPanel.appendChild(row);
@@ -2973,7 +2999,8 @@ function openBuildOverlay() {
       const row = document.createElement('div');
       const btn = document.createElement('button');
       const built = sectState.buildings[key] || 0;
-      btn.textContent = `${b.name} (${built}/${b.max})`;
+      const name = key === 'bohio' ? getHousingName(built + 1) : b.name;
+      btn.textContent = `${name} (${built}/${b.max})`;
       btn.disabled = built >= b.max || sectState.currentBuild;
       btn.addEventListener('click', () => {
         startBuilding(key);
@@ -2994,7 +3021,8 @@ function openBuildOverlay() {
         row.appendChild(bar);
       } else {
         const cost = document.createElement('div');
-        cost.textContent = `Cost: ${b.cost} Softwood`;
+        const c = b.costFunc ? b.costFunc(built + 1) : b.cost;
+        cost.textContent = `Cost: ${c} Softwood`;
         row.appendChild(cost);
       }
       list.appendChild(row);

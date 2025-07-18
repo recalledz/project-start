@@ -479,7 +479,10 @@ const constructEffects = {
     const targetIdx = sectSystem.disciples.length + 1;
     const reqPower = Math.pow(1.8, targetIdx - 1);
     const chance = Math.max(0.05, Math.min(1, callPower / reqPower));
-    if (Math.random() < chance) {
+    if (sectSystem.disciples.length >= sectState.maxDisciples) {
+      addLog('No available housing for more disciples.', 'info');
+      if (lastConstructTarget) showConstructCloud('Failed', lastConstructTarget, 'red');
+    } else if (Math.random() < chance) {
       const bonus = generateDiscipleAttributes();
       const attrs = {
         strength: 1 + bonus.strength,
