@@ -70,6 +70,11 @@ import {
   updateBloodSplat
 } from "./rendering.js";
 
+import { init as initCombat } from "./game/combat.js";
+import { init as initUi } from "./game/ui.js";
+import { init as initDisciples } from "./game/disciples.js";
+import { init as initDebug } from "./game/debug.js";
+
 
 
 // --- Game State ---
@@ -638,6 +643,9 @@ const playerStats = {
 // Debug time scaling
 export const FAST_MODE_SCALE = 10;
 export let timeScale = 1;
+export function setTimeScale(value) {
+  timeScale = value;
+}
 
 // Definitions for purchasable upgrades and their effects are
 // centralized in cardUpgrades.js
@@ -3107,6 +3115,10 @@ document.addEventListener("DOMContentLoaded", () => {
   initSect();
   initTabs();
   initPollen();
+  initCombat();
+  initUi();
+  initDisciples();
+  initDebug();
   window.addEventListener('location-discovered', e => addDiscoveredLocation(e.detail.name));
   loadGame();
   if (sectSystem.disciples.length === 0) {
