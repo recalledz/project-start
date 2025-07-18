@@ -763,6 +763,8 @@ let statsEconomySubTabButton;
 let statsOverviewContainer;
 let statsEconomyContainer;
 let sectNavWorkBtn;
+let sectNavResourceBtn;
+let sectNavBuildBtn;
 let sectNavChantBtn;
 let sectNavMapBtn;
 let sectNavInfluenceBtn;
@@ -997,6 +999,8 @@ function initTabs() {
   locationsPanelBtn = document.getElementById('locationsPanelBtn');
   gateBtn = document.getElementById('gateBtn');
   sectNavWorkBtn = document.getElementById("sectNavWorkBtn");
+  sectNavResourceBtn = document.getElementById("sectNavResourceBtn");
+  sectNavBuildBtn = document.getElementById("sectNavBuildBtn");
   sectNavChantBtn = document.getElementById("sectNavChantBtn");
   sectNavMapBtn = document.getElementById("sectNavMapBtn");
   sectNavInfluenceBtn = document.getElementById("sectNavInfluenceBtn");
@@ -1046,12 +1050,14 @@ function initTabs() {
       }
       openExplorationOverlay();
     });
-  const navButtons = [sectNavWorkBtn, sectNavChantBtn, sectNavMapBtn, sectNavInfluenceBtn, sectNavResearchBtn, sectNavCultivationBtn];
+  const navButtons = [sectNavWorkBtn, sectNavResourceBtn, sectNavBuildBtn, sectNavChantBtn, sectNavMapBtn, sectNavInfluenceBtn, sectNavResearchBtn, sectNavCultivationBtn];
   function setActiveNavBtn(btn) {
     navButtons.forEach(b => b && b.classList.remove("active"));
     if (btn) btn.classList.add("active");
   }
   if (sectNavWorkBtn) sectNavWorkBtn.addEventListener("click", () => { setActiveNavBtn(sectNavWorkBtn); openWorkOverlay(); });
+  if (sectNavResourceBtn) sectNavResourceBtn.addEventListener("click", () => { setActiveNavBtn(sectNavResourceBtn); openResourceOverlay(); });
+  if (sectNavBuildBtn) sectNavBuildBtn.addEventListener("click", () => { setActiveNavBtn(sectNavBuildBtn); openPlaceholderOverlay("Building"); });
   if (sectNavChantBtn) sectNavChantBtn.addEventListener("click", () => { setActiveNavBtn(sectNavChantBtn); openPlaceholderOverlay("Chanting"); });
   if (sectNavMapBtn) sectNavMapBtn.addEventListener("click", () => { setActiveNavBtn(sectNavMapBtn); openExplorationOverlay(); });
   if (sectNavInfluenceBtn) sectNavInfluenceBtn.addEventListener("click", () => { setActiveNavBtn(sectNavInfluenceBtn); openPlaceholderOverlay("Influence"); });
@@ -1469,8 +1475,12 @@ function updateSectDisplay() {
     sectSummaryDisplay.innerHTML = `
       <span>👥 ${total - assigned}/${total}</span>
       <span>${sectState.fruits}</span>
-      <span>🪵 ${sectState.softwood}</span>
-      <span>⚖️ -${upkeep}/day (${mm}:${ss})</span>`;
+      <span>🪵 ${sectState.softwood}</span>`;
+    const timer = document.getElementById('resourceTimer');
+    if (timer) {
+      timer.textContent = `${mm}:${ss}`;
+      timer.title = `-${upkeep}/day`;
+    }
   }
 
   const patch = document.getElementById('fruitPatch');
@@ -2759,6 +2769,44 @@ function openWorkOverlay() {
   }
 
   render();
+}
+
+let resourceOverlay = null;
+function openResourceOverlay() {
+  if (resourceOverlay) return;
+  resourceOverlay = createOverlay({ className: 'resource-overlay' });
+  resourceOverlay.onClose(() => {
+    resourceOverlay = null;
+  });
+  const { box } = resourceOverlay;
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 'close-btn';
+  closeBtn.innerHTML = '&times;';
+  closeBtn.addEventListener('click', resourceOverlay.close);
+  box.appendChild(closeBtn);
+
+  const header = document.createElement('div');
+  header.className = 'panel-heading';
+  header.textContent = 'Resources';
+  box.appendChild(header);
+
+  const list = document.createElement('div');
+  box.appendChild(list);
+
+  const total = sectSystem.disciples.length;
+  const gatherFruit = sectSystem.disciples.filter(d => sectState.discipleTasks[d.id] === 'Gather Fruit').length;
+  const fruitProd = gatherFruit * (FRUIT_CYCLE_AMOUNT / FRUIT_CYCLE_SECONDS) * DAY_LENGTH_SECONDS;
+  const fruitCons = DAILY_FRUIT_CONSUMPTION * total;
+  const fruitBal = fruitProd - fruitCons;
+  const fruitRow = document.createElement('div');
+  fruitRow.textContent = `Fruit: +${fruitProd.toFixed(1)} -${fruitCons} = ${fruitBal.toFixed(1)}/day`;
+  list.appendChild(fruitRow);
+
+  const gatherWood = sectSystem.disciples.filter(d => sectState.discipleTasks[d.id] === 'Gather Softwood').length;
+  const woodProd = gatherWood * (SOFTWOOD_CYCLE_AMOUNT / SOFTWOOD_CYCLE_SECONDS) * DAY_LENGTH_SECONDS;
+  const woodRow = document.createElement('div');
+  woodRow.textContent = `Softwood: +${woodProd.toFixed(1)}/day`;
+  list.appendChild(woodRow);
 }
 
 function openPlaceholderOverlay(title) {
