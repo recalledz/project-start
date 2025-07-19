@@ -75,7 +75,7 @@ Dictates the strength multiplier for spell effects.
 
 Base Potency: 1.0
 
-Modifiers: Increases from building upgrades, spell-specific multipliers, and relics.
+Modifiers: Increases from spell-specific multipliers and relics.
 
 (Exact formula to be defined alongside Combat & Spell systems.)
 

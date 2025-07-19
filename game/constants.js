@@ -1,11 +1,9 @@
 // Centralized configuration values used across the game
 
 export const BASE_STATS = {
-  upgradePower: 0,
   pDamage: 0,
   pRegen: 0,
   damageMultiplier: 1,
-  upgradeDamageMultiplier: 1,
   combatSlots: 3,
   attackSpeed: 10000,
   hpPerKill: 1,

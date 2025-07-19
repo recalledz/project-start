@@ -768,8 +768,7 @@ body.darkenshift-mode .tabsContainer button.active {
     height: 60px;
 }
 
-.camp-overlay h2,
-.upgrade-selection-overlay h2 {
+.camp-overlay h2 {
     margin-bottom: 10px;
     color: #fff;
 }
@@ -780,33 +779,6 @@ body.darkenshift-mode .tabsContainer button.active {
     margin-bottom: 8px;
 }
 
-.upgrade-selection-overlay {
-    gap: 10px;
-}
-
-.upgrade-box {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-}
-
-.upgrade-header {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    width: 100%;
-    justify-content: center;
-    border-bottom: 1px solid rgba(255,255,255,0.2);
-    padding-bottom: 4px;
-}
-
-.upgrade-cards {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    justify-content: center;
-}
 
 .overlay-stats {
     display: flex;
@@ -1531,73 +1503,6 @@ body.darkenshift-mode .tabsContainer button.active {
     padding: 5px;
 }
 
-.upgradesTab {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    background: radial-gradient(circle, #00451b 0%, #001a0a 100%);
-    padding: 8px;
-}
-
-.upgrade-subtabs {
-    display: flex;
-    gap: 3px;
-}
-
-.upgrade-subtabs button {
-    flex: 1;
-    background: rgba(0, 0, 0, 0.4);
-    color: #d4af37;
-    border: 3px solid #d4af37;
-    padding: 4px 7px;
-    border-radius: 4px;
-    font-size: 0.5rem;
-    font-weight: bold;
-    text-shadow: 0 0 6px #000;
-    box-shadow: 0 0 8px rgba(212, 175, 55, 0.5);
-    transition: all 0.2s;
-    text-align: center;
-}
-.upgrade-subtabs button:hover {
-    box-shadow: 0 0 12px rgba(212, 175, 55, 0.8);
-    color: #fff4b3;
-}
-.upgrade-subtabs button.active {
-    background: #d4af37;
-    color: #220000;
-    box-shadow: inset 0 0 8px #fff8c6, 0 0 12px #d4af37;
-}
-
-.upgradesTab h3 {
-    margin: 4px 0;
-    padding-bottom: 2px;
-    color: #d4af37;
-    text-shadow: 0 0 8px #d4af37;
-    text-align: center;
-    border-bottom: 1px solid #d4af37;
-}
-
-.bar-upgrades-panel,
-.card-upgrades-panel {
-    display: none;
-}
-
-.bar-upgrades-container,
-.card-upgrades-container {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    overflow-y: auto;
-}
-
-/* Reduce button padding so bars remain visible */
-#buyUpgradePowerBtn {
-    padding: 4px 6px;
-    font-size: 0.8rem;
-    align-self: flex-start;
-}
-
 /* Joker container and tiles */
 .joker-wrapper {
     max-width: 90px;
@@ -1651,203 +1556,6 @@ body.darkenshift-mode .tabsContainer button.active {
     }
 }
 
-.upgrade-list {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
-
-.upgrade-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 2px 4px;
-    border-radius: 4px;
-    transition:
-        background 0.2s ease,
-        opacity 0.2s ease;
-}
-
-.upgrade-item button {
-    width: 70px;
-    height: 24px;
-    font-size: 0.5rem; /* Match side panel text size */
-    line-height: 1;
-    padding: 2px 4px;
-    background: #000;
-    border: 1px solid #d4af37;
-    border-radius: 4px;
-    cursor: pointer;
-    box-sizing: border-box;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: #d4af37;
-    box-shadow: 0 0 6px rgba(212, 175, 55, 0.5);
-    transition:
-        background 0.2s ease,
-        box-shadow 0.2s ease,
-        color 0.2s ease;
-}
-
-.upgrade-item button:disabled {
-    cursor: not-allowed;
-    opacity: 0.5;
-    filter: grayscale(1);
-}
-
-.upgrade-item button:not(:disabled):hover {
-    background: #d4af37;
-    color: #220000;
-    box-shadow: 0 0 10px rgba(212, 175, 55, 0.8);
-}
-
-.upgrade-item.affordable {
-    background: rgba(76, 175, 80, 0.2);
-    opacity: 1;
-}
-
-.upgrade-item.unaffordable {
-    opacity: 0.5;
-}
-
-.bar-upgrades {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    margin-top: 4px;
-    flex: 1;
-}
-.bar-upgrade {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
-
-.bar-header {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.6rem;
-}
-.bar {
-    width: 100%;
-    height: 8px;
-    background: rgba(0, 0, 0, 0.8);
-    border-radius: 4px;
-    border: 1px solid #d4af37;
-    box-shadow: inset 0 0 6px #d4af37;
-    overflow: hidden;
-}
-
-.bar-label {
-    width: 60px;
-    font-size: 0.7rem;
-    color: #d4af37;
-}
-.bar-fill {
-    height: 100%;
-    width: 0%;
-    background: #d4af37;
-}
-.bar-info {
-    font-size: 0.6rem;
-}
-
-.card-upgrade-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
-    gap: 8px;
-}
-
-.purchased-upgrade-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
-    gap: 8px;
-}
-
-.bar-controls {
-    display: flex;
-    gap: 2px;
-    align-items: center;
-    margin-left: auto;
-}
-
-.bar-controls button {
-    width: 16px;
-    height: 16px;
-    padding: 0;
-    font-size: 0.6rem;
-}
-
-.bar-points {
-    min-width: 20px;
-    text-align: center;
-    font-size: 0.7rem;
-}
-
-.upgrade-card {
-    background: #000;
-    padding: 4px;
-    margin-bottom: 4px;
-    color: #fff;
-    font-size: 0.6rem;
-    border-radius: 8px;
-    border: 2px solid #888;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    transform: rotate(0deg);
-    box-shadow: 0 0 6px rgba(0, 0, 0, 0.5);
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-.upgrade-card:hover {
-    transform: rotate(-3deg) translateY(-2px);
-    box-shadow: 0 0 12px rgba(255, 255, 255, 0.8);
-}
-.upgrade-card button {
-    width: 100%;
-    padding: 2px 4px;
-    font-size: 0.6rem;
-    background: #000;
-    border: 1px solid #d4af37;
-    border-radius: 4px;
-    cursor: pointer;
-    color: #d4af37;
-    box-shadow: 0 0 6px rgba(212, 175, 55, 0.5);
-    transition: background 0.2s, color 0.2s, box-shadow 0.2s;
-}
-.upgrade-card button:not(:disabled):hover {
-    background: #d4af37;
-    color: #220000;
-    box-shadow: 0 0 10px rgba(212, 175, 55, 0.8);
-}
-.upgrade-card button:disabled {
-    opacity: 0.5;
-    filter: grayscale(1);
-}
-
-.upgrade-card.unaffordable {
-    opacity: 0.5;
-    filter: grayscale(1);
-    pointer-events: none;
-}
-
-.upgrade-selection-overlay .upgrade-text {
-    width: 100%;
-    text-align: center;
-    color: #fff;
-    margin-bottom: 6px;
-}
-
-.upgrade-popup {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 2000;
-    pointer-events: none;
-}
 
 .active-effects {
     font-size: 0.6rem;
@@ -2012,16 +1720,6 @@ body.darkenshift-mode .tabsContainer button.active {
     background: #2ecc71;
 }*/
 
-.card-upgrades {
-    margin-top: 6px;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
-
-.card-upgrade-entry.active {
-    font-weight: bold;
-}
 
 @keyframes glow-pulse {
     from { box-shadow: 0 0 5px 2px gold; }
@@ -2325,7 +2023,7 @@ body.darkenshift-mode .tabsContainer button.active {
     max-width: 13%;
     color: var(--core-text);
 }
-.core-resources, .core-upgrades {
+.core-resources {
     display: flex;
     flex-direction: column;
     gap: 4px;
@@ -2406,13 +2104,6 @@ body.darkenshift-mode .tabsContainer button.active {
     gap: 8px;
     flex: 1;
     height: 100%;
-}
-
-.player-upgrades-panel {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    padding: 6px;
 }
 
 .core-main {
@@ -3249,123 +2940,8 @@ body.darkenshift-mode .tabsContainer button.active {
 }
 
 /* Sect resource panels */
-.construct-gains, .construct-upgrades, .secondary-resources {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    font-size: 0.64rem; /* reduced by ~20% */
-}
-.construct-upgrades button {
-    padding: 6px;
-    border: 2px solid #b76eff;
-    background: #4b0082;
-    color: #e0d0ff;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 0.8rem;
-    text-shadow: 0 0 4px #000;
-    box-shadow: 0 0 6px rgba(183, 110, 255, 0.5);
-    transition: all 0.2s;
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 4px;
-}
-.construct-upgrades button .detail {
-    display: none;
-    flex-direction: column;
-    gap: 2px;
-    font-size: 0.7em;
-    width: 100%;
-    text-align: left;
-}
-.construct-upgrades button.expanded {
-    flex-direction: column;
-    align-items: flex-start;
-}
-.construct-upgrades button.expanded .detail {
-    display: flex;
-}
-.construct-upgrades .buy-btn {
-    align-self: flex-end;
-    padding: 2px 4px;
-    margin-top: 2px;
-    border: 1px solid #b76eff;
-    border-radius: 4px;
-    background: #321050;
-    cursor: pointer;
-    font-size: 0.7em;
-}
-.construct-upgrades .buy-btn:hover {
-    background: #b76eff;
-    color: #220044;
-}
-.construct-upgrades .buy-btn.disabled {
-    opacity: 0.6;
-    pointer-events: none;
-}
-.construct-upgrades button:hover {
-    box-shadow: 0 0 12px rgba(183, 110, 255, 0.8);
-    color: #fff4b3;
-}
-.construct-upgrades .icon-row {
-    display: flex;
-    gap: 4px;
-    align-items: center;
-}
-.construct-upgrades .icon-row i {
-    width: 12px;
-    height: 12px;
-}
-.construct-upgrades .cost-missing {
-    color: #ff6b6b;
-}
-.construct-upgrades button.unaffordable {
-    opacity: 0.6;
-}
-.construct-upgrades .upg-info {
-    display: flex;
-    gap: 4px;
-    align-items: center;
-}
-.construct-upgrades .upgrade-level {
-    opacity: 0.8;
-}
-.construct-upgrades .section-title {
     margin-top: 8px;
     margin-bottom: 4px;
-}
-.core-upgrades button {
-    padding: 6px;
-    border: 2px solid #b76eff;
-    background: #4b0082;
-    color: #e0d0ff;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 0.8rem;
-    text-shadow: 0 0 4px #000;
-    box-shadow: 0 0 6px rgba(183, 110, 255, 0.5);
-    transition: all 0.2s;
-}
-.core-upgrades button:hover {
-    box-shadow: 0 0 12px rgba(183, 110, 255, 0.8);
-    color: #fff4b3;
-}
-
-.core-upgrades {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    width: 100%;
-    padding-top: 6px;
-    align-items: center;
-}
-.core-upgrades .upgrade-group {
-    display: flex;
-    gap: 6px;
-    justify-content: center;
-    flex-wrap: wrap;
 }
 
 .secondary-resources {

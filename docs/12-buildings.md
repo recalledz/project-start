@@ -7,7 +7,7 @@ Housing Buildings
 Building	Cost (Softwood)
 
 placed in housing zone
-progressing through different levels upgrades the housing building as follows and populates the housing zone.
+progressing through different levels improves the housing building as follows and populates the housing zone.
 each level provides +1 max disciple. every 10 levels 5% additive to other bonuses.
 levels 1-10: 
 Bohio	20 × (2^lvl)	+1 disciple	each level Start/ allows building research desk
