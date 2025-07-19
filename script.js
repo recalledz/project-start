@@ -830,9 +830,9 @@ function initTabs() {
       // economy stats removed
     });
 
-  showTab(playerTab); // Start with construct panel visible
+  showTab(playerTab); // Start with sect panel visible
   setActiveTabButton(playerTabButton);
-  if (playerConstructSubTabButton) playerConstructSubTabButton.click();
+  if (playerSectSubTabButton) playerSectSubTabButton.click();
 }
 
 function initPollen() {
@@ -2145,6 +2145,7 @@ function buildDiscipleSkillsList(d) {
     currentExplorationParty.forEach(id => {
       const d = sectSystem.disciples.find(x => x.id === id);
       if (d) {
+        d.currentHp = d.maxHp;
         selectDisciple(d);
       }
     });
@@ -2248,13 +2249,11 @@ function init() {
   });
   showColonyTab('resources');
   updatePlayerStats(stats);
-  // Start or resume the game after loading
-  spawnPlayer();
-  respawnDealerStage();
-  renderDealerCard();
-  resetStageCashStats();
-  renderStageInfo();
+  // Game starts in sect view; exploration initiates combat
   renderWorldsMenu();
+  showTab(playerTab);
+  setActiveTabButton(playerTabButton);
+  if (playerSectSubTabButton) playerSectSubTabButton.click();
 
   if (dom.nextStageArea) {
     dom.nextStageArea.addEventListener("click", () => {
@@ -2276,6 +2275,9 @@ function init() {
   const buttons = document.querySelector('.buttonsContainer');
   playerAttackFill = renderPlayerAttackBar(buttons);
   hidePlayerAttackBar(playerAttackFill);
+  removeDealerLifeBar();
+  setCurrentEnemy(null);
+  setInCombat(false);
 
   const btn = document.getElementById("debugToggle");
   if (btn) btn.addEventListener("click", toggleDebug);
