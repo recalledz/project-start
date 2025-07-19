@@ -3317,7 +3317,7 @@ body.darkenshift-mode .tabsContainer button.active {
 }
 .sect-disciple-list .disciple-progress {
     width: 60px;
-    height: 4px;
+    height: 10px;
 }
 .sect-disciple-list .disciple-progress-label {
     font-size: 0.55rem;
@@ -3640,6 +3640,19 @@ body.darkenshift-mode .tabsContainer button.active {
   .sect-basket { width: 6px; height: 4px; }
   .sect-bohio { width: 24px; height: 18px; }
 #colonyTasksPanel .task-entry { width: 100%; flex-direction: column; gap: 4px; }
+}
+
+/* Desktop scaling */
+@media (min-width: 1024px) {
+  .sect-orb { width: 70px; height: 70px; }
+  .disciple-orb { width: 20px; height: 20px; }
+  .sect-disciple { width: 7px; height: 7px; }
+  .sect-basket { width: 12px; height: 8px; }
+  .sect-bohio { width: 36px; height: 28px; }
+  .sect-nav-panel button { width: 32px; height: 32px; font-size: 0.65rem; }
+  .sect-nav-panel button svg { width: 20px; height: 20px; }
+  .sect-resource-display { width: 160px; }
+  .sect-summary { font-size: 0.7rem; }
 }
 
 .disciple-skill-list {
