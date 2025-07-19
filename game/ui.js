@@ -45,7 +45,7 @@ export function updateDealerLifeDisplay(currentEnemy) {
   renderDealerLifeBarFill(currentEnemy);
 }
 
-function updateDiscipleStatsDisplay(d) {
+export function updateDiscipleStatsDisplay(d) {
   if (!d.statsElement) return;
   d.statsElement.innerHTML = '';
 }
