@@ -11,7 +11,7 @@ export const stats = {
   pRegen: 0,
   damageMultiplier: 1,
   upgradeDamageMultiplier: 1,
-  cardSlots: 3,
+  combatSlots: 3,
   attackSpeed: 10000,
   hpPerKill: 1,
   avgCombatLevel: 0,
@@ -32,7 +32,7 @@ export const stats = {
   damageBuffMultiplier: 1,
   damageBuffExpiration: 0
 };
-stats.cardSlots = stats.cardSlots + attributes.Strength.inventorySlots;
+stats.combatSlots = stats.combatSlots + attributes.Strength.inventorySlots;
 
 export const systems = {
   manaUnlocked: false,

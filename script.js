@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars, no-undef */
-// Core modules that power the card game
-import { shuffleArray } from "./card.js"; // card utilities
+// Core modules that power combat systems
+import { shuffleArray } from "./utils/random.js"; // generic utilities
 import Disciple from "./disciple.js";
 import addLog from "./log.js"; // helper for appending to the event log
 import Enemy from "./enemy.js"; // base enemy class
@@ -495,7 +495,6 @@ function checkSpeakerEncounter() {
 
 const playerStats = {
   timesPrestiged: 0,
-  decksUnlocked: 1,
   totalBossKills: 0,
   stageKills: {},
   speakerEncounters: 0,
@@ -586,7 +585,6 @@ let locationTabButton;
 let logTabButton;
 let mainTab;
 let cardSubTab;
-let deckTab;
 let starChartTab;
 let playerStatsTab;
 let worldsTab;
@@ -735,7 +733,6 @@ function selectWorld(id) {
 
 function hideTab() {
   if (mainTab) mainTab.style.display = "none";
-  if (deckTab) deckTab.style.display = "none";
   if (starChartTab) starChartTab.style.display = "none";
   if (playerStatsTab) playerStatsTab.style.display = "none";
   if (worldsTab) worldsTab.style.display = "none";
@@ -830,7 +827,6 @@ function initTabs() {
   logTabButton = document.querySelector('.logTabButton');
   mainTab = document.querySelector('.mainTab');
   cardSubTab = document.querySelector('.cardSubTab');
-  deckTab = document.querySelector('.deckTab');
   starChartTab = document.querySelector('.starChartTab');
   playerStatsTab = document.querySelector('.playerStatsTab');
   worldsTab = document.querySelector('.worldsTab');
@@ -2734,7 +2730,6 @@ function renderGlobalStats() {
   const basics = document.createElement("div");
   basics.innerHTML = `
   <div>Times Prestiged: ${playerStats.timesPrestiged}</div>
-  <div>Decks Unlocked: ${playerStats.decksUnlocked}</div>
   <div>Total Boss Kills: ${formatNumber(playerStats.totalBossKills)}</div>
   `;
   container.appendChild(basics);
@@ -3353,9 +3348,6 @@ function dealerBarDeathAnimation(callback) {
   });
 }
 
-//========deck functions===========
-
-
 function combatXp(xpAmount) {
   activeDisciples.forEach(d => {
     if (!d) return;
@@ -3365,15 +3357,7 @@ function combatXp(xpAmount) {
   updateHandDisplay();
 }
 
-/**
-* Draws the top card from `Deck` into `intoHand`.
-* Renders it with `renderFn` and then calls `updateFn`.
-* Returns the drawn card, or null if the deck was empty.
-*/
-// Draw the next card from the deck into the player's hand
-// drawing logic moved to cardManagement.js
-
-// Enable or disable the draw button depending on hand size
+// Update the draw button depending on party size
 function updateDrawButton() {
   const drawBtn = document.getElementById('clickalipse');
   if (!drawBtn) return;
@@ -3614,7 +3598,7 @@ function spawnPlayer() {
   disciples.forEach(d => {
     d.currentHp = d.maxHp;
   });
-  disciples.slice(0, stats.cardSlots).forEach(d => selectDisciple(d));
+  disciples.slice(0, stats.combatSlots).forEach(d => selectDisciple(d));
   renderCombatDisciples();
 }
 
@@ -3622,7 +3606,7 @@ function respawnPlayer() {
   setEnemyAttackProgress(0);
   playerStats.hasDied = false;
   Object.assign(stats, BASE_STATS);
-  stats.cardSlots = BASE_STATS.cardSlots + attributes.Strength.inventorySlots;
+  stats.combatSlots = BASE_STATS.combatSlots + attributes.Strength.inventorySlots;
   // reset resources
 
   resetCardUpgrades();
@@ -3698,8 +3682,7 @@ clearInterval(saveInterval);
 location.reload();
 }
 
-// Shuffle all current cards back into the deck and draw a new hand
-// redraw logic moved to cardManagement.js
+// Regroup disciples and refresh the combat party
 
 
 
@@ -3739,7 +3722,7 @@ function updatePlayerStats() {
 
   stats.attackSpeed = BASE_STATS.attackSpeed;
 
-  stats.cardSlots = BASE_STATS.cardSlots + attributes.Strength.inventorySlots;
+  stats.combatSlots = BASE_STATS.combatSlots + attributes.Strength.inventorySlots;
   renderPlayerStats(stats);
 }
 
