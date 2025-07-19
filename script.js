@@ -232,7 +232,7 @@ function createDiscipleCard(d) {
 
   card.appendChild(createLabeledBar('❤️', d.health, DISCIPLE_MAX_HEALTH, '#a33'));
   card.appendChild(
-    createLabeledBar('⚡', d.stamina, calculateMaxStamina(d.endurance), '#cc3')
+    createLabeledBar('⚡', d.stamina, calculateMaxStamina(), '#cc3')
   );
   card.appendChild(createLabeledBar('🍖', d.hunger, 20, '#996633'));
 
@@ -1503,7 +1503,7 @@ function buildDiscipleStatusView(d) {
       label: 'Stamina',
       color: '#cc3',
       value: d.stamina,
-      max: calculateMaxStamina(d.endurance)
+      max: calculateMaxStamina()
     },
     { label: 'Hunger', color: '#cc3', value: d.hunger, max: 20 }
   ];
@@ -1671,11 +1671,11 @@ function buildDiscipleGeneralView(d) {
   const staminaRow = makeStatRow(
     'Stamina',
     d.stamina,
-    calculateMaxStamina(d.endurance),
+    calculateMaxStamina(),
     'linear-gradient(90deg,#3b3,#7f7)'
   );
   const stamRate = document.createElement('span');
-  stamRate.textContent = ` (+${calculateStaminaRegen(d.endurance).toFixed(2)}/s)`;
+  stamRate.textContent = ` (+${calculateStaminaRegen().toFixed(2)}/s)`;
   staminaRow.appendChild(stamRate);
   vit.appendChild(staminaRow);
   const waterLvl = getTaskSkillProgress(
@@ -2164,8 +2164,8 @@ function init() {
   document.addEventListener('day-passed', () => {
     sectSystem.disciples.forEach(d => {
       d.stamina = Math.min(
-        calculateMaxStamina(d.endurance),
-        d.stamina + calculateStaminaRegen(d.endurance)
+        calculateMaxStamina(),
+        d.stamina + calculateStaminaRegen()
       );
     });
     sectState.availableFruits = Math.min(

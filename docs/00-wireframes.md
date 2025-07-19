@@ -110,7 +110,7 @@ Here’s the updated **Disciple Overlay UI wireframe** with the added `Cultivati
 ├────────────────────────────────────────────────────┤
 │ **Attributes**                                     │
 │ DEX: 8   – (affects movement, crit rate, evade)    │
-│ END: 6   – (max stamina, stamina regen)            │
+│ END: 6   – (affects building and farming speed)    │
 │ STR: 5   – (physical damage, mining power)         │
 │ INT: 9   – (learning rate, spell potency)          │
 │ CHA: 4   – (affects persuasion, mood sharing)      │
@@ -158,7 +158,7 @@ Here’s the updated **Disciple Overlay UI wireframe** with the added `Cultivati
 │ 🙂 Inspired      (+10% cultivation speed)           │
 │ 😴 Tired         (–20% work speed)                  │
 │ 🍽 Hungry        (–50% happiness; seeks food)       │
-│ ⚡ Energized     (+5 stamina/sec regen)             │
+│ ⚡ Energized     (faster stamina regen)             │
 └────────────────────────────────────────────────────┘
 ```
 
