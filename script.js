@@ -29,7 +29,6 @@ import {
   renderHotbar
 } from "./sect.js";
 import { SECT_SCHEDULE, getCurrentSchedule } from "./sect.js";
-import RateTracker from "./utils/rateTracker.js";
 import { formatNumber } from "./utils/numberFormat.js";
 import { runAnimation } from "./utils/animation.js";
 import { initCore, refreshCore } from './core.js';
@@ -113,7 +112,25 @@ import {
   timeScale,
   setTimeScale,
   FRUIT_MAX_CAP,
-  FRUIT_GROWTH_RATES
+  FRUIT_GROWTH_RATES,
+  isDarkenshift,
+  setIsDarkenshift,
+  lifeCore,
+  worldProgress,
+  playerStats,
+  gamePaused,
+  setGamePaused,
+  campOverlayOpen,
+  setCampOverlayOpen,
+  campOverlay,
+  setCampOverlay,
+  inCombat,
+  setInCombat,
+  speakerOverlay,
+  setSpeakerOverlay,
+  worldProgressTimer,
+  setWorldProgressTimer,
+  worldProgressRateTracker
 } from "./game/state.js";
 import {
   BASE_STATS,
@@ -155,7 +172,6 @@ import {
 // Initialized with three disciples ("frogs") per the documentation
 let { disciples } = initializeSect();
 // theme state
-let isDarkenshift = false;
 
 function makeBar(value, max, color) {
   const bar = document.createElement('div');
@@ -371,8 +387,6 @@ function getHousingName(level) {
   return 'Immortal Sanctum';
 }
 
-const lifeCore = { real: false };
-
 // Card HP adjustments moved to card.js utilities
 
 // Data for the current stage and world progression
@@ -390,21 +404,6 @@ function stageWeight(stage) {
   return stage <= 10 ? stage : 10 + Math.sqrt(stage - 10);
 }
 
-// Total weighted kills needed for a world to be considered "complete"
-const WORLD_PROGRESS_TARGET = 1820; // base requirement for level 1
-
-const worldProgress = {};
-Object.keys(BossTemplates).forEach(id => {
-  worldProgress[id] = {
-    unlocked: parseInt(id) === 1,
-    bossDefeated: false,
-    rewardClaimed: false,
-    level: 1,
-    progress: 0,
-    progressTarget: WORLD_PROGRESS_TARGET
-  };
-});
-
 function checkSpeakerEncounter() {
   if (playerStats.speakerEncounters === 0 && stageData.stage >= 5 && !playerStats.hasDied) {
     speakerEncounterPending = true;
@@ -416,13 +415,7 @@ function checkSpeakerEncounter() {
 }
 
 
-const playerStats = {
-  timesPrestiged: 0,
-  totalBossKills: 0,
-  stageKills: {},
-  speakerEncounters: 0,
-  hasDied: false
-};
+// player statistics live in game/state.js
 
 // Debug time scaling
 
@@ -481,10 +474,8 @@ const dom = {
 // attack progress bars
 let playerAttackFill = null;
 let enemyAttackFill = null;
-let worldProgressTimer = 0;
 let discipleEtaTimer = 0;
 //let sanityTimer = 0;
-const worldProgressRateTracker = new RateTracker(30000);
 // Chance to trigger a random event each step of movement
 // Reduced from 30% to 10% so encounters feel more like rare discoveries
 const EVENT_CHANCE = 0.1;
@@ -2555,7 +2546,7 @@ function init() {
 
   const tbtn = document.getElementById("themeToggle");
   if (tbtn) {
-    isDarkenshift = localStorage.getItem('isDarkenshift') === 'true';
+    setIsDarkenshift(localStorage.getItem('isDarkenshift') === 'true');
     applyTheme();
     tbtn.addEventListener("click", toggleTheme);
   }
@@ -2874,7 +2865,7 @@ export function nextStage() {
   renderGlobalStats();
   renderStageInfo();
   checkSpeakerEncounter();
-  inCombat = false;
+  setInCombat(false);
   setCurrentEnemy(null);
   if (dom.nextStageArea) dom.nextStageArea.classList.remove('glow-notify');
   if (isBossStage) {
@@ -2892,7 +2883,7 @@ function nextWorld() {
   stageData.kills = playerStats.stageKills[stageData.stage] || 0;
   applyWorldTheme();
   resetStageCashStats();
-  worldProgressTimer = 0;
+  setWorldProgressTimer(0);
   worldProgressRateTracker.reset(computeWorldProgress(stageData.world) * 100);
   if (dom.worldProgressPerSecDisplay) {
     dom.worldProgressPerSecDisplay.textContent = "Avg World Progress/sec: 0%";
@@ -2903,7 +2894,7 @@ function nextWorld() {
   updateNextStageAvailability();
   renderGlobalStats();
   renderStageInfo();
-  inCombat = false;
+  setInCombat(false);
   setCurrentEnemy(null);
   if (dom.nextStageArea) dom.nextStageArea.classList.remove('glow-notify');
   respawnDealerStage();
@@ -2917,7 +2908,7 @@ function goToWorld(id) {
   stageData.stage = 1;
   stageData.kills = playerStats.stageKills[stageData.stage] || 0;
   resetStageCashStats();
-  worldProgressTimer = 0;
+  setWorldProgressTimer(0);
   worldProgressRateTracker.reset(computeWorldProgress(stageData.world) * 100);
   if (dom.worldProgressPerSecDisplay) {
     dom.worldProgressPerSecDisplay.textContent = "Avg World Progress/sec: 0%";
@@ -2927,7 +2918,7 @@ function goToWorld(id) {
   updateBossProgress();
   renderGlobalStats();
   renderStageInfo();
-  inCombat = false;
+  setInCombat(false);
   setCurrentEnemy(null);
   if (dom.nextStageArea) dom.nextStageArea.classList.remove('glow-notify');
   renderWorldsMenu();
@@ -2977,7 +2968,7 @@ function updateBossProgress() {
 // Adjust the width of the dealer's HP bar
 
 export function spawnDealerEvent(powerMult = 1) {
-  inCombat = true;
+  setInCombat(true);
   removeDealerLifeBar();
   const temp = { ...stageData, stage: Math.round(stageData.stage * powerMult) };
   setCurrentEnemy(spawnEnemy('dealer', temp, enemyAttackProgress, onDealerDefeat));
@@ -2988,7 +2979,7 @@ export function spawnDealerEvent(powerMult = 1) {
 }
 
 export function spawnBossEvent() {
-  inCombat = true;
+  setInCombat(true);
   removeDealerLifeBar();
   const data = worldProgress[stageData.world];
   const bossStage = 10 * (data?.level || 1);
@@ -3041,7 +3032,7 @@ function onDealerDefeat() {
   recordWorldKill(stageData.world, stageData.stage);
   dealerDeathAnimation();
     dealerBarDeathAnimation(() => {
-      inCombat = false;
+      setInCombat(false);
       updateDealerLifeDisplay();
       hidePlayerAttackBar(playerAttackFill);
       respawnDealerStage();
@@ -3063,7 +3054,7 @@ function onSpeakerDefeat() {
   }
   dealerDeathAnimation();
   dealerBarDeathAnimation(() => {
-    inCombat = false;
+    setInCombat(false);
     setCurrentEnemy(null);
     combatXp(calculateKillXp(stageData.stage, stageData.world));
     updateDealerLifeDisplay();
@@ -3103,7 +3094,7 @@ function onBossDefeat(boss) {
   dom.fightBossBtn.style.display = "none";
   dealerDeathAnimation();
   dealerBarDeathAnimation(() => {
-    inCombat = false;
+    setInCombat(false);
     setCurrentEnemy(null);
     combatXp(boss.xp);
     hidePlayerAttackBar(playerAttackFill);
@@ -3261,10 +3252,7 @@ function updateSectCardInfo() {
 // Create DOM elements for a card in the player's hand
 // card rendering moved to rendering.js
 
-let gamePaused = false;
-let campOverlayOpen = false;
-let campOverlay = null; // overlay instance
-let inCombat = false;
+// state flags moved to game/state.js
 //let stageProgressing = false;
 //let stageProgressInterval = null;
 //let progressButtonActive = false;
@@ -3290,13 +3278,13 @@ function rarityClass(rarity) {
 
 function openCamp(onCloseCallback = null) {
   if (campOverlayOpen) return;
-  campOverlayOpen = true;
-  gamePaused = true;
+  setCampOverlayOpen(true);
+  setGamePaused(true);
   hidePlayerAttackBar(playerAttackFill);
-  campOverlay = createOverlay({ className: 'camp-overlay' });
+  setCampOverlay(createOverlay({ className: 'camp-overlay' }));
   campOverlay.onClose(() => {
-    campOverlayOpen = false;
-    gamePaused = false;
+    setCampOverlayOpen(false);
+    setGamePaused(false);
     onCloseCallback?.();
   });
 
@@ -3487,7 +3475,7 @@ function returnPartyToSect() {
   });
   currentExplorationParty = [];
   clearActiveDisciples();
-  inCombat = false;
+  setInCombat(false);
   setCurrentEnemy(null);
   removeDealerLifeBar();
   hidePlayerAttackBar(playerAttackFill);
@@ -3501,23 +3489,23 @@ function returnPartyToSect() {
 }
 
 
-let speakerOverlay = null;
 function showSpeakerQuote(text) {
   if (speakerOverlay) return;
-  speakerOverlay = document.createElement("div");
-  speakerOverlay.classList.add("speaker-overlay");
+  const overlay = document.createElement("div");
+  overlay.classList.add("speaker-overlay");
   const msg = document.createElement("div");
   msg.classList.add("speaker-quote");
   msg.textContent = text;
-  speakerOverlay.appendChild(msg);
-  document.body.appendChild(speakerOverlay);
+  overlay.appendChild(msg);
+  document.body.appendChild(overlay);
+  setSpeakerOverlay(overlay);
   setTimeout(hideSpeakerQuote, 8000);
 }
 
 function hideSpeakerQuote() {
   if (speakerOverlay) {
     speakerOverlay.remove();
-    speakerOverlay = null;
+    setSpeakerOverlay(null);
   }
 }
 
@@ -3755,7 +3743,7 @@ if (currentEnemy) {
 
 
   updatePlayerStats(stats);
-  worldProgressTimer += deltaTime;
+  setWorldProgressTimer(worldProgressTimer + deltaTime);
   if (worldProgressTimer >= 1000) {
     const currentPct = computeWorldProgress(stageData.world) * 100;
     worldProgressRateTracker.record(currentPct);
@@ -3763,7 +3751,7 @@ if (currentEnemy) {
       const rate = worldProgressRateTracker.getRate();
       dom.worldProgressPerSecDisplay.textContent = `Avg World Progress/sec: ${rate.toFixed(2)}%`;
     }
-    worldProgressTimer = 0;
+    setWorldProgressTimer(0);
   }
   if (currentEnemy) {
     attack(deltaTime);
@@ -3793,7 +3781,7 @@ function applyTheme() {
 }
 
 function toggleTheme() {
-  isDarkenshift = !isDarkenshift;
+  setIsDarkenshift(!isDarkenshift);
   localStorage.setItem('isDarkenshift', isDarkenshift);
   applyTheme();
 }
