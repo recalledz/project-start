@@ -3711,3 +3711,24 @@ body.darkenshift-mode .tabsContainer button.active {
   gap: 8px;
 }
 
+.disciple-badge {
+  background: #d4e4b0;
+  color: #000;
+  border: 1px solid #7d8b50;
+  border-radius: 6px;
+  padding: 2px 4px;
+  font-size: 0.7rem;
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+  gap: 2px;
+}
+.disciple-badge .mood-icon {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  font-size: 0.6rem;
+}
+.disciple-badge.selected {
+  box-shadow: 0 0 4px #8fa16c;
+}
