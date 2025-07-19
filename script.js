@@ -40,7 +40,7 @@ import {
 import { createOverlay } from './ui/overlay.js';
 import { showRestartScreen } from './ui/restartOverlay.js';
 import { showLoadErrorOverlay } from './ui/loadErrorOverlay.js';
-import { openExplorationOverlay, closeExplorationOverlay, openWorkOverlay, openScheduleOverlay, openPlaceholderOverlay, locationListContainer, explorationListContainer } from "./ui/colonyOverlays.js";
+import { openExplorationOverlay, closeExplorationOverlay, openWorkOverlay, openScheduleOverlay, openPlaceholderOverlay, openResourceOverlay, openBuildOverlay, locationListContainer, explorationListContainer } from "./ui/colonyOverlays.js";
 import { calculateKillXp, XP_EFFICIENCY } from './utils/xp.js';
 import {
   calculateMaxStamina,

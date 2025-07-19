@@ -225,3 +225,11 @@ export function openPlaceholderOverlay(title) {
   msg.textContent = `${title} coming soon`;
   box.appendChild(msg);
 }
+
+export function openResourceOverlay() {
+  openPlaceholderOverlay('Resources');
+}
+
+export function openBuildOverlay() {
+  openPlaceholderOverlay('Build');
+}
