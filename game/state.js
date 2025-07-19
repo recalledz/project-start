@@ -79,7 +79,6 @@ export const systems = {
   buildingUnlocked: false,
   researchUnlocked: false,
   chantingHallUnlocked: false,
-  voiceOfThePeople: false,
   explorationUnlocked: false
 };
 

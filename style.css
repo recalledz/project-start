@@ -1994,51 +1994,6 @@ body.darkenshift-mode .tabsContainer button.active {
     max-width: 360px;
     transform: scale(1.2);
 }
-.core-level-text {
-    margin-top: 4px;
-}
-.voice-level-display {
-    text-align: center;
-    font-size: 1.2rem;
-    font-weight: 600;
-    background: var(--core-bg);
-    padding: 4px 8px;
-    border-radius: 8px;
-    box-shadow: 0 0 4px var(--core-glow);
-}
-.voice-level-display .voice-level-value {
-    color: #c785ff;
-}
-.core-resource-indicators {
-    display: flex;
-    gap: 8px;
-    justify-content: center;
-    margin-top: 4px;
-}
-.core-resource-indicators .resource-box {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    padding: 2px 6px;
-    background: var(--core-bg);
-    border-radius: 6px;
-    box-shadow: 0 0 4px var(--core-glow);
-    font-size: 0.8rem;
-    color: var(--core-text);
-}
-.core-resource-indicators .resource-box i {
-    width: 16px;
-    height: 16px;
-}
-.resource-value {
-    font-weight: 600;
-}
-.resource-name {
-    color: #aaa;
-}
-.resource-box.mind .resource-value { color: #7fd9ff; }
-.resource-value.thought { color: #c785ff; }
-.resource-value.structure { color: #a97b5d; }
 
 .player-construct-panel {
     display: flex;
@@ -2209,65 +2164,6 @@ body.darkenshift-mode .tabsContainer button.active {
     gap: 6px;
 }
 
-.voice-xp-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    cursor: pointer;
-    gap: 6px;
-    width: 70%;
-    margin: 0 auto;
-}
-
-.voice-progress {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2px;
-}
-
-.voice-icon {
-    width: 16px;
-    height: 16px;
-}
-
-.voice-xp-bar {
-    position: relative;
-    width: 100%;
-    height: 10px;
-    background: #222;
-    border: 1px solid #555;
-    border-radius: 4px;
-    box-shadow: 0 0 4px rgba(199, 133, 255, 0.4);
-}
-.voice-xp-fill {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-    width: 0%;
-    background: #c785ff;
-    box-shadow: 0 0 6px #c785ff;
-    transition: width 0.3s ease;
-}
-.voice-level {
-    font-size: 0.8rem;
-    font-weight: 600;
-    white-space: nowrap;
-    color: #c785ff;
-}
-
-.voice-skill-detail {
-    display: none;
-    font-size: 0.75rem;
-    text-align: center;
-    color: #c785ff;
-}
-
-.voice-xp-container.expanded .voice-skill-detail {
-    display: block;
-}
 
 .capacity-display {
     font-size: 0.8rem;
