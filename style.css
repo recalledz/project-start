@@ -2647,7 +2647,7 @@ body.darkenshift-mode .tabsContainer button.active {
     position: absolute;
     left: 4px;
     top: 40px;
-    width: 120px; /* reduced by ~20% */
+    width: fit-content;
     display: flex;
     flex-direction: column;
     gap: 4px;
@@ -3249,7 +3249,7 @@ body.darkenshift-mode .tabsContainer button.active {
   .sect-bohio { width: 36px; height: 28px; }
   .sect-nav-panel button { width: 32px; height: 32px; font-size: 0.65rem; }
   .sect-nav-panel button svg { width: 20px; height: 20px; }
-  .sect-resource-display { width: 160px; }
+  .sect-resource-display { width: fit-content; }
   .sect-summary { font-size: 0.7rem; }
 }
 
