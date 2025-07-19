@@ -156,16 +156,6 @@ const cardBackImages = {
 let isDarkenshift = false;
 // resources and progress trackers
 let cardPoints = 0;
-
-// track how many upgrade power points have been bought total
-let upgradePowerPurchased = 0;
-const upgrades = {};
-
-function upgradePowerCost() {
-  return Math.floor(50 * Math.pow(1.5, upgradePowerPurchased));
-}
-
-
 function awardAttributePoints(d, group) {
   const attr = ATTRIBUTE_FOR_GROUP[group];
   const points = 1 + (Math.random() < 0.1 ? 1 : 0);
@@ -514,8 +504,6 @@ const playerStats = {
 
 // Debug time scaling
 
-// Definitions for purchasable upgrades and their effects are
-// centralized in cardUpgrades.js
 
 // Utility to colorize the enemy icon based on stage level
 function getDealerIconStyle(stage) {
@@ -607,7 +595,6 @@ let playerTab;
 let explorationTab;
 let locationTab;
 let logTab;
-let purchasedUpgradeList;
 let activeEffectsContainer;
 let tooltip;
 
@@ -853,7 +840,6 @@ function initTabs() {
   locationTab = document.querySelector('.locationTab');
   logTab = document.querySelector('.logTab');
 
-  purchasedUpgradeList = document.querySelector('.purchased-upgrade-list');
   activeEffectsContainer = document.querySelector('.active-effects');
   tooltip = document.getElementById('tooltip');
   playerCoreSubTabButton = document.querySelector(".playerCoreSubTabButton");
@@ -1045,15 +1031,6 @@ function initVignetteToggles() {
     });
   });
 }
-
-// Refresh button states (enabled/disabled) based on available cash
-
-function updateUpgradePowerCost() {
-  const btn = document.getElementById('buyUpgradePowerBtn');
-  if (btn) btn.textContent = `Buy Upgrade Point ($${formatNumber(upgradePowerCost())})`;
-}
-
-
 
 function tickSect(delta) {
   if (!sectTabUnlocked) return;
@@ -2699,13 +2676,11 @@ function unlockManaSystem() {
   }
 
   systems.manaUnlocked = true;
-  // establish baseline mana so upgrades scale correctly
+  // establish baseline mana values
   const baseMana = 50;
   stats.maxMana = baseMana;
   stats.mana = stats.maxMana;
   stats.manaRegen = 0.01;
-  // re-apply upgrade effects in case levels were purchased before unlock
-  Object.values(upgrades).forEach(u => u.effect({ stats, stageData, systems }));
   updatePlayerStats(stats);
   updateManaBar();
 }
@@ -3255,7 +3230,6 @@ function onBossDefeat(boss) {
   playerStats.totalBossKills += 1;
   renderGlobalStats();
 
-  stats.upgradePower += 5;
   checkSpeakerEncounter();
   // Unlock and immediately travel to the next world
   updateWorldTabNotification();
@@ -3617,23 +3591,6 @@ function animateCardLevelUp(card) {
   runAnimation(w, "levelup-animate");
 }
 
-function showUpgradePopup(id) {
-  const def = cardUpgradeDefinitions[id];
-  if (!def) return;
-  const wrapper = document.createElement('div');
-  wrapper.classList.add('upgrade-popup');
-  wrapper.innerHTML = `
-    <div class="card-wrapper">
-      <div class="card upgrade-card rarity-${rarityClass(def.rarity)}">
-        <div class="card-suit"><i data-lucide="${def.icon || 'sword'}"></i></div>
-        <div class="card-desc">${def.name}</div>
-      </div>
-    </div>`;
-  document.body.appendChild(wrapper);
-  lucide.createIcons({ icons: lucide.icons });
-  setTimeout(() => wrapper.remove(), 3000);
-}
-
 // Fade out and remove the card when its HP reaches zero
 function animateCardDeath(card, callback) {
   const w = card.wrapperElement;
@@ -3789,21 +3746,11 @@ function updatePlayerStats() {
 export function saveGame() {
 if (typeof localStorage === "undefined") return;
 
-
-const upgradeLevels = Object.fromEntries(
-Object.entries(upgrades).map(([k, u]) => [k, u.level])
-);
-const upgradeUnlocked = Object.fromEntries(
-Object.entries(upgrades).map(([k, u]) => [k, u.unlocked])
-);
-
   const state = {
     stats,
     stageData,
-    upgradePowerPurchased,
     cardPoints,
     redrawCost,
-    upgrades: upgradeLevels,
     playerStats,
     worldProgress,
     lifeCore,
@@ -3839,7 +3786,6 @@ const state = JSON.parse(json);
   // legacy cash/chip values are ignored
   cardPoints = state.cardPoints || 0;
   redrawCost = state.redrawCost || 10;
-  upgradePowerPurchased = state.upgradePowerPurchased || 0;
   Object.assign(stats, state.stats || {});
   if (state.systems) {
     Object.assign(systems, state.systems);
@@ -3927,19 +3873,6 @@ Object.assign(playerStats, state.playerStats || {});
     if (playerSectSubTabButton) playerSectSubTabButton.style.display = '';
   }
 
-
-if (state.upgrades) {
-Object.entries(state.upgrades).forEach(([k, lvl]) => {
-if (upgrades[k]) upgrades[k].level = lvl;
-});
-}
-if (state.upgradesUnlocked) {
-Object.entries(state.upgradesUnlocked).forEach(([k, unlocked]) => {
-if (upgrades[k]) upgrades[k].unlocked = unlocked;
-});
-}
-
-
 updatePlayerStats(stats);
   renderPlayerStats(stats);
   renderStageInfo();
@@ -3952,8 +3885,6 @@ updatePlayerStats(stats);
     worldProgressPerSecDisplay.textContent = "Avg World Progress/sec: 0%";
 
   updateManaBar();
-
-  updateUpgradePowerCost();
   applyWorldTheme();
 
   updateWorldTabNotification();
