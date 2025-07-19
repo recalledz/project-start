@@ -3053,7 +3053,7 @@ function triggerOrbFlash() {
 
 
 //========render functions==========
-document.addEventListener("DOMContentLoaded", () => {
+function init() {
   // now the DOM is in, and lucide.js has run, so window.lucide is defined
   initSect();
   initTabs();
@@ -3157,8 +3157,21 @@ document.addEventListener("DOMContentLoaded", () => {
   const buttons = document.querySelector('.buttonsContainer');
   playerAttackFill = renderPlayerAttackBar(buttons);
   hidePlayerAttackBar(playerAttackFill);
+
+  const btn = document.getElementById("debugToggle");
+  if (btn) btn.addEventListener("click", toggleDebug);
+
+  const tbtn = document.getElementById("themeToggle");
+  if (tbtn) {
+    isDarkenshift = localStorage.getItem('isDarkenshift') === 'true';
+    applyTheme();
+    tbtn.addEventListener("click", toggleTheme);
+  }
+
   requestAnimationFrame(gameLoop);
-});
+}
+
+document.addEventListener("DOMContentLoaded", init);
 
 // life rendering moved to rendering.js
 
@@ -4577,17 +4590,5 @@ toggleDebug();
 }
 });
 
-document.addEventListener("DOMContentLoaded", () => {
-const btn = document.getElementById("debugToggle");
-if (btn) btn.addEventListener("click", toggleDebug);
-});
 
-document.addEventListener("DOMContentLoaded", () => {
-  const tbtn = document.getElementById("themeToggle");
-  if (tbtn) {
-    isDarkenshift = localStorage.getItem('isDarkenshift') === 'true';
-    applyTheme();
-    tbtn.addEventListener("click", toggleTheme);
-  }
-});
 
