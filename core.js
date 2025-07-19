@@ -1,4 +1,4 @@
-import { sectSystem, renderXpBar, openWaterRegenPopup } from './sect.js';
+import { sectSystem, renderXpBar } from './sect.js';
 
 export const coreState = {
   coreLevel: 1,

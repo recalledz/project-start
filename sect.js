@@ -31,7 +31,6 @@ const seasons = [
   { name: 'Aurelia', multiplier: 0.90 },
   { name: 'Bruma', multiplier: 0.70 }
 ];
-const seasonIcons = ['\uD83C\uDF31', '\u2600\uFE0F', '\u2728', '\uD83C\uDF42', '\u2744\uFE0F'];
 const seasonClasses = ['spring','summer','aurora','autumn','winter'];
 const seasonTemps = [15, 25, 20, 10, -5];
 
@@ -1081,12 +1080,6 @@ function renderResources() {
   window.dispatchEvent(new CustomEvent('resources-changed'));
 }
 
-
-function renderGains() {
-  const panel = document.getElementById('constructGains');
-  if (!panel) return;
-  panel.innerHTML = '';
-}
 
 function tickActiveConstructs(dt) {
   // Constructs no longer auto-cast when slotted. Only active buffs
