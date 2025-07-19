@@ -1,5 +1,6 @@
 import Disciple from '../disciple.js';
 import { initializeDisciple } from './discipleInit.js';
+import { sectState } from '../game/state.js';
 
 export function initializeSect() {
   const disciples = [1, 2, 3].map(id => {
@@ -7,5 +8,6 @@ export function initializeSect() {
     initializeDisciple(d);
     return d;
   });
+  sectState.fruits = 100;
   return { disciples };
 }

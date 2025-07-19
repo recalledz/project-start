@@ -46,7 +46,10 @@ export const TASK_ICONS = {
   Chant: '🎶',
   Exploration: '🧭',
   Idle: '💤',
-  Resting: '🛌'
+  Resting: '🛌',
+  Training: '🥋',
+  Eat: '🍽️',
+  Sleep: '💤'
 };
 
 export const TASK_GROUPS = {

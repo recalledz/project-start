@@ -808,9 +808,18 @@ function updateTaskProgressDisplay() {
     const fill = wrapper.querySelector('.disciple-progress-fill');
     const label = wrapper.querySelector('.disciple-progress-label');
     const rateEl = wrapper.querySelector('.disciple-task-rate');
+    const phase = getCurrentSchedule().action;
     const taskName = d.incapacitated
       ? 'Resting'
-      : sectState.discipleTasks[d.id] || 'Idle';
+      : phase !== 'Work'
+        ? phase
+        : sectState.discipleTasks[d.id] || 'Idle';
+    if (phase !== 'Work' && taskName !== 'Resting') {
+      if (fill) fill.style.width = '0%';
+      if (label) label.textContent = taskName;
+      if (rateEl) rateEl.textContent = '';
+      return;
+    }
     if (taskName === 'Gather Fruit' || taskName === 'Gather Softwood') {
       const progress = sectState.discipleProgress[d.id] || 0;
       const group = TASK_GROUPS[taskName];
@@ -1121,9 +1130,12 @@ function startDiscipleMovement() {
     const row = document.createElement('div');
     row.className = 'task-entry';
     if (d.id === selectedDiscipleId) row.classList.add('selected');
+    const phase = getCurrentSchedule().action;
     const current = d.incapacitated
       ? 'Resting'
-      : sectState.discipleTasks[d.id] || 'Idle';
+      : phase !== 'Work'
+        ? phase
+        : sectState.discipleTasks[d.id] || 'Idle';
     if (current === 'Idle') row.classList.add('idle');
     row.addEventListener('click', () => {
       selectedDiscipleId = d.id;
