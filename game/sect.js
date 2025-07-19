@@ -669,6 +669,7 @@ export function unlockConstruct(name) {
 }
 
 export function renderConstructCards() {
+  if (!panel) return;
   const cont = panel.querySelector('#modalCardContainer');
   const slotCont = panel.querySelector('#memorySlotsDisplay');
   if (!cont || !slotCont) return;
