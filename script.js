@@ -521,22 +521,26 @@ function getDealerIconStyle(stage) {
 
 
 
-const nextStageArea = document.getElementById("nextStageArea");
-const nextStageProgress = document.getElementById("nextStageProgress");
-//const moveForwardBtn = document.getElementById("moveForwardBtn");
-const fightBossBtn = document.getElementById("fightBossBtn");
-const bossProgress = document.getElementById("bossProgress");
-const campBtn = document.getElementById("campBtn");
-const killsDisplay = document.getElementById("kills");
-const worldProgressPerSecDisplay = document.getElementById("worldProgressPerSecDisplay");
-const dCardContainer = document.getElementsByClassName("dCardContainer")[0];
-const dealerContainer = document.querySelector('.dealerContainer');
-const jokerContainers = document.querySelectorAll(".jokerContainer");
-const combatHotbar = document.getElementById('combatHotbar');
-const combatResources = document.getElementById('combatResources');
-const manaBar = document.getElementById("manaBar");
-const manaFill = document.getElementById("manaFill");
-const manaText = document.getElementById("manaText");
+const dom = {
+  nextStageArea: document.getElementById("nextStageArea"),
+  nextStageProgress: document.getElementById("nextStageProgress"),
+  //moveForwardBtn: document.getElementById("moveForwardBtn"),
+  fightBossBtn: document.getElementById("fightBossBtn"),
+  bossProgress: document.getElementById("bossProgress"),
+  campBtn: document.getElementById("campBtn"),
+  killsDisplay: document.getElementById("kills"),
+  worldProgressPerSecDisplay: document.getElementById("worldProgressPerSecDisplay"),
+  dCardContainer: document.getElementsByClassName("dCardContainer")[0],
+  dealerContainer: document.querySelector('.dealerContainer'),
+  jokerContainers: document.querySelectorAll(".jokerContainer"),
+  combatHotbar: document.getElementById('combatHotbar'),
+  combatResources: document.getElementById('combatResources'),
+  manaBar: document.getElementById("manaBar"),
+  manaFill: document.getElementById("manaFill"),
+  manaText: document.getElementById("manaText"),
+  manaRegenDisplay: document.getElementById("manaRegenDisplay"),
+  dpsDisplay: document.getElementById("dpsDisplay")
+};
 //const stageProgressFill = document.getElementById("stageProgressFill");
 //const stageProgressBar = document.getElementById("stageProgressBar");
 //const insanityMessages = [
@@ -547,8 +551,6 @@ const manaText = document.getElementById("manaText");
 //let insanityMsgIndex = 0;
 //let lastInsanityMsg = 0;
 //let lowSanityOverlayShown = false;
-const manaRegenDisplay = document.getElementById("manaRegenDisplay");
-const dpsDisplay = document.getElementById("dpsDisplay");
 
 //function hideStageProgressBar() {
 //  if (stageProgressBar) stageProgressBar.style.display = "none";
@@ -2617,20 +2619,20 @@ function init() {
   renderStageInfo();
   renderWorldsMenu();
 
-  if (nextStageArea) {
-    nextStageArea.addEventListener("click", () => {
+  if (dom.nextStageArea) {
+    dom.nextStageArea.addEventListener("click", () => {
       if (stageData.kills >= STAGE_KILL_REQUIREMENT) {
         openCamp(() => nextStage());
       }
     });
   }
-  fightBossBtn.addEventListener("click", () => {
-    fightBossBtn.style.display = "none";
+  dom.fightBossBtn.addEventListener("click", () => {
+    dom.fightBossBtn.style.display = "none";
     spawnBossEvent();
   });
-  if (campBtn) {
-    campBtn.addEventListener('click', () => {
-      campBtn.style.display = 'none';
+  if (dom.campBtn) {
+    dom.campBtn.addEventListener('click', () => {
+      dom.campBtn.style.display = 'none';
       openCamp(() => nextStage());
     });
   }
@@ -2656,15 +2658,15 @@ document.addEventListener("DOMContentLoaded", init);
 // life rendering moved to rendering.js
 
 function updateManaBar() {
-  if (!manaBar) return;
+  if (!dom.manaBar) return;
   if (!systems.manaUnlocked) {
-    manaBar.style.display = "none";
+    dom.manaBar.style.display = "none";
     return;
   }
-  manaBar.style.display = "flex";
+  dom.manaBar.style.display = "flex";
   const ratio = stats.maxMana > 0 ? stats.mana / stats.maxMana: 0;
-  if (manaFill) manaFill.style.width = `${Math.min(1, ratio) * 100}%`;
-  if (manaText) manaText.textContent = `${Math.floor(stats.mana)}/${Math.floor(stats.maxMana)}`;
+  if (dom.manaFill) dom.manaFill.style.width = `${Math.min(1, ratio) * 100}%`;
+  if (dom.manaText) dom.manaText.textContent = `${Math.floor(stats.mana)}/${Math.floor(stats.maxMana)}`;
 }
 
 //function updateSanityBar() {}
@@ -2694,7 +2696,7 @@ export function renderStageInfo() {
   stageData.kills = playerStats.stageKills[stageData.stage] || stageData.kills || 0;
   const lvl = worldProgress[stageData.world]?.level || 1;
   stageDisplay.textContent = `Stage ${stageData.stage} World ${stageData.world} (Lv ${lvl})`;
-  killsDisplay.textContent = `Kills: ${formatNumber(stageData.kills)}`;
+  dom.killsDisplay.textContent = `Kills: ${formatNumber(stageData.kills)}`;
   updateNextStageAvailability();
   updateBossProgress();
 }
@@ -2712,12 +2714,12 @@ export function renderPlayerStats(stats) {
     avgProfDisplay.textContent = `Avg Skill Lv: ${stats.avgProficiencyLevel.toFixed(1)}`;
   }
   attackSpeedDisplay.textContent = `Attack Speed: ${(stats.attackSpeed / 1000).toFixed(1)}s`;
-  if (manaRegenDisplay) {
-    manaRegenDisplay.textContent = `Mana Regen: ${stats.manaRegen.toFixed(2)}/s`;
+  if (dom.manaRegenDisplay) {
+    dom.manaRegenDisplay.textContent = `Mana Regen: ${stats.manaRegen.toFixed(2)}/s`;
   }
-  if (dpsDisplay) {
+  if (dom.dpsDisplay) {
     const dps = stats.pDamage / (stats.attackSpeed / 1000);
-    dpsDisplay.textContent = `DPS: ${dps.toFixed(2)}`;
+    dom.dpsDisplay.textContent = `DPS: ${dps.toFixed(2)}`;
   }
 
   // Update HP per kill display
@@ -2839,8 +2841,8 @@ function renderDealerCard() {
   const card = currentEnemy instanceof Boss
     ? renderBossCard(currentEnemy)
     : renderDealerCardBase(currentEnemy);
-  dCardContainer.innerHTML = '';
-  dCardContainer.appendChild(card);
+  dom.dCardContainer.innerHTML = '';
+  dom.dCardContainer.appendChild(card);
   lucide.createIcons({ icons: lucide.icons });
 }
 
@@ -2914,9 +2916,9 @@ function updateWorldProgressUI(id) {
     pct >= 100 &&
     id == stageData.world
   ) {
-    fightBossBtn.style.display = "inline-block";
+    dom.fightBossBtn.style.display = "inline-block";
   } else if (id == stageData.world) {
-    fightBossBtn.style.display = "none";
+    dom.fightBossBtn.style.display = "none";
   }
 }
 
@@ -3001,7 +3003,7 @@ export function nextStage() {
   stageData.kills = playerStats.stageKills[stageData.stage] || 0;
   const isBossStage = stageData.stage % 10 === 0;
   resetStageCashStats();
-  killsDisplay.textContent = `Kills: ${formatNumber(stageData.kills)}`;
+  dom.killsDisplay.textContent = `Kills: ${formatNumber(stageData.kills)}`;
   updateNextStageProgress();
   updateNextStageAvailability();
   renderGlobalStats();
@@ -3010,7 +3012,7 @@ export function nextStage() {
   inCombat = false;
   setCurrentEnemy(null);
   redrawAllowed = false;
-  if (nextStageArea) nextStageArea.classList.remove('glow-notify');
+  if (dom.nextStageArea) dom.nextStageArea.classList.remove('glow-notify');
   if (isBossStage) {
     respawnDealerStage();
   } else {
@@ -3028,10 +3030,10 @@ function nextWorld() {
   resetStageCashStats();
   worldProgressTimer = 0;
   worldProgressRateTracker.reset(computeWorldProgress(stageData.world) * 100);
-  if (worldProgressPerSecDisplay) {
-    worldProgressPerSecDisplay.textContent = "Avg World Progress/sec: 0%";
+  if (dom.worldProgressPerSecDisplay) {
+    dom.worldProgressPerSecDisplay.textContent = "Avg World Progress/sec: 0%";
   }
-  killsDisplay.textContent = `Kills: ${formatNumber(stageData.kills)}`;
+  dom.killsDisplay.textContent = `Kills: ${formatNumber(stageData.kills)}`;
   updateNextStageProgress();
   updateBossProgress();
   updateNextStageAvailability();
@@ -3040,7 +3042,7 @@ function nextWorld() {
   inCombat = false;
   setCurrentEnemy(null);
   redrawAllowed = false;
-  if (nextStageArea) nextStageArea.classList.remove('glow-notify');
+  if (dom.nextStageArea) dom.nextStageArea.classList.remove('glow-notify');
   respawnDealerStage();
 }
 
@@ -3054,10 +3056,10 @@ function goToWorld(id) {
   resetStageCashStats();
   worldProgressTimer = 0;
   worldProgressRateTracker.reset(computeWorldProgress(stageData.world) * 100);
-  if (worldProgressPerSecDisplay) {
-    worldProgressPerSecDisplay.textContent = "Avg World Progress/sec: 0%";
+  if (dom.worldProgressPerSecDisplay) {
+    dom.worldProgressPerSecDisplay.textContent = "Avg World Progress/sec: 0%";
   }
-  killsDisplay.textContent = `Kills: ${formatNumber(stageData.kills)}`;
+  dom.killsDisplay.textContent = `Kills: ${formatNumber(stageData.kills)}`;
   updateNextStageProgress();
   updateBossProgress();
   renderGlobalStats();
@@ -3065,7 +3067,7 @@ function goToWorld(id) {
   inCombat = false;
   setCurrentEnemy(null);
   redrawAllowed = false;
-  if (nextStageArea) nextStageArea.classList.remove('glow-notify');
+  if (dom.nextStageArea) dom.nextStageArea.classList.remove('glow-notify');
   renderWorldsMenu();
   updateWorldTabNotification();
   respawnDealerStage();
@@ -3077,13 +3079,13 @@ function resetStageCashStats() {
 }
 
 function updateNextStageAvailability() {
-  if (!nextStageArea) return;
+  if (!dom.nextStageArea) return;
   if (stageData.kills >= STAGE_KILL_REQUIREMENT) {
-    nextStageArea.classList.add('glow-notify');
-    nextStageArea.classList.add('clickable');
+    dom.nextStageArea.classList.add('glow-notify');
+    dom.nextStageArea.classList.add('clickable');
   } else {
-    nextStageArea.classList.remove('glow-notify');
-    nextStageArea.classList.remove('clickable');
+    dom.nextStageArea.classList.remove('glow-notify');
+    dom.nextStageArea.classList.remove('clickable');
   }
   updateNextStageProgress();
 }
@@ -3096,11 +3098,11 @@ function setProgress(circle, ratio) {
 }
 
 function updateNextStageProgress() {
-  setProgress(nextStageProgress, stageData.kills / STAGE_KILL_REQUIREMENT);
+  setProgress(dom.nextStageProgress, stageData.kills / STAGE_KILL_REQUIREMENT);
 }
 
 function updateBossProgress() {
-  setProgress(bossProgress, computeWorldProgress(stageData.world));
+  setProgress(dom.bossProgress, computeWorldProgress(stageData.world));
 }
 
 // Enable the next stage button when kill requirements met
@@ -3171,7 +3173,7 @@ function onDealerDefeat() {
   combatXp(calculateKillXp(stageData.stage, stageData.world));
   stageData.kills += 1;
   playerStats.stageKills[stageData.stage] = stageData.kills;
-  killsDisplay.textContent = `Kills: ${formatNumber(stageData.kills)}`;
+  dom.killsDisplay.textContent = `Kills: ${formatNumber(stageData.kills)}`;
   updateNextStageAvailability();
   renderGlobalStats();
   recordWorldKill(stageData.world, stageData.stage);
@@ -3236,7 +3238,7 @@ function onBossDefeat(boss) {
   // Unlock and immediately travel to the next world
   updateWorldTabNotification();
   renderWorldsMenu();
-  fightBossBtn.style.display = "none";
+  dom.fightBossBtn.style.display = "none";
   dealerDeathAnimation();
   dealerBarDeathAnimation(() => {
     inCombat = false;
@@ -3330,12 +3332,12 @@ function dealerDeathAnimation() {
   const dCardWrapper = document.querySelector(".dCardWrapper:last-child");
   const dCardPane = document.querySelector(".dCardPane");
   if (!dCardWrapper) {
-    dCardContainer.innerHTML = "";
+    dom.dCardContainer.innerHTML = "";
     renderDealerCard();
     return;
   }
   runAnimation(dCardWrapper, "dealer-dead").then(() => {
-    dCardContainer.innerHTML = "";
+    dom.dCardContainer.innerHTML = "";
     renderDealerCard();
   });
   runAnimation(dCardPane, "dealer-dead");
@@ -3635,7 +3637,7 @@ function respawnPlayer() {
   spawnPlayer();
   respawnDealerStage();
   updatePlayerStats(stats);
-  killsDisplay.textContent = `Kills: ${formatNumber(stageData.kills)}`;
+  dom.killsDisplay.textContent = `Kills: ${formatNumber(stageData.kills)}`;
   renderGlobalStats();
   renderWorldsMenu();
   checkSpeakerEncounter();
@@ -3883,8 +3885,8 @@ updatePlayerStats(stats);
   worldProgressRateTracker.reset(
     computeWorldProgress(stageData.world) * 100
   );
-  if (worldProgressPerSecDisplay)
-    worldProgressPerSecDisplay.textContent = "Avg World Progress/sec: 0%";
+  if (dom.worldProgressPerSecDisplay)
+    dom.worldProgressPerSecDisplay.textContent = "Avg World Progress/sec: 0%";
 
   updateManaBar();
   applyWorldTheme();
@@ -3964,9 +3966,9 @@ if (currentEnemy) {
   if (worldProgressTimer >= 1000) {
     const currentPct = computeWorldProgress(stageData.world) * 100;
     worldProgressRateTracker.record(currentPct);
-    if (worldProgressPerSecDisplay) {
+    if (dom.worldProgressPerSecDisplay) {
       const rate = worldProgressRateTracker.getRate();
-      worldProgressPerSecDisplay.textContent = `Avg World Progress/sec: ${rate.toFixed(2)}%`;
+      dom.worldProgressPerSecDisplay.textContent = `Avg World Progress/sec: ${rate.toFixed(2)}%`;
     }
     worldProgressTimer = 0;
   }
