@@ -1,5 +1,6 @@
 import Disciple from '../disciple.js';
 import { calculateMaxWater } from './water.js';
+import { sectState } from '../game/state.js';
 
 export function initializeDisciple(d) {
   if (!d) return d;
@@ -32,6 +33,13 @@ export function initializeDisciple(d) {
   if (d.currentHp === undefined) d.currentHp = d.maxHp;
   if (d.foundationXp === undefined) d.foundationXp = 0;
   if (d.lastTab === undefined) d.lastTab = 'general';
+  if (!sectState.discipleMetamorphosis[d.id]) {
+    sectState.discipleMetamorphosis[d.id] = {
+      xp: 0,
+      stage: 0,
+      meditating: false
+    };
+  }
   Object.setPrototypeOf(d, Disciple.prototype);
   if (typeof d.updateCombatStats === 'function') d.updateCombatStats();
   return d;

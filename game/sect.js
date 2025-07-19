@@ -1,5 +1,5 @@
 import addLog from '../log.js';
-import { refreshMetamorphosis } from '../metamorphosis.js';
+import { refreshMetamorphosis, tickMetamorphosis } from '../metamorphosis.js';
 import { sectState, currentEnemy } from './state.js';
 import { generateDiscipleAttributes } from '../discipleAttributes.js';
 import Disciple from '../disciple.js';
@@ -1281,6 +1281,7 @@ export function tickSectSystem(delta) {
     }
   }
   tickActiveConstructs(dt);
+  tickMetamorphosis(dt);
   ins.current = Math.min(ins.max, Math.max(0, ins.current));
   if (hasUI) {
     updateCooldownOverlays();

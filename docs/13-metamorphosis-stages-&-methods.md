@@ -12,6 +12,7 @@ Each disciple evolves through frog-like spiritual metamorphosis. Accessible via 
 - **Tadpole silhouette** with animated fill toward next breakthrough. replacing body figure.
 - **Progress bar** showing XP and % toward next phase
 - **metamorphosis Stats**: method modifiers, room/building multipliers, season, humidity, and training bonuses
+- **Left panel disciple list** for selecting which coquí's progress to view
 
 ---
 

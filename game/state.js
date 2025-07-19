@@ -96,6 +96,7 @@ export const sectState = {
   discipleProgress: {},
   discipleSkills: {},
   discipleConstructXp: {},
+  discipleMetamorphosis: {},
   chantAssignments: {},
   discipleRest: {},
   maxDisciples: 3,
