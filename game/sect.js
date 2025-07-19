@@ -65,7 +65,6 @@ export const sectSystem = {
     water: { current: 0, max: 2000, regen: R_MAX }
   },
   resources: {
-    sound: { current: 0, max: 200, regen: 0, unlocked: true },
     thought: { current: 0, max: 10, regen: 0, unlocked: false },
     structure: { current: 0, max: 10, regen: 0, unlocked: false },
     woodEssence: { current: 0, max: 10, regen: 0, unlocked: false },
@@ -90,7 +89,7 @@ export const sectSystem = {
   weather: null,
   waterRegenBase: 0,
   activeConstructs: [],
-  savedConstructs: ['Murmur'],
+  savedConstructs: [],
   activeBuffs: {},
   cooldowns: {},
   constructUnlocked: true,
@@ -239,7 +238,6 @@ recipes.forEach(r => {
 
 const resourceIcons = {
   water: 'star',
-  sound: 'volume-2',
   thought: 'activity',
   structure: 'box',
   woodEssence: 'leaf',
@@ -359,6 +357,7 @@ const constructEffects = {
     const amount = dt * pot; // 1 water -> sound per second scaled
     const ins = sectSystem.resources.water;
     const snd = sectSystem.resources.sound;
+    if (!snd) return;
     if (ins.current >= amount) {
       ins.current -= amount;
       snd.current = Math.min(snd.max, snd.current + amount);
@@ -1309,7 +1308,7 @@ export function tickSectSystem(delta) {
     }
   }
   const call = recipes.find(r => r.name === 'The Calling');
-  if (call && !call.unlocked && sectSystem.resources.sound.current >= 100) {
+  if (call && !call.unlocked && sectSystem.resources.sound && sectSystem.resources.sound.current >= 100) {
     call.unlocked = true;
     addLog('The Calling construct unlocked!', 'info');
     if (hasUI) {
