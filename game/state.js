@@ -1,4 +1,66 @@
 import { attributes } from '../attributes.js';
+import RateTracker from '../utils/rateTracker.js';
+import { BossTemplates } from '../boss.js';
+
+export let isDarkenshift = false;
+export function setIsDarkenshift(val) {
+  isDarkenshift = val;
+}
+
+export const lifeCore = { real: false };
+
+export const WORLD_PROGRESS_TARGET = 1820;
+export const worldProgress = {};
+Object.keys(BossTemplates).forEach(id => {
+  worldProgress[id] = {
+    unlocked: parseInt(id) === 1,
+    bossDefeated: false,
+    rewardClaimed: false,
+    level: 1,
+    progress: 0,
+    progressTarget: WORLD_PROGRESS_TARGET
+  };
+});
+
+export const playerStats = {
+  timesPrestiged: 0,
+  totalBossKills: 0,
+  stageKills: {},
+  speakerEncounters: 0,
+  hasDied: false
+};
+
+export let gamePaused = false;
+export function setGamePaused(val) {
+  gamePaused = val;
+}
+
+export let campOverlayOpen = false;
+export function setCampOverlayOpen(val) {
+  campOverlayOpen = val;
+}
+
+export let campOverlay = null;
+export function setCampOverlay(val) {
+  campOverlay = val;
+}
+
+export let inCombat = false;
+export function setInCombat(val) {
+  inCombat = val;
+}
+
+export let speakerOverlay = null;
+export function setSpeakerOverlay(val) {
+  speakerOverlay = val;
+}
+
+export let worldProgressTimer = 0;
+export function setWorldProgressTimer(val) {
+  worldProgressTimer = val;
+}
+
+export const worldProgressRateTracker = new RateTracker(30000);
 
 export let currentEnemy = null;
 export function setCurrentEnemy(val) {
