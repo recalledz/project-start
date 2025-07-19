@@ -60,21 +60,18 @@ Quick-jump icons for your major screens (Research, Chanting, Tasks, Map, Influen
 
 Main canvas (green)
 
-Four zones laid out roughly in a cross:
+Zones curve around the Water Orb in an ellipse:
 
-Cultivation Zone (upper-left)
+- Cultivation Zone
+- Industrial Zone
+- Storage / Items
+- Research Zone
+- Housing Zone (between the upper zones)
 
-Industrial Zone (upper-right)
+The Water Orb now sits at the exact center, with the housing zone forming the tip
+of a loose triangle above the lower zones.
 
-Storage / Items (lower-left)
-
-Research Zone (lower-right)
-
-
-
-Center
-
-Water Orb widget showing current Water per second.
+Water Orb widget shows current Water per second.
 
 
 Footer
