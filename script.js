@@ -541,19 +541,7 @@ function getHousingName(level) {
 
 const lifeCore = { real: false };
 
-const barUpgrades = {
-  damage: { level: 0, progress: 0, points: 0, multiplier: 1 },
-  maxHp: { level: 0, progress: 0, points: 0, multiplier: 1 }
-};
-
 // Card HP adjustments moved to card.js utilities
-
-function computeBarMultiplier(level) {
-  return 1 + (level / (level + 20)) * 9;
-}
-
-// progress gained per second for each point invested in a bar
-const BAR_PROGRESS_RATE = 0.1;
 
 // Data for the current stage and world progression
 
@@ -1146,37 +1134,7 @@ function updateUpgradePowerCost() {
   if (btn) btn.textContent = `Buy Upgrade Point ($${formatNumber(upgradePowerCost())})`;
 }
 
-function updateBarUI(key) {
-  const bar = barUpgrades[key];
-  const wrapper = document.querySelector(`.bar-upgrade[data-key="${key}"]`);
-  if (!wrapper) return;
-  const fill = wrapper.querySelector('.bar-fill');
-  const info = wrapper.querySelector('.bar-info');
-  const pointsEl = wrapper.querySelector('.bar-points');
-  const req = 10 + bar.level * 5;
-  if (fill) fill.style.width = `${(bar.progress / req) * 100}%`;
-  if (info) info.textContent = `Lv. ${bar.level} ×${bar.multiplier.toFixed(2)}`;
-  if (pointsEl) pointsEl.textContent = bar.points;
-}
 
-
-function tickBarProgress(delta) {
-  Object.entries(barUpgrades).forEach(([key, bar]) => {
-    if (bar.points <= 0) return;
-    bar.progress += (bar.points * BAR_PROGRESS_RATE * delta) / 1000;
-    const req = 10 + bar.level * 5;
-    if (bar.progress >= req) {
-      bar.progress -= req;
-      bar.level += 1;
-      bar.multiplier = computeBarMultiplier(bar.level);
-      if (key === 'maxHp') {
-        recalcAllCardHp();
-      }
-      updatePlayerStats();
-    }
-    updateBarUI(key);
-  });
-}
 
 function tickSect(delta) {
   if (!sectTabUnlocked) return;
@@ -2477,7 +2435,7 @@ function renderSectDiscipleList() {
 }
 
 let discipleOverlay = null;
-let discipleOverlayData = { disciple: null, bars: null };
+let discipleOverlayData = { disciple: null };
 let discipleOverlayActiveTab = 'general';
 function openDiscipleOverlay(d) {
   if (discipleOverlay) {
@@ -2514,23 +2472,9 @@ function openDiscipleOverlay(d) {
   let active = discipleOverlayActiveTab;
   function render() {
     content.innerHTML = '';
-    discipleOverlayData.bars = null;
     if (active === 'general') {
       const view = buildDiscipleGeneralView(d);
       content.appendChild(view);
-      const rows = view.querySelectorAll('.stat-row');
-      if (rows.length >= 4) {
-        discipleOverlayData.bars = {
-          healthFill: rows[0].querySelector('.bar-fill'),
-          healthVal: rows[0].lastElementChild,
-          staminaFill: rows[1].querySelector('.bar-fill'),
-          staminaVal: rows[1].lastElementChild,
-          waterFill: rows[2].querySelector('.bar-fill'),
-          waterVal: rows[2].lastElementChild,
-          hungerFill: rows[3].querySelector('.bar-fill'),
-          hungerVal: rows[3].lastElementChild
-        };
-      }
     } else if (active === 'proficiency') {
       content.appendChild(buildDiscipleProficiencyView(d));
     } else if (active === 'constructs') {
@@ -2576,35 +2520,7 @@ function openDiscipleOverlay(d) {
       discipleOverlayData.disciple.lastTab = discipleOverlayActiveTab;
     }
     discipleOverlayData.disciple = null;
-    discipleOverlayData.bars = null;
   });
-}
-
-function updateDiscipleOverlayBars() {
-  const data = discipleOverlayData;
-  if (!data.disciple || !data.bars) return;
-  const d = data.disciple;
-  const maxStamina = calculateMaxStamina(d.endurance);
-  const waterLvl = getTaskSkillProgress(
-    sectState.discipleSkills[d.id]?.WaterSense || 0
-  ).level;
-  const maxWater = calculateMaxWater(waterLvl);
-  if (data.bars.healthFill)
-    data.bars.healthFill.style.width = `${(d.health / DISCIPLE_MAX_HEALTH) * 100}%`;
-  if (data.bars.healthVal)
-    data.bars.healthVal.textContent = `${Math.round(d.health)}/${DISCIPLE_MAX_HEALTH}`;
-  if (data.bars.staminaFill)
-    data.bars.staminaFill.style.width = `${(d.stamina / maxStamina) * 100}%`;
-  if (data.bars.staminaVal)
-    data.bars.staminaVal.textContent = `${Math.round(d.stamina)}/${Math.round(maxStamina)}`;
-  if (data.bars.waterFill)
-    data.bars.waterFill.style.width = `${(d.water / maxWater) * 100}%`;
-  if (data.bars.waterVal)
-    data.bars.waterVal.textContent = `${Math.round(d.water)}/${Math.round(maxWater)}`;
-  if (data.bars.hungerFill)
-    data.bars.hungerFill.style.width = `${(d.hunger / 20) * 100}%`;
-  if (data.bars.hungerVal)
-    data.bars.hungerVal.textContent = `${Math.round(d.hunger)}/20`;
 }
 
 function buildDiscipleSkillsList(d) {
@@ -3915,7 +3831,7 @@ function updatePlayerStats() {
   // Reset base stats
   stats.pDamage = 0;
   stats.damageMultiplier =
-    stats.upgradeDamageMultiplier * barUpgrades.damage.multiplier * stats.extraDamageMultiplier;
+    stats.upgradeDamageMultiplier * stats.extraDamageMultiplier;
   stats.pRegen = 0;
   stats.avgCombatLevel = 0;
   stats.avgProficiencyLevel = 0;
@@ -3971,7 +3887,6 @@ Object.entries(upgrades).map(([k, u]) => [k, u.unlocked])
     upgrades: upgradeLevels,
     playerStats,
     worldProgress,
-    barUpgrades,
     lifeCore,
     sectSystem,
     sectState,
@@ -4093,11 +4008,6 @@ Object.assign(playerStats, state.playerStats || {});
     if (playerSectSubTabButton) playerSectSubTabButton.style.display = '';
   }
 
-  if (state.barUpgrades) {
-    Object.entries(state.barUpgrades).forEach(([k, v]) => {
-      if (barUpgrades[k]) Object.assign(barUpgrades[k], v);
-    });
-  }
 
 if (state.upgrades) {
 Object.entries(state.upgrades).forEach(([k, lvl]) => {
@@ -4220,11 +4130,8 @@ if (currentEnemy) {
  updateManaBar();
 }
 
-  // passive progress for bar upgrades
-  tickBarProgress(deltaTime);
   tickSectSystem(deltaTime);
   tickSect(deltaTime);
-  updateDiscipleOverlayBars();
   const dtSeconds = deltaTime / 1000;
   sectSystem.gains.water =
     dtSeconds > 0
