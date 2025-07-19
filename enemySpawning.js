@@ -145,7 +145,7 @@ export function spawnEnemy(kind, stageData, enemyAttackProgress, onDefeat) {
     const dmg = Math.floor(Math.random() * (enemy.maxDamage - enemy.minDamage + 1)) + enemy.minDamage;
     const finalDmg = dmg;
     if (typeof globalThis.cDealerDamage === 'function') {
-      globalThis.cDealerDamage(finalDmg, null, enemy.name);
+      globalThis.cDealerDamage(finalDmg, enemy.name);
     }
   };
 

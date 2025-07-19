@@ -5,7 +5,8 @@ The project organizes game logic under the `game/` directory.
 - **game/state.js** – central store for global state like `stats`, `systems`, `sectState`, and the current enemy. Also exposes time scaling helpers.
 - **game/disciples.js** – manages which disciples are active in combat.
 - **game/ui.js** – renders combat UI elements such as bars and disciple cards.
-- **game/combat.js** – handles combat timers and damage resolution.
+- **game/combat.js** – centralizes all combat logic including damage
+  resolution and disciple hit animations.
 - **game/debug.js** – wiring for optional debug controls.
 - **game/constants.js** – collection of shared gameplay constants used across systems.
 - **game/tooltip.js** – simple helpers for showing and hiding the UI tooltip.
