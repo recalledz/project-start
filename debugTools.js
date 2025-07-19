@@ -6,16 +6,15 @@ import {
   nextStage,
   respawnDealerStage,
   renderStageInfo,
-  renderPlayerStats,
   addDiscoveredLocation,
   saveGame,
   loadGame,
   startNewGame,
   cDealerDamage
 } from './script.js';
+import { activeDisciples } from './game/disciples.js';
 import {
   stageData,
-  stats,
   timeScale,
   FAST_MODE_SCALE,
   systems,
