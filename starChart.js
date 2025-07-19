@@ -97,10 +97,7 @@ const nodes = [
 
   // dex tree
   { id: "dex_attack_speed",   x: 0.6241266375545852, y: 0.8756632223234702, label: "Unlock Attack Speed", type: "dex" },
-  { id: "dex_misc",           x: 0.4025109170305677, y: 0.6742980932895483, label: "DEX Upgrade", type: "dex" },
-
-  // int tree
-  { id: "int_joker_slot",     x: 0.6623362445414848, y: 0.8041400890600553, label: "+1 Joker Slot", type: "int" }
+  { id: "dex_misc",           x: 0.4025109170305677, y: 0.6742980932895483, label: "DEX Upgrade", type: "dex" }
 ];
 
 const nodeMap = Object.fromEntries(nodes.map(n => [n.id, n]));
@@ -114,10 +111,7 @@ const nodeMap = Object.fromEntries(nodes.map(n => [n.id, n]));
   
   // dex tree
   ["root", "dex_attack_speed"], 
-  ["dex_attack_speed", "dex_misc"],
-
-  // int tree
-  ["root", "int_joker_slot"]
+  ["dex_attack_speed", "dex_misc"]
 ];
 
  function drawConnections() {

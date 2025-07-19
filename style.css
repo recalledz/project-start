@@ -274,8 +274,7 @@ body.darkenshift-mode .tabsContainer button.active {
     grid-template-rows: auto 1fr auto;
     grid-template-areas:
         "buttons"
-        "hand"
-        "jokers";
+        "hand";
     overflow-y: auto;
     gap: 10px;
     position: relative;
@@ -287,12 +286,7 @@ body.darkenshift-mode .tabsContainer button.active {
 .handContainer {
     grid-area: hand;
 }
-.joker-wrapper {
-    grid-area: jokers;
-} /* or add a .jokerContainer alias */
-.jokerContainer {
-    grid-area: jokers;
-}
+
 
 
 /*.insanity-orb {
@@ -1464,33 +1458,6 @@ body.darkenshift-mode .tabsContainer button.active {
     padding: 5px;
 }
 
-/* Joker container and tiles */
-.joker-wrapper {
-    max-width: 90px;
-    width: 100%;
-    display: inline-flex;
-    flex-direction: column;
-    align-items: center;
-    cursor: pointer;
-}
-
-.joker-wrapper .card {
-    width: 100%;
-    aspect-ratio: 3 / 4;
-    border-radius: 8px;
-    padding: 4px;
-    margin-bottom: 4px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.joker-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover; /* or try 'cover' for tighter framing */
-    border-radius: 6px; /* optional: mimic the inner edge */
-}
 
 .damage-float {
     position: absolute;

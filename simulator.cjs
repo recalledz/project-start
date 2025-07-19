@@ -15,7 +15,6 @@ class GameSimulator {
 
     // analytics placeholders for future expansion
     this.tracking = {
-      jokerActivations: 0,
       abilityUsage: {},
       cooldownUsage: {},
       traitInteractions: {}
