@@ -78,38 +78,7 @@ export const sectSystem = {
   gains: {
     water: 0
   },
-  upgrades: {
-    // Cohere costs scale more steeply so high levels require larger water
-    // investment. This keeps Cohere from overwhelming Intone's impact.
-    cohere: { level: 0, costFunc: lvl => Math.round(15 * Math.pow(1.2, lvl)) },
-    vocalMaturity: { level: 0, baseCost: 2, unlocked: false },
-    capacityBoost: { level: 0, baseCost: { water: 10 }, unlocked: false },
-    expandMind: {
-      level: 0,
-      unlocked: true,
-      costFunc: lvl => ({ water: 2 * Math.pow(lvl + 1, 2) })
-    },
-    soundExpansion: {
-      level: 0,
-      unlocked: true,
-      costFunc: lvl => ({ sound: 25 + lvl * 4 })
-    },
-    cognitiveLattice: {
-      level: 0,
-      unlocked: true,
-      costFunc: lvl => ({
-        sound: 50 + lvl * 10,
-        thought: 10 + lvl * 2,
-        structure: 5 + lvl
-      })
-    },
-    clarividence: { level: 0, baseCost: 300, unlocked: false },
-    idleChatter: {
-      level: 0,
-      baseCost: { sound: 200, thought: 10 },
-      unlocked: true
-    }
-  },
+  upgrades: {},
   skills: {
     voice: { xp: 0, level: 0 },
     mind: { xp: 0, level: 0 },
@@ -1131,204 +1100,23 @@ function renderResources() {
   });
   if (window.lucide) window.lucide.createIcons({ icons: window.lucide.icons });
   window.dispatchEvent(new CustomEvent('resources-changed'));
-  updateUpgradeAffordability();
 }
 
-function getUpgradeCost(name) {
-  const up = sectSystem.upgrades[name];
-  if (typeof up.costFunc === 'function') {
-    return up.costFunc(up.level);
-  }
-  if (typeof up.baseCost === 'number') {
-    if (up.scale === 'linear') {
-      return Math.floor(up.baseCost + up.level);
-    }
-    return Math.floor(up.baseCost * Math.pow(2, up.level));
-  }
-  const costs = {};
-  for (const [k, v] of Object.entries(up.baseCost)) {
-    if (up.scale === 'linear') {
-      costs[k] = Math.floor(v + up.level);
-    } else {
-      costs[k] = Math.floor(v * Math.pow(2, up.level));
-    }
-  }
-  return costs;
+function getUpgradeCost() {
+  return 0;
 }
 
-function canAfford(cost) {
-  if (typeof cost === 'number') {
-    return sectSystem.orbs.water.current >= cost;
-  }
-  for (const [k, v] of Object.entries(cost)) {
-    const orb = sectSystem.orbs[k];
-    const res = sectSystem.resources[k];
-    const have = orb ? orb.current : res ? res.current : 0;
-    if (have < v) return false;
-  }
-  return true;
+function canAfford() {
+  return false;
 }
 
-function updateUpgradeAffordability() {
-  const panelUp = document.getElementById('constructUpgrades');
-  if (!panelUp) return;
-  const buttons = panelUp.querySelectorAll('button[data-upgrade]');
-  buttons.forEach(btn => {
-    const name = btn.dataset.upgrade;
-    const cost = getUpgradeCost(name);
-    const affordable = canAfford(cost);
-    btn.classList.toggle('unaffordable', !affordable);
-    const buy = btn.querySelector('.buy-btn');
-    if (buy) buy.classList.toggle('disabled', !affordable);
-    const spans = btn.querySelectorAll('.icon-row span');
-    if (typeof cost === 'number') {
-      const have = sectSystem.orbs.water.current;
-      spans.forEach(span => span.classList.toggle('cost-missing', have < cost));
-    } else {
-      const entries = Object.entries(cost);
-      spans.forEach((span, idx) => {
-        const [res, amt] = entries[idx] || [];
-        const have =
-          (sectSystem.orbs[res]?.current ?? sectSystem.resources[res]?.current ?? 0);
-        span.classList.toggle('cost-missing', have < amt);
-      });
-    }
-  });
-}
+function updateUpgradeAffordability() {}
 
-function purchaseUpgrade(name) {
-  const up = sectSystem.upgrades[name];
-  const cost = getUpgradeCost(name);
-  const prevSlots = sectSystem.memorySlots;
-  if (typeof cost === 'number') {
-    if (sectSystem.orbs.water.current < cost) return;
-    sectSystem.orbs.water.current -= cost;
-  } else {
-    for (const [k, v] of Object.entries(cost)) {
-      if (sectSystem.orbs[k] && sectSystem.orbs[k].current < v) return;
-      if (sectSystem.resources[k] && sectSystem.resources[k].current < v) return;
-    }
-    for (const [k, v] of Object.entries(cost)) {
-      if (sectSystem.orbs[k]) sectSystem.orbs[k].current -= v;
-      if (sectSystem.resources[k]) sectSystem.resources[k].current -= v;
-    }
-  }
-  up.level += 1;
-  if (name === 'cohere') {
-    // regen handled in tickSect based on upgrade level
-  } else if (name === 'vocalMaturity') {
-    awardXp(5, ['voice']);
-  } else if (name === 'capacityBoost') {
-    sectSystem.memorySlots += 1;
-  } else if (name === 'expandMind') {
-    sectSystem.orbs.water.max = Math.round(sectSystem.orbs.water.max * 1.15);
-  } else if (name === 'soundExpansion') {
-    sectSystem.resources.sound.max += 25;
-    if (up.level === 2) {
-      sectSystem.memorySlots += 1;
-    }
-  } else if (name === 'cognitiveLattice') {
-    sectSystem.resources.sound.max += 50;
-    sectSystem.resources.thought.max += 10;
-    sectSystem.resources.structure.max += 5;
-  }
-  renderUpgrades();
-  renderGains();
-  renderOrbs();
-  renderResources();
-  if (sectSystem.memorySlots !== prevSlots) {
-    renderConstructCards();
-  }
-}
+function purchaseUpgrade() {}
 
 export function renderUpgrades() {
   const panelUp = document.getElementById('constructUpgrades');
-  if (!panelUp) return;
-  panelUp.innerHTML = '';
-  const coreGroup = document.createElement('div');
-  coreGroup.className = 'upgrade-group';
-  panelUp.appendChild(coreGroup);
-  ['cohere','expandMind','soundExpansion','cognitiveLattice','idleChatter'].forEach(name => {
-    const btn = document.createElement('button');
-    btn.dataset.upgrade = name;
-    const cost = getUpgradeCost(name);
-    const up = sectSystem.upgrades[name];
-    let costHtml = '';
-    if (typeof cost === 'number') {
-      const have = sectSystem.orbs.water.current;
-      const cls = have >= cost ? '' : 'cost-missing';
-      costHtml = `<span class="icon-row"><span class="${cls}"><i data-lucide="${resourceIcons.water}"></i> ${cost}</span></span>`;
-    } else {
-      costHtml = `<span class="icon-row">` +
-        Object.entries(cost).map(([r,a]) => {
-          const have = (sectSystem.orbs[r]?.current ?? sectSystem.resources[r]?.current ?? 0);
-          const cls = have >= a ? '' : 'cost-missing';
-          return `<span class="${cls}"><i data-lucide="${resourceIcons[r] || 'package'}"></i> ${a}</span>`;
-        }).join(' ') +
-        `</span>`;
-    }
-    const affordable = canAfford(cost);
-    btn.classList.toggle('unaffordable', !affordable);
-    const desc = typeof upgradeDescriptions[name] === 'function'
-      ? upgradeDescriptions[name](up.level)
-      : upgradeDescriptions[name] || '';
-    btn.innerHTML = `<span class="upg-info"><span class="upg-name">${name}</span><span class="upgrade-level">Lv.${up.level}</span></span><div class="detail"><div class="cost">${costHtml}</div><div class="desc">${desc}</div><span class="buy-btn">Buy</span></div>`;
-    btn.addEventListener('click', e => {
-      if (!btn.classList.contains('expanded')) {
-        btn.classList.add('expanded');
-        return;
-      }
-      if (e.target.closest('.buy-btn')) {
-        purchaseUpgrade(name);
-      } else {
-        btn.classList.remove('expanded');
-      }
-    });
-    coreGroup.appendChild(btn);
-  });
-  if (sectSystem.upgrades.clarividence.unlocked && sectSystem.upgrades.clarividence.level === 0) {
-    const btn = document.createElement('button');
-    btn.dataset.upgrade = 'clarividence';
-    const cost = getUpgradeCost('clarividence');
-    const cls = sectSystem.orbs.water.current >= cost ? '' : 'cost-missing';
-    btn.classList.toggle('unaffordable', !canAfford(cost));
-    btn.innerHTML = `<span class="upg-info"><span class="upg-name">clarividence</span><span class="upgrade-level">Lv.0</span></span><div class="detail"><div class="cost"><span class="icon-row"><span class="${cls}"><i data-lucide="${resourceIcons.water}"></i> ${cost}</span></span></div><div class="desc">${upgradeDescriptions.clarividence}</div><span class="buy-btn">Buy</span></div>`;
-    btn.addEventListener('click', e => {
-      if (!btn.classList.contains('expanded')) {
-        btn.classList.add('expanded');
-        return;
-      }
-      if (e.target.closest('.buy-btn')) {
-        purchaseUpgrade('clarividence');
-      } else {
-        btn.classList.remove('expanded');
-      }
-    });
-    coreGroup.appendChild(btn);
-  }
-  if (sectSystem.upgrades.vocalMaturity.unlocked || sectSystem.failCount >= 5) {
-    const vocal = document.createElement('div');
-    vocal.className = 'upgrade-group';
-    panelUp.appendChild(vocal);
-    const btn = document.createElement('button');
-    btn.dataset.upgrade = 'vocalMaturity';
-    const cost = getUpgradeCost('vocalMaturity');
-    const cls = sectSystem.orbs.water.current >= cost ? '' : 'cost-missing';
-    btn.classList.toggle('unaffordable', !canAfford(cost));
-    btn.innerHTML = `<span class="upg-info"><span class="upg-name">vocalMaturity</span><span class="upgrade-level">Lv.${sectSystem.upgrades.vocalMaturity.level}</span></span><div class="detail"><div class="cost"><span class="icon-row"><span class="${cls}"><i data-lucide="${resourceIcons.water}"></i> ${cost}</span></span></div><div class="desc">${upgradeDescriptions.vocalMaturity}</div><span class="buy-btn">Buy</span></div>`;
-    btn.addEventListener('click', e => {
-      if (!btn.classList.contains('expanded')) {
-        btn.classList.add('expanded');
-        return;
-      }
-      if (e.target.closest('.buy-btn')) {
-        purchaseUpgrade('vocalMaturity');
-      } else {
-        btn.classList.remove('expanded');
-      }
-    });
-    vocal.appendChild(btn);
-  }
+  if (panelUp) panelUp.innerHTML = '<em>No upgrades available</em>';
 }
 
 function renderGains() {
@@ -1489,15 +1277,9 @@ export function tickSectSystem(delta) {
   const ins = sectSystem.resources.water;
   const seasonMult = seasons[sectSystem.seasonIndex].multiplier;
   const baseRateRaw = R_MAX / (1 + Math.exp((ins.current - getWaterMidpoint()) / K));
-  const level = sectSystem.upgrades.cohere.level;
-  // provide baseline regen at level 0 while still tapering off with higher levels
+  const level = 0;
   const upgradeMult = (level + 1) / (level + 5);
-  const idleCount =
-    sectSystem.upgrades.idleChatter.level > 0
-      ? sectSystem.disciples.filter(
-          d => (sectState.discipleTasks[d.id] || 'Idle') === 'Idle'
-        ).length
-      : 0;
+  const idleCount = 0;
   const idleMult = 1 + idleCount * 0.05;
   const baseTotal = baseRateRaw * upgradeMult * idleMult;
   let regen = baseTotal * seasonMult;
@@ -1505,12 +1287,6 @@ export function tickSectSystem(delta) {
   regen = Math.min(R_MAX, regen) * getIntoneMultiplier();
   sectSystem.waterRegenBase = baseTotal;
   ins.current = Math.min(ins.max, ins.current + regen * dt);
-  // Unlock clarividence once the player demonstrates basic water control
-  // by accumulating at least 50 water.
-  if (!sectSystem.upgrades.clarividence.unlocked && ins.current >= 50) {
-    sectSystem.upgrades.clarividence.unlocked = true;
-    if (hasUI) renderUpgrades();
-  }
   const echo = recipes.find(r => r.name === 'Echo of Mind');
   if (
     echo &&
@@ -1632,14 +1408,9 @@ export function openWaterRegenPopup() {
   const ins = sectSystem.resources.water;
   const season = seasons[sectSystem.seasonIndex];
   const baseRateRaw = R_MAX / (1 + Math.exp((ins.current - getWaterMidpoint()) / K));
-  const level = sectSystem.upgrades.cohere.level;
+  const level = 0;
   const upgradeMult = (level + 1) / (level + 5);
-  const idleCount =
-    sectSystem.upgrades.idleChatter.level > 0
-      ? sectSystem.disciples.filter(
-          d => (sectState.discipleTasks[d.id] || 'Idle') === 'Idle'
-        ).length
-      : 0;
+  const idleCount = 0;
   const idleMult = 1 + idleCount * 0.05;
   const seasonMult = season.multiplier;
   const weatherMult = sectSystem.weather ? sectSystem.weather.multiplier : 1;

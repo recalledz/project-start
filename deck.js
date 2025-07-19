@@ -4,7 +4,6 @@
 export const deckMastery = {};
 
 import { formatNumber } from './utils/numberFormat.js';
-import { cardUpgradeDefinitions } from './cardUpgrades.js';
 
 // Required levels to reach each mastery tier
 export const masteryRequirements = [
@@ -25,14 +24,7 @@ export const deckConfigs = {
     deckSize: 52,
     maxJokers: 2,
     hpMultiplier: 1,
-    damageMultiplier: 1,
-    upgrades: [
-      'hpPerKill',
-      'damageMultiplier',
-      'hpMultiplier',
-      'spadeDamage15',
-      'cashOutNoRedraw'
-    ]
+    damageMultiplier: 1
   }
 };
 
@@ -97,19 +89,7 @@ export function renderDeckList(container) {
       <span>DMG ×${cfg.damageMultiplier}</span>
     `;
 
-    const upContainer = document.createElement('div');
-    const upTitle = document.createElement('div');
-    upTitle.textContent = 'Upgrades';
-    const upList = document.createElement('ul');
-    upList.classList.add('deck-upgrade-list');
-    (cfg.upgrades || []).forEach(u => {
-      const li = document.createElement('li');
-      li.textContent = cardUpgradeDefinitions[u]?.name || u;
-      upList.appendChild(li);
-    });
-    upContainer.append(upTitle, upList);
-
-    row.append(name, bottom, caps, upContainer);
+    row.append(name, bottom, caps);
     row.addEventListener('click', () => {
       selectedDeck = id;
       const event = new CustomEvent('deck-selected', { detail: { id } });
