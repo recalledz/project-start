@@ -41,6 +41,7 @@ import { showRestartScreen } from './ui/restartOverlay.js';
 import { showLoadErrorOverlay } from './ui/loadErrorOverlay.js';
 import { openExplorationOverlay, closeExplorationOverlay, openWorkOverlay, openScheduleOverlay, openPlaceholderOverlay, openResourceOverlay, openBuildOverlay, locationListContainer, explorationListContainer } from "./ui/colonyOverlays.js";
 import { calculateKillXp, XP_EFFICIENCY } from './utils/xp.js';
+import { initTooltip } from './game/tooltip.js';
 import {
   calculateMaxStamina,
   calculateStaminaRegen
@@ -474,7 +475,6 @@ export let explorationTab;
 export let locationTab;
 export let logTab;
 let activeEffectsContainer;
-let tooltip;
 
 let playerCoreSubTabButton;
 let playerCorePanel;
@@ -662,11 +662,11 @@ function initTabs() {
   worldsTab = document.querySelector('.worldsTab');
   playerTab = document.querySelector('.playerTab');
   explorationTab = document.querySelector('.explorationTab');
-  locationTab = document.querySelector('.locationTab');
-  logTab = document.querySelector('.logTab');
+    locationTab = document.querySelector('.locationTab');
+    logTab = document.querySelector('.logTab');
 
   activeEffectsContainer = document.querySelector('.active-effects');
-  tooltip = document.getElementById('tooltip');
+  initTooltip();
   playerCoreSubTabButton = document.querySelector(".playerCoreSubTabButton");
   playerCorePanel = document.querySelector(".player-core-panel");
   playerConstructSubTabButton = document.querySelector('.playerConstructSubTabButton');
