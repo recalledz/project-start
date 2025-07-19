@@ -8,9 +8,9 @@ import {
   renderStageInfo,
   saveGame,
   loadGame,
-  startNewGame,
-  cDealerDamage
+  startNewGame
 } from './script.js';
+import { cDealerDamage } from './game/combat.js';
 import { addDiscoveredLocation } from './game/ui.js';
 import {
   stageData,

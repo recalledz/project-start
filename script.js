@@ -37,7 +37,6 @@ import {
   intelligenceXpMultiplier
 } from './attributes.js';
 import { createOverlay } from './ui/overlay.js';
-import { showRestartScreen } from './ui/restartOverlay.js';
 import { showLoadErrorOverlay } from './ui/loadErrorOverlay.js';
 import { openExplorationOverlay, closeExplorationOverlay, openWorkOverlay, openScheduleOverlay, openPlaceholderOverlay, openResourceOverlay, openBuildOverlay, locationListContainer, explorationListContainer } from "./ui/colonyOverlays.js";
 import { calculateKillXp, XP_EFFICIENCY } from './utils/xp.js';
@@ -76,7 +75,9 @@ import {
   discipleAttackTimers,
   enemyAttackProgress,
   setEnemyAttackProgress,
-  attack
+  attack,
+  cDealerDamage,
+  setPartyDefeatHandler
 } from "./game/combat.js";
 // in-combat UI helpers
 import {
@@ -171,6 +172,9 @@ import {
   ensureDiscipleSkills,
   getTaskSkillProgress
 } from './utils/skills.js';
+
+// expose combat damage handler for enemy AI
+globalThis.cDealerDamage = cDealerDamage;
 
 
 
@@ -2625,28 +2629,6 @@ function renderDealerCard() {
   lucide.createIcons({ icons: lucide.icons });
 }
 
-function animateDiscipleHit(card) {
-  const w = card.wrapperElement;
-  if (!w) return;
-
-  const target = card.cardElement || w;
-  runAnimation(target, "hit-animate");
-}
-
-// Floating text that shows damage taken by a card
-function showDamageFloat(card, amount) {
-  const hp = card.hpDisplay;
-  if (!hp) return;
-  const dmg = document.createElement("div");
-  dmg.classList.add("damage-float");
-  dmg.textContent = `-${amount}`;
-  hp.appendChild(dmg);
-  // ensure the element is removed even if the animationend event doesn't fire
-  dmg.addEventListener("animationend", () => dmg.remove(), {
-    once: true
-  });
-  setTimeout(() => dmg.remove(), 3000);
-}
 
 //=========stage functions===========
 
@@ -3033,71 +3015,6 @@ function onBossDefeat(boss) {
 // enemy scaling moved to enemySpawning.js
 
 // Apply damage from the enemy to the first card in the player's hand
-export function cDealerDamage(damageAmount = null, ability = null, source = "dealer") {
-  const targets = activeDisciples;
-  if (targets.length === 0) {
-    playerStats.hasDied = true;
-    showRestartScreen(returnPartyToSect);
-    return;
-  }
-
-  const {
-    minDamage,
-    maxDamage
-  } = calculateEnemyBasicDamage(
-    stageData.stage,
-    stageData.world
-  );
-  const dDamage =
-  damageAmount ??
-  Math.floor(Math.random() * (maxDamage - minDamage + 1)) + minDamage;
-
-  let finalDamage = dDamage;
-
-  // randomly target one of the available targets
-  const idx = Math.floor(Math.random() * targets.length);
-  const card = targets[idx];
-
-  // subtract **one** hit’s worth
-  card.currentHp = Math.round(Math.max(0, card.currentHp - finalDamage));
-  const targetName = card.name ? card.name : `${card.value}${card.symbol}`;
-  addLog(
-    `${source} hit ${targetName} for ${finalDamage} damage!`,
-    "damage"
-  );
-
-  // update its specific HP display
-  if (card.hpDisplay) {
-    card.hpDisplay.textContent = `HP: ${formatNumber(Math.round(card.currentHp))}/${formatNumber(Math.round(card.maxHp))}`;
-  }
-  if (card.wrapperElement) {
-    animateDiscipleHit(card);
-    // Show actual damage dealt after shield reduction
-    showDamageFloat(card, finalDamage);
-  }
-  updateBloodSplat(card);
-  // if it’s dead, remove it
-  if (card.currentHp === 0) {
-    {
-      activeDisciples.splice(idx, 1);
-      card.incapacitated = true;
-      card.health = 0;
-      card.stamina = 0;
-      sectState.discipleTasks[card.id] = 'Idle';
-      animateDiscipleDeath(card, () => {
-        removeBloodSplat(card);
-        card.wrapperElement?.remove();
-        if (activeDisciples.length === 0) {
-          playerStats.hasDied = true;
-          showRestartScreen(returnPartyToSect);
-        }
-      });
-    }
-  }
-  // Optional ability logic (e.g., healing, fireball
-}
-
-globalThis.cDealerDamage = cDealerDamage;
 
 function dealerDeathAnimation() {
   const dCardWrapper = document.querySelector(".dCardWrapper:last-child");
@@ -3327,26 +3244,6 @@ function drawSpeakerIcon(canvas) {
 
 
 // Visual pulse when a disciple gains health
-function animateDiscipleHeal(card) {
-  const w = card.wrapperElement;
-  runAnimation(w, "heal-animate");
-}
-
-// Brief animation shown when a disciple levels up
-function animateDiscipleLevelUp(card) {
-  const w = card.wrapperElement;
-  runAnimation(w, "levelup-animate");
-}
-
-// Fade out and remove the disciple when its HP reaches zero
-function animateDiscipleDeath(card, callback) {
-  const w = card.wrapperElement;
-  if (!w) {
-    callback?.();
-    return;
-  }
-  runAnimation(w, "card-death", 600).then(() => callback?.());
-}
 
 
 
@@ -3410,6 +3307,8 @@ function returnPartyToSect() {
   renderDiscipleList();
   renderDiscipleDetails();
 }
+
+setPartyDefeatHandler(returnPartyToSect);
 
 
 function showSpeakerQuote(text) {
