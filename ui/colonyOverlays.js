@@ -4,7 +4,7 @@ export let explorationListContainer = null;
 export let startDungeonBtn = null;
 
 import { createOverlay } from './overlay.js';
-import { sectSystem, SECT_SCHEDULE, getCurrentSchedule, renderConstructCards } from '../sect.js';
+import { sectSystem, SECT_SCHEDULE, getCurrentSchedule, renderConstructCards } from '../game/sect.js';
 import { systems, sectState } from '../game/state.js';
 import { createSectDiscipleCard, renderColonyTasks, renderExplorationTab, startExploration, discipleGatherPhase } from '../script.js';
 

@@ -27,8 +27,8 @@ import {
   unlockConstruct,
   renderConstructCards,
   renderHotbar
-} from "./sect.js";
-import { SECT_SCHEDULE, getCurrentSchedule } from "./sect.js";
+} from "./game/sect.js";
+import { SECT_SCHEDULE, getCurrentSchedule } from "./game/sect.js";
 import { formatNumber } from "./utils/numberFormat.js";
 import { runAnimation } from "./utils/animation.js";
 import { initCore, refreshCore } from './core.js';

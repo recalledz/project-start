@@ -1,5 +1,5 @@
 import { Boss } from './boss.js';
-import { unlockConstruct } from './sect.js';
+import { unlockConstruct } from './game/sect.js';
 import {
   spawnBossEvent,
   spawnDealerEvent,

@@ -1,4 +1,4 @@
-import { sectSystem, renderXpBar } from './sect.js';
+import { sectSystem, renderXpBar } from './game/sect.js';
 
 export const coreState = {
   coreLevel: 1,
