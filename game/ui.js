@@ -2,20 +2,29 @@ import { renderDealerLifeBar, renderDealerLifeBarFill } from '../rendering.js';
 import { activeDisciples } from './disciples.js';
 import { renderDiscipleCard } from '../rendering.js';
 import { formatNumber } from '../utils/numberFormat.js';
-import {
-  mainTab,
-  starChartTab,
-  playerStatsTab,
-  worldsTab,
-  playerTab,
-  explorationTab,
-  locationTab,
-  logTab,
-  locationTabButton,
-  explorationTabButton
-} from '../script.js';
+let mainTab;
+let starChartTab;
+let playerStatsTab;
+let worldsTab;
+let playerTab;
+let explorationTab;
+let locationTab;
+let logTab;
+let locationTabButton;
+let explorationTabButton;
 
-export function init() {}
+export function init(elements = {}) {
+  mainTab = elements.mainTab;
+  starChartTab = elements.starChartTab;
+  playerStatsTab = elements.playerStatsTab;
+  worldsTab = elements.worldsTab;
+  playerTab = elements.playerTab;
+  explorationTab = elements.explorationTab;
+  locationTab = elements.locationTab;
+  logTab = elements.logTab;
+  locationTabButton = elements.locationTabButton;
+  explorationTabButton = elements.explorationTabButton;
+}
 
 export const handContainer = document.getElementsByClassName('handContainer')[0];
 export const dealerLifeDisplay =
