@@ -262,8 +262,8 @@ You can adjust button labels, add icons, or tweak layout widths to fit your fina
 │ [Room 1]   [Room 2]   [Room 3]        Room 1 Selected                        │
 │                                                                              │
 │ ┌───────────────────────┐   ┌─────────────────────────┐   ┌─────────────────┐ │
-│ │       Body Figure     │   │     Progress:          │   │ Assigned to     │ │
-│ │   (disciple silhouette │   │   25 000 / 25 000      │   │   Li Xuan       │ │
+│ │     Tadpole Figure    │   │     Progress:          │   │ Assigned to     │ │
+│ │   (tadpole silhouette │   │   25 000 / 25 000      │   │   Li Xuan       │ │
 │ │    with fill overlay) │   │   (fill bar here)      │   │                 │ │
 │ └───────────────────────┘   └─────────────────────────┘   └─────────────────┘ │
 │                                                                              │
@@ -280,7 +280,7 @@ You can adjust button labels, add icons, or tweak layout widths to fit your fina
 
 Top: room‐selector tabs & currently selected label.
 
-Center‐left: disciple “body” silhouette with fill overlay showing cultivation progress.
+Center‐left: disciple “tadpole” silhouette with fill overlay showing metamorphosis progress.
 
 Center‐middle: numeric & bar progress (current/target).
 
@@ -289,4 +289,6 @@ Right: which disciple is assigned.
 Below main: two‐column stats panel (room vs. cultivation).
 
 Footer: method buttons plus a “Path Progress” link to open path menu.
+
+Rooms are unlocked further in the game and can be assigned as they are created. For now no rooms are available to select.
 

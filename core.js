@@ -16,14 +16,13 @@ let mindValEl;
 export function initCore() {
   container = document.getElementById('coreTabContent');
   if (!container) return;
-const bodyPath = `M200 140
-               C185 140, 180 120, 200 120
-               C220 120, 215 140, 200 140
-               M190 140
-               C170 160, 170 190, 185 200
-               C170 210, 170 240, 200 240
-               C230 240, 230 210, 215 200
-               C230 190, 230 160, 210 140
+const bodyPath = `M200 150
+               m -25 0
+               a25 25 0 1 0 50 0
+               a25 25 0 1 0 -50 0
+               m25 20
+               c60 20 90 60 50 110
+               c-30 -40 -70 -70 -100 -80
                Z`;
   container.innerHTML = `
     <div id="voiceLevelDisplay" class="voice-level-display">Voice Level: <span id="voiceLevelValue" class="voice-level-value"></span></div>
