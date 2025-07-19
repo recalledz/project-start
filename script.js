@@ -31,10 +31,7 @@ import { SECT_SCHEDULE, getCurrentSchedule } from "./game/sect.js";
 import { formatNumber } from "./utils/numberFormat.js";
 import { runAnimation } from "./utils/animation.js";
 import { initMetamorphosis, refreshMetamorphosis } from './metamorphosis.js';
-import {
-  attributes,
-  intelligenceXpMultiplier
-} from './attributes.js';
+import { intelligenceXpMultiplier } from './attributes.js';
 import { createOverlay } from './ui/overlay.js';
 import { showLoadErrorOverlay } from './ui/loadErrorOverlay.js';
 import { openExplorationOverlay, closeExplorationOverlay, openWorkOverlay, openScheduleOverlay, openPlaceholderOverlay, openResourceOverlay, openBuildOverlay, closeDungeonOverlay, locationListContainer, explorationListContainer } from "./ui/colonyOverlays.js";
@@ -1473,24 +1470,22 @@ function buildDiscipleStatusView(d) {
       label: 'Strength',
       value: d.strength,
       base: d.baseStrength ?? 1,
-      effect:
-        `Melee Damage ×${(1 + 0.05 * (d.strength - 1)).toFixed(2)}, ` +
-        `+${Math.floor((d.strength - 1) / 2)} Inventory Slots`,
-      desc: 'Improves woodcutting, hunting & mining yield'
+      effect: `Yield ×${(1 + 0.05 * (d.strength - 1)).toFixed(2)}`,
+      desc: 'Boosts woodcutting, hunting & mining yield'
     },
     {
       label: 'Dexterity',
       value: d.dexterity,
       base: d.baseDexterity ?? 1,
-      effect: `Attack Speed ×${(1 + 0.05 * (d.dexterity - 1)).toFixed(2)}`,
-      desc: 'Increases gathering & hunting yield and discovery chance'
+      effect: `Yield ×${(1 + 0.05 * (d.dexterity - 1)).toFixed(2)}`,
+      desc: 'Raises gathering & hunting yield and discovery chance'
     },
     {
       label: 'Intelligence',
       value: d.intelligence,
       base: d.baseIntelligence ?? 1,
       effect:
-        `Construct Potency ×${(1 + 0.03 * (d.intelligence - 1)).toFixed(2)}, ` +
+        `Potency ×${(1 + 0.03 * (d.intelligence - 1)).toFixed(2)}, ` +
         `Learning ×${learning}`,
       desc: 'Improves Chanting and Research'
     },
@@ -1498,11 +1493,8 @@ function buildDiscipleStatusView(d) {
       label: 'Endurance',
       value: d.endurance,
       base: d.baseEndurance ?? 1,
-      effect:
-        `Stamina ×${(1 + 0.05 * (d.endurance - 1)).toFixed(2)}, ` +
-        `Regen ×${(1 + 0.01 * (d.endurance - 1)).toFixed(2)}, ` +
-        `+${10 * (d.endurance - 1)} HP`,
-      desc: 'Speeds building'
+      effect: `Build Speed ×${(1 + 0.05 * (d.endurance - 1)).toFixed(2)}`,
+      desc: 'Speeds building and farming'
     },
     {
       label: 'Charisma',
@@ -1681,9 +1673,7 @@ function buildDiscipleStatsView(d) {
       label: 'Strength',
       value: d.strength,
       base: d.baseStrength ?? 1,
-      effect:
-        `Melee ×${(1 + 0.05 * (d.strength - 1)).toFixed(2)}, ` +
-        `+${Math.floor((d.strength - 1) / 2)} inventory; woodcutting, hunting & mining yield`,
+      effect: `Yield ×${(1 + 0.05 * (d.strength - 1)).toFixed(2)}; woodcutting, hunting & mining`,
       cls: 'strength'
     },
     {
@@ -1691,7 +1681,7 @@ function buildDiscipleStatsView(d) {
       value: d.dexterity,
       base: d.baseDexterity ?? 1,
       effect:
-        `Speed ×${(1 + 0.05 * (d.dexterity - 1)).toFixed(2)}; gathering & hunting yield, discovery chance`,
+        `Yield ×${(1 + 0.05 * (d.dexterity - 1)).toFixed(2)}; gathering & hunting, discovery chance`,
       cls: 'dexterity'
     },
     {
@@ -1706,10 +1696,7 @@ function buildDiscipleStatsView(d) {
       label: 'Endurance',
       value: d.endurance,
       base: d.baseEndurance ?? 1,
-      effect:
-        `Stamina ×${(1 + 0.05 * (d.endurance - 1)).toFixed(2)}, Regen ×${(
-          1 + 0.01 * (d.endurance - 1)
-        ).toFixed(2)}, +${10 * (d.endurance - 1)} HP; building speed`,
+      effect: `Build Speed ×${(1 + 0.05 * (d.endurance - 1)).toFixed(2)}`,
       cls: 'endurance'
     }
   ];
@@ -2904,7 +2891,7 @@ function updatePlayerStats() {
     stats.avgProficiencyLevel = profTotal / count;
   }
 
-  stats.combatSlots = BASE_STATS.combatSlots + attributes.Strength.inventorySlots;
+  stats.combatSlots = BASE_STATS.combatSlots;
   renderPlayerStats(stats);
 }
 
