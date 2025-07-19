@@ -31,7 +31,7 @@ import {
 import { SECT_SCHEDULE, getCurrentSchedule } from "./game/sect.js";
 import { formatNumber } from "./utils/numberFormat.js";
 import { runAnimation } from "./utils/animation.js";
-import { initCore, refreshCore } from './core.js';
+import { initMetamorphosis, refreshMetamorphosis } from './metamorphosis.js';
 import {
   attributes,
   intelligenceXpMultiplier
@@ -447,18 +447,18 @@ let logTabButton;
 export let mainTab;
 export let starChartTab;
 export let playerStatsTab;
-export let coreTab;
+export let metamorphosisTab;
 export let lexiconTab;
 export let sectTab;
 export let explorationTab;
 export let locationTab;
 export let logTab;
 let activeEffectsContainer;
-let playerCoreTabButton;
+let playerMetamorphosisTabButton;
 let playerLexiconTabButton;
 let playerSectTabButton;
 
-let playerCorePanel;
+let playerMetamorphosisPanel;
 let playerLexiconPanel;
 let playerSectPanel;
 let constructLexiconContainer;
@@ -622,7 +622,7 @@ function initTabs() {
   mainTab = document.querySelector('.mainTab');
   starChartTab = document.querySelector('.starChartTab');
   playerStatsTab = document.querySelector('.playerStatsTab');
-  coreTab = document.querySelector('.coreTab');
+  metamorphosisTab = document.querySelector('.metamorphosisTab');
   lexiconTab = document.querySelector('.lexiconTab');
   sectTab = document.querySelector('.sectTab');
   explorationTab = document.querySelector('.explorationTab');
@@ -631,10 +631,10 @@ function initTabs() {
 
   activeEffectsContainer = document.querySelector('.active-effects');
   initTooltip();
-  playerCoreTabButton = document.querySelector('.playerCoreTabButton');
+  playerMetamorphosisTabButton = document.querySelector('.playerMetamorphosisTabButton');
   playerLexiconTabButton = document.querySelector('.playerLexiconTabButton');
   playerSectTabButton = document.querySelector('.playerSectTabButton');
-  playerCorePanel = document.querySelector('.player-core-panel');
+  playerMetamorphosisPanel = document.querySelector('.player-metamorphosis-panel');
   playerLexiconPanel = document.querySelector('.player-lexicon-panel');
   playerSectPanel = document.querySelector('.player-sect-panel');
   constructLexiconContainer = document.getElementById('constructLexicon');
@@ -719,11 +719,11 @@ function initTabs() {
       openPlaceholderOverlay("Cultivation");
     });
 
-  if (playerCoreTabButton)
-    playerCoreTabButton.addEventListener("click", () => {
-      refreshCore();
-      showTab(coreTab);
-      setActiveTabButton(playerCoreTabButton);
+  if (playerMetamorphosisTabButton)
+    playerMetamorphosisTabButton.addEventListener('click', () => {
+      refreshMetamorphosis();
+      showTab(metamorphosisTab);
+      setActiveTabButton(playerMetamorphosisTabButton);
     });
   if (playerLexiconTabButton)
     playerLexiconTabButton.addEventListener("click", () => {
@@ -2130,7 +2130,7 @@ function init() {
     mainTab,
     starChartTab,
     playerStatsTab,
-    coreTab,
+    metamorphosisTab,
     lexiconTab,
     sectTab,
     explorationTab,
@@ -2159,7 +2159,7 @@ function init() {
   updateSectDisplay();
   initVignetteToggles();
   if (window.lucide) lucide.createIcons({ icons: lucide.icons });
-  initCore();
+  initMetamorphosis();
   renderConstructLexicon();
   document.addEventListener('day-passed', () => {
     sectSystem.disciples.forEach(d => {

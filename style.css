@@ -1934,8 +1934,8 @@ body.darkenshift-mode .tabsContainer button.active {
     box-shadow: inset 0 0 4px rgba(197,242,212,0.4);
     color: var(--verdantia-parchment);
 }
-/* player-core-panel modifications */
-.player-core-panel {
+/* player-metamorphosis-panel modifications */
+.player-metamorphosis-panel {
     display: flex;
     flex-direction: row;
     align-items: flex-start;
@@ -1949,7 +1949,7 @@ body.darkenshift-mode .tabsContainer button.active {
     box-shadow: 0 0 10px var(--core-glow);
 }
 
-.core-side-panel {
+.metamorphosis-side-panel {
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -1981,7 +1981,7 @@ body.darkenshift-mode .tabsContainer button.active {
     width: 11px; /* reduced by ~20% */
     height: 11px;
 }
-#coreTabContent {
+#metamorphosisTabContent {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -1990,7 +1990,7 @@ body.darkenshift-mode .tabsContainer button.active {
     position: relative;
     width: 100%;
 }
-#coreTabContent svg {
+#metamorphosisTabContent svg {
     max-width: 360px;
     transform: scale(1.2);
 }
@@ -2049,7 +2049,7 @@ body.darkenshift-mode .tabsContainer button.active {
     height: 100%;
 }
 
-.core-main {
+.metamorphosis-main {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -2144,7 +2144,7 @@ body.darkenshift-mode .tabsContainer button.active {
     margin-bottom: 10px;
 }
 
-#meditateCoreBtn {
+#meditateMetamorphosisBtn {
     padding: 4px 8px;
     border: 2px solid #7fafff;
     background: #1a1f2e;
@@ -2155,7 +2155,7 @@ body.darkenshift-mode .tabsContainer button.active {
     text-shadow: 0 0 4px #000;
     box-shadow: 0 0 8px rgba(127, 175, 255, 0.4);
 }
-#meditateCoreBtn:disabled {
+#meditateMetamorphosisBtn:disabled {
     opacity: 0.5;
 }
 
@@ -2165,7 +2165,7 @@ body.darkenshift-mode .tabsContainer button.active {
     pointer-events: none;
 }
 
-#coreHalo {
+#metamorphosisHalo {
     transition: opacity 0.3s;
     filter: drop-shadow(0 0 6px gold) drop-shadow(0 0 4px cyan);
 }

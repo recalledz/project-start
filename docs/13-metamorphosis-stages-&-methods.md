@@ -4,7 +4,7 @@ Each disciple has tab when viewing metmorphosis tab showing:
 
 # 🐸 coqui metamorphosis: Stages & Growth Methods
 
-Each disciple evolves through frog-like spiritual metamorphosis. Accessible via the core tab (rename to metamorphosis)
+Each disciple evolves through frog-like spiritual metamorphosis. Accessible via the metamorphosis tab.
 
 ## 🐚 metmorphosis Overview (Per Disciple)
 
