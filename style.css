@@ -3478,47 +3478,12 @@ body.darkenshift-mode .tabsContainer button.active {
     overflow-x: auto;
 }
 .sect-disciple-card {
-    position: relative;
-    border: 1px solid #b4b89f;
-    padding: 2px;
-    width: 60px;
-    font-size: 0.55rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
     cursor: pointer;
-    background: rgba(0,0,0,0.5);
-    box-shadow: none;
 }
 .sect-disciple-card:hover {
-    background: #fbf6e0;
     box-shadow: 0 0 8px rgba(0,0,0,0.4);
 }
 .disciple-icon { display: none; }
-.sect-disciple-card .bar {
-    width: 100%;
-    height: 4px;
-    background: #444;
-    border: 1px solid #222;
-    margin-top: 1px;
-    position: relative;
-}
-.sect-disciple-card .bar-fill {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-    width: 0%;
-    background: var(--verdantia-jade);
-}
-.life-bar .bar-label {
-    font-size: 0.55rem;
-}
-
-.sect-disciple-card .disciple-name {
-    font-size: 0.55rem;
-    margin-bottom: 1px;
-}
 
 .disciple-tabs {
     display: flex;
@@ -3732,9 +3697,11 @@ body.darkenshift-mode .tabsContainer button.active {
   color: #000;
   border: 1px solid #7d8b50;
   border-radius: 6px;
-  padding: 2px 4px;
-  font-size: 0.7rem;
-  display: inline-flex;
+  padding: 2px;
+  width: 60px;
+  font-size: 0.55rem;
+  display: flex;
+  flex-direction: column;
   align-items: center;
   position: relative;
   gap: 2px;
@@ -3747,4 +3714,31 @@ body.darkenshift-mode .tabsContainer button.active {
 }
 .disciple-badge.selected {
   box-shadow: 0 0 4px #8fa16c;
+}
+.disciple-badge .bar {
+  width: 100%;
+  height: 4px;
+  background: #444;
+  border: 1px solid #222;
+  margin-top: 1px;
+  position: relative;
+}
+.disciple-badge .bar-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 0%;
+  background: var(--verdantia-jade);
+}
+.disciple-badge .disciple-name {
+  font-size: 0.55rem;
+  margin-bottom: 1px;
+}
+.disciple-badge .disciple-progress {
+  width: 60px;
+  height: 10px;
+}
+.disciple-badge .disciple-progress-label {
+  font-size: 0.55rem;
 }

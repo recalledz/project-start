@@ -278,32 +278,9 @@ function createDiscipleCard(d) {
 }
 
 // Simplified card used in the sect overview list
- export function createSectDiscipleCard(d) {
-  const card = document.createElement('div');
-  card.className = 'sect-disciple-card';
-
-  const nameLabel = document.createElement('div');
-  nameLabel.className = 'bar-label disciple-name';
-  nameLabel.textContent = d.name || `Disciple ${d.id}`;
-  card.appendChild(nameLabel);
-
-  const lifeBar = makeBar(d.health, DISCIPLE_MAX_HEALTH, '#a33');
-  lifeBar.classList.add('life-bar');
-  card.appendChild(lifeBar);
-
-  const wrapper = document.createElement('div');
-  wrapper.id = `disciple-task-${d.id}`;
-  wrapper.className = 'disciple-progress';
-  const fill = document.createElement('div');
-  fill.className = 'disciple-progress-fill';
-  wrapper.appendChild(fill);
-  const label = document.createElement('div');
-  label.className = 'disciple-progress-label';
-  const curTask = d.incapacitated ? 'Resting' : sectState.discipleTasks[d.id] || 'Idle';
-  label.textContent = curTask;
-  wrapper.appendChild(label);
-  card.appendChild(wrapper);
-
+export function createSectDiscipleCard(d) {
+  const card = createDiscipleBadge(d);
+  card.classList.add('sect-disciple-card');
   return card;
 }
 
