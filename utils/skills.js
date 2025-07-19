@@ -1,4 +1,3 @@
-import { ATTRIBUTE_FOR_GROUP } from '../game/constants.js';
 import { sectState } from '../game/state.js';
 import { runAnimation } from './animation.js';
 
@@ -18,22 +17,6 @@ export function ensureDiscipleSkills(id) {
   }
 }
 
-export function awardAttributePoints(d, group) {
-  const attr = ATTRIBUTE_FOR_GROUP[group];
-  const points = 1 + (Math.random() < 0.1 ? 1 : 0);
-  for (let i = 0; i < points; i++) {
-    const targeted = Math.random() < 0.5 && attr;
-    let target = attr;
-    if (!targeted || !attr) {
-      const others = ['strength', 'dexterity', 'endurance', 'intelligence'];
-      if (attr) others.splice(others.indexOf(attr), 1);
-      target = others[Math.floor(Math.random() * others.length)];
-    }
-    d[target] += 1;
-  }
-  if (typeof d.updateCombatStats === 'function') d.updateCombatStats();
-  if (d.cardElement) runAnimation(d.cardElement, 'levelup-animate');
-}
 
 export function taskXpRequired(level) {
   return Math.round(50 * Math.pow(1.2, level));
@@ -62,7 +45,6 @@ export function addSkillXp(d, group, amount) {
   if (newLevel > oldLevel) {
     if (newLevel > d.globalLevel) {
       d.globalLevel = newLevel;
-      awardAttributePoints(d, group);
     }
     if (d.cardElement) runAnimation(d.cardElement, 'levelup-animate');
   }
