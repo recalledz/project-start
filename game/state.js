@@ -6,26 +6,9 @@ export function setCurrentEnemy(val) {
 }
 
 export const stats = {
-  pDamage: 0,
-  pRegen: 0,
-  damageMultiplier: 1,
   combatSlots: 3,
-  attackSpeed: 10000,
-  hpPerKill: 1,
   avgCombatLevel: 0,
-  avgProficiencyLevel: 0,
-  baseCardHpBoost: 0,
-  healOnRedraw: 0,
-  abilityPower: 1,
-  spadeDamageMultiplier: 1,
-  playerShield: 0,
-  abilityCooldownReduction: 0,
-  jokerCooldownReduction: 0,
-  redrawCooldownReduction: 0,
-  hpMultiplier: 1,
-  extraDamageMultiplier: 1,
-  damageBuffMultiplier: 1,
-  damageBuffExpiration: 0
+  avgProficiencyLevel: 0
 };
 stats.combatSlots = stats.combatSlots + attributes.Strength.inventorySlots;
 
