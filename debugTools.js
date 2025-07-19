@@ -54,15 +54,10 @@ export const devTools = {
     const mult = parseFloat(
       document.getElementById('debugDamageMult').value
     );
-    if (!isNaN(mult)) {
-      stats.damageMultiplier = mult;
-      renderPlayerStats(stats);
-    }
-  },
-  addManaRegen: () => {
-    const amt = parseFloat(document.getElementById('debugManaRegen').value) || 0;
-    stats.manaRegen += amt;
-    renderPlayerStats(stats);
+    if (isNaN(mult)) return;
+    activeDisciples.forEach(d => {
+      d.damage = Math.round(d.damage * mult);
+    });
   },
   toggleFastMode: () => {
     setTimeScale(timeScale === 1 ? FAST_MODE_SCALE : 1);

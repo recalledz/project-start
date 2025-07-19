@@ -100,9 +100,7 @@ const nodes = [
   { id: "dex_misc",           x: 0.4025109170305677, y: 0.6742980932895483, label: "DEX Upgrade", type: "dex" },
 
   // int tree
-  { id: "int_joker_slot",     x: 0.6623362445414848, y: 0.8041400890600553, label: "+1 Joker Slot", type: "int" },
-  { id: "int_max_mana",       x: 0.6841703056768559, y: 0.6963052112167529, label: "Unlock Max Mana", type: "int" },
-  { id: "int_mana_regen",     x: 0.6186681222707423, y: 0.7084091260767154, label: "Unlock Mana Regen", type: "int" }
+  { id: "int_joker_slot",     x: 0.6623362445414848, y: 0.8041400890600553, label: "+1 Joker Slot", type: "int" }
 ];
 
 const nodeMap = Object.fromEntries(nodes.map(n => [n.id, n]));
@@ -119,9 +117,7 @@ const nodeMap = Object.fromEntries(nodes.map(n => [n.id, n]));
   ["dex_attack_speed", "dex_misc"],
 
   // int tree
-  ["root", "int_joker_slot"], 
-  ["int_joker_slot", "int_max_mana"], 
-  ["int_max_mana", "int_mana_regen"]
+  ["root", "int_joker_slot"]
 ];
 
  function drawConnections() {

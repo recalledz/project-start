@@ -26,8 +26,6 @@
       <button onclick="devTools.toggleFastMode()">Fast Mode</button>
       <br>
 
-      <label>Mana Regen + <input id="debugManaRegen" type="number" value="0.1" step="0.1" style="width: 50px;"></label>
-      <button onclick="devTools.addManaRegen()">Add</button>
       <br><br>
 
       <button onclick="devTools.spawnBoss()">Spawn Boss</button>
@@ -77,26 +75,12 @@
           <button class="vignette-toggle">Stats</button>
           <div class="vignette-content">
             <div class="statsSidePanel casino-section">
-              <div id="damageDisplay">
-                Damage: 0
-              </div>
               <div id="combatLevelDisplay">
-                Combat Lv: 1
+                Avg Combat Lv: 1
               </div>
               <div id="avgProfDisplay">
                 Avg Skill Lv: 0
               </div>
-              <div id="hpPerKillDisplay">
-                HP per Kill: 1
-              </div>
-              <div id="attackSpeedDisplay">
-                Attack Speed: 10
-              </div>
-              <div id="manaRegenDisplay">
-                Mana Regen: 0/s
-              </div>
-              <div id="dpsDisplay">
-                DPS: 0
               </div>
             </div>
           </div>
@@ -112,12 +96,6 @@
         <div class="buttonsContainer casino-section">
           <div id="playerAttackBar" class="playerAttackBar">
             <div class="playerAttackFill"></div>
-          </div>
-          <div class="manaBar" id="manaBar" style="display:none;">
-            <div class="manaBarInner">
-              <div class="manaFill" id="manaFill"></div>
-              <div class="manaText" id="manaText">0/0</div>
-            </div>
           </div>
           <!--<button id="moveForwardBtn" title="Move Forward">➡️</button>-->
           <div class="canvasButtonsRow">

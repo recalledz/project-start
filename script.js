@@ -154,14 +154,8 @@ import {
 // Available disciples under the player's control
 // Initialized with three disciples ("frogs") per the documentation
 let { disciples } = initializeSect();
-// mapping of card back styles
-const cardBackImages = {
-  "basic-red": "img/basic deck.png"
-};
 // theme state
 let isDarkenshift = false;
-// resources and progress trackers
-let cardPoints = 0;
 
 function makeBar(value, max, color) {
   const bar = document.createElement('div');
@@ -463,11 +457,6 @@ const dom = {
   jokerContainers: document.querySelectorAll(".jokerContainer"),
   combatHotbar: document.getElementById('combatHotbar'),
   combatResources: document.getElementById('combatResources'),
-  manaBar: document.getElementById("manaBar"),
-  manaFill: document.getElementById("manaFill"),
-  manaText: document.getElementById("manaText"),
-  manaRegenDisplay: document.getElementById("manaRegenDisplay"),
-  dpsDisplay: document.getElementById("dpsDisplay")
 };
 //const stageProgressFill = document.getElementById("stageProgressFill");
 //const stageProgressBar = document.getElementById("stageProgressBar");
@@ -2578,37 +2567,8 @@ document.addEventListener("DOMContentLoaded", init);
 
 // life rendering moved to rendering.js
 
-function updateManaBar() {
-  if (!dom.manaBar) return;
-  if (!systems.manaUnlocked) {
-    dom.manaBar.style.display = "none";
-    return;
-  }
-  dom.manaBar.style.display = "flex";
-  const ratio = stats.maxMana > 0 ? stats.mana / stats.maxMana: 0;
-  if (dom.manaFill) dom.manaFill.style.width = `${Math.min(1, ratio) * 100}%`;
-  if (dom.manaText) dom.manaText.textContent = `${Math.floor(stats.mana)}/${Math.floor(stats.maxMana)}`;
-}
-
 //function updateSanityBar() {}
 //function updateInsanityOrb(ratio) {}
-
-function unlockManaSystem() {
-  // prevent duplicate initialization
-  if (systems.manaUnlocked) {
-    updateManaBar();
-    return;
-  }
-
-  systems.manaUnlocked = true;
-  // establish baseline mana values
-  const baseMana = 50;
-  stats.maxMana = baseMana;
-  stats.mana = stats.maxMana;
-  stats.manaRegen = 0.01;
-  updatePlayerStats(stats);
-  updateManaBar();
-}
 
 //stage
 
@@ -2623,29 +2583,14 @@ export function renderStageInfo() {
 }
 
 export function renderPlayerStats(stats) {
-  const damageDisplay = document.getElementById("damageDisplay");
-  const hpPerKillDisplay = document.getElementById("hpPerKillDisplay");
-  const attackSpeedDisplay = document.getElementById("attackSpeedDisplay");
   const combatLevelDisplay = document.getElementById("combatLevelDisplay");
   const avgProfDisplay = document.getElementById("avgProfDisplay");
 
-  damageDisplay.textContent = `Damage: ${formatNumber(Math.floor(stats.pDamage))}`;
-  combatLevelDisplay.textContent = `Combat Lv: ${stats.avgCombatLevel.toFixed(1)}`;
+  if (combatLevelDisplay) {
+    combatLevelDisplay.textContent = `Avg Combat Lv: ${stats.avgCombatLevel.toFixed(1)}`;
+  }
   if (avgProfDisplay) {
     avgProfDisplay.textContent = `Avg Skill Lv: ${stats.avgProficiencyLevel.toFixed(1)}`;
-  }
-  attackSpeedDisplay.textContent = `Attack Speed: ${(stats.attackSpeed / 1000).toFixed(1)}s`;
-  if (dom.manaRegenDisplay) {
-    dom.manaRegenDisplay.textContent = `Mana Regen: ${stats.manaRegen.toFixed(2)}/s`;
-  }
-  if (dom.dpsDisplay) {
-    const dps = stats.pDamage / (stats.attackSpeed / 1000);
-    dom.dpsDisplay.textContent = `DPS: ${dps.toFixed(2)}`;
-  }
-
-  // Update HP per kill display
-  if (hpPerKillDisplay) {
-    hpPerKillDisplay.textContent = `HP per Kill: ${formatNumber(stats.hpPerKill)}`;
   }
 }
 
@@ -2766,7 +2711,7 @@ function renderDealerCard() {
   lucide.createIcons({ icons: lucide.icons });
 }
 
-function animateCardHit(card) {
+function animateDiscipleHit(card) {
   const w = card.wrapperElement;
   if (!w) return;
 
@@ -2931,7 +2876,6 @@ export function nextStage() {
   checkSpeakerEncounter();
   inCombat = false;
   setCurrentEnemy(null);
-  redrawAllowed = false;
   if (dom.nextStageArea) dom.nextStageArea.classList.remove('glow-notify');
   if (isBossStage) {
     respawnDealerStage();
@@ -2961,7 +2905,6 @@ function nextWorld() {
   renderStageInfo();
   inCombat = false;
   setCurrentEnemy(null);
-  redrawAllowed = false;
   if (dom.nextStageArea) dom.nextStageArea.classList.remove('glow-notify');
   respawnDealerStage();
 }
@@ -2986,7 +2929,6 @@ function goToWorld(id) {
   renderStageInfo();
   inCombat = false;
   setCurrentEnemy(null);
-  redrawAllowed = false;
   if (dom.nextStageArea) dom.nextStageArea.classList.remove('glow-notify');
   renderWorldsMenu();
   updateWorldTabNotification();
@@ -3197,11 +3139,6 @@ export function cDealerDamage(damageAmount = null, ability = null, source = "dea
   Math.floor(Math.random() * (maxDamage - minDamage + 1)) + minDamage;
 
   let finalDamage = dDamage;
-  if (stats.playerShield > 0) {
-    const absorbed = Math.min(stats.playerShield, finalDamage);
-    stats.playerShield -= absorbed;
-    finalDamage -= absorbed;
-  }
 
   // randomly target one of the available targets
   const idx = Math.floor(Math.random() * targets.length);
@@ -3220,7 +3157,7 @@ export function cDealerDamage(damageAmount = null, ability = null, source = "dea
     card.hpDisplay.textContent = `HP: ${formatNumber(Math.round(card.currentHp))}/${formatNumber(Math.round(card.maxHp))}`;
   }
   if (card.wrapperElement) {
-    animateCardHit(card);
+    animateDiscipleHit(card);
     // Show actual damage dealt after shield reduction
     showDamageFloat(card, finalDamage);
   }
@@ -3233,7 +3170,7 @@ export function cDealerDamage(damageAmount = null, ability = null, source = "dea
       card.health = 0;
       card.stamina = 0;
       sectState.discipleTasks[card.id] = 'Idle';
-      animateCardDeath(card, () => {
+      animateDiscipleDeath(card, () => {
         removeBloodSplat(card);
         card.wrapperElement?.remove();
         if (activeDisciples.length === 0) {
@@ -3284,16 +3221,6 @@ function combatXp(xpAmount) {
   updateHandDisplay();
 }
 
-// Update the draw button depending on party size
-function updateDrawButton() {
-  const drawBtn = document.getElementById('clickalipse');
-  if (!drawBtn) return;
-  drawBtn.disabled = false;
-  drawBtn.style.background = 'green';
-}
-
-
-
 // Refresh the cards currently shown in the player's hand
 function updateHandDisplay() {
   activeDisciples.forEach(d => {
@@ -3338,8 +3265,6 @@ let gamePaused = false;
 let campOverlayOpen = false;
 let campOverlay = null; // overlay instance
 let inCombat = false;
-let redrawAllowed = false;
-let redrawCost = 10;
 //let stageProgressing = false;
 //let stageProgressInterval = null;
 //let progressButtonActive = false;
@@ -3366,13 +3291,11 @@ function rarityClass(rarity) {
 function openCamp(onCloseCallback = null) {
   if (campOverlayOpen) return;
   campOverlayOpen = true;
-  redrawAllowed = true;
   gamePaused = true;
   hidePlayerAttackBar(playerAttackFill);
   campOverlay = createOverlay({ className: 'camp-overlay' });
   campOverlay.onClose(() => {
     campOverlayOpen = false;
-    redrawAllowed = false;
     gamePaused = false;
     onCloseCallback?.();
   });
@@ -3399,9 +3322,9 @@ function openCamp(onCloseCallback = null) {
   const statsRow = document.createElement('div');
   statsRow.classList.add('overlay-stats');
   statsRow.innerHTML = `
-    <div>Damage: ${formatNumber(Math.floor(stats.pDamage))}</div>
-    <div>Attack: ${(stats.attackSpeed / 1000).toFixed(1)}s</div>
-    <div>HP/kill: ${stats.hpPerKill}</div>`;
+    <div>Avg Combat Lv: ${stats.avgCombatLevel.toFixed(1)}</div>
+    <div>Avg Skill Lv: ${stats.avgProficiencyLevel.toFixed(1)}</div>
+  `;
   box.appendChild(statsRow);
 
 
@@ -3492,20 +3415,20 @@ function drawSpeakerIcon(canvas) {
 
 
 
-// Visual pulse when a card gains health
-function animateCardHeal(card) {
+// Visual pulse when a disciple gains health
+function animateDiscipleHeal(card) {
   const w = card.wrapperElement;
   runAnimation(w, "heal-animate");
 }
 
-// Brief animation shown when a card levels up
-function animateCardLevelUp(card) {
+// Brief animation shown when a disciple levels up
+function animateDiscipleLevelUp(card) {
   const w = card.wrapperElement;
   runAnimation(w, "levelup-animate");
 }
 
-// Fade out and remove the card when its HP reaches zero
-function animateCardDeath(card, callback) {
+// Fade out and remove the disciple when its HP reaches zero
+function animateDiscipleDeath(card, callback) {
   const w = card.wrapperElement;
   if (!w) {
     callback?.();
@@ -3613,39 +3536,22 @@ location.reload();
 
 
 
-// Recalculate combat stats based on cards currently drawn
+// Recalculate combat stats based on active disciples
 function updatePlayerStats() {
-  // Reset base stats
-  stats.pDamage = 0;
-  stats.damageMultiplier = stats.extraDamageMultiplier;
-  stats.pRegen = 0;
   stats.avgCombatLevel = 0;
   stats.avgProficiencyLevel = 0;
-  stats.attackSpeed = 0;
 
-  if (stats.damageBuffExpiration && Date.now() > stats.damageBuffExpiration) {
-    stats.damageBuffMultiplier = 1;
-  }
-
-
-
-  // Calculate average proficiency level of disciples
-  if (sectSystem && Array.isArray(sectSystem.disciples)) {
-    let total = 0;
+  if (sectSystem && Array.isArray(sectSystem.disciples) && sectSystem.disciples.length > 0) {
+    let combatTotal = 0;
+    let profTotal = 0;
     sectSystem.disciples.forEach(d => {
-      total += d.globalLevel || 0;
+      combatTotal += d.combatLevel || 0;
+      profTotal += d.globalLevel || 0;
     });
-    if (sectSystem.disciples.length > 0) {
-      stats.avgProficiencyLevel = total / sectSystem.disciples.length;
-    }
+    const count = sectSystem.disciples.length;
+    stats.avgCombatLevel = combatTotal / count;
+    stats.avgProficiencyLevel = profTotal / count;
   }
-
-  stats.pDamage *=
-    stats.damageMultiplier *
-    stats.damageBuffMultiplier *
-    attributes.Strength.meleeDamageMultiplier;
-
-  stats.attackSpeed = BASE_STATS.attackSpeed;
 
   stats.combatSlots = BASE_STATS.combatSlots + attributes.Strength.inventorySlots;
   renderPlayerStats(stats);
@@ -3659,8 +3565,6 @@ if (typeof localStorage === "undefined") return;
   const state = {
     stats,
     stageData,
-    cardPoints,
-    redrawCost,
     playerStats,
     worldProgress,
     lifeCore,
@@ -3668,7 +3572,6 @@ if (typeof localStorage === "undefined") return;
     sectState,
     sectTabUnlocked,
     systems: {
-      manaUnlocked: systems.manaUnlocked,
       buildingUnlocked: systems.buildingUnlocked,
       researchUnlocked: systems.researchUnlocked,
       chantingHallUnlocked: systems.chantingHallUnlocked,
@@ -3694,13 +3597,9 @@ if (!json) return;
 try {
 const state = JSON.parse(json);
   // legacy cash/chip values are ignored
-  cardPoints = state.cardPoints || 0;
-  redrawCost = state.redrawCost || 10;
   Object.assign(stats, state.stats || {});
   if (state.systems) {
     Object.assign(systems, state.systems);
-  } else {
-    systems.manaUnlocked = (state.stats && state.stats.maxMana > 0);
   }
   Object.assign(stageData, state.stageData || {});
 Object.assign(playerStats, state.playerStats || {});
@@ -3784,8 +3683,6 @@ updatePlayerStats(stats);
   );
   if (dom.worldProgressPerSecDisplay)
     dom.worldProgressPerSecDisplay.textContent = "Avg World Progress/sec: 0%";
-
-  updateManaBar();
   applyWorldTheme();
 
   updateWorldTabNotification();
@@ -3857,7 +3754,6 @@ if (currentEnemy) {
 }
 
 
-  updateDrawButton();
   updatePlayerStats(stats);
   worldProgressTimer += deltaTime;
   if (worldProgressTimer >= 1000) {
@@ -3873,13 +3769,7 @@ if (currentEnemy) {
     attack(deltaTime);
   }
 
-  if (systems.manaUnlocked) {
-  stats.mana = Math.min(
-  stats.maxMana,
-  stats.mana + (stats.manaRegen * deltaTime) / 1000
-);
- updateManaBar();
-}
+
 
   tickSectSystem(deltaTime);
   tickSect(deltaTime);
