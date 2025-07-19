@@ -38,7 +38,7 @@ import {
 } from './attributes.js';
 import { createOverlay } from './ui/overlay.js';
 import { showLoadErrorOverlay } from './ui/loadErrorOverlay.js';
-import { openExplorationOverlay, closeExplorationOverlay, openWorkOverlay, openScheduleOverlay, openPlaceholderOverlay, openResourceOverlay, openBuildOverlay, locationListContainer, explorationListContainer } from "./ui/colonyOverlays.js";
+import { openExplorationOverlay, closeExplorationOverlay, openWorkOverlay, openScheduleOverlay, openPlaceholderOverlay, openResourceOverlay, openBuildOverlay, closeDungeonOverlay, locationListContainer, explorationListContainer } from "./ui/colonyOverlays.js";
 import { createDiscipleBadge } from "./game/badges.js";
 import { calculateKillXp, XP_EFFICIENCY } from './utils/xp.js';
 import { initTooltip } from './game/tooltip.js';
@@ -464,16 +464,12 @@ const saveInterval = setInterval(saveGame, 30000);
 
 let playerStatsTabButton;
 let worldSubTabButton;
-let cardSubTabButton;
-let playerTabButton;
 export let explorationTabButton;
 export let locationTabButton;
 let logTabButton;
 export let mainTab;
-export let cardSubTab;
 export let starChartTab;
 export let playerStatsTab;
-export let worldsTab;
 export let coreTab;
 export let lexiconTab;
 export let sectTab;
@@ -536,13 +532,6 @@ function setupTabHandlers() {
         renderGlobalStats();
         showTab(playerStatsTab);
         setActiveTabButton(playerStatsTabButton);
-      }
-    },
-    {
-      buttonSelector: '.playerTabButton',
-      onClick: () => {
-        showTab(mainTab);
-        setActiveTabButton(playerTabButton);
       }
     },
     {
@@ -650,17 +639,12 @@ function initTabs() {
   if (typeof document === 'undefined') return;
 
   playerStatsTabButton = document.querySelector('.playerStatsTabButton');
-  cardSubTabButton = document.querySelector('.cardSubTabButton');
-  worldSubTabButton = document.querySelector('.worldSubTabButton');
-  playerTabButton = document.querySelector('.playerTabButton');
   explorationTabButton = document.querySelector('.explorationTabButton');
   locationTabButton = document.querySelector('.locationTabButton');
   logTabButton = document.querySelector('.logTabButton');
   mainTab = document.querySelector('.mainTab');
-  cardSubTab = document.querySelector('.cardSubTab');
   starChartTab = document.querySelector('.starChartTab');
   playerStatsTab = document.querySelector('.playerStatsTab');
-  worldsTab = document.querySelector('.worldsTab');
   coreTab = document.querySelector('.coreTab');
   lexiconTab = document.querySelector('.lexiconTab');
   sectTab = document.querySelector('.sectTab');
@@ -718,23 +702,7 @@ function initTabs() {
   if (colonyResearchTabButton) colonyResearchTabButton.addEventListener('click', () => showColonyTab('research'));
 
 
-  if (worldSubTabButton) {
-    worldSubTabButton.addEventListener("click", () => {
-      renderWorldsMenu();
-      if (cardSubTab) cardSubTab.style.display = "none";
-      if (worldsTab) worldsTab.style.display = "";
-      worldSubTabButton.classList.add("active");
-      if (cardSubTabButton) cardSubTabButton.classList.remove("active");
-    });
-  }
-  if (cardSubTabButton) {
-    cardSubTabButton.addEventListener("click", () => {
-      if (worldsTab) worldsTab.style.display = "none";
-      if (cardSubTab) cardSubTab.style.display = "";
-      cardSubTabButton.classList.add("active");
-      if (worldSubTabButton) worldSubTabButton.classList.remove("active");
-    });
-  }
+
 
 
   if (locationsPanelBtn)
@@ -2114,7 +2082,7 @@ function buildDiscipleSkillsList(d) {
   });
 }
 
- export function startExploration() {
+export function startExploration() {
   if (!explorationListContainer) return;
   explorationParty.clear();
   explorationListContainer
@@ -2132,9 +2100,25 @@ function buildDiscipleSkillsList(d) {
     });
     closeExplorationOverlay();
     showTab(mainTab);
-    setActiveTabButton(playerTabButton);
     respawnDealerStage();
   }
+}
+
+export function startWorldCombat(worldId, party) {
+  if (!Array.isArray(party) || party.length === 0) return;
+  goToWorld(worldId);
+  clearActiveDisciples();
+  party.forEach(id => {
+    const d = sectSystem.disciples.find(x => x.id === id);
+    if (d) {
+      d.currentHp = d.maxHp;
+      selectDisciple(d);
+    }
+  });
+  closeDungeonOverlay?.();
+  closeExplorationOverlay?.();
+  showTab(mainTab);
+  respawnDealerStage();
 }
 
  function triggerOrbFlash() {
@@ -2157,7 +2141,6 @@ function init() {
     mainTab,
     starChartTab,
     playerStatsTab,
-    worldsTab,
     coreTab,
     lexiconTab,
     sectTab,
@@ -2476,7 +2459,7 @@ function updateWorldProgressUI(id) {
   }
 }
 
-function renderWorldsMenu() {
+export function renderWorldsMenu() {
   const container = document.querySelector(".worldsContainer");
   if (!container) return;
   container.innerHTML = "";
@@ -2534,7 +2517,6 @@ function renderWorldsMenu() {
 
 // Highlight the Worlds tab when rewards can be claimed or a new world is unlocked
 function updateWorldTabNotification() {
-  if (!worldSubTabButton) return;
   let highestUnlocked = 0;
   let rewardAvailable = false;
   Object.entries(worldProgress).forEach(([id, data]) => {
@@ -2544,7 +2526,9 @@ function updateWorldTabNotification() {
   });
   const newWorldAvailable = highestUnlocked > stageData.world;
   const shouldGlow = rewardAvailable || newWorldAvailable;
-  worldSubTabButton.classList.toggle("glow-notify", shouldGlow);
+  if (worldSubTabButton) {
+    worldSubTabButton.classList.toggle("glow-notify", shouldGlow);
+  }
 }
 
 // Show cards eligible for job assignment in the Deck tab
@@ -2746,9 +2730,7 @@ function onSpeakerDefeat() {
     showSpeakerQuote("Words don’t just describe. They make.");
   } else if (idx === 3) {
     showSpeakerQuote("The soul is the only prison you’ve never tried to break.");
-    if (playerTabButton) playerTabButton.style.display = "inline-block";
     showTab(mainTab);
-    setActiveTabButton(playerTabButton);
   }
   dealerDeathAnimation();
   dealerBarDeathAnimation(() => {

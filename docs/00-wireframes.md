@@ -217,6 +217,9 @@ Here’s the updated **Disciple Overlay UI wireframe** with the added `Cultivati
 │ └───────────────────────────────┘  │ [ Send ▶ ]  [ Back ]       │ │
 │                                    └────────────────────────────┘ │
 └───────────────────────────────────────────────────────────────────┘
+- Selecting the new *Exoteric Dungeon* entry opens a world screen displaying
+  progress bars for each unlocked world. From there you choose which disciples
+  to send and begin combat.
 
 
 # Woodcutting Locations Tab

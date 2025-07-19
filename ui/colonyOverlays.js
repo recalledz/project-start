@@ -5,8 +5,8 @@ export let startDungeonBtn = null;
 
 import { createOverlay } from './overlay.js';
 import { sectSystem, SECT_SCHEDULE, getCurrentSchedule, renderConstructCards } from '../game/sect.js';
-import { systems, sectState } from '../game/state.js';
-import { createSectDiscipleCard, renderColonyTasks, renderExplorationTab, startExploration, discipleGatherPhase } from '../script.js';
+import { systems, sectState, worldProgress } from '../game/state.js';
+import { createSectDiscipleCard, renderColonyTasks, renderExplorationTab, startExploration, startWorldCombat, discipleGatherPhase } from '../script.js';
 
 let explorationOverlay = null;
 let explorationOverlayActiveTab = 'explore';
@@ -64,6 +64,11 @@ export function openExplorationOverlay() {
   // exploration tab elements
   locationListContainer = document.createElement('div');
   locationListContainer.className = 'location-list casino-section';
+  const exoRow = document.createElement('div');
+  exoRow.className = 'location-entry';
+  exoRow.textContent = 'Exoteric Dungeon';
+  exoRow.addEventListener('click', openDungeonOverlay);
+  locationListContainer.appendChild(exoRow);
   explorationListContainer = document.createElement('div');
   explorationListContainer.className = 'exploration-list casino-section';
   startDungeonBtn = document.createElement('button');
@@ -233,4 +238,64 @@ export function openResourceOverlay() {
 
 export function openBuildOverlay() {
   openPlaceholderOverlay('Build');
+}
+
+let dungeonOverlay = null;
+export function closeDungeonOverlay() {
+  if (dungeonOverlay) dungeonOverlay.close();
+}
+
+export function openDungeonOverlay() {
+  if (dungeonOverlay) return;
+  dungeonOverlay = createOverlay({ className: 'dungeon-overlay' });
+  dungeonOverlay.onClose(() => { dungeonOverlay = null; });
+  const { box } = dungeonOverlay;
+
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 'close-btn';
+  closeBtn.innerHTML = '&times;';
+  closeBtn.addEventListener('click', dungeonOverlay.close);
+  box.appendChild(closeBtn);
+
+  const partyList = document.createElement('div');
+  partyList.className = 'exploration-list casino-section';
+  box.appendChild(partyList);
+
+  const worldsContainer = document.createElement('div');
+  worldsContainer.className = 'worldsContainer casino-section';
+  box.appendChild(worldsContainer);
+
+  sectSystem.disciples.forEach(d => {
+    const row = document.createElement('label');
+    row.className = 'exploration-entry';
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.value = d.id;
+    const badge = createSectDiscipleCard(d);
+    row.appendChild(cb);
+    row.appendChild(badge);
+    partyList.appendChild(row);
+  });
+
+  Object.entries(worldProgress).forEach(([id, data]) => {
+    if (!data.unlocked) return;
+    const entry = document.createElement('div');
+    entry.className = 'world-entry';
+    entry.innerHTML = `<div>World ${id} (Lv ${data.level})</div>`;
+    const progress = document.createElement('div');
+    progress.className = 'world-progress';
+    const fill = document.createElement('div');
+    fill.className = 'world-progress-fill';
+    fill.style.width = `${Math.min(100, (data.progress / data.progressTarget) * 100)}%`;
+    progress.appendChild(fill);
+    entry.appendChild(progress);
+    const btn = document.createElement('button');
+    btn.textContent = 'Enter';
+    btn.addEventListener('click', () => {
+      const ids = Array.from(partyList.querySelectorAll('input:checked')).map(n => parseInt(n.value));
+      startWorldCombat(parseInt(id), ids);
+    });
+    entry.appendChild(btn);
+    worldsContainer.appendChild(entry);
+  });
 }
