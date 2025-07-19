@@ -294,45 +294,6 @@ body.darkenshift-mode .tabsContainer button.active {
     grid-area: jokers;
 }
 
-.manaBar {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 30px;
-    width: 50%;
-    margin: 0 auto;
-}
-
-.manaBarInner {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.8);
-    border: 1px solid var(--verdantia-highlight);
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: inset 0 0 6px var(--verdantia-highlight);
-}
-
-.manaFill {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-    width: 0%;
-    background: var(--verdantia-highlight);
-    transition: width 0.3s;
-}
-
-.manaText {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: #fff;
-    font-size: 0.7rem;
-    white-space: nowrap;
-}
 
 /*.insanity-orb {
     position: fixed;
@@ -2939,10 +2900,6 @@ body.darkenshift-mode .tabsContainer button.active {
     width: 100%;
 }
 
-/* Sect resource panels */
-    margin-top: 8px;
-    margin-bottom: 4px;
-}
 
 .secondary-resources {
     display: flex;

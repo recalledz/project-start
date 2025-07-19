@@ -59,11 +59,6 @@ export const devTools = {
       d.damage = Math.round(d.damage * mult);
     });
   },
-  addManaRegen: () => {
-    const amt = parseFloat(document.getElementById('debugManaRegen').value) || 0;
-    stats.manaRegen += amt;
-    renderPlayerStats(stats);
-  },
   toggleFastMode: () => {
     setTimeScale(timeScale === 1 ? FAST_MODE_SCALE : 1);
   },

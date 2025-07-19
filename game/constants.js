@@ -2,9 +2,6 @@
 
 export const BASE_STATS = {
   combatSlots: 3,
-  maxMana: 0,
-  mana: 0,
-  manaRegen: 0,
   avgCombatLevel: 0,
   avgProficiencyLevel: 0
 };

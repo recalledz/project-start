@@ -4,7 +4,6 @@ export const HealingJoker = {
   isJoker: true,
   abilityType: "heal",
   baseValue: 10,
-  manaCost: 10,
   image: "img/healerJoker.png",
   awardCondition: "defeat_boss_world_1",
 
@@ -23,7 +22,6 @@ export const DamageJoker = {
   isJoker: true,
   abilityType: "damage",
   baseValue: 8,
-  manaCost: 15,
   image: "assets/jokers/damage_joker.png",
   awardCondition: "defeat_boss_world_3",
 
@@ -42,7 +40,6 @@ export const ShieldJoker = {
   isJoker: true,
   abilityType: "shield",
   baseValue: 5,
-  manaCost: 12,
   image: "assets/jokers/shield_joker.png",
   awardCondition: "defeat_boss_world_2",
 
@@ -62,7 +59,6 @@ export const BuffJoker = {
   abilityType: "buff",
   baseValue: 1.2,
   baseDuration: 2,
-  manaCost: 20,
   image: "assets/jokers/buff_joker.png",
   awardCondition: "defeat_boss_world_4",
 

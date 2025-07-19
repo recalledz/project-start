@@ -534,10 +534,6 @@ const dom = {
   jokerContainers: document.querySelectorAll(".jokerContainer"),
   combatHotbar: document.getElementById('combatHotbar'),
   combatResources: document.getElementById('combatResources'),
-  manaBar: document.getElementById("manaBar"),
-  manaFill: document.getElementById("manaFill"),
-  manaText: document.getElementById("manaText"),
-  manaRegenDisplay: document.getElementById("manaRegenDisplay")
 };
 //const stageProgressFill = document.getElementById("stageProgressFill");
 //const stageProgressBar = document.getElementById("stageProgressBar");
@@ -2648,37 +2644,8 @@ document.addEventListener("DOMContentLoaded", init);
 
 // life rendering moved to rendering.js
 
-function updateManaBar() {
-  if (!dom.manaBar) return;
-  if (!systems.manaUnlocked) {
-    dom.manaBar.style.display = "none";
-    return;
-  }
-  dom.manaBar.style.display = "flex";
-  const ratio = stats.maxMana > 0 ? stats.mana / stats.maxMana: 0;
-  if (dom.manaFill) dom.manaFill.style.width = `${Math.min(1, ratio) * 100}%`;
-  if (dom.manaText) dom.manaText.textContent = `${Math.floor(stats.mana)}/${Math.floor(stats.maxMana)}`;
-}
-
 //function updateSanityBar() {}
 //function updateInsanityOrb(ratio) {}
-
-function unlockManaSystem() {
-  // prevent duplicate initialization
-  if (systems.manaUnlocked) {
-    updateManaBar();
-    return;
-  }
-
-  systems.manaUnlocked = true;
-  // establish baseline mana values
-  const baseMana = 50;
-  stats.maxMana = baseMana;
-  stats.mana = stats.maxMana;
-  stats.manaRegen = 0.01;
-  updatePlayerStats(stats);
-  updateManaBar();
-}
 
 //stage
 
@@ -2701,9 +2668,6 @@ export function renderPlayerStats(stats) {
   }
   if (avgProfDisplay) {
     avgProfDisplay.textContent = `Avg Skill Lv: ${stats.avgProficiencyLevel.toFixed(1)}`;
-  }
-  if (dom.manaRegenDisplay) {
-    dom.manaRegenDisplay.textContent = `Mana Regen: ${stats.manaRegen.toFixed(2)}/s`;
   }
 }
 
@@ -3704,7 +3668,6 @@ if (typeof localStorage === "undefined") return;
     sectState,
     sectTabUnlocked,
     systems: {
-      manaUnlocked: systems.manaUnlocked,
       buildingUnlocked: systems.buildingUnlocked,
       researchUnlocked: systems.researchUnlocked,
       chantingHallUnlocked: systems.chantingHallUnlocked,
@@ -3735,8 +3698,6 @@ const state = JSON.parse(json);
   Object.assign(stats, state.stats || {});
   if (state.systems) {
     Object.assign(systems, state.systems);
-  } else {
-    systems.manaUnlocked = (state.stats && state.stats.maxMana > 0);
   }
   Object.assign(stageData, state.stageData || {});
 Object.assign(playerStats, state.playerStats || {});
@@ -3820,8 +3781,6 @@ updatePlayerStats(stats);
   );
   if (dom.worldProgressPerSecDisplay)
     dom.worldProgressPerSecDisplay.textContent = "Avg World Progress/sec: 0%";
-
-  updateManaBar();
   applyWorldTheme();
 
   updateWorldTabNotification();
@@ -3909,13 +3868,7 @@ if (currentEnemy) {
     attack(deltaTime);
   }
 
-  if (systems.manaUnlocked) {
-  stats.mana = Math.min(
-  stats.maxMana,
-  stats.mana + (stats.manaRegen * deltaTime) / 1000
-);
- updateManaBar();
-}
+
 
   tickSectSystem(deltaTime);
   tickSect(deltaTime);

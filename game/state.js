@@ -7,16 +7,12 @@ export function setCurrentEnemy(val) {
 
 export const stats = {
   combatSlots: 3,
-  maxMana: 0,
-  mana: 0,
-  manaRegen: 0,
   avgCombatLevel: 0,
   avgProficiencyLevel: 0
 };
 stats.combatSlots = stats.combatSlots + attributes.Strength.inventorySlots;
 
 export const systems = {
-  manaUnlocked: false,
   buildingUnlocked: false,
   researchUnlocked: false,
   chantingHallUnlocked: false,
