@@ -82,3 +82,5 @@ export const LOCATION_DEFS = [
   { name: 'Exoteric Dungeon', reqDistance: 100, baseChance: 1.0, x: '60%', y: '25%' },
   { name: 'Ancient Ruins', reqDistance: 800, baseChance: 0.05, x: '80%', y: '10%' }
 ];
+
+export const METAMORPHOSIS_STAGE_REQ = 25000;
