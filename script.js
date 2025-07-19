@@ -39,6 +39,7 @@ import {
 import { createOverlay } from './ui/overlay.js';
 import { showLoadErrorOverlay } from './ui/loadErrorOverlay.js';
 import { openExplorationOverlay, closeExplorationOverlay, openWorkOverlay, openScheduleOverlay, openPlaceholderOverlay, openResourceOverlay, openBuildOverlay, locationListContainer, explorationListContainer } from "./ui/colonyOverlays.js";
+import { createDiscipleBadge } from "./game/badges.js";
 import { calculateKillXp, XP_EFFICIENCY } from './utils/xp.js';
 import { initTooltip } from './game/tooltip.js';
 import {
@@ -2099,12 +2100,19 @@ function buildDiscipleSkillsList(d) {
     cb.type = 'checkbox';
     cb.value = d.id;
     cb.checked = explorationParty.has(d.id);
+    const badge = createDiscipleBadge(d);
+    if (cb.checked) badge.classList.add('selected');
     cb.addEventListener('change', () => {
-      if (cb.checked) explorationParty.add(d.id);
-      else explorationParty.delete(d.id);
+      if (cb.checked) {
+        explorationParty.add(d.id);
+        badge.classList.add('selected');
+      } else {
+        explorationParty.delete(d.id);
+        badge.classList.remove('selected');
+      }
     });
     row.appendChild(cb);
-    row.appendChild(createDiscipleCard(d));
+    row.appendChild(badge);
     explorationListContainer.appendChild(row);
   });
 }

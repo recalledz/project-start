@@ -80,6 +80,7 @@ Water Orb widget showing current Water per second.
 Footer
 
 “Gate” button to open the full map/exploration/tasks overlay.
+* Exploration disciple selection now uses bamboo-colored badges with a small mood icon.
 
 #dicsiple overlay card on pressing disciple
 
