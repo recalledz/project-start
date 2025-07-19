@@ -2601,10 +2601,6 @@ function init() {
       renderDiscipleDetails();
     }
   });
-  window.addEventListener('core-mind-upgrade', () => {
-    stats.maxMana += 10;
-    updateManaBar();
-  });
   showColonyTab('resources');
   updatePlayerStats(stats);
   // Start or resume the game after loading
@@ -3611,7 +3607,6 @@ function respawnPlayer() {
   stats.combatSlots = BASE_STATS.combatSlots + attributes.Strength.inventorySlots;
   // reset resources
 
-  resetCardUpgrades();
   clearActiveDisciples();
   stageData.world = 1;
   stageData.stage = 1;
@@ -3693,8 +3688,7 @@ location.reload();
 function updatePlayerStats() {
   // Reset base stats
   stats.pDamage = 0;
-  stats.damageMultiplier =
-    stats.upgradeDamageMultiplier * stats.extraDamageMultiplier;
+  stats.damageMultiplier = stats.extraDamageMultiplier;
   stats.pRegen = 0;
   stats.avgCombatLevel = 0;
   stats.avgProficiencyLevel = 0;
@@ -3793,7 +3787,7 @@ Object.assign(playerStats, state.playerStats || {});
   }
 
     if (state.sectSystem) {
-      const { upgrades: savedUpgrades, ...restSect } = state.sectSystem;
+      const { upgrades: _unused, ...restSect } = state.sectSystem;
       Object.assign(sectSystem, restSect);
       // ensure orbs exist for older saves
       if (!sectSystem.orbs || !sectSystem.orbs.water) {
@@ -3812,15 +3806,6 @@ Object.assign(playerStats, state.playerStats || {});
         sectSystem.weather.duration = sectSystem.weather.days;
         delete sectSystem.weather.days;
       }
-    if (savedUpgrades) {
-      Object.entries(savedUpgrades).forEach(([name, data]) => {
-        if (sectSystem.upgrades[name]) {
-          Object.assign(sectSystem.upgrades[name], data);
-        } else {
-          sectSystem.upgrades[name] = data;
-        }
-      });
-    }
 
     if (!Array.isArray(sectSystem.savedConstructs)) {
       sectSystem.savedConstructs = ['Murmur'];

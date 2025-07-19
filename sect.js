@@ -6,13 +6,11 @@ import Disciple from './disciple.js';
 import { initializeDisciple } from './utils/discipleInit.js';
 import { createOverlay } from './ui/overlay.js';
 
-// Core state for the Constructs system. Orbs and upgrades from the
-// previous implementation remains intact.
+// Core state for the Constructs system. Orbs from the
+// previous implementation remain intact.
 // Water regeneration constants
-// Water regen now scales with the Cohere upgrade using a saturating
-// logistic curve. This starts near zero and gradually approaches `R_MAX`
-// with diminishing returns as more Cohere levels are purchased. The curve
-// still tapers off as Water accumulates.
+// Water regen follows a saturating logistic curve that gradually
+// approaches `R_MAX` with diminishing returns as Water accumulates.
 const R_MAX = 6;        // cap per-second regen
 const BASE_MIDPOINT = 1000;  // default inflection point
 const K = 150;          // controls steepness of taper
@@ -78,7 +76,6 @@ export const sectSystem = {
   gains: {
     water: 0
   },
-  upgrades: {},
   skills: {
     voice: { xp: 0, level: 0 },
     mind: { xp: 0, level: 0 },
@@ -120,7 +117,7 @@ export function getCurrentSchedule() {
 sectSystem.resources.water = sectSystem.orbs.water;
 
 // Basic construct recipe list. Additional constructs can be appended
-// later through unlocks or upgrades.
+// later through unlocks.
 export const recipes = [
   {
     name: 'Murmur',
@@ -251,23 +248,6 @@ const resourceIcons = {
   waterEssence: 'droplet'
 };
 
-const upgradeDescriptions = {
-  cohere: level => {
-    // Cohere provides diminishing returns that taper off more sharply so
-    // Intone remains relevant even at high levels.
-    const current = (R_MAX * (level / (level + 5))).toFixed(2);
-    const next = (R_MAX * ((level + 1) / (level + 6))).toFixed(2);
-    const inc = (next - current).toFixed(2);
-    return `Improves water regeneration. Next +${inc}/s (now ${current}/s)`;
-  },
-  expandMind: 'Increase max water by 15% each level.',
-  soundExpansion: 'Raises sound capacity; Lv.2 grants an extra slot.',
-  cognitiveLattice: 'Increase caps by +50 sound, +10 thought and +5 structure.',
-  idleChatter: 'Bonus regen from idle disciples.',
-  capacityBoost: 'Adds one memory slot.',
-  clarividence: 'Reveals hidden constructs.',
-  vocalMaturity: 'Grants a burst of voice experience.'
-};
 
 // Effect summary strings used across UI views
 export const constructEffectText = {
@@ -524,7 +504,6 @@ export function initSect() {
   renderPot();
   renderXpBar();
   renderOrbs();
-  renderUpgrades();
   renderConstructCards();
   renderChantDisciples();
   renderHotbar();
@@ -1102,22 +1081,6 @@ function renderResources() {
   window.dispatchEvent(new CustomEvent('resources-changed'));
 }
 
-function getUpgradeCost() {
-  return 0;
-}
-
-function canAfford() {
-  return false;
-}
-
-function updateUpgradeAffordability() {}
-
-function purchaseUpgrade() {}
-
-export function renderUpgrades() {
-  const panelUp = document.getElementById('constructUpgrades');
-  if (panelUp) panelUp.innerHTML = '<em>No upgrades available</em>';
-}
 
 function renderGains() {
   const panel = document.getElementById('constructGains');
@@ -1277,11 +1240,9 @@ export function tickSectSystem(delta) {
   const ins = sectSystem.resources.water;
   const seasonMult = seasons[sectSystem.seasonIndex].multiplier;
   const baseRateRaw = R_MAX / (1 + Math.exp((ins.current - getWaterMidpoint()) / K));
-  const level = 0;
-  const upgradeMult = (level + 1) / (level + 5);
   const idleCount = 0;
   const idleMult = 1 + idleCount * 0.05;
-  const baseTotal = baseRateRaw * upgradeMult * idleMult;
+  const baseTotal = baseRateRaw * 0.2 * idleMult;
   let regen = baseTotal * seasonMult;
   if (sectSystem.weather) regen *= sectSystem.weather.multiplier;
   regen = Math.min(R_MAX, regen) * getIntoneMultiplier();
@@ -1408,8 +1369,6 @@ export function openWaterRegenPopup() {
   const ins = sectSystem.resources.water;
   const season = seasons[sectSystem.seasonIndex];
   const baseRateRaw = R_MAX / (1 + Math.exp((ins.current - getWaterMidpoint()) / K));
-  const level = 0;
-  const upgradeMult = (level + 1) / (level + 5);
   const idleCount = 0;
   const idleMult = 1 + idleCount * 0.05;
   const seasonMult = season.multiplier;
@@ -1422,16 +1381,8 @@ export function openWaterRegenPopup() {
     d => sectState.discipleTasks[d.id] === 'Chant'
   ).length;
 
-  // Compare against the level 0 baseline so the display shows the
-  // actual boost rather than a sub-1 multiplier.
-  const baseMult = 1 / 5; // (level + 1)/(level + 5) when level = 0
-  const cohereContribution = upgradeMult / baseMult;
   const rows = [
     { label: 'Base Rate', value: `${baseRateRaw.toFixed(3)}/s` },
-    {
-      label: `Cohere Lv.${level}`,
-      value: `×${cohereContribution.toFixed(2)}`,
-    },
   ];
   if (idleCount > 0) {
     rows.push({ label: `Idle Disciples (${idleCount})`, value: `×${idleMult.toFixed(2)}` });
