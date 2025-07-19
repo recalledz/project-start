@@ -2251,6 +2251,9 @@ function init() {
   updatePlayerStats(stats);
   // Game starts in sect view; exploration initiates combat
   renderWorldsMenu();
+  showTab(playerTab);
+  setActiveTabButton(playerTabButton);
+  if (playerSectSubTabButton) playerSectSubTabButton.click();
 
   if (dom.nextStageArea) {
     dom.nextStageArea.addEventListener("click", () => {
@@ -2272,6 +2275,9 @@ function init() {
   const buttons = document.querySelector('.buttonsContainer');
   playerAttackFill = renderPlayerAttackBar(buttons);
   hidePlayerAttackBar(playerAttackFill);
+  removeDealerLifeBar();
+  setCurrentEnemy(null);
+  setInCombat(false);
 
   const btn = document.getElementById("debugToggle");
   if (btn) btn.addEventListener("click", toggleDebug);
