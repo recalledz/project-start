@@ -1,3 +1,6 @@
+// Core class representing an individual disciple. Instances of this
+// class are created by systems across the game and store combat and
+// attribute information for a single coquí.
 import { generateDiscipleAttributes } from './discipleAttributes.js';
 import { xpRequirement } from './utils/xp.js';
 import { runAnimation } from './utils/animation.js';

@@ -42,4 +42,6 @@ This is not a standard Wuxia knockoff — **Taino and Caribbean mysticism** blen
 - Disciples battle system with a dynamic simulation loop
 - Branches organized per feature (e.g. `sect-ui`, `resource-loop`, `card-art`)
 - See `docs/module-structure.md` for an overview of the game modules.
+- The `Disciple` class lives in `disciple.js` while `game/disciples.js` tracks
+  which disciples are currently participating in combat.
 
