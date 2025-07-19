@@ -1398,20 +1398,6 @@ function renderColonyResearchPanel() {
     });
     colonyResearchPanel.appendChild(btn);
   }
-  if (!systems.voiceOfThePeople) {
-    const btn = document.createElement('button');
-    btn.textContent = 'Voice of the People (5 RP)';
-    btn.disabled = sectState.researchPoints < 5;
-    btn.addEventListener('click', () => {
-      if (sectState.researchPoints >= 5) {
-        sectState.researchPoints -= 5;
-        systems.voiceOfThePeople = true;
-        addLog('Research complete: Voice of the People', 'good');
-        renderColonyResearchPanel();
-      }
-    });
-    colonyResearchPanel.appendChild(btn);
-  }
   if (!systems.explorationUnlocked) {
     const btn = document.createElement('button');
     btn.textContent = 'Foreseers Research (10 RP)';
@@ -3148,7 +3134,6 @@ if (typeof localStorage === "undefined") return;
       buildingUnlocked: systems.buildingUnlocked,
       researchUnlocked: systems.researchUnlocked,
       chantingHallUnlocked: systems.chantingHallUnlocked,
-      voiceOfThePeople: systems.voiceOfThePeople,
       explorationUnlocked: systems.explorationUnlocked
     }
   };

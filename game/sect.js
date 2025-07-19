@@ -1,6 +1,6 @@
 import addLog from '../log.js';
 import { refreshMetamorphosis } from '../metamorphosis.js';
-import { sectState, systems, currentEnemy } from './state.js';
+import { sectState, currentEnemy } from './state.js';
 import { generateDiscipleAttributes } from '../discipleAttributes.js';
 import Disciple from '../disciple.js';
 import { initializeDisciple } from '../utils/discipleInit.js';
@@ -18,7 +18,7 @@ const BASE_MIDPOINT = 1000;  // default inflection point
 const K = 150;          // controls steepness of taper
 
 function getWaterMidpoint() {
-  return systems.voiceOfThePeople ? 1500 : BASE_MIDPOINT;
+  return BASE_MIDPOINT;
 }
 
 // Seasonal cycle configuration
@@ -77,7 +77,6 @@ export const sectSystem = {
     water: 0
   },
   skills: {
-    voice: { xp: 0, level: 0 },
     mind: { xp: 0, level: 0 },
     invocation: { xp: 0, level: 0 }
   },
@@ -124,7 +123,7 @@ export const recipes = [
     // Increased cost to make early water management more meaningful
     input: { water: 25 },
     output: { sound: 1 },
-    xp: { voice: 1 },
+    xp: {},
     tags: ['single-cast', 'generator'],
     unlocked: true,
     cooldown: 1,
@@ -135,10 +134,10 @@ export const recipes = [
     name: 'Echo of Mind',
     input: { sound: 1, water: 1 },
     output: { thought: 1 },
-    xp: { mind: 0.5, voice: 0.5 },
+    xp: { mind: 0.5 },
     tags: ['single-cast', 'generator', 'duration'],
     unlocked: false,
-    requirements: { voiceLevel: 3, water: 1500 },
+    requirements: { water: 1500 },
     castCost: { sound: 25, water: 500 },
     duration: 5,
     cooldown: 5,
@@ -179,7 +178,7 @@ export const recipes = [
     xp: { invocation: 1 },
     tags: ['single-cast'],
     unlocked: false,
-    requirements: { voiceLevel: 5, mindLevel: 5, water: 2300 },
+    requirements: { mindLevel: 5, water: 2300 },
     castCost: { thought: 10, structure: 10, water: 1000 },
     cooldown: 10,
     potency: 1,
@@ -211,7 +210,7 @@ export const recipes = [
     input: { sound: 100 },
     output: {},
     xp: 0,
-    tags: ['voice'],
+    tags: [],
     unlocked: false,
     requirements: { sound: 100 },
     cooldown: 300
@@ -220,7 +219,7 @@ export const recipes = [
     name: 'Sonic Boom',
     input: {},
     output: {},
-    xp: { voice: 10 },
+    xp: {},
     tags: ['single-cast', 'combat'],
     unlocked: false,
     castCost: { sound: 10 },
@@ -341,7 +340,7 @@ function awardXp(amount, tags) {
   if (sectSystem.memorySlots !== prevSlots) {
     renderConstructCards();
   }
-  window.dispatchEvent(new CustomEvent('voice-xp-changed'));
+  // xp change events removed with voice skill removal
 }
 
 function awardConstructXp(xpObj = {}, mult = 1) {
@@ -502,7 +501,6 @@ export function initSect() {
   panel.querySelector('#performConstruct').addEventListener('click', performConstruct);
   renderResourcesUI();
   renderPot();
-  renderXpBar();
   renderOrbs();
   renderConstructCards();
   renderChantDisciples();
@@ -571,9 +569,6 @@ function renderConstructRequirements() {
   const recipe = recipes.find(r => Object.entries(r.input).every(([k,v]) => counts[k] >= v));
   if (!recipe || !recipe.requirements) return;
   const reqs = [];
-  if (recipe.requirements.voiceLevel) {
-    reqs.push(`Voice Lv.${recipe.requirements.voiceLevel}`);
-  }
   if (recipe.requirements.mindLevel) {
     reqs.push(`Mind Lv.${recipe.requirements.mindLevel}`);
   }
@@ -610,10 +605,6 @@ function performConstruct() {
   renderConstructRequirements();
   if (!recipe) return;
   if (recipe.requirements) {
-    if (recipe.requirements.voiceLevel && sectSystem.skills.voice.level < recipe.requirements.voiceLevel) {
-      addLog(`Requires Voice Lv.${recipe.requirements.voiceLevel}`, 'error');
-      return;
-    }
     if (recipe.requirements.mindLevel && sectSystem.skills.mind.level < recipe.requirements.mindLevel) {
       addLog(`Requires Mind Lv.${recipe.requirements.mindLevel}`, 'error');
       return;
@@ -636,7 +627,6 @@ function performConstruct() {
   awardConstructXp(recipe.xp);
   addConstruct(recipe.name);
   renderResourcesUI();
-  renderXpBar();
   addLog(`${recipe.name} constructed!`, 'info');
 }
 
@@ -884,12 +874,7 @@ export function castConstruct(name, el, powerMult = 1, caster = 'player') {
     addLog('Cannot use this construct in combat', 'error');
     return;
   }
-  const voiceSkill = sectSystem.skills.voice;
   const mindSkill = sectSystem.skills.mind;
-  if (def.requirements && def.requirements.voiceLevel && voiceSkill.level < def.requirements.voiceLevel) {
-    addLog(`Requires Voice Lv.${def.requirements.voiceLevel}`, 'error');
-    return;
-  }
   if (def.requirements && def.requirements.mindLevel && mindSkill.level < def.requirements.mindLevel) {
     addLog(`Requires Mind Lv.${def.requirements.mindLevel}`, 'error');
     return;
@@ -940,11 +925,7 @@ export function castConstruct(name, el, powerMult = 1, caster = 'player') {
   showConstructCloud(name, el);
   const basePot = sectSystem.constructPotency[name] || 1;
   const levelPot = Math.pow(1.05, getConstructLevel(caster, name));
-  let voiceMult = 1;
-  if (caster === 'player' && def.tags && def.tags.includes('generator')) {
-    voiceMult = Math.pow(1.05, sectSystem.skills.voice.level);
-  }
-  const finalMult = powerMult * basePot * levelPot * voiceMult;
+  const finalMult = powerMult * basePot * levelPot;
   if (def.duration) {
     sectSystem.activeBuffs[name] = { time: def.duration, mult: finalMult };
   } else {
@@ -959,7 +940,6 @@ export function castConstruct(name, el, powerMult = 1, caster = 'player') {
     sectSystem.cooldowns[cdKey] = def.cooldown;
   }
   renderResources();
-  renderXpBar();
   renderOrbs();
 }
 
@@ -990,22 +970,6 @@ export function renderHotbar() {
   });
 }
 
-export function renderXpBar() {
-  const barFill = document.querySelector('#voiceSkillPanel .voice-xp-fill');
-  const lvlEl = document.getElementById('voiceLevel');
-  const detailEl = document.getElementById('voiceDetail');
-  if (!barFill || !lvlEl) return;
-  const skill = sectSystem.skills.voice;
-  const prog = getSkillProgress(skill.xp);
-  skill.level = prog.level;
-  barFill.style.width = `${(prog.progress * 100).toFixed(1)}%`;
-  lvlEl.textContent = `Voice Lv.${prog.level}`;
-  if (detailEl) {
-    const bonus = (Math.pow(1.05, skill.level) - 1) * 100;
-    const xpToNext = Math.ceil((1 - prog.progress) * prog.next);
-    detailEl.textContent = `Bonus: +${bonus.toFixed(0)}% generator potency | ${xpToNext} XP to Lv.${skill.level + 1}`;
-  }
-}
 
 function renderOrbs() {
   const fill = document.querySelector('#sectOrbs .sect-orb.water .orb-fill');
@@ -1246,7 +1210,6 @@ export function tickSectSystem(delta) {
   if (
     echo &&
     !echo.unlocked &&
-    sectSystem.skills.voice.level >= 3 &&
     ins.current >= 1500
   ) {
     echo.unlocked = true;
@@ -1294,7 +1257,6 @@ export function tickSectSystem(delta) {
   if (
     mental &&
     !mental.unlocked &&
-    sectSystem.skills.voice.level >= 5 &&
     sectSystem.skills.mind.level >= 5 &&
     ins.current >= 2300
   ) {
@@ -1327,7 +1289,6 @@ export function tickSectSystem(delta) {
     renderSeasonBanner();
     renderResources();
     refreshMetamorphosis();
-    renderXpBar();
   }
 }
 
