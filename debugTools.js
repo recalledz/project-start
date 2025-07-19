@@ -6,13 +6,12 @@ import {
   nextStage,
   respawnDealerStage,
   renderStageInfo,
-  addDiscoveredLocation,
   saveGame,
   loadGame,
   startNewGame,
   cDealerDamage
 } from './script.js';
-import { activeDisciples } from './game/disciples.js';
+import { addDiscoveredLocation } from './game/ui.js';
 import {
   stageData,
   timeScale,

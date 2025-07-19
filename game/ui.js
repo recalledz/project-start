@@ -2,6 +2,18 @@ import { renderDealerLifeBar, renderDealerLifeBarFill } from '../rendering.js';
 import { activeDisciples } from './disciples.js';
 import { renderDiscipleCard } from '../rendering.js';
 import { formatNumber } from '../utils/numberFormat.js';
+import {
+  mainTab,
+  starChartTab,
+  playerStatsTab,
+  worldsTab,
+  playerTab,
+  explorationTab,
+  locationTab,
+  logTab,
+  locationTabButton,
+  explorationTabButton
+} from '../script.js';
 
 export function init() {}
 
@@ -64,4 +76,93 @@ export function renderCombatDisciples() {
     d.attackFill = fill;
     updateDiscipleStatsDisplay(d);
   });
+}
+
+export function makeBar(value, max, color) {
+  const bar = document.createElement('div');
+  bar.className = 'bar';
+  const fill = document.createElement('div');
+  fill.className = 'bar-fill';
+  fill.style.background = color;
+  fill.style.width = `${Math.min(100, (value / max) * 100)}%`;
+  bar.appendChild(fill);
+  return bar;
+}
+
+export function formatTime(seconds) {
+  if (!isFinite(seconds)) return '∞';
+  const s = Math.max(0, Math.round(seconds));
+  const m = Math.floor(s / 60);
+  const sec = s % 60;
+  return m > 0 ? `${m}m ${sec}s` : `${sec}s`;
+}
+
+export function createLabeledBar(icon, value, max, color) {
+  const row = document.createElement('div');
+  row.className = 'disciple-card-row';
+  const ic = document.createElement('span');
+  ic.className = 'disciple-bar-icon';
+  ic.textContent = icon;
+  const text = document.createElement('span');
+  text.className = 'disciple-bar-text';
+  text.textContent = `${Math.round(value)}/${Math.round(max)}`;
+  const bar = makeBar(value, max, color);
+  bar.classList.add('disciple-card-bar');
+  row.appendChild(ic);
+  row.appendChild(text);
+  row.appendChild(bar);
+  return row;
+}
+
+export function setActiveTabButton(btn) {
+  document.querySelectorAll('.tabsContainer button').forEach(b => {
+    b.classList.toggle('active', b === btn);
+  });
+}
+
+export function hideTab() {
+  if (mainTab) mainTab.style.display = 'none';
+  if (starChartTab) starChartTab.style.display = 'none';
+  if (playerStatsTab) playerStatsTab.style.display = 'none';
+  if (worldsTab) worldsTab.style.display = 'none';
+  if (playerTab) playerTab.style.display = 'none';
+  if (explorationTab) explorationTab.style.display = 'none';
+  if (locationTab) locationTab.style.display = 'none';
+  if (logTab) logTab.style.display = 'none';
+}
+
+export function showTab(tab) {
+  hideTab();
+  if (tab) tab.style.display = '';
+}
+
+export function addDiscoveredLocation(name, locationListContainer, LOCATION_DEFS) {
+  if (!LOCATION_DEFS) return;
+  const discoveredLocations = addDiscoveredLocation.discoveredLocations || (addDiscoveredLocation.discoveredLocations = []);
+  if (discoveredLocations.includes(name)) return;
+  discoveredLocations.push(name);
+  if (locationListContainer) {
+    const row = document.createElement('div');
+    row.textContent = name;
+    locationListContainer.appendChild(row);
+  }
+  const map = document.getElementById('colonyMap');
+  const def = LOCATION_DEFS.find(l => l.name === name);
+  if (map && def) {
+    const icon = document.createElement('div');
+    icon.className = 'location-icon';
+    icon.style.left = def.x;
+    icon.style.top = def.y;
+    map.appendChild(icon);
+  }
+  if (locationTabButton && locationTabButton.style.display === 'none') {
+    locationTabButton.style.display = '';
+  }
+  if (
+    explorationTabButton &&
+    name === 'Esoteric Dungeon' &&
+    explorationTabButton.style.display === 'none'
+  ) {
+    explorationTabButton.style.display = '';
+  }
 }
