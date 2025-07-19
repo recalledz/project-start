@@ -7,14 +7,6 @@ export function drawCard(state) {
     renderCard,
     updateDeckDisplay,
     stats,
-    showUpgradePopup,
-    applyCardUpgrade,
-    renderCardUpgrades,
-    purchaseCardUpgrade,
-    renderPurchasedUpgrades,
-    updateActiveEffects,
-    updateAllCardHp,
-    updateHandDisplay,
     pDeck,
     renderDeckTop,
     updatePileCounts
@@ -25,16 +17,6 @@ export function drawCard(state) {
   const card = deck.shift();
 
   if (card.upgradeId) {
-    showUpgradePopup(card.upgradeId);
-    applyCardUpgrade(card.upgradeId, { stats, pDeck, updateAllCardHp });
-    renderCardUpgrades(document.querySelector('.card-upgrade-list'), {
-      stats,
-      onPurchase: purchaseCardUpgrade
-    });
-    renderPurchasedUpgrades();
-    updateActiveEffects();
-    updateAllCardHp();
-    if (typeof updateHandDisplay === 'function') updateHandDisplay();
     return null;
   }
 
