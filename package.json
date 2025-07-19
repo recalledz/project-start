@@ -6,7 +6,7 @@
     "test": "mocha",
     "start": "node script.js",
     "dev": "live-server /storage/emulated/0/Documents/project-start",
-    "build": "parcel build index.html",
+    "build": "parcel build index.html --no-scope-hoist",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "simulate": "node simulate.js",
     "simulate:aggressive": "node simulate.js aggressive",
