@@ -3321,46 +3321,15 @@ let lastFrameTime = performance.now();
 
 // Main animation loop; handles ticking the enemy and player actions
 function gameLoop(currentTime) {
-const rawDelta = currentTime - lastFrameTime;
-lastFrameTime = currentTime;
-const deltaTime = rawDelta * timeScale;
-const startWater = sectSystem.resources.water.current;
+  const rawDelta = currentTime - lastFrameTime;
+  lastFrameTime = currentTime;
+  const deltaTime = rawDelta * timeScale;
+  const startWater = sectSystem.resources.water.current;
 
-if (currentEnemy) {
+  if (currentEnemy) {
     currentEnemy.tick(deltaTime);
-
-    // Enemy may be cleared during tick (on defeat callbacks)
-    if (currentEnemy) {
-        updateDealerLifeBar(currentEnemy);
-
-        if (enemyAttackFill) {
-            const eratio = Math.min(
-                1,
-                currentEnemy.attackTimer / currentEnemy.attackInterval
-            );
-            enemyAttackFill.style.width = `${eratio * 100}%`;
-        }
-
-        // Update cooldown overlays
-        const overlays = document.querySelectorAll(".cooldown-overlay");
-        overlays.forEach((overlay, i) => {
-            const ability = currentEnemy.abilities[i];
-
-            // Defensive check: ensure ability has timer + maxTimer
-            if (
-                ability &&
-                typeof ability.timer === "number" &&
-                typeof ability.maxTimer === "number"
-            ) {
-                const ratio = Math.min(
-                    1,
-                    Math.max(0, ability.timer / ability.maxTimer)
-                );
-                overlay.style.setProperty("--cooldown", ratio);
-            }
-        });
-    }
-}
+    updateDealerLifeBar(currentEnemy);
+  }
 
 
   updatePlayerStats(stats);
