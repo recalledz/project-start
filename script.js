@@ -423,7 +423,6 @@ const dom = {
   worldProgressPerSecDisplay: document.getElementById("worldProgressPerSecDisplay"),
   dCardContainer: document.getElementsByClassName("dCardContainer")[0],
   dealerContainer: document.querySelector('.dealerContainer'),
-  jokerContainers: document.querySelectorAll(".jokerContainer"),
   combatHotbar: document.getElementById('combatHotbar'),
   combatResources: document.getElementById('combatResources'),
 };
