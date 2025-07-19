@@ -8,5 +8,6 @@ The project organizes game logic under the `game/` directory.
 - **game/combat.js** – handles combat timers and damage resolution.
 - **game/debug.js** – wiring for optional debug controls.
 - **game/constants.js** – collection of shared gameplay constants used across systems.
+- **game/tooltip.js** – simple helpers for showing and hiding the UI tooltip.
 
 The top-level `script.js` now merely orchestrates initialization, delegating all logic to the modules above.
