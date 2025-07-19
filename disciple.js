@@ -43,9 +43,11 @@ export default class Disciple {
   }
 
   updateCombatStats() {
-    this.damage = this.combatLevel * 3 * (1 + 0.05 * this.strength);
-    this.attackSpeed = 10000 / (1 + 0.05 * this.dexterity);
-    this.defense = (1 + 0.05 * this.endurance) * this.combatLevel;
+    // Combat stats no longer scale with attributes.
+    // Damage and defense grow purely with combat level as documented.
+    this.damage = this.combatLevel * 3;
+    this.attackSpeed = 10000;
+    this.defense = this.combatLevel;
   }
 
   takeDamage(amount) {

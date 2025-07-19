@@ -1,4 +1,3 @@
-import { attributes } from '../attributes.js';
 import RateTracker from '../utils/rateTracker.js';
 import { BossTemplates } from '../boss.js';
 
@@ -73,7 +72,6 @@ export const stats = {
   avgProficiencyLevel: 0
 
 };
-stats.combatSlots = stats.combatSlots + attributes.Strength.inventorySlots;
 
 export const systems = {
   buildingUnlocked: false,
