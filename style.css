@@ -3944,10 +3944,23 @@ body.darkenshift-mode .tabsContainer button.active {
     box-shadow: 0 0 4px rgba(255, 255, 255, 0.6);
     animation: sectGlow 3s infinite alternate;
 }
+.sect-orb .orb-fill {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 0%;
+    border-radius: inherit;
+}
 .sect-orb.flash {
     animation: sectGlow 3s infinite alternate, sectGlowFlash 0.5s;
 }
-.sect-orb.water { background: rgba(127,217,255,0.6); }
+.sect-orb.water {
+    background: rgba(127,217,255,0.2);
+    border: 1px solid #7fd9ff;
+    color: #7fd9ff;
+}
+.sect-orb.water .orb-fill { background: rgba(127,217,255,0.6); }
 .water-rate {
     position: absolute;
     left: 50%;

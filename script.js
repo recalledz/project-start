@@ -533,7 +533,6 @@ const dCardContainer = document.getElementsByClassName("dCardContainer")[0];
 const dealerContainer = document.querySelector('.dealerContainer');
 const jokerContainers = document.querySelectorAll(".jokerContainer");
 const combatHotbar = document.getElementById('combatHotbar');
-const combatOrbs = document.getElementById('combatOrbs');
 const combatResources = document.getElementById('combatResources');
 const manaBar = document.getElementById("manaBar");
 const manaFill = document.getElementById("manaFill");
@@ -1375,6 +1374,9 @@ function updateSectDisplay() {
     positions.forEach(p => {
       const orb = document.createElement('div');
       orb.className = `sect-orb ${p.cls}`;
+      const fill = document.createElement('div');
+      fill.className = 'orb-fill';
+      orb.appendChild(fill);
       orb.style.left = p.left;
       orb.style.top = p.top;
       if (p.cls === 'water') {
