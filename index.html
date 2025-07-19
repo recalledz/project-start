@@ -42,11 +42,14 @@
     </div>
 
     <!---tabs container--->
-    <div class="tabsContainer">
-      <button class="playerTabButton">real</button>
-      <button class="playerStatsTabButton">stats</button>
-      <button class="logTabButton">log</button>
-    </div>
+      <div class="tabsContainer">
+        <button class="playerTabButton">real</button>
+        <button class="playerStatsTabButton">stats</button>
+        <button class="playerCoreTabButton">core</button>
+        <button class="playerLexiconTabButton">lexicon</button>
+        <button class="playerSectTabButton" style="display:none;">sect</button>
+        <button class="logTabButton">log</button>
+      </div>
 
     <!--------------main tab panel----------------->
     <div class="mainTab">
@@ -135,96 +138,85 @@
       <div id="statsOverviewContainer" class="casino-section"></div>
       <div id="statsEconomyContainer" class="casino-section" style="display:none;"></div>
     </div>
-    <div class="playerTab">
-      <div class="playerMainContainer">
-        <div class="player-header">
-          <div class="player-subtabs">
-            <button class="playerLexiconSubTabButton">Lexicon</button>
-            <button class="playerCoreSubTabButton">Core</button>
-            <button class="playerSectSubTabButton" style="display:none;">Sect</button>
-          </div>
-        </div>
-        <div class="player-core-panel" style="display:none;">
-          <div class="core-side-panel sidePanel">
-            <div class="vignette skills open">
-              <button class="vignette-toggle">Skills</button>
-              <div class="vignette-content">
-                <div id="voiceSkillPanel" class="voice-xp-container">
-                  <i data-lucide="mic" class="voice-icon"></i>
-                  <div class="voice-progress">
-                    <div id="voiceLevel" class="voice-level"></div>
-                    <div class="voice-xp-bar"><div class="voice-xp-fill"></div></div>
-                  </div>
-                  <div id="voiceDetail" class="voice-skill-detail"></div>
-                </div>
+    <div class="coreTab player-core-panel" style="display:none;">
+      <div class="core-side-panel sidePanel">
+        <div class="vignette skills open">
+          <button class="vignette-toggle">Skills</button>
+          <div class="vignette-content">
+            <div id="voiceSkillPanel" class="voice-xp-container">
+              <i data-lucide="mic" class="voice-icon"></i>
+              <div class="voice-progress">
+                <div id="voiceLevel" class="voice-level"></div>
+                <div class="voice-xp-bar"><div class="voice-xp-fill"></div></div>
               </div>
+              <div id="voiceDetail" class="voice-skill-detail"></div>
             </div>
           </div>
-          <div class="core-main">
-            <div id="coreTabContent"></div>
+        </div>
+      </div>
+      <div class="core-main">
+        <div id="coreTabContent"></div>
+      </div>
+    </div>
+    <div class="lexiconTab player-lexicon-panel" style="display:none;">
+      <div id="tagGuide" class="tags-guide"></div>
+      <div id="constructLexicon" class="construct-lexicon built-constructs"></div>
+    </div>
+    <div class="sectTab player-sect-panel" style="display:none;">
+      <div class="colony-main">
+        <div id="colonyMap" class="colony-map">
+          <div class="sect-header">
+            <div id="seasonBanner" class="season-banner"></div>
+            <div id="sectDiscipleList" class="sect-disciple-list"></div>
           </div>
-        </div>
-        <div class="player-lexicon-panel" style="display:none;">
-          <div id="tagGuide" class="tags-guide"></div>
-          <div id="constructLexicon" class="construct-lexicon built-constructs"></div>
-        </div>
-        <div class="player-sect-panel" style="display:none;">
-          <div class="colony-main">
-            <div id="colonyMap" class="colony-map">
-              <div class="sect-header">
-                <div id="seasonBanner" class="season-banner"></div>
-                <div id="sectDiscipleList" class="sect-disciple-list"></div>
+          <div class="colony-tabs">
+            <button id="colonyTasksTabBtn" style="display:none;">👤</button>
+            <button id="colonyInfoTabBtn" style="display:none;">ℹ️</button>
+            <button id="colonyResourcesTabBtn"></button>
+            <button id="colonyBuildTabBtn" style="display:none;">🏠</button>
+            <button id="colonyResearchTabBtn" style="display:none;">🔬</button>
+            <button id="locationsPanelBtn"></button>
+          </div>
+          <div id="sectDisciplesContainer" class="sect-disciples-container">
+            <div class="zone orchard"></div>
+            <div class="zone lumberyard"></div>
+            <div class="zone storage"></div>
+            <div class="zone research"></div>
+            <div class="sect-orbs" id="sectOrbs"></div>
+            <div id="waterRate" class="water-rate"></div>
+            <div id="sectBasket" class="sect-basket"></div>
+            <div id="sectBohio" class="sect-bohio"></div>
+            <div id="fruitPatch" class="fruit-patch">
+              <div id="fruitBar" class="fruit-bar resource-bar">
+                <div class="resource-fill fruit"></div>
               </div>
-              <div class="colony-tabs">
-                <button id="colonyTasksTabBtn" style="display:none;">👤</button>
-                <button id="colonyInfoTabBtn" style="display:none;">ℹ️</button>
-                <button id="colonyResourcesTabBtn"></button>
-                <button id="colonyBuildTabBtn" style="display:none;">🏠</button>
-                <button id="colonyResearchTabBtn" style="display:none;">🔬</button>
-                <button id="locationsPanelBtn"></button>
-              </div>
-              <div id="sectDisciplesContainer" class="sect-disciples-container">
-                <div class="zone orchard"></div>
-                <div class="zone lumberyard"></div>
-                <div class="zone storage"></div>
-                <div class="zone research"></div>
-                <div class="sect-orbs" id="sectOrbs"></div>
-                <div id="waterRate" class="water-rate"></div>
-                <div id="sectBasket" class="sect-basket"></div>
-                <div id="sectBohio" class="sect-bohio"></div>
-                <div id="fruitPatch" class="fruit-patch">
-                  <div id="fruitBar" class="fruit-bar resource-bar">
-                    <div class="resource-fill fruit"></div>
-                  </div>
-                </div>
-                <button id="gateBtn" class="sect-gate">Gate</button>
-              </div>
-                <div id="resourceDisplay" class="sect-resource-display vignette open">
-                  <button class="vignette-toggle"><i data-lucide="chevron-down"></i></button>
-                  <div class="vignette-content">
-                    <div id="sectSummary" class="sect-summary"></div>
-                  </div>
-                </div>
-            <div id="sectNavPanel" class="sect-nav-panel">
-  <button id="sectNavWorkBtn" title="Work"><i data-lucide="hammer"></i><span>Work</span></button>
-  <button id="sectNavResourceBtn" title="Resources"><i data-lucide="utensils"></i><span id="resourceTimer"></span></button>
-  <button id="sectNavBuildBtn" title="Build"><i data-lucide="circle"></i><span>Build</span></button>
-  <button id="sectNavScheduleBtn" title="Schedule"><i data-lucide="clock"></i><span>Sched</span></button>
-  <button id="sectNavChantBtn" title="Chanting"><i data-lucide="mic-2"></i><span>Chant</span></button>
-  <button id="sectNavMapBtn" title="Map"><i data-lucide="map"></i><span>Map</span></button>
-  <button id="sectNavInfluenceBtn" title="Influence"><i data-lucide="users"></i><span>Influence</span></button>
-  <button id="sectNavResearchBtn" title="Research"><i data-lucide="flask-conical"></i><span>Research</span></button>
-  <button id="sectNavCultivationBtn" title="Cultivation"><i data-lucide="sprout"></i><span>Cultivate</span></button>
             </div>
-</div>
-            <div class="colony-side">
-              <div id="colonyTasksPanel" class="colony-panel"></div>
-              <div id="colonyInfoPanel" class="colony-panel"></div>
-              <div id="colonyResourcesPanel" class="colony-panel" style="display:none;"></div>
-              <div id="colonyBuildPanel" class="colony-panel" style="display:none;"></div>
-              <div id="colonyResearchPanel" class="colony-panel" style="display:none;"></div>
+            <button id="gateBtn" class="sect-gate">Gate</button>
+          </div>
+          <div id="resourceDisplay" class="sect-resource-display vignette open">
+            <button class="vignette-toggle"><i data-lucide="chevron-down"></i></button>
+            <div class="vignette-content">
+              <div id="sectSummary" class="sect-summary"></div>
             </div>
           </div>
+          <div id="sectNavPanel" class="sect-nav-panel">
+            <button id="sectNavWorkBtn" title="Work"><i data-lucide="hammer"></i><span>Work</span></button>
+            <button id="sectNavResourceBtn" title="Resources"><i data-lucide="utensils"></i><span id="resourceTimer"></span></button>
+            <button id="sectNavBuildBtn" title="Build"><i data-lucide="circle"></i><span>Build</span></button>
+            <button id="sectNavScheduleBtn" title="Schedule"><i data-lucide="clock"></i><span>Sched</span></button>
+            <button id="sectNavChantBtn" title="Chanting"><i data-lucide="mic-2"></i><span>Chant</span></button>
+            <button id="sectNavMapBtn" title="Map"><i data-lucide="map"></i><span>Map</span></button>
+            <button id="sectNavInfluenceBtn" title="Influence"><i data-lucide="users"></i><span>Influence</span></button>
+            <button id="sectNavResearchBtn" title="Research"><i data-lucide="flask-conical"></i><span>Research</span></button>
+            <button id="sectNavCultivationBtn" title="Cultivation"><i data-lucide="sprout"></i><span>Cultivate</span></button>
+          </div>
+        </div>
+        <div class="colony-side">
+          <div id="colonyTasksPanel" class="colony-panel"></div>
+          <div id="colonyInfoPanel" class="colony-panel"></div>
+          <div id="colonyResourcesPanel" class="colony-panel" style="display:none;"></div>
+          <div id="colonyBuildPanel" class="colony-panel" style="display:none;"></div>
+          <div id="colonyResearchPanel" class="colony-panel" style="display:none;"></div>
         </div>
       </div>
     </div>

@@ -473,17 +473,19 @@ export let cardSubTab;
 export let starChartTab;
 export let playerStatsTab;
 export let worldsTab;
-export let playerTab;
+export let coreTab;
+export let lexiconTab;
+export let sectTab;
 export let explorationTab;
 export let locationTab;
 export let logTab;
 let activeEffectsContainer;
+let playerCoreTabButton;
+let playerLexiconTabButton;
+let playerSectTabButton;
 
-let playerCoreSubTabButton;
 let playerCorePanel;
-let playerLexiconSubTabButton;
 let playerLexiconPanel;
-let playerSectSubTabButton;
 let playerSectPanel;
 let constructLexiconContainer;
 let sectSummaryDisplay;
@@ -538,10 +540,8 @@ function setupTabHandlers() {
     {
       buttonSelector: '.playerTabButton',
       onClick: () => {
-        refreshCore();
-        showTab(playerTab);
+        showTab(mainTab);
         setActiveTabButton(playerTabButton);
-        if (playerCoreSubTabButton) playerCoreSubTabButton.click();
       }
     },
     {
@@ -660,18 +660,20 @@ function initTabs() {
   starChartTab = document.querySelector('.starChartTab');
   playerStatsTab = document.querySelector('.playerStatsTab');
   worldsTab = document.querySelector('.worldsTab');
-  playerTab = document.querySelector('.playerTab');
+  coreTab = document.querySelector('.coreTab');
+  lexiconTab = document.querySelector('.lexiconTab');
+  sectTab = document.querySelector('.sectTab');
   explorationTab = document.querySelector('.explorationTab');
-    locationTab = document.querySelector('.locationTab');
-    logTab = document.querySelector('.logTab');
+  locationTab = document.querySelector('.locationTab');
+  logTab = document.querySelector('.logTab');
 
   activeEffectsContainer = document.querySelector('.active-effects');
   initTooltip();
-  playerCoreSubTabButton = document.querySelector(".playerCoreSubTabButton");
-  playerCorePanel = document.querySelector(".player-core-panel");
-  playerLexiconSubTabButton = document.querySelector('.playerLexiconSubTabButton');
+  playerCoreTabButton = document.querySelector('.playerCoreTabButton');
+  playerLexiconTabButton = document.querySelector('.playerLexiconTabButton');
+  playerSectTabButton = document.querySelector('.playerSectTabButton');
+  playerCorePanel = document.querySelector('.player-core-panel');
   playerLexiconPanel = document.querySelector('.player-lexicon-panel');
-  playerSectSubTabButton = document.querySelector('.playerSectSubTabButton');
   playerSectPanel = document.querySelector('.player-sect-panel');
   constructLexiconContainer = document.getElementById('constructLexicon');
   sectSummaryDisplay = document.getElementById('sectSummary');
@@ -705,7 +707,7 @@ function initTabs() {
   statsEconomyContainer = document.getElementById('statsEconomyContainer');
   if (colonyBuildTabButton) colonyBuildTabButton.style.display = systems.buildingUnlocked ? '' : 'none';
   if (colonyResearchTabButton) colonyResearchTabButton.style.display = systems.researchUnlocked ? '' : 'none';
-  if (playerSectSubTabButton) playerSectSubTabButton.style.display = sectTabUnlocked ? '' : 'none';
+  if (playerSectTabButton) playerSectTabButton.style.display = sectTabUnlocked ? '' : 'none';
   setupTabHandlers();
 
   if (colonyTasksTabButton) colonyTasksTabButton.addEventListener('click', () => showColonyTab('tasks'));
@@ -765,33 +767,29 @@ function initTabs() {
   if (sectNavMapBtn) sectNavMapBtn.addEventListener("click", () => { setActiveNavBtn(sectNavMapBtn); openExplorationOverlay(); });
   if (sectNavInfluenceBtn) sectNavInfluenceBtn.addEventListener("click", () => { setActiveNavBtn(sectNavInfluenceBtn); openPlaceholderOverlay("Influence"); });
   if (sectNavResearchBtn) sectNavResearchBtn.addEventListener("click", () => { setActiveNavBtn(sectNavResearchBtn); openPlaceholderOverlay("Research"); });
-  if (sectNavCultivationBtn) sectNavCultivationBtn.addEventListener("click", () => { setActiveNavBtn(sectNavCultivationBtn); openPlaceholderOverlay("Cultivation"); });  if (playerCoreSubTabButton)
-    playerCoreSubTabButton.addEventListener("click", () => {
-      if (playerCorePanel) playerCorePanel.style.display = "flex";
-      if (playerLexiconPanel) playerLexiconPanel.style.display = 'none';
-      if (playerSectPanel) playerSectPanel.style.display = 'none';
-      playerCoreSubTabButton.classList.add("active");
-      if (playerLexiconSubTabButton) playerLexiconSubTabButton.classList.remove('active');
+  if (sectNavCultivationBtn)
+    sectNavCultivationBtn.addEventListener("click", () => {
+      setActiveNavBtn(sectNavCultivationBtn);
+      openPlaceholderOverlay("Cultivation");
     });
-  if (playerLexiconSubTabButton)
-    playerLexiconSubTabButton.addEventListener('click', () => {
-      if (playerCorePanel) playerCorePanel.style.display = 'none';
-      if (playerLexiconPanel) playerLexiconPanel.style.display = 'flex';
-      if (playerSectPanel) playerSectPanel.style.display = 'none';
-      playerLexiconSubTabButton.classList.add('active');
-      if (playerCoreSubTabButton) playerCoreSubTabButton.classList.remove('active');
-      if (playerSectSubTabButton) playerSectSubTabButton.classList.remove('active');
+
+  if (playerCoreTabButton)
+    playerCoreTabButton.addEventListener("click", () => {
+      refreshCore();
+      showTab(coreTab);
+      setActiveTabButton(playerCoreTabButton);
     });
-  if (playerSectSubTabButton)
-    playerSectSubTabButton.addEventListener('click', () => {
-      if (playerCorePanel) playerCorePanel.style.display = 'none';
-      if (playerLexiconPanel) playerLexiconPanel.style.display = 'none';
-      if (playerSectPanel) playerSectPanel.style.display = 'flex';
+  if (playerLexiconTabButton)
+    playerLexiconTabButton.addEventListener("click", () => {
+      showTab(lexiconTab);
+      setActiveTabButton(playerLexiconTabButton);
+    });
+  if (playerSectTabButton)
+    playerSectTabButton.addEventListener("click", () => {
+      showTab(sectTab);
+      setActiveTabButton(playerSectTabButton);
       startDiscipleMovement();
-      playerSectSubTabButton.classList.add('active');
-      playerSectSubTabButton.classList.remove('glow-notify');
-      if (playerCoreSubTabButton) playerCoreSubTabButton.classList.remove('active');
-      if (playerLexiconSubTabButton) playerLexiconSubTabButton.classList.remove('active');
+      playerSectTabButton.classList.remove('glow-notify');
     });
   if (statsOverviewSubTabButton)
     statsOverviewSubTabButton.addEventListener('click', () => {
@@ -809,9 +807,8 @@ function initTabs() {
       // economy stats removed
     });
 
-  showTab(playerTab); // Start with sect panel visible
-  setActiveTabButton(playerTabButton);
-  if (playerSectSubTabButton) playerSectSubTabButton.click();
+  showTab(sectTab); // Start with sect panel visible
+  setActiveTabButton(playerSectTabButton);
 }
 
 function initPollen() {
@@ -2153,7 +2150,9 @@ function init() {
     starChartTab,
     playerStatsTab,
     worldsTab,
-    playerTab,
+    coreTab,
+    lexiconTab,
+    sectTab,
     explorationTab,
     locationTab,
     logTab,
@@ -2167,7 +2166,7 @@ function init() {
   if (sectSystem.disciples.length === 0) {
     sectSystem.disciples.push(...disciples);
     sectTabUnlocked = true;
-    if (playerSectSubTabButton) playerSectSubTabButton.style.display = '';
+    if (playerSectTabButton) playerSectTabButton.style.display = '';
     updateSectDisplay();
   }
   checkBuildingUnlock();
@@ -2211,11 +2210,11 @@ function init() {
   document.addEventListener('disciple-gained', e => {
     if (!sectTabUnlocked && e.detail.count >= 1) {
       sectTabUnlocked = true;
-      if (playerSectSubTabButton) playerSectSubTabButton.style.display = '';
+      if (playerSectTabButton) playerSectTabButton.style.display = '';
       addLog('A presence stirs. The first disciple has heard the Calling.', 'info');
     }
-    if (playerSectSubTabButton && !playerSectSubTabButton.classList.contains('active')) {
-      playerSectSubTabButton.classList.add('glow-notify');
+    if (playerSectTabButton && !playerSectTabButton.classList.contains('active')) {
+      playerSectTabButton.classList.add('glow-notify');
     }
     updateSectDisplay();
     if (colonyInfoTabButton && colonyInfoTabButton.classList.contains('active')) {
@@ -2227,9 +2226,8 @@ function init() {
   updatePlayerStats(stats);
   // Game starts in sect view; exploration initiates combat
   renderWorldsMenu();
-  showTab(playerTab);
-  setActiveTabButton(playerTabButton);
-  if (playerSectSubTabButton) playerSectSubTabButton.click();
+  showTab(sectTab);
+  setActiveTabButton(playerSectTabButton);
 
   if (dom.nextStageArea) {
     dom.nextStageArea.addEventListener("click", () => {
@@ -2741,7 +2739,7 @@ function onSpeakerDefeat() {
   } else if (idx === 3) {
     showSpeakerQuote("The soul is the only prison you’ve never tried to break.");
     if (playerTabButton) playerTabButton.style.display = "inline-block";
-    showTab(playerTab);
+    showTab(mainTab);
     setActiveTabButton(playerTabButton);
   }
   dealerDeathAnimation();
@@ -3087,9 +3085,8 @@ function returnPartyToSect() {
   removeDealerLifeBar();
   hidePlayerAttackBar(playerAttackFill);
   playerStats.hasDied = false;
-  showTab(playerTab);
-  setActiveTabButton(playerTabButton);
-  if (playerSectSubTabButton) playerSectSubTabButton.click();
+  showTab(sectTab);
+  setActiveTabButton(playerSectTabButton);
   updateSectDisplay();
   renderDiscipleList();
   renderDiscipleDetails();
@@ -3261,7 +3258,7 @@ Object.assign(playerStats, state.playerStats || {});
   if (state.sectTabUnlocked ||
       (sectSystem.disciples && sectSystem.disciples.length > 0)) {
     sectTabUnlocked = true;
-    if (playerSectSubTabButton) playerSectSubTabButton.style.display = '';
+    if (playerSectTabButton) playerSectTabButton.style.display = '';
   }
 
 updatePlayerStats(stats);
