@@ -15,9 +15,6 @@ export const stats = {
   avgCombatLevel: 0,
   avgProficiencyLevel: 0,
   baseCardHpBoost: 0,
-  maxMana: 0,
-  mana: 0,
-  manaRegen: 0,
   healOnRedraw: 0,
   abilityPower: 1,
   spadeDamageMultiplier: 1,
@@ -33,7 +30,6 @@ export const stats = {
 stats.combatSlots = stats.combatSlots + attributes.Strength.inventorySlots;
 
 export const systems = {
-  manaUnlocked: false,
   buildingUnlocked: false,
   researchUnlocked: false,
   chantingHallUnlocked: false,
