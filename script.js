@@ -40,6 +40,7 @@ import {
 import { createOverlay } from './ui/overlay.js';
 import { showRestartScreen } from './ui/restartOverlay.js';
 import { showLoadErrorOverlay } from './ui/loadErrorOverlay.js';
+import { openExplorationOverlay, closeExplorationOverlay, openWorkOverlay, openScheduleOverlay, openPlaceholderOverlay, locationListContainer, explorationListContainer } from "./ui/colonyOverlays.js";
 import { calculateKillXp, XP_EFFICIENCY } from './utils/xp.js';
 import {
   calculateMaxStamina,
@@ -437,7 +438,7 @@ function createDiscipleCard(d) {
 }
 
 // Simplified card used in the sect overview list
-function createSectDiscipleCard(d) {
+ export function createSectDiscipleCard(d) {
   const card = document.createElement('div');
   card.className = 'sect-disciple-card';
 
@@ -699,9 +700,6 @@ let playerTab;
 let explorationTab;
 let locationTab;
 let logTab;
-let locationListContainer;
-let explorationListContainer;
-let startDungeonBtn;
 let purchasedUpgradeList;
 let activeEffectsContainer;
 let tooltip;
@@ -729,13 +727,12 @@ let colonyBuildTabButton;
 let colonyResearchTabButton;
 let locationsPanelBtn;
 let gateBtn;
-let explorationOverlay = null;
 let sectDisciplesContainer;
 let sectDiscipleListContainer;
 let selectedDiscipleId = null;
 let discipleInfoView = 'status';
 const sectDiscipleEls = {};
-const discipleGatherPhase = {};
+export const discipleGatherPhase = {};
 let discipleMoveInterval;
 let sectTabUnlocked = true;
 let statsOverviewSubTabButton;
@@ -948,9 +945,7 @@ function initTabs() {
   explorationTab = document.querySelector('.explorationTab');
   locationTab = document.querySelector('.locationTab');
   logTab = document.querySelector('.logTab');
-  locationListContainer = document.querySelector('.location-list');
-  explorationListContainer = document.querySelector('.exploration-list');
-  startDungeonBtn = document.querySelector('.startDungeonBtn');
+
   purchasedUpgradeList = document.querySelector('.purchased-upgrade-list');
   activeEffectsContainer = document.querySelector('.active-effects');
   tooltip = document.getElementById('tooltip');
@@ -1054,10 +1049,7 @@ function initTabs() {
   if (sectNavMapBtn) sectNavMapBtn.addEventListener("click", () => { setActiveNavBtn(sectNavMapBtn); openExplorationOverlay(); });
   if (sectNavInfluenceBtn) sectNavInfluenceBtn.addEventListener("click", () => { setActiveNavBtn(sectNavInfluenceBtn); openPlaceholderOverlay("Influence"); });
   if (sectNavResearchBtn) sectNavResearchBtn.addEventListener("click", () => { setActiveNavBtn(sectNavResearchBtn); openPlaceholderOverlay("Research"); });
-  if (sectNavCultivationBtn) sectNavCultivationBtn.addEventListener("click", () => { setActiveNavBtn(sectNavCultivationBtn); openPlaceholderOverlay("Cultivation"); });
-  if (startDungeonBtn)
-    startDungeonBtn.addEventListener('click', startExploration);
-  if (playerCoreSubTabButton)
+  if (sectNavCultivationBtn) sectNavCultivationBtn.addEventListener("click", () => { setActiveNavBtn(sectNavCultivationBtn); openPlaceholderOverlay("Cultivation"); });  if (playerCoreSubTabButton)
     playerCoreSubTabButton.addEventListener("click", () => {
       if (playerCorePanel) playerCorePanel.style.display = "flex";
       if (playerConstructPanel) playerConstructPanel.style.display = "none";
@@ -1703,7 +1695,7 @@ function startDiscipleMovement() {
   }, 3000);
 }
 
-function renderColonyTasks() {
+ export function renderColonyTasks() {
   colonyTasksPanel.innerHTML = '';
   const heading = document.createElement('div');
   heading.className = 'panel-heading';
@@ -2675,7 +2667,7 @@ function buildDiscipleSkillsList(d) {
   return container;
 }
 
-function renderExplorationTab() {
+ export function renderExplorationTab() {
   if (!explorationListContainer) return;
   explorationListContainer.innerHTML = '';
   sectSystem.disciples.forEach(d => {
@@ -2695,7 +2687,7 @@ function renderExplorationTab() {
   });
 }
 
-function startExploration() {
+ export function startExploration() {
   if (!explorationListContainer) return;
   explorationParty.clear();
   explorationListContainer
@@ -2710,340 +2702,14 @@ function startExploration() {
         selectDisciple(d);
       }
     });
-    if (explorationOverlay) explorationOverlay.close();
+    closeExplorationOverlay();
     showTab(mainTab);
     setActiveTabButton(playerTabButton);
     respawnDealerStage();
   }
 }
 
-let explorationOverlayActiveTab = 'explore';
-function openExplorationOverlay() {
-  if (explorationOverlay) return;
-  explorationOverlay = createOverlay({ className: 'exploration-overlay' });
-  explorationOverlay.onClose(() => {
-    explorationOverlay = null;
-  });
-  const { box } = explorationOverlay;
-
-  const closeBtn = document.createElement('button');
-  closeBtn.className = 'close-btn';
-  closeBtn.innerHTML = '&times;';
-  closeBtn.addEventListener('click', explorationOverlay.close);
-  box.appendChild(closeBtn);
-
-  const map = document.createElement('img');
-  map.src = 'img/Map.jpg';
-  map.className = 'exploration-map';
-  box.appendChild(map);
-
-  const tabs = document.createElement('div');
-  tabs.className = 'exploration-overlay-tabs';
-  box.appendChild(tabs);
-  const content = document.createElement('div');
-  content.className = 'exploration-overlay-content';
-  box.appendChild(content);
-
-  const defs = [
-    { key: 'explore', label: 'Exploration' },
-    { key: 'wood', label: 'Woodcutting' },
-    { key: 'mining', label: 'Mining' }
-  ];
-  const containers = {};
-  defs.forEach(def => {
-    const btn = document.createElement('button');
-    btn.textContent = def.label;
-    tabs.appendChild(btn);
-    const pane = document.createElement('div');
-    pane.className = 'exploration-tab-content';
-    content.appendChild(pane);
-    containers[def.key] = pane;
-    btn.addEventListener('click', () => {
-      explorationOverlayActiveTab = def.key;
-      update();
-    });
-  });
-
-  // exploration tab elements
-  locationListContainer = document.createElement('div');
-  locationListContainer.className = 'location-list casino-section';
-  explorationListContainer = document.createElement('div');
-  explorationListContainer.className = 'exploration-list casino-section';
-  startDungeonBtn = document.createElement('button');
-  startDungeonBtn.className = 'startDungeonBtn';
-  startDungeonBtn.textContent = 'Start';
-  startDungeonBtn.addEventListener('click', startExploration);
-
-  const exploreWrap = document.createElement('div');
-  exploreWrap.className = 'explore-wrap';
-  exploreWrap.appendChild(locationListContainer);
-  exploreWrap.appendChild(explorationListContainer);
-  containers.explore.appendChild(exploreWrap);
-  containers.explore.appendChild(startDungeonBtn);
-
-  // simple placeholders for other tabs
-  containers.wood.textContent = 'Woodcutting coming soon.';
-  containers.mining.textContent = 'Mining coming soon.';
-
-  function update() {
-    Array.from(tabs.children).forEach((b, i) => {
-      const key = defs[i].key;
-      b.classList.toggle('active', key === explorationOverlayActiveTab);
-      containers[key].classList.toggle('active', key === explorationOverlayActiveTab);
-    });
-    if (explorationOverlayActiveTab === 'explore') {
-      renderExplorationTab();
-    }
-  }
-
-  update();
-
-}
-
-let workOverlay = null;
-let workOverlaySelected = null;
-function openWorkOverlay() {
-  if (workOverlay) return;
-  workOverlay = createOverlay({ className: 'work-overlay' });
-  workOverlay.onClose(() => {
-    workOverlay = null;
-    workOverlaySelected = null;
-  });
-  const { box } = workOverlay;
-  const closeBtn = document.createElement('button');
-  closeBtn.className = 'close-btn';
-  closeBtn.innerHTML = '&times;';
-  closeBtn.addEventListener('click', workOverlay.close);
-  box.appendChild(closeBtn);
-
-  const header = document.createElement('div');
-  header.className = 'panel-heading';
-  header.textContent = 'Work';
-  box.appendChild(header);
-
-  const content = document.createElement('div');
-  content.className = 'work-content';
-  box.appendChild(content);
-
-  const left = document.createElement('div');
-  left.className = 'work-disciples';
-  content.appendChild(left);
-
-  const right = document.createElement('div');
-  right.className = 'work-tasks';
-  content.appendChild(right);
-
-  function render() {
-    left.innerHTML = '';
-    sectSystem.disciples.forEach(d => {
-      const card = createSectDiscipleCard(d);
-      if (d.id === workOverlaySelected) card.classList.add('selected');
-      card.addEventListener('click', () => {
-        workOverlaySelected = d.id;
-        render();
-      });
-      left.appendChild(card);
-    });
-
-    right.innerHTML = '';
-    const tasks = ['Gather Fruit', 'Gather Softwood'];
-    if (systems.buildingUnlocked) tasks.push('Building');
-    tasks.forEach(t => {
-      const btn = document.createElement('button');
-      btn.textContent = t;
-      btn.addEventListener('click', () => {
-        if (workOverlaySelected == null) return;
-        const prev = sectState.discipleTasks[workOverlaySelected];
-        sectState.discipleTasks[workOverlaySelected] = t;
-        discipleGatherPhase[workOverlaySelected] = -1;
-        if (prev === 'Chant' && t !== 'Chant') {
-          delete sectState.chantAssignments[workOverlaySelected];
-          if (typeof renderConstructCards === 'function') {
-            renderConstructCards();
-          }
-        }
-        if (typeof renderColonyTasks === 'function') renderColonyTasks();
-        render();
-      });
-      right.appendChild(btn);
-    });
-  }
-
-  render();
-}
-
-let resourceOverlay = null;
-function openResourceOverlay() {
-  if (resourceOverlay) return;
-  resourceOverlay = createOverlay({ className: 'resource-overlay' });
-  resourceOverlay.onClose(() => {
-    resourceOverlay = null;
-  });
-  const { box } = resourceOverlay;
-  const closeBtn = document.createElement('button');
-  closeBtn.className = 'close-btn';
-  closeBtn.innerHTML = '&times;';
-  closeBtn.addEventListener('click', resourceOverlay.close);
-  box.appendChild(closeBtn);
-
-  const header = document.createElement('div');
-  header.className = 'panel-heading';
-  header.textContent = 'Resources';
-  box.appendChild(header);
-
-  const list = document.createElement('div');
-  box.appendChild(list);
-
-  const total = sectSystem.disciples.length;
-  const gatherFruit = sectSystem.disciples.filter(d => sectState.discipleTasks[d.id] === 'Gather Fruit').length;
-  const spotFruit = GATHER_SPOTS['Gather Fruit'];
-  const travelFruit = Math.max(MIN_TRAVEL_SECONDS, spotFruit.travel * TRAVEL_SECONDS_PER_UNIT);
-  const cycleFruit = travelFruit * 2 + GATHER_WORK_SECONDS;
-  const baseYieldFruit = spotFruit.baseYield * GATHER_WORK_SECONDS;
-  const fruitProd = gatherFruit * (baseYieldFruit / cycleFruit) * DAY_LENGTH_SECONDS;
-  const fruitCons = DAILY_FRUIT_CONSUMPTION * total;
-  const fruitBal = fruitProd - fruitCons;
-  const fruitRow = document.createElement('div');
-  fruitRow.textContent = `Fruit: +${fruitProd.toFixed(1)} -${fruitCons} = ${fruitBal.toFixed(1)}/day`;
-  list.appendChild(fruitRow);
-
-  const gatherWood = sectSystem.disciples.filter(d => sectState.discipleTasks[d.id] === 'Gather Softwood').length;
-  const spotWood = GATHER_SPOTS['Gather Softwood'];
-  const travelWood = Math.max(MIN_TRAVEL_SECONDS, spotWood.travel * TRAVEL_SECONDS_PER_UNIT);
-  const cycleWood = travelWood * 2 + GATHER_WORK_SECONDS;
-  const baseYieldWood = spotWood.baseYield * GATHER_WORK_SECONDS;
-  const woodProd = gatherWood * (baseYieldWood / cycleWood) * DAY_LENGTH_SECONDS;
-  const woodRow = document.createElement('div');
-  woodRow.textContent = `Softwood: +${woodProd.toFixed(1)}/day`;
-  list.appendChild(woodRow);
-}
-
-let buildOverlay = null;
-let updateBuildOverlay = null;
-function openBuildOverlay() {
-  if (buildOverlay) return;
-  buildOverlay = createOverlay({ className: 'build-overlay' });
-  buildOverlay.onClose(() => {
-    buildOverlay = null;
-    updateBuildOverlay = null;
-  });
-  const { box } = buildOverlay;
-  const closeBtn = document.createElement('button');
-  closeBtn.className = 'close-btn';
-  closeBtn.innerHTML = '&times;';
-  closeBtn.addEventListener('click', buildOverlay.close);
-  box.appendChild(closeBtn);
-
-  const header = document.createElement('div');
-  header.className = 'panel-heading';
-  header.textContent = 'Build';
-  box.appendChild(header);
-
-  const list = document.createElement('div');
-  box.appendChild(list);
-
-  function render() {
-    list.innerHTML = '';
-    Object.entries(BUILDINGS).forEach(([key, b]) => {
-      if (b.requires && sectState.buildings[b.requires] < b.max) return;
-      if (key === 'chantingHall' && !systems.chantingHallUnlocked) return;
-      const row = document.createElement('div');
-      const btn = document.createElement('button');
-      const built = sectState.buildings[key] || 0;
-      const name = key === 'bohio' ? getHousingName(built + 1) : b.name;
-      btn.textContent = `${name} (${built}/${b.max})`;
-      btn.disabled = built >= b.max || sectState.currentBuild;
-      btn.addEventListener('click', () => {
-        startBuilding(key);
-        render();
-      });
-      row.appendChild(btn);
-      if (sectState.currentBuild === key) {
-        const bar = document.createElement('div');
-        bar.className = 'disciple-progress';
-        const fill = document.createElement('div');
-        fill.className = 'disciple-progress-fill';
-        fill.style.width = `${(sectState.buildProgress * 100).toFixed(0)}%`;
-        const text = document.createElement('div');
-        text.className = 'disciple-progress-label';
-        text.textContent = `${(sectState.buildProgress * 100).toFixed(0)}%`;
-        bar.appendChild(fill);
-        bar.appendChild(text);
-        row.appendChild(bar);
-      } else {
-        const cost = document.createElement('div');
-        const c = b.costFunc ? b.costFunc(built + 1) : b.cost;
-        cost.textContent = `Cost: ${c} Softwood`;
-        row.appendChild(cost);
-      }
-      list.appendChild(row);
-    });
-  }
-
-  updateBuildOverlay = render;
-  render();
-}
-
-let scheduleOverlay = null;
-function openScheduleOverlay() {
-  if (scheduleOverlay) return;
-  scheduleOverlay = createOverlay({ className: 'schedule-overlay' });
-  let interval;
-  scheduleOverlay.onClose(() => {
-    if (interval) clearInterval(interval);
-    scheduleOverlay = null;
-  });
-  const { box } = scheduleOverlay;
-  const closeBtn = document.createElement('button');
-  closeBtn.className = 'close-btn';
-  closeBtn.innerHTML = '&times;';
-  closeBtn.addEventListener('click', scheduleOverlay.close);
-  box.appendChild(closeBtn);
-
-  const header = document.createElement('div');
-  header.className = 'panel-heading';
-  header.textContent = 'Schedule';
-  box.appendChild(header);
-
-  const timeEl = document.createElement('div');
-  box.appendChild(timeEl);
-
-  const table = document.createElement('div');
-  table.className = 'schedule-table';
-  SECT_SCHEDULE.forEach(ph => {
-    const row = document.createElement('div');
-    row.className = 'schedule-row';
-    row.textContent = `${ph.phase}: ${ph.action}`;
-    table.appendChild(row);
-  });
-  box.appendChild(table);
-
-  function update() {
-    const cur = getCurrentSchedule();
-    const remaining =
-      cur.duration - sectSystem.scheduleTimer;
-    timeEl.textContent = `${cur.phase} - ${Math.ceil(remaining)}s left`;
-    [...table.children].forEach((row, i) => {
-      row.classList.toggle('current', i === sectSystem.scheduleIndex);
-    });
-  }
-  update();
-  interval = setInterval(update, 1000);
-}
-
-function openPlaceholderOverlay(title) {
-  const ov = createOverlay({});
-  const { box } = ov;
-  const closeBtn = document.createElement("button");
-  closeBtn.className = "close-btn";
-  closeBtn.innerHTML = "&times;";
-  closeBtn.addEventListener("click", ov.close);
-  box.appendChild(closeBtn);
-  const msg = document.createElement("div");
-  msg.textContent = `${title} coming soon`;
-  box.appendChild(msg);
-}
-function triggerOrbFlash() {
+ function triggerOrbFlash() {
   const orbs = document.querySelectorAll('#sectOrbs .sect-orb');
   orbs.forEach(o => {
     o.classList.add('flash');
