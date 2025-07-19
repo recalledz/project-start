@@ -517,36 +517,6 @@ export function initSect() {
   container = document.getElementById('constructTabCardContainer');
   if (!container) return;
   container.innerHTML = `
-    <div class="construct-top">
-      <div class="orbs-section">
-        <h3 class="section-title">Core Orbs</h3>
-        <div class="construct-orbs construct-tab-orbs">
-          <div id="orbWaterContainer" class="orb-wrapper">
-            <div class="orb-container">
-              <div id="orbWater" class="construct-orb"><div class="orb-fill"></div></div>
-            </div>
-            <div id="orbWaterValue" class="orb-value"></div>
-            <div id="orbWaterRegen" class="orb-regen">
-              <span class="season-icon"></span><span class="regen-value"></span><span id="intoneMultiplier" class="mult-badge"></span>
-            </div>
-          </div>
-          <div id="orbBodyContainer" class="orb-wrapper" style="display:none">
-            <div class="orb-container">
-              <div id="orbBody" class="construct-orb"><div class="orb-fill"></div></div>
-            </div>
-            <div id="orbBodyValue" class="orb-value"></div>
-            <div id="orbBodyRegen" class="orb-regen"></div>
-          </div>
-          <div id="orbWillContainer" class="orb-wrapper" style="display:none">
-            <div class="orb-container">
-              <div id="orbWill" class="construct-orb"><div class="orb-fill"></div></div>
-            </div>
-            <div id="orbWillValue" class="orb-value"></div>
-            <div id="orbWillRegen" class="orb-regen"></div>
-          </div>
-        </div>
-      </div>
-    </div>
     <div id="constructToggle" class="construct-toggle">❮</div>
     <div id="constructHotbar" class="construct-hotbar"></div>
     <div id="modalConstructorPanel" class="modal-constructor-panel">
@@ -591,8 +561,6 @@ export function initSect() {
   renderHotbar();
   renderSeasonBanner();
   if (window.lucide) window.lucide.createIcons({ icons: window.lucide.icons });
-  const waterOrbEl = container.querySelector('#orbWater');
-  if (waterOrbEl) waterOrbEl.addEventListener('click', openWaterRegenPopup);
   document.addEventListener('disciple-gained', renderChantDisciples);
 }
 
@@ -1092,51 +1060,11 @@ export function renderXpBar() {
 }
 
 function renderOrbs() {
-  const roots = [];
-  if (container) roots.push(container);
-  const combatRoot = document.getElementById('combatOrbs');
-  if (combatRoot) roots.push(combatRoot);
-  roots.forEach(root => {
-    const update = (id, orb) => {
-      const fill = root.querySelector(`#${id} .orb-fill`);
-      if (!fill) return;
-      const pct = Math.max(0, Math.min(1, orb.current / orb.max)) * 100;
-      fill.style.height = `${pct}%`;
-      const el = root.querySelector(`#${id}`);
-      if (el) {
-        const gainKey = id.replace('orb', '').toLowerCase();
-        const gain = sectSystem.gains[gainKey] ?? 0;
-        el.title = `${Math.floor(orb.current)}/${orb.max} (${gain.toFixed(1)}/sec)`;
-        el.classList.toggle('full', orb.current >= orb.max);
-      }
-      const label = root.querySelector(`#${id}Value`);
-      if (label) label.textContent = `${Math.floor(orb.current)}/${orb.max}`;
-      const regenLabel = root.querySelector(`#${id}Regen`);
-      if (regenLabel) {
-        if (sectSystem.upgrades.clarividence.level > 0) {
-          const iconEl = regenLabel.querySelector('.season-icon');
-          const valEl = regenLabel.querySelector('.regen-value');
-          if (valEl) {
-            const gainKey = id.replace('orb', '').toLowerCase();
-            const gain = sectSystem.gains[gainKey] ?? 0;
-            valEl.textContent = `+${gain.toFixed(3)}/s`;
-          }
-          if (id === 'orbWater' && iconEl) {
-            const icon = seasonIcons[sectSystem.seasonIndex];
-            iconEl.textContent = icon;
-            regenLabel.onmouseenter = e => {
-              window.showTooltip(`Base: ${sectSystem.waterRegenBase.toFixed(3)}<br>Current: ${sectSystem.gains.water.toFixed(3)}`, e.clientX + 10, e.clientY + 10);
-            };
-            regenLabel.onmouseleave = window.hideTooltip;
-          }
-          regenLabel.style.display = 'flex';
-        } else {
-          regenLabel.style.display = 'none';
-        }
-      }
-    };
-    update('orbWater', sectSystem.orbs.water);
-  });
+  const fill = document.querySelector('#sectOrbs .sect-orb.water .orb-fill');
+  if (fill) {
+    const pct = Math.max(0, Math.min(1, sectSystem.orbs.water.current / sectSystem.orbs.water.max)) * 100;
+    fill.style.height = `${pct}%`;
+  }
   window.dispatchEvent(new CustomEvent('orbs-changed'));
 }
 
