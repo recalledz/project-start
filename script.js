@@ -87,7 +87,8 @@ import {
   updateDealerLifeBar,
   removeDealerLifeBar,
   updateDealerLifeDisplay,
-  renderCombatDisciples
+  renderCombatDisciples,
+  updateDiscipleStatsDisplay
 } from "./game/ui.js";
 // disciple selection for combat
 import {
@@ -109,7 +110,9 @@ import {
   stageData,
   FAST_MODE_SCALE,
   timeScale,
-  setTimeScale
+  setTimeScale,
+  FRUIT_MAX_CAP,
+  FRUIT_GROWTH_RATES
 } from "./game/state.js";
 
 
