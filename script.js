@@ -32,10 +32,7 @@ import { SECT_SCHEDULE, getCurrentSchedule } from "./sect.js";
 import { formatNumber } from "./utils/numberFormat.js";
 import { runAnimation } from "./utils/animation.js";
 import { initCore, refreshCore } from './core.js';
-import {
-  attributes,
-  intelligenceXpMultiplier
-} from './attributes.js';
+import { intelligenceXpMultiplier } from './game/attributes.js';
 import { createOverlay } from './ui/overlay.js';
 import { showLoadErrorOverlay } from './ui/loadErrorOverlay.js';
 import { openExplorationOverlay, closeExplorationOverlay, openWorkOverlay, openScheduleOverlay, openPlaceholderOverlay, openResourceOverlay, openBuildOverlay, locationListContainer, explorationListContainer } from "./ui/colonyOverlays.js";
@@ -231,7 +228,7 @@ function createDiscipleCard(d) {
 
   card.appendChild(createLabeledBar('❤️', d.health, DISCIPLE_MAX_HEALTH, '#a33'));
   card.appendChild(
-    createLabeledBar('⚡', d.stamina, calculateMaxStamina(d.endurance), '#cc3')
+    createLabeledBar('⚡', d.stamina, calculateMaxStamina(), '#cc3')
   );
   card.appendChild(createLabeledBar('🍖', d.hunger, 20, '#996633'));
 
@@ -1356,7 +1353,7 @@ function tickBuilding(dt) {
       const xp = sectState.discipleSkills[d.id]['Building'];
       const lvl = getTaskSkillProgress(xp).level;
       speed += 1 + 0.05 * d.endurance + 0.02 * lvl;
-        addSkillXp(d, 'Building', BUILD_XP_RATE * dt * intelligenceXpMultiplier());
+      addSkillXp(d, 'Building', BUILD_XP_RATE * dt * intelligenceXpMultiplier());
     }
   });
   if (speed === 0) return;
@@ -1569,7 +1566,7 @@ function buildDiscipleStatusView(d) {
       label: 'Stamina',
       color: '#cc3',
       value: d.stamina,
-      max: calculateMaxStamina(d.endurance)
+      max: calculateMaxStamina()
     },
     { label: 'Hunger', color: '#cc3', value: d.hunger, max: 20 }
   ];
@@ -1606,16 +1603,14 @@ function buildDiscipleStatusView(d) {
       label: 'Strength',
       value: d.strength,
       base: d.baseStrength ?? 1,
-      effect:
-        `Melee Damage ×${(1 + 0.05 * (d.strength - 1)).toFixed(2)}, ` +
-        `+${Math.floor((d.strength - 1) / 2)} Inventory Slots`,
+      effect: `Yield ×${(1 + 0.05 * (d.strength - 1)).toFixed(2)} for woodcutting & mining`,
       desc: 'Improves woodcutting, hunting & mining yield'
     },
     {
       label: 'Dexterity',
       value: d.dexterity,
       base: d.baseDexterity ?? 1,
-      effect: `Attack Speed ×${(1 + 0.05 * (d.dexterity - 1)).toFixed(2)}`,
+      effect: `Gather Yield ×${(1 + 0.05 * (d.dexterity - 1)).toFixed(2)}`,
       desc: 'Increases gathering & hunting yield and discovery chance'
     },
     {
@@ -1631,10 +1626,7 @@ function buildDiscipleStatusView(d) {
       label: 'Endurance',
       value: d.endurance,
       base: d.baseEndurance ?? 1,
-      effect:
-        `Stamina ×${(1 + 0.05 * (d.endurance - 1)).toFixed(2)}, ` +
-        `Regen ×${(1 + 0.01 * (d.endurance - 1)).toFixed(2)}, ` +
-        `+${10 * (d.endurance - 1)} HP`,
+      effect: `Build Speed ×${(1 + 0.05 * (d.endurance - 1)).toFixed(2)}`,
       desc: 'Speeds building'
     },
     {
@@ -1737,11 +1729,11 @@ function buildDiscipleGeneralView(d) {
   const staminaRow = makeStatRow(
     'Stamina',
     d.stamina,
-    calculateMaxStamina(d.endurance),
+    calculateMaxStamina(),
     'linear-gradient(90deg,#3b3,#7f7)'
   );
   const stamRate = document.createElement('span');
-  stamRate.textContent = ` (+${calculateStaminaRegen(d.endurance).toFixed(2)}/s)`;
+  stamRate.textContent = ` (+${calculateStaminaRegen().toFixed(2)}/s)`;
   staminaRow.appendChild(stamRate);
   vit.appendChild(staminaRow);
   const waterLvl = getTaskSkillProgress(
@@ -2197,8 +2189,8 @@ function init() {
   document.addEventListener('day-passed', () => {
     sectSystem.disciples.forEach(d => {
       d.stamina = Math.min(
-        calculateMaxStamina(d.endurance),
-        d.stamina + calculateStaminaRegen(d.endurance)
+        calculateMaxStamina(),
+        d.stamina + calculateStaminaRegen()
       );
     });
     sectState.availableFruits = Math.min(
@@ -3062,7 +3054,7 @@ function respawnPlayer() {
   setEnemyAttackProgress(0);
   playerStats.hasDied = false;
   Object.assign(stats, BASE_STATS);
-  stats.combatSlots = BASE_STATS.combatSlots + attributes.Strength.inventorySlots;
+  stats.combatSlots = BASE_STATS.combatSlots;
   // reset resources
 
   clearActiveDisciples();
@@ -3161,7 +3153,7 @@ function updatePlayerStats() {
     stats.avgProficiencyLevel = profTotal / count;
   }
 
-  stats.combatSlots = BASE_STATS.combatSlots + attributes.Strength.inventorySlots;
+  stats.combatSlots = BASE_STATS.combatSlots;
   renderPlayerStats(stats);
 }
 

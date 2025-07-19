@@ -1,4 +1,4 @@
-import { generateDiscipleAttributes } from './discipleAttributes.js';
+import { generateDiscipleAttributes } from './game/attributes.js';
 import { xpRequirement } from './utils/xp.js';
 import { runAnimation } from './utils/animation.js';
 

@@ -1,7 +1,7 @@
 import addLog from './log.js';
 import { refreshCore } from './core.js';
 import { sectState, systems, currentEnemy } from './game/state.js';
-import { generateDiscipleAttributes } from './discipleAttributes.js';
+import { generateDiscipleAttributes } from './game/attributes.js';
 import Disciple from './disciple.js';
 import { initializeDisciple } from './utils/discipleInit.js';
 import { createOverlay } from './ui/overlay.js';
