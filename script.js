@@ -1,6 +1,5 @@
 /* eslint-disable no-unused-vars, no-undef */
 // Core modules that power combat systems
-import { shuffleArray } from "./utils/random.js"; // generic utilities
 import Disciple from "./disciple.js";
 import addLog from "./log.js"; // helper for appending to the event log
 import Enemy from "./enemy.js"; // base enemy class
