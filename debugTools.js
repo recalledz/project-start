@@ -12,6 +12,7 @@ import {
   startNewGame,
   cDealerDamage
 } from './script.js';
+import { activeDisciples } from './game/disciples.js';
 import {
   stageData,
   timeScale,

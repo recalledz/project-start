@@ -1,6 +1,7 @@
-export let locationListContainer;
-export let explorationListContainer;
-export let startDungeonBtn;
+// DOM references assigned after overlays are constructed
+export let locationListContainer = null;
+export let explorationListContainer = null;
+export let startDungeonBtn = null;
 
 import { createOverlay } from './overlay.js';
 import { sectSystem, SECT_SCHEDULE, getCurrentSchedule, renderConstructCards } from '../sect.js';
