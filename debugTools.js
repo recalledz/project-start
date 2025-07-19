@@ -6,7 +6,6 @@ import {
   nextStage,
   respawnDealerStage,
   renderStageInfo,
-  renderPlayerStats,
   addDiscoveredLocation,
   saveGame,
   loadGame,
@@ -15,13 +14,13 @@ import {
 } from './script.js';
 import {
   stageData,
-  stats,
   timeScale,
   FAST_MODE_SCALE,
   systems,
   currentEnemy,
   setTimeScale
 } from './game/state.js';
+import { activeDisciples } from './game/disciples.js';
 
 export const devTools = {
   spawnBoss: () => spawnBossEvent(),

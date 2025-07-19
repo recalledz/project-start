@@ -49,18 +49,6 @@ export const attributes = {
   }
 };
 
-export function strengthXpMultiplier() {
-  return 1;
-}
-
-export function enduranceXpMultiplier() {
-  return 1;
-}
-
-export function dexterityXpMultiplier() {
-  return 1;
-}
-
 export function intelligenceXpMultiplier() {
   return 0.5 + 0.15 * attributes.Intelligence.points;
 }

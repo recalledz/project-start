@@ -1089,9 +1089,9 @@ function tickSect(delta) {
           const animal = ANIMALS.find(a => a.name === name);
           const skillXp = sectState.discipleSkills[d.id]?.['Hunting'] || 0;
           const lvl = getTaskSkillProgress(skillXp).level;
-          let chance = d.combatLevel / (d.combatLevel + animal.level);
+          let chance = (d.combatLevel / (d.combatLevel + animal.level)) * (1 + 0.2 * d.dexterity);
           if (Math.random() < chance) {
-            const yieldAmt = Math.round(animal.yield * (1 + 0.1 * lvl));
+            const yieldAmt = Math.round(animal.yield * (1 + 0.1 * lvl) * (1 + 0.3 * d.strength));
             sectState.fruits += yieldAmt;
             sectState.animals[name] -= 1;
             addSkillXp(d, 'Hunting', HUNT_XP_PER_SUCCESS);
@@ -1117,7 +1117,7 @@ function tickSect(delta) {
         let found = null;
         eligible.forEach(loc => {
           if (found) return;
-          let chance = loc.baseChance + (d.endurance - 1) * 0.01 + seasonBonus;
+          let chance = loc.baseChance + (d.dexterity - 1) * 0.01 + seasonBonus;
           if (Math.random() < chance) {
             addDiscoveredLocation(loc.name);
             found = loc.name;
@@ -1643,7 +1643,7 @@ function tickBuilding(dt) {
       ensureDiscipleConstructXp(d.id);
       const xp = sectState.discipleSkills[d.id]['Building'];
       const lvl = getTaskSkillProgress(xp).level;
-      speed += 1 + 0.02 * lvl;
+      speed += 1 + 0.05 * d.endurance + 0.02 * lvl;
         addSkillXp(d, 'Building', BUILD_XP_RATE * dt * intelligenceXpMultiplier());
     }
   });
@@ -1888,6 +1888,7 @@ function buildDiscipleStatusView(d) {
   invRow.textContent = `Inventory: ${filled}/${d.inventorySlots}` + (desc ? ` (${desc})` : '');
   body.appendChild(invRow);
 
+  const learning = (0.5 + 0.15 * d.intelligence).toFixed(2);
   const attrInfo = [
     {
       label: 'Strength',
@@ -1896,21 +1897,23 @@ function buildDiscipleStatusView(d) {
       effect:
         `Melee Damage ×${(1 + 0.05 * (d.strength - 1)).toFixed(2)}, ` +
         `+${Math.floor((d.strength - 1) / 2)} Inventory Slots`,
-      skills: 'Gather Softwood, Mining & Smithing'
+      desc: 'Improves woodcutting, hunting & mining yield'
     },
     {
       label: 'Dexterity',
       value: d.dexterity,
       base: d.baseDexterity ?? 1,
       effect: `Attack Speed ×${(1 + 0.05 * (d.dexterity - 1)).toFixed(2)}`,
-      skills: 'Gather Softwood & Gather Fruit'
+      desc: 'Increases gathering & hunting yield and discovery chance'
     },
     {
       label: 'Intelligence',
       value: d.intelligence,
       base: d.baseIntelligence ?? 1,
-      effect: `Construct Potency ×${(1 + 0.03 * (d.intelligence - 1)).toFixed(2)}`,
-      skills: 'Chant & Research'
+      effect:
+        `Construct Potency ×${(1 + 0.03 * (d.intelligence - 1)).toFixed(2)}, ` +
+        `Learning ×${learning}`,
+      desc: 'Improves Chanting and Research'
     },
     {
       label: 'Endurance',
@@ -1920,21 +1923,21 @@ function buildDiscipleStatusView(d) {
         `Stamina ×${(1 + 0.05 * (d.endurance - 1)).toFixed(2)}, ` +
         `Regen ×${(1 + 0.01 * (d.endurance - 1)).toFixed(2)}, ` +
         `+${10 * (d.endurance - 1)} HP`,
-      skills: 'Building, Defending & Combat'
+      desc: 'Speeds building'
     },
     {
       label: 'Charisma',
       value: d.charisma,
       base: d.baseCharisma ?? 1,
       effect: `Recruit Chance ×${(1 + 0.05 * (d.charisma - 1)).toFixed(2)}`,
-      skills: 'Recruiting & Diplomacy'
+      desc: 'Influences diplomacy and disciple potential'
     },
     {
       label: 'Potential',
       value: d.potential,
       base: d.basePotential ?? d.potential,
       effect: `Inner Cauldron Size ${d.potential * 500}`,
-      skills: 'Cultivation'
+      desc: null
     }
   ];
   const attrContainer = document.createElement('div');
@@ -1942,7 +1945,8 @@ function buildDiscipleStatusView(d) {
     const row = document.createElement('div');
     const diff = a.value - a.base;
     const gainText = diff > 0 ? ` (+${diff})` : '';
-    row.textContent = `${a.label} ${a.value}${gainText} (${a.effect} – boosts ${a.skills} XP)`;
+    const extra = a.desc ? `; ${a.desc}` : '';
+    row.textContent = `${a.label} ${a.value}${gainText} – ${a.effect}${extra}`;
     attrContainer.appendChild(row);
   });
   body.appendChild(attrContainer);
@@ -2092,15 +2096,15 @@ function buildDiscipleStatsView(d) {
 
   const table = document.createElement('table');
   table.className = 'attribute-table';
+  const learnMult = (0.5 + 0.15 * d.intelligence).toFixed(2);
   const rows = [
     {
       label: 'Strength',
       value: d.strength,
       base: d.baseStrength ?? 1,
       effect:
-        `Melee ×${(1 + 0.05 * (d.strength - 1)).toFixed(2)}, +${Math.floor(
-          (d.strength - 1) / 2
-        )} inventory, +XP: Log, Mine, Smith`,
+        `Melee ×${(1 + 0.05 * (d.strength - 1)).toFixed(2)}, ` +
+        `+${Math.floor((d.strength - 1) / 2)} inventory; woodcutting, hunting & mining yield`,
       cls: 'strength'
     },
     {
@@ -2108,7 +2112,7 @@ function buildDiscipleStatsView(d) {
       value: d.dexterity,
       base: d.baseDexterity ?? 1,
       effect:
-        `Speed ×${(1 + 0.05 * (d.dexterity - 1)).toFixed(2)}, +XP: Woodcut, Gather Fruit`,
+        `Speed ×${(1 + 0.05 * (d.dexterity - 1)).toFixed(2)}; gathering & hunting yield, discovery chance`,
       cls: 'dexterity'
     },
     {
@@ -2116,7 +2120,7 @@ function buildDiscipleStatsView(d) {
       value: d.intelligence,
       base: d.baseIntelligence ?? 1,
       effect:
-        `Potency ×${(1 + 0.03 * (d.intelligence - 1)).toFixed(2)}, +XP: Chant, Research`,
+        `Potency ×${(1 + 0.03 * (d.intelligence - 1)).toFixed(2)}, Learning ×${learnMult}`,
       cls: 'intelligence'
     },
     {
@@ -2126,7 +2130,7 @@ function buildDiscipleStatsView(d) {
       effect:
         `Stamina ×${(1 + 0.05 * (d.endurance - 1)).toFixed(2)}, Regen ×${(
           1 + 0.01 * (d.endurance - 1)
-        ).toFixed(2)}, +${10 * (d.endurance - 1)} HP, +XP: Build, Defend, Combat`,
+        ).toFixed(2)}, +${10 * (d.endurance - 1)} HP; building speed`,
       cls: 'endurance'
     }
   ];
