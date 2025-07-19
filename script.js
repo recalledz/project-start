@@ -40,7 +40,7 @@ import { createOverlay } from './ui/overlay.js';
 import { showLoadErrorOverlay } from './ui/loadErrorOverlay.js';
 import { openExplorationOverlay, closeExplorationOverlay, openWorkOverlay, openScheduleOverlay, openPlaceholderOverlay, openResourceOverlay, openBuildOverlay, closeDungeonOverlay, locationListContainer, explorationListContainer } from "./ui/colonyOverlays.js";
 import { createDiscipleBadge } from "./game/badges.js";
-import { calculateKillXp, XP_EFFICIENCY } from './utils/xp.js';
+import { calculateKillXp } from './utils/xp.js';
 import { initTooltip } from './game/tooltip.js';
 import {
   calculateMaxStamina,
@@ -291,33 +291,6 @@ function ensureDiscipleConstructXp(id) {
   }
 }
 
-function calculateDailyFruitGain() {
-  let total = 0;
-  sectSystem.disciples.forEach(d => {
-    if (sectState.discipleTasks[d.id] === 'Gather Fruit') {
-      ensureDiscipleSkills(d.id);
-      ensureDiscipleConstructXp(d.id);
-      const xp = sectState.discipleSkills[d.id]['Gathering'];
-      const lvl = getTaskSkillProgress(xp).level;
-      const yieldMult = 1 + 0.05 * d.dexterity + 0.02 * lvl;
-      const gatherAmt = Math.min(
-        GATHER_SPOTS['Gather Fruit'].baseYield * yieldMult * GATHER_WORK_SECONDS,
-        d.inventorySlots
-      );
-      const travel = Math.max(
-        MIN_TRAVEL_SECONDS,
-        GATHER_SPOTS['Gather Fruit'].travel * TRAVEL_SECONDS_PER_UNIT
-      );
-      const cycleSeconds = travel * 2 + GATHER_WORK_SECONDS;
-      const perSecond = gatherAmt / cycleSeconds;
-      total += perSecond * DAY_LENGTH_SECONDS;
-    }
-  });
-  return total;
-}
-
-
-
 
 const BUILDINGS = {
   bohio: {
@@ -347,8 +320,6 @@ function getHousingName(level) {
 
 const STAGE_KILL_REQUIREMENT = 10;
 const PROGRESS_CIRCUMFERENCE = 2 * Math.PI * 22;
-
-const xpEfficiency = XP_EFFICIENCY;
 
 let speakerEncounterPending = false;
 
@@ -405,32 +376,9 @@ const dom = {
 };
 //const stageProgressFill = document.getElementById("stageProgressFill");
 //const stageProgressBar = document.getElementById("stageProgressBar");
-//const insanityMessages = [
-//  "You feel watched.",
-//  "The walls bend inward.",
-//  "Thoughts scatter like crows..."
-//];
-//let insanityMsgIndex = 0;
-//let lastInsanityMsg = 0;
-//let lowSanityOverlayShown = false;
-
-//function hideStageProgressBar() {
-//  if (stageProgressBar) stageProgressBar.style.display = "none";
-//}
-
-//function showStageProgressBar() {
-//  if (stageProgressBar) stageProgressBar.style.display = "block";
-//}
-
-
 // attack progress bars
 let playerAttackFill = null;
 let enemyAttackFill = null;
-let discipleEtaTimer = 0;
-//let sanityTimer = 0;
-// Chance to trigger a random event each step of movement
-// Reduced from 30% to 10% so encounters feel more like rare discoveries
-const EVENT_CHANCE = 0.1;
 
 // Load saved state when DOM is ready
 window.addEventListener("beforeunload", saveGame);
@@ -1797,29 +1745,6 @@ function buildDiscipleStatsView(d) {
   return container;
 }
 
-function buildDiscipleInventoryView(d) {
-  const body = document.createElement('div');
-  const entries = Object.entries(d.inventory || {});
-  const filled = entries.reduce((a, [_, v]) => a + v, 0);
-  const header = document.createElement('div');
-  header.textContent = `Slots ${filled}/${d.inventorySlots}`;
-  body.appendChild(header);
-  const list = document.createElement('ul');
-  entries.forEach(([k, v]) => {
-    const li = document.createElement('li');
-    li.textContent = `${v} ${k}`;
-    list.appendChild(li);
-  });
-  body.appendChild(list);
-  return body;
-}
-
-function buildDiscipleGearView() {
-  const body = document.createElement('div');
-  body.textContent = 'No gear equipped';
-  return body;
-}
-
 function buildDiscipleProficiencyView(d) {
   const container = document.createElement('div');
   const groups = {
@@ -1859,23 +1784,6 @@ function buildDiscipleProficiencyView(d) {
     entry.appendChild(head);
     container.appendChild(entry);
   });
-  return container;
-}
-
-function buildDiscipleConstructsView() {
-  const container = document.createElement('div');
-  const list = document.createElement('div');
-  list.className = 'saved-constructs';
-  sectSystem.savedConstructs.forEach(name => {
-    const wrap = document.createElement('div');
-    wrap.className = 'construct-card-wrapper';
-    const card = createConstructCard(name);
-    wrap.appendChild(card);
-    const info = createConstructInfo(name);
-    if (info) wrap.appendChild(info);
-    list.appendChild(wrap);
-  });
-  container.appendChild(list);
   return container;
 }
 
@@ -1984,66 +1892,6 @@ function openDiscipleOverlay(d) {
   });
 }
 
-function buildDiscipleSkillsList(d) {
-  const container = document.createElement('div');
-  const groups = {
-    Gathering: ['Gather Fruit'],
-    Logging: ['Gather Softwood'],
-    Building: ['Building'],
-    Chanting: ['Chant'],
-    Researching: ['Research']
-  };
-  const effects = {
-    Gathering: 'yield',
-    Logging: 'yield',
-    Building: 'speed',
-    Chanting: 'potency',
-    Researching: 'research pts'
-  };
-  Object.entries(groups).forEach(([name, tasks]) => {
-    const xp = sectState.discipleSkills[d.id]?.[name] || 0;
-    const prog = getTaskSkillProgress(xp);
-    const entry = document.createElement('div');
-    entry.className = 'skill-group';
-    const head = document.createElement('div');
-    const isGather = name === 'Gathering' || name === 'Logging';
-    const mult = 1 + (isGather ? 0.05 : 0.02) * prog.level;
-    const effect = effects[name];
-    head.textContent = `${name} Lv ${prog.level}` +
-      (effect ? ` (×${mult.toFixed(2)} ${effect})` : '');
-    const bar = document.createElement('div');
-    bar.className = 'disciple-skill-progress';
-    const fill = document.createElement('div');
-    fill.className = 'disciple-skill-progress-fill';
-    fill.style.width = `${Math.floor(prog.progress * 100)}%`;
-    bar.appendChild(fill);
-    head.appendChild(bar);
-    entry.appendChild(head);
-    const list = document.createElement('div');
-    list.style.display = 'none';
-    tasks.forEach(t => {
-      const opt = document.createElement('div');
-      opt.className = 'skill-task-option';
-      opt.textContent = t;
-      opt.addEventListener('click', () => {
-        if (!d.incapacitated) {
-          sectState.discipleTasks[d.id] = t;
-          discipleGatherPhase[d.id] = -1;
-          discipleOverlay.close();
-          updateSectDisplay();
-        }
-      });
-      list.appendChild(opt);
-    });
-    head.addEventListener('click', () => {
-      list.style.display = list.style.display === 'none' ? 'block' : 'none';
-    });
-    entry.appendChild(list);
-    container.appendChild(entry);
-  });
-  return container;
-}
-
  export function renderExplorationTab() {
   if (!explorationListContainer) return;
   explorationListContainer.innerHTML = '';
@@ -2108,14 +1956,6 @@ export function startWorldCombat(worldId, party) {
   closeExplorationOverlay?.();
   showTab(mainTab);
   respawnDealerStage();
-}
-
- function triggerOrbFlash() {
-  const orbs = document.querySelectorAll('#sectOrbs .sect-orb');
-  orbs.forEach(o => {
-    o.classList.add('flash');
-    setTimeout(() => o.classList.remove('flash'), 500);
-  });
 }
 
 
@@ -2863,21 +2703,6 @@ function updateSectCardInfo() {
 //let stageEndEnemyActive = false;
 //let stageComplete = false;
 
-function rarityClass(rarity) {
-  switch (rarity) {
-    case 'common':
-      return 'basic';
-    case 'uncommon':
-      return 'rare';
-    case 'rare':
-      return 'epic';
-    case 'super-rare':
-      return 'legendary';
-    default:
-      return 'basic';
-  }
-}
-
 
 
 function openCamp(onCloseCallback = null) {
@@ -3013,38 +2838,6 @@ function drawSpeakerIcon(canvas) {
 
 
 //=========player functions===========
-
-function spawnPlayer() {
-  clearActiveDisciples();
-  // Ensure disciples start combat at full health
-  disciples.forEach(d => {
-    d.currentHp = d.maxHp;
-  });
-  disciples.slice(0, stats.combatSlots).forEach(d => selectDisciple(d));
-  renderCombatDisciples();
-}
-
-function respawnPlayer() {
-  setEnemyAttackProgress(0);
-  playerStats.hasDied = false;
-  Object.assign(stats, BASE_STATS);
-  stats.combatSlots = BASE_STATS.combatSlots + attributes.Strength.inventorySlots;
-  // reset resources
-
-  clearActiveDisciples();
-  stageData.world = 1;
-  stageData.stage = 1;
-  stageData.kills = playerStats.stageKills[stageData.stage] || 0;
-  renderStageInfo();
-
-  spawnPlayer();
-  respawnDealerStage();
-  updatePlayerStats(stats);
-  dom.killsDisplay.textContent = `Kills: ${formatNumber(stageData.kills)}`;
-  renderGlobalStats();
-  renderWorldsMenu();
-  checkSpeakerEncounter();
-}
 
 function returnPartyToSect() {
   currentExplorationParty.forEach(id => {
