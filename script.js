@@ -2171,7 +2171,18 @@ function init() {
   initTabs();
   initPollen();
   initCombat();
-  initUi();
+  initUi({
+    mainTab,
+    starChartTab,
+    playerStatsTab,
+    worldsTab,
+    playerTab,
+    explorationTab,
+    locationTab,
+    logTab,
+    locationTabButton,
+    explorationTabButton
+  });
   initDisciples();
   initDebug();
   window.addEventListener('location-discovered', e => addDiscoveredLocation(e.detail.name, locationListContainer, LOCATION_DEFS));
