@@ -4,6 +4,7 @@ export const BASE_STATS = {
   combatSlots: 3,
   avgCombatLevel: 0,
   avgProficiencyLevel: 0
+
 };
 
 export const HUNT_CYCLE_SECONDS = 200;

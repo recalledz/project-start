@@ -148,14 +148,8 @@ import {
 // Available disciples under the player's control
 // Initialized with three disciples ("frogs") per the documentation
 let { disciples } = initializeSect();
-// mapping of card back styles
-const cardBackImages = {
-  "basic-red": "img/basic deck.png"
-};
 // theme state
 let isDarkenshift = false;
-// resources and progress trackers
-let cardPoints = 0;
 function awardAttributePoints(d, group) {
   const attr = ATTRIBUTE_FOR_GROUP[group];
   const points = 1 + (Math.random() < 0.1 ? 1 : 0);
@@ -2788,7 +2782,7 @@ function renderDealerCard() {
   lucide.createIcons({ icons: lucide.icons });
 }
 
-function animateCardHit(card) {
+function animateDiscipleHit(card) {
   const w = card.wrapperElement;
   if (!w) return;
 
@@ -2953,7 +2947,6 @@ export function nextStage() {
   checkSpeakerEncounter();
   inCombat = false;
   setCurrentEnemy(null);
-  redrawAllowed = false;
   if (dom.nextStageArea) dom.nextStageArea.classList.remove('glow-notify');
   if (isBossStage) {
     respawnDealerStage();
@@ -2983,7 +2976,6 @@ function nextWorld() {
   renderStageInfo();
   inCombat = false;
   setCurrentEnemy(null);
-  redrawAllowed = false;
   if (dom.nextStageArea) dom.nextStageArea.classList.remove('glow-notify');
   respawnDealerStage();
 }
@@ -3008,7 +3000,6 @@ function goToWorld(id) {
   renderStageInfo();
   inCombat = false;
   setCurrentEnemy(null);
-  redrawAllowed = false;
   if (dom.nextStageArea) dom.nextStageArea.classList.remove('glow-notify');
   renderWorldsMenu();
   updateWorldTabNotification();
@@ -3237,7 +3228,7 @@ export function cDealerDamage(damageAmount = null, ability = null, source = "dea
     card.hpDisplay.textContent = `HP: ${formatNumber(Math.round(card.currentHp))}/${formatNumber(Math.round(card.maxHp))}`;
   }
   if (card.wrapperElement) {
-    animateCardHit(card);
+    animateDiscipleHit(card);
     // Show actual damage dealt after shield reduction
     showDamageFloat(card, finalDamage);
   }
@@ -3250,7 +3241,7 @@ export function cDealerDamage(damageAmount = null, ability = null, source = "dea
       card.health = 0;
       card.stamina = 0;
       sectState.discipleTasks[card.id] = 'Idle';
-      animateCardDeath(card, () => {
+      animateDiscipleDeath(card, () => {
         removeBloodSplat(card);
         card.wrapperElement?.remove();
         if (activeDisciples.length === 0) {
@@ -3301,16 +3292,6 @@ function combatXp(xpAmount) {
   updateHandDisplay();
 }
 
-// Update the draw button depending on party size
-function updateDrawButton() {
-  const drawBtn = document.getElementById('clickalipse');
-  if (!drawBtn) return;
-  drawBtn.disabled = false;
-  drawBtn.style.background = 'green';
-}
-
-
-
 // Refresh the cards currently shown in the player's hand
 function updateHandDisplay() {
   activeDisciples.forEach(d => {
@@ -3355,8 +3336,6 @@ let gamePaused = false;
 let campOverlayOpen = false;
 let campOverlay = null; // overlay instance
 let inCombat = false;
-let redrawAllowed = false;
-let redrawCost = 10;
 //let stageProgressing = false;
 //let stageProgressInterval = null;
 //let progressButtonActive = false;
@@ -3383,13 +3362,11 @@ function rarityClass(rarity) {
 function openCamp(onCloseCallback = null) {
   if (campOverlayOpen) return;
   campOverlayOpen = true;
-  redrawAllowed = true;
   gamePaused = true;
   hidePlayerAttackBar(playerAttackFill);
   campOverlay = createOverlay({ className: 'camp-overlay' });
   campOverlay.onClose(() => {
     campOverlayOpen = false;
-    redrawAllowed = false;
     gamePaused = false;
     onCloseCallback?.();
   });
@@ -3509,20 +3486,20 @@ function drawSpeakerIcon(canvas) {
 
 
 
-// Visual pulse when a card gains health
-function animateCardHeal(card) {
+// Visual pulse when a disciple gains health
+function animateDiscipleHeal(card) {
   const w = card.wrapperElement;
   runAnimation(w, "heal-animate");
 }
 
-// Brief animation shown when a card levels up
-function animateCardLevelUp(card) {
+// Brief animation shown when a disciple levels up
+function animateDiscipleLevelUp(card) {
   const w = card.wrapperElement;
   runAnimation(w, "levelup-animate");
 }
 
-// Fade out and remove the card when its HP reaches zero
-function animateCardDeath(card, callback) {
+// Fade out and remove the disciple when its HP reaches zero
+function animateDiscipleDeath(card, callback) {
   const w = card.wrapperElement;
   if (!w) {
     callback?.();
@@ -3630,7 +3607,7 @@ location.reload();
 
 
 
-// Recalculate combat stats based on cards currently drawn
+// Recalculate combat stats based on active disciples
 function updatePlayerStats() {
   stats.avgCombatLevel = 0;
   stats.avgProficiencyLevel = 0;
@@ -3659,8 +3636,6 @@ if (typeof localStorage === "undefined") return;
   const state = {
     stats,
     stageData,
-    cardPoints,
-    redrawCost,
     playerStats,
     worldProgress,
     lifeCore,
@@ -3693,8 +3668,6 @@ if (!json) return;
 try {
 const state = JSON.parse(json);
   // legacy cash/chip values are ignored
-  cardPoints = state.cardPoints || 0;
-  redrawCost = state.redrawCost || 10;
   Object.assign(stats, state.stats || {});
   if (state.systems) {
     Object.assign(systems, state.systems);
@@ -3852,7 +3825,6 @@ if (currentEnemy) {
 }
 
 
-  updateDrawButton();
   updatePlayerStats(stats);
   worldProgressTimer += deltaTime;
   if (worldProgressTimer >= 1000) {

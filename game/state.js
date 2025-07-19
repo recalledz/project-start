@@ -9,6 +9,7 @@ export const stats = {
   combatSlots: 3,
   avgCombatLevel: 0,
   avgProficiencyLevel: 0
+
 };
 stats.combatSlots = stats.combatSlots + attributes.Strength.inventorySlots;
 
@@ -52,7 +53,6 @@ export let stageData = {
   dealerLifeCurrent: 10,
   stageDamageMultiplier: 1.05,
   kills: 0,
-  cardXp: 1,
   playerXp: 1,
   attackspeed: 10000
 };
