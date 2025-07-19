@@ -6,7 +6,7 @@ let mainTab;
 let starChartTab;
 let playerStatsTab;
 let worldsTab;
-let coreTab;
+let metamorphosisTab;
 let lexiconTab;
 let sectTab;
 let explorationTab;
@@ -20,7 +20,7 @@ export function init(elements = {}) {
   starChartTab = elements.starChartTab;
   playerStatsTab = elements.playerStatsTab;
   worldsTab = elements.worldsTab;
-  coreTab = elements.coreTab;
+  metamorphosisTab = elements.metamorphosisTab;
   lexiconTab = elements.lexiconTab;
   sectTab = elements.sectTab;
   explorationTab = elements.explorationTab;
@@ -138,7 +138,7 @@ export function hideTab() {
   if (starChartTab) starChartTab.style.display = 'none';
   if (playerStatsTab) playerStatsTab.style.display = 'none';
   if (worldsTab) worldsTab.style.display = 'none';
-  if (coreTab) coreTab.style.display = 'none';
+  if (metamorphosisTab) metamorphosisTab.style.display = 'none';
   if (lexiconTab) lexiconTab.style.display = 'none';
   if (sectTab) sectTab.style.display = 'none';
   if (explorationTab) explorationTab.style.display = 'none';

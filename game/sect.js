@@ -1,5 +1,5 @@
 import addLog from '../log.js';
-import { refreshCore } from '../core.js';
+import { refreshMetamorphosis } from '../metamorphosis.js';
 import { sectState, systems, currentEnemy } from './state.js';
 import { generateDiscipleAttributes } from '../discipleAttributes.js';
 import Disciple from '../disciple.js';
@@ -1326,7 +1326,7 @@ export function tickSectSystem(delta) {
     renderOrbs();
     renderSeasonBanner();
     renderResources();
-    refreshCore();
+    refreshMetamorphosis();
     renderXpBar();
   }
 }
