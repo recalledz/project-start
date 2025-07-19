@@ -9,7 +9,7 @@ export let activeDisciples = [];
 
 // Functions to manage which disciples are active in combat
 export function selectDisciple(d) {
-  if (!activeDisciples.includes(d) && activeDisciples.length < stats.cardSlots) {
+  if (!activeDisciples.includes(d) && activeDisciples.length < stats.combatSlots) {
     activeDisciples.push(d);
     discipleAttackTimers[d.id] = 0;
     renderCombatDisciples();

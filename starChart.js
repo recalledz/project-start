@@ -91,14 +91,12 @@ const nodes = [
 
   // strength tree
   { id: "str_base_hp",        x: 0.883406113537118,  y: 0.8283479187799804, label: "+5 B HP", type: "str" },
-  {id: 'str_deck2', x: 0.926528384279476, y: 0.7414198029675223, label: 'S Deck #2', type: 'str'},
   {id: 'str_challenges', x: 0.9270742358078603, y: 0.6368859928133005, label: 'Unlock Challenges', type: 'str'},
   {id: 'str_misc', x: 0.9259825327510917, y: 0.5103450647318742, label: 'Strength Upgrade', type: 'str'},
   {id: 'str_unlock_class', x: 0.8151746724890829, y: 0.3111806743548304, label: 'Unlock Class', type: 'str'},
 
   // dex tree
   { id: "dex_attack_speed",   x: 0.6241266375545852, y: 0.8756632223234702, label: "Unlock Attack Speed", type: "dex" },
-  { id: "dex_deck2",          x: 0.5564410480349345, y: 0.8008390213709746, label: "Unlock DEX Deck #2", type: "dex" },
   { id: "dex_misc",           x: 0.4025109170305677, y: 0.6742980932895483, label: "DEX Upgrade", type: "dex" },
 
   // int tree
@@ -113,15 +111,12 @@ const nodeMap = Object.fromEntries(nodes.map(n => [n.id, n]));
  const edges = [
   // strength tree
   ["root", "str_base_hp"], 
-  ["str_base_hp", "str_deck2"], 
-  ["str_deck2", "str_challenges"],
   ["str_challenges", "str_misc"],
   ["str_challenges", "str_misc"],
   
   // dex tree
   ["root", "dex_attack_speed"], 
-  ["dex_attack_speed", "dex_deck2"], 
-  ["dex_deck2", "dex_misc"],
+  ["dex_attack_speed", "dex_misc"],
 
   // int tree
   ["root", "int_joker_slot"], 

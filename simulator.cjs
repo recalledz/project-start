@@ -14,7 +14,7 @@ class GameSimulator {
     this.commitHash = process.env.GITHUB_SHA || "";
     // track upgrade unlocks
     this.upgrades = {
-      cardSlots: { unlocked: false, unlockStage: 5 }
+      combatSlots: { unlocked: false, unlockStage: 5 }
     };
 
     // analytics placeholders for future expansion

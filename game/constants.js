@@ -6,7 +6,7 @@ export const BASE_STATS = {
   pRegen: 0,
   damageMultiplier: 1,
   upgradeDamageMultiplier: 1,
-  cardSlots: 3,
+  combatSlots: 3,
   attackSpeed: 10000,
   hpPerKill: 1,
   avgCombatLevel: 0,
