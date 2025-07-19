@@ -115,6 +115,32 @@ import {
   FRUIT_MAX_CAP,
   FRUIT_GROWTH_RATES
 } from "./game/state.js";
+import {
+  BASE_STATS,
+  HUNT_CYCLE_SECONDS,
+  HUNT_XP_PER_SUCCESS,
+  ANIMALS,
+  SOFTWOOD_CYCLE_SECONDS,
+  SOFTWOOD_CYCLE_AMOUNT,
+  DAILY_FRUIT_CONSUMPTION,
+  FRUIT_XP_PER_CYCLE,
+  LOG_XP_PER_CYCLE,
+  BUILD_XP_RATE,
+  RESEARCH_XP_PER_CYCLE,
+  CHANT_XP_PER_CYCLE,
+  EXPLORATION_CYCLE_SECONDS,
+  STAMINA_DRAIN_PER_EXPLORATION,
+  DISCIPLE_MAX_HEALTH,
+  REST_TIME_SECONDS,
+  GATHER_WORK_SECONDS,
+  MIN_TRAVEL_SECONDS,
+  TRAVEL_SECONDS_PER_UNIT,
+  GATHER_SPOTS,
+  TASK_ICONS,
+  TASK_GROUPS,
+  ATTRIBUTE_FOR_GROUP,
+  LOCATION_DEFS
+} from "./game/constants.js";
 
 
 
@@ -139,107 +165,6 @@ function upgradePowerCost() {
   return Math.floor(50 * Math.pow(1.5, upgradePowerPurchased));
 }
 
-// Base player stats used for resets
-const BASE_STATS = {
-  upgradePower: 0,
-  pDamage: 0,
-  pRegen: 0,
-  damageMultiplier: 1,
-  upgradeDamageMultiplier: 1,
-  cardSlots: 3,
-  //at start max
-  attackSpeed: 10000,
-  //ms between automatic attacks
-  hpPerKill: 1,
-  avgCombatLevel: 0,
-  avgProficiencyLevel: 0,
-  baseCardHpBoost: 0,
-  maxMana: 0,
-  mana: 0,
-  manaRegen: 0,
-  //maxSanity: 100,
-  //sanity: 100,
-  healOnRedraw: 0,
-  abilityPower: 1,
-  spadeDamageMultiplier: 1,
-  playerShield: 0,
-  abilityCooldownReduction: 0,
-  jokerCooldownReduction: 0,
-  redrawCooldownReduction: 0,
-  hpMultiplier: 1,
-  extraDamageMultiplier: 1,
-  damageBuffMultiplier: 1,
-  damageBuffExpiration: 0
-};
-
-// Persistent player stats affecting combat and rewards
-
-const HUNT_CYCLE_SECONDS = 200;
-const HUNT_XP_PER_SUCCESS = 30;
-const ANIMALS = [
-  { name: 'Chicken', level: 1, yield: 3, spawnRate: 0.8, max: 5 },
-  { name: 'Boar', level: 3, yield: 7, spawnRate: 0.4, max: 3 },
-  { name: 'Deer', level: 5, yield: 10, spawnRate: 0.2, max: 2 }
-];
-const SOFTWOOD_CYCLE_SECONDS = 215;
-const SOFTWOOD_CYCLE_AMOUNT = 10;
-const DAILY_FRUIT_CONSUMPTION = 20; // fruits eaten by each disciple per day
-
-// XP earned for disciple tasks (BaseXP × cycle length)
-const FRUIT_XP_PER_CYCLE = 1; // 0.005 XP/s × 200s
-const LOG_XP_PER_CYCLE = 1; // 0.0047 XP/s × 215s ≈ 1
-const BUILD_XP_RATE = 1; // per second
-const RESEARCH_XP_PER_CYCLE = 1; // 0.008 XP/s × ~125s ≈ 1
-const CHANT_XP_PER_CYCLE = 1.665; // 0.333 XP/s × 5s
-const EXPLORATION_CYCLE_SECONDS = 150;
-const STAMINA_DRAIN_PER_EXPLORATION = 1;
-const DISCIPLE_MAX_HEALTH = 10;
-const REST_TIME_SECONDS = 300; // health fully restored over 5 minutes
-
-// Gathering constants based on documentation
-const GATHER_WORK_SECONDS = 120; // WorkDuration per slot
-const MIN_TRAVEL_SECONDS = 1; // minimum travel/haul time
-const TRAVEL_SECONDS_PER_UNIT = 5; // seconds per travel distance unit
-
-const GATHER_SPOTS = {
-  'Gather Fruit': { baseYield: 0.1038, travel: 0 }, // Berry Bush
-  'Gather Softwood': { baseYield: 0.09, travel: 0.5 } // Scrubland Trees
-};
-
-const TASK_ICONS = {
-  'Gather Fruit': '🍎',
-  'Gather Softwood': '🪵',
-  Hunt: '🏹',
-  Building: '⚒️',
-  Research: '🔬',
-  Chant: '🎶',
-  Exploration: '🧭',
-  Idle: '💤',
-  Resting: '🛌'
-};
-
-const TASK_GROUPS = {
-  'Gather Fruit': 'Gathering',
-  'Gather Softwood': 'Logging',
-  Hunt: 'Hunting',
-  'Building': 'Building',
-  'Research': 'Researching',
-  'Chant': 'Chanting',
-  'Exploration': 'Exploration',
-  Idle: 'Idle',
-  Resting: 'Idle'
-};
-
-const ATTRIBUTE_FOR_GROUP = {
-  Gathering: 'dexterity',
-  Logging: 'strength',
-  Hunting: 'dexterity',
-  Building: 'endurance',
-  Researching: 'intelligence',
-  Chanting: 'intelligence',
-  Exploration: 'dexterity',
-  Idle: null
-};
 
 function awardAttributePoints(d, group) {
   const attr = ATTRIBUTE_FOR_GROUP[group];
@@ -274,12 +199,6 @@ function addSkillXp(d, group, amount) {
   }
 }
 
-const LOCATION_DEFS = [
-  { name: 'Firewood Grove', reqDistance: 100, baseChance: 0.2, x: '30%', y: '70%' },
-  { name: 'Crystal Cavern', reqDistance: 300, baseChance: 0.15, x: '70%', y: '40%' },
-  { name: 'Esoteric Dungeon', reqDistance: 100, baseChance: 1.0, x: '50%', y: '20%' },
-  { name: 'Ancient Ruins', reqDistance: 800, baseChance: 0.05, x: '80%', y: '10%' }
-];
 
 // XP progression for disciple tasks
 function taskXpRequired(level) {
