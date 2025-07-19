@@ -2680,6 +2680,7 @@ body.darkenshift-mode .tabsContainer button.active {
     gap: 6px;
     padding: 6px;
     overflow: hidden;
+    height: 100vh;
 }
 .sect-disciples-container {
     flex: 1;
