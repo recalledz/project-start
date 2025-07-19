@@ -7,5 +7,6 @@ The project organizes game logic under the `game/` directory.
 - **game/ui.js** – renders combat UI elements such as bars and disciple cards.
 - **game/combat.js** – handles combat timers and damage resolution.
 - **game/debug.js** – wiring for optional debug controls.
+- **game/constants.js** – collection of shared gameplay constants used across systems.
 
-The top-level `script.js` only imports these modules and orchestrates initialization.
+The top-level `script.js` now merely orchestrates initialization, delegating all logic to the modules above.
