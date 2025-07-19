@@ -884,8 +884,8 @@ function updateSectDisplay() {
     orbs.innerHTML = '';
     const mobile = window.innerWidth <= 600;
     const positions = mobile
-      ? [{ cls: 'water', left: '50%', top: '10%' }]
-      : [{ cls: 'water', left: '50%', top: '5%' }];
+      ? [{ cls: 'water', left: '50%', top: '50%' }]
+      : [{ cls: 'water', left: '50%', top: '50%' }];
     positions.forEach(p => {
       const orb = document.createElement('div');
       orb.className = `sect-orb ${p.cls}`;
@@ -902,7 +902,7 @@ function updateSectDisplay() {
         const rateEl = document.getElementById('waterRate');
         if (rateEl) {
           const orbSize = mobile ? 30 : 50;
-          rateEl.style.top = `calc(${p.top} + ${orbSize}px)`;
+          rateEl.style.top = `calc(${p.top} + ${orbSize / 2 + 4}px)`;
           rateEl.textContent = `${sectSystem.gains.water.toFixed(2)}/s`;
         }
       }
