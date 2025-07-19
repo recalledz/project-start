@@ -423,7 +423,6 @@ const dom = {
   worldProgressPerSecDisplay: document.getElementById("worldProgressPerSecDisplay"),
   dCardContainer: document.getElementsByClassName("dCardContainer")[0],
   dealerContainer: document.querySelector('.dealerContainer'),
-  combatHotbar: document.getElementById('combatHotbar'),
   combatResources: document.getElementById('combatResources'),
 };
 //const stageProgressFill = document.getElementById("stageProgressFill");
@@ -482,8 +481,6 @@ let activeEffectsContainer;
 
 let playerCoreSubTabButton;
 let playerCorePanel;
-let playerConstructSubTabButton;
-let playerConstructPanel;
 let playerLexiconSubTabButton;
 let playerLexiconPanel;
 let playerSectSubTabButton;
@@ -544,7 +541,7 @@ function setupTabHandlers() {
         refreshCore();
         showTab(playerTab);
         setActiveTabButton(playerTabButton);
-        if (playerConstructSubTabButton) playerConstructSubTabButton.click();
+        if (playerCoreSubTabButton) playerCoreSubTabButton.click();
       }
     },
     {
@@ -672,8 +669,6 @@ function initTabs() {
   initTooltip();
   playerCoreSubTabButton = document.querySelector(".playerCoreSubTabButton");
   playerCorePanel = document.querySelector(".player-core-panel");
-  playerConstructSubTabButton = document.querySelector('.playerConstructSubTabButton');
-  playerConstructPanel = document.querySelector('.player-construct-panel');
   playerLexiconSubTabButton = document.querySelector('.playerLexiconSubTabButton');
   playerLexiconPanel = document.querySelector('.player-lexicon-panel');
   playerSectSubTabButton = document.querySelector('.playerSectSubTabButton');
@@ -773,45 +768,29 @@ function initTabs() {
   if (sectNavCultivationBtn) sectNavCultivationBtn.addEventListener("click", () => { setActiveNavBtn(sectNavCultivationBtn); openPlaceholderOverlay("Cultivation"); });  if (playerCoreSubTabButton)
     playerCoreSubTabButton.addEventListener("click", () => {
       if (playerCorePanel) playerCorePanel.style.display = "flex";
-      if (playerConstructPanel) playerConstructPanel.style.display = "none";
       if (playerLexiconPanel) playerLexiconPanel.style.display = 'none';
       if (playerSectPanel) playerSectPanel.style.display = 'none';
       playerCoreSubTabButton.classList.add("active");
-      if (playerConstructSubTabButton) playerConstructSubTabButton.classList.remove("active");
-      if (playerLexiconSubTabButton) playerLexiconSubTabButton.classList.remove('active');
-    });
-  if (playerConstructSubTabButton)
-    playerConstructSubTabButton.addEventListener('click', () => {
-      if (playerCorePanel) playerCorePanel.style.display = 'none';
-      if (playerConstructPanel) playerConstructPanel.style.display = 'flex';
-      if (playerLexiconPanel) playerLexiconPanel.style.display = 'none';
-      if (playerSectPanel) playerSectPanel.style.display = 'none';
-      playerConstructSubTabButton.classList.add('active');
-      if (playerCoreSubTabButton) playerCoreSubTabButton.classList.remove('active');
       if (playerLexiconSubTabButton) playerLexiconSubTabButton.classList.remove('active');
     });
   if (playerLexiconSubTabButton)
     playerLexiconSubTabButton.addEventListener('click', () => {
       if (playerCorePanel) playerCorePanel.style.display = 'none';
-      if (playerConstructPanel) playerConstructPanel.style.display = 'none';
       if (playerLexiconPanel) playerLexiconPanel.style.display = 'flex';
       if (playerSectPanel) playerSectPanel.style.display = 'none';
       playerLexiconSubTabButton.classList.add('active');
       if (playerCoreSubTabButton) playerCoreSubTabButton.classList.remove('active');
-      if (playerConstructSubTabButton) playerConstructSubTabButton.classList.remove('active');
       if (playerSectSubTabButton) playerSectSubTabButton.classList.remove('active');
     });
   if (playerSectSubTabButton)
     playerSectSubTabButton.addEventListener('click', () => {
       if (playerCorePanel) playerCorePanel.style.display = 'none';
-      if (playerConstructPanel) playerConstructPanel.style.display = 'none';
       if (playerLexiconPanel) playerLexiconPanel.style.display = 'none';
       if (playerSectPanel) playerSectPanel.style.display = 'flex';
       startDiscipleMovement();
       playerSectSubTabButton.classList.add('active');
       playerSectSubTabButton.classList.remove('glow-notify');
       if (playerCoreSubTabButton) playerCoreSubTabButton.classList.remove('active');
-      if (playerConstructSubTabButton) playerConstructSubTabButton.classList.remove('active');
       if (playerLexiconSubTabButton) playerLexiconSubTabButton.classList.remove('active');
     });
   if (statsOverviewSubTabButton)
@@ -1973,7 +1952,7 @@ function openDiscipleOverlay(d) {
   } else {
     discipleOverlayActiveTab = d.lastTab || 'general';
     if (discipleOverlayActiveTab === 'skills') discipleOverlayActiveTab = 'proficiency';
-    if (discipleOverlayActiveTab === 'inventory' || discipleOverlayActiveTab === 'gear') {
+    if (discipleOverlayActiveTab === 'inventory' || discipleOverlayActiveTab === 'gear' || discipleOverlayActiveTab === 'constructs') {
       discipleOverlayActiveTab = 'general';
     }
   }
@@ -1995,7 +1974,6 @@ function openDiscipleOverlay(d) {
   const defs = [
     { key: 'general', label: 'General' },
     { key: 'proficiency', label: 'Proficiency' },
-    { key: 'constructs', label: 'Constructs' },
     { key: 'moodlets', label: 'Moodlets' },
     { key: 'stats', label: 'Stats' }
   ];
@@ -2007,8 +1985,6 @@ function openDiscipleOverlay(d) {
       content.appendChild(view);
     } else if (active === 'proficiency') {
       content.appendChild(buildDiscipleProficiencyView(d));
-    } else if (active === 'constructs') {
-      content.appendChild(buildDiscipleConstructsView(d));
     } else if (active === 'moodlets') {
       content.appendChild(buildDiscipleMoodletsView(d));
     } else if (active === 'stats') {
@@ -3257,16 +3233,10 @@ Object.assign(playerStats, state.playerStats || {});
       }
 
     if (!Array.isArray(sectSystem.savedConstructs)) {
-      sectSystem.savedConstructs = ['Murmur'];
-    } else if (!sectSystem.savedConstructs.includes('Murmur')) {
-      sectSystem.savedConstructs.unshift('Murmur');
+      sectSystem.savedConstructs = [];
     }
-
-    // ensure the default Murmur card is active if no constructs are active
     if (!Array.isArray(sectSystem.activeConstructs)) {
-      sectSystem.activeConstructs = ['Murmur'];
-    } else if (sectSystem.activeConstructs.length === 0) {
-      sectSystem.activeConstructs.push('Murmur');
+      sectSystem.activeConstructs = [];
     }
 
     // ensure disciples have required stats when loading older saves
