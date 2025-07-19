@@ -6,7 +6,6 @@ import {
   nextStage,
   respawnDealerStage,
   renderStageInfo,
-  addDiscoveredLocation,
   saveGame,
   loadGame,
   startNewGame,
