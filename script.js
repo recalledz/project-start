@@ -88,7 +88,13 @@ import {
   removeDealerLifeBar,
   updateDealerLifeDisplay,
   renderCombatDisciples,
-  updateDiscipleStatsDisplay
+  updateDiscipleStatsDisplay,
+  makeBar,
+  formatTime,
+  createLabeledBar,
+  setActiveTabButton,
+  showTab,
+  addDiscoveredLocation
 } from "./game/ui.js";
 // disciple selection for combat
 import {
@@ -172,42 +178,6 @@ import {
 // Initialized with three disciples ("frogs") per the documentation
 let { disciples } = initializeSect();
 // theme state
-
-function makeBar(value, max, color) {
-  const bar = document.createElement('div');
-  bar.className = 'bar';
-  const fill = document.createElement('div');
-  fill.className = 'bar-fill';
-  fill.style.background = color;
-  fill.style.width = `${Math.min(100, (value / max) * 100)}%`;
-  bar.appendChild(fill);
-  return bar;
-}
-
-function formatTime(seconds) {
-  if (!isFinite(seconds)) return '∞';
-  const s = Math.max(0, Math.round(seconds));
-  const m = Math.floor(s / 60);
-  const sec = s % 60;
-  return m > 0 ? `${m}m ${sec}s` : `${sec}s`;
-}
-
-function createLabeledBar(icon, value, max, color) {
-  const row = document.createElement('div');
-  row.className = 'disciple-card-row';
-  const ic = document.createElement('span');
-  ic.className = 'disciple-bar-icon';
-  ic.textContent = icon;
-  const text = document.createElement('span');
-  text.className = 'disciple-bar-text';
-  text.textContent = `${Math.round(value)}/${Math.round(max)}`;
-  const bar = makeBar(value, max, color);
-  bar.classList.add('disciple-card-bar');
-  row.appendChild(ic);
-  row.appendChild(text);
-  row.appendChild(bar);
-  return row;
-}
 
 function getTaskEta(d) {
   const task = d.incapacitated ? 'Resting' : sectState.discipleTasks[d.id] || 'Idle';
@@ -491,18 +461,18 @@ let playerStatsTabButton;
 let worldSubTabButton;
 let cardSubTabButton;
 let playerTabButton;
-let explorationTabButton;
-let locationTabButton;
+export let explorationTabButton;
+export let locationTabButton;
 let logTabButton;
-let mainTab;
-let cardSubTab;
-let starChartTab;
-let playerStatsTab;
-let worldsTab;
-let playerTab;
-let explorationTab;
-let locationTab;
-let logTab;
+export let mainTab;
+export let cardSubTab;
+export let starChartTab;
+export let playerStatsTab;
+export let worldsTab;
+export let playerTab;
+export let explorationTab;
+export let locationTab;
+export let logTab;
 let activeEffectsContainer;
 let tooltip;
 
@@ -554,41 +524,6 @@ let sectNavScheduleBtn;
 const discoveredLocations = [];
 const explorationParty = new Set();
 let currentExplorationParty = [];
-
-function setActiveTabButton(btn) {
-  document.querySelectorAll('.tabsContainer button').forEach(b => {
-    b.classList.toggle('active', b === btn);
-  });
-}
-
-export function addDiscoveredLocation(name) {
-  if (discoveredLocations.includes(name)) return;
-  discoveredLocations.push(name);
-  if (locationListContainer) {
-    const row = document.createElement('div');
-    row.textContent = name;
-    locationListContainer.appendChild(row);
-  }
-  const map = document.getElementById('colonyMap');
-  const def = LOCATION_DEFS.find(l => l.name === name);
-  if (map && def) {
-    const icon = document.createElement('div');
-    icon.className = 'location-icon';
-    icon.style.left = def.x;
-    icon.style.top = def.y;
-    map.appendChild(icon);
-  }
-  if (locationTabButton && locationTabButton.style.display === 'none') {
-    locationTabButton.style.display = '';
-  }
-  if (
-    explorationTabButton &&
-    name === 'Esoteric Dungeon' &&
-    explorationTabButton.style.display === 'none'
-  ) {
-    explorationTabButton.style.display = '';
-  }
-}
 
 function setupTabHandlers() {
   const tabHandlers = [
@@ -642,22 +577,6 @@ function selectWorld(id) {
   }
 }
 
-function hideTab() {
-  if (mainTab) mainTab.style.display = "none";
-  if (starChartTab) starChartTab.style.display = "none";
-  if (playerStatsTab) playerStatsTab.style.display = "none";
-  if (worldsTab) worldsTab.style.display = "none";
-  if (playerTab) playerTab.style.display = "none";
-  if (explorationTab) explorationTab.style.display = "none";
-  if (locationTab) locationTab.style.display = "none";
-  if (logTab) logTab.style.display = "none";
-}
-
-function showTab(tab) {
-  hideTab();
-  // Reset display so CSS controls layout
-  if (tab) tab.style.display = "";
-}
 
 function showColonyTab(name) {
   if (!colonyTasksPanel || !colonyInfoPanel || !colonyResourcesPanel || !colonyBuildPanel) return;
@@ -822,7 +741,7 @@ function initTabs() {
   if (gateBtn)
     gateBtn.addEventListener('click', () => {
       if (discoveredLocations.length === 0) {
-        LOCATION_DEFS.forEach(loc => addDiscoveredLocation(loc.name));
+        LOCATION_DEFS.forEach(loc => addDiscoveredLocation(loc.name, locationListContainer, LOCATION_DEFS));
       }
       openExplorationOverlay();
     });
@@ -1110,7 +1029,7 @@ function tickSect(delta) {
           if (found) return;
           let chance = loc.baseChance + (d.dexterity - 1) * 0.01 + seasonBonus;
           if (Math.random() < chance) {
-            addDiscoveredLocation(loc.name);
+            addDiscoveredLocation(loc.name, locationListContainer, LOCATION_DEFS);
             found = loc.name;
           }
         });
@@ -2453,7 +2372,7 @@ function init() {
   initUi();
   initDisciples();
   initDebug();
-  window.addEventListener('location-discovered', e => addDiscoveredLocation(e.detail.name));
+  window.addEventListener('location-discovered', e => addDiscoveredLocation(e.detail.name, locationListContainer, LOCATION_DEFS));
   loadGame();
   if (sectSystem.disciples.length === 0) {
     sectSystem.disciples.push(...disciples);
