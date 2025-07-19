@@ -75,7 +75,8 @@ import {
   discipleAttackTimers,
   enemyAttackProgress,
   setEnemyAttackProgress,
-  attack
+  attack,
+  tickEnemy
 } from "./game/combat.js";
 // in-combat UI helpers
 import {
@@ -3710,39 +3711,8 @@ const deltaTime = rawDelta * timeScale;
 const startWater = sectSystem.resources.water.current;
 
 if (currentEnemy) {
-    currentEnemy.tick(deltaTime);
-
-    // Enemy may be cleared during tick (on defeat callbacks)
-    if (currentEnemy) {
-        updateDealerLifeBar(currentEnemy);
-
-        if (enemyAttackFill) {
-            const eratio = Math.min(
-                1,
-                currentEnemy.attackTimer / currentEnemy.attackInterval
-            );
-            enemyAttackFill.style.width = `${eratio * 100}%`;
-        }
-
-        // Update cooldown overlays
-        const overlays = document.querySelectorAll(".cooldown-overlay");
-        overlays.forEach((overlay, i) => {
-            const ability = currentEnemy.abilities[i];
-
-            // Defensive check: ensure ability has timer + maxTimer
-            if (
-                ability &&
-                typeof ability.timer === "number" &&
-                typeof ability.maxTimer === "number"
-            ) {
-                const ratio = Math.min(
-                    1,
-                    Math.max(0, ability.timer / ability.maxTimer)
-                );
-                overlay.style.setProperty("--cooldown", ratio);
-            }
-        });
-    }
+    tickEnemy(deltaTime, enemyAttackFill);
+    attack(deltaTime);
 }
 
 
@@ -3757,9 +3727,7 @@ if (currentEnemy) {
     }
     setWorldProgressTimer(0);
   }
-  if (currentEnemy) {
-    attack(deltaTime);
-  }
+
 
 
 

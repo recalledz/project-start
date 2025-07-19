@@ -1,5 +1,5 @@
 import { currentEnemy, stageData } from './state.js';
-import { dealerLifeDisplay } from './ui.js';
+import { dealerLifeDisplay, updateDealerLifeBar } from './ui.js';
 import { renderDealerLifeBarFill } from '../rendering.js';
 import { formatNumber } from '../utils/numberFormat.js';
 import { activeDisciples } from './disciples.js';
@@ -42,4 +42,35 @@ export function attack(deltaTime = 0) {
     ))}/${formatNumber(enemy.maxHp)}`;
     renderDealerLifeBarFill(enemy);
   }
+}
+
+export function tickEnemy(deltaTime = 0, enemyAttackFill) {
+  if (!currentEnemy) return;
+
+  currentEnemy.tick(deltaTime);
+
+  if (!currentEnemy) return;
+
+  updateDealerLifeBar(currentEnemy);
+
+  if (enemyAttackFill) {
+    const eratio = Math.min(
+      1,
+      currentEnemy.attackTimer / currentEnemy.attackInterval
+    );
+    enemyAttackFill.style.width = `${eratio * 100}%`;
+  }
+
+  const overlays = document.querySelectorAll('.cooldown-overlay');
+  overlays.forEach((overlay, i) => {
+    const ability = currentEnemy.abilities[i];
+    if (
+      ability &&
+      typeof ability.timer === 'number' &&
+      typeof ability.maxTimer === 'number'
+    ) {
+      const ratio = Math.min(1, Math.max(0, ability.timer / ability.maxTimer));
+      overlay.style.setProperty('--cooldown', ratio);
+    }
+  });
 }
