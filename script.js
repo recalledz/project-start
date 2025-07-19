@@ -96,8 +96,9 @@ import {
   createLabeledBar,
   setActiveTabButton,
   showTab,
-  addDiscoveredLocation
+
 } from "./game/ui.js";
+import { tickSect, renderColonyResources, addDiscoveredLocation, discoveredLocations } from "./game/sect.js";
 // disciple selection for combat
 import {
   init as initDisciples,
@@ -525,7 +526,6 @@ let sectNavResearchBtn;
 let sectNavCultivationBtn;
 let sectNavScheduleBtn;
 
-const discoveredLocations = [];
 const explorationParty = new Set();
 let currentExplorationParty = [];
 
@@ -861,198 +861,6 @@ function initVignetteToggles() {
   });
 }
 
-function tickSect(delta) {
-  if (!sectTabUnlocked) return;
-  const dt = delta / 1000;
-  const scheduleAction = getCurrentSchedule().action;
-  sectSystem.disciples.forEach(d => {
-    ensureDiscipleSkills(d.id);
-    ensureDiscipleConstructXp(d.id);
-    const waterXp = sectState.discipleSkills[d.id].WaterSense || 0;
-    const waterLvl = getTaskSkillProgress(waterXp).level;
-    const maxWater = calculateMaxWater(waterLvl);
-    const waterRegen = calculateWaterRegen(waterLvl);
-    d.water = Math.min(maxWater, Math.max(0, d.water + waterRegen * dt));
-    const maxStamina = calculateMaxStamina(d.endurance);
-    const regenRate = calculateStaminaRegen(d.endurance);
-    d.stamina = Math.min(maxStamina, Math.max(0, d.stamina));
-
-    if (d.incapacitated) {
-      sectState.discipleTasks[d.id] = 'Idle';
-      if (d.health < DISCIPLE_MAX_HEALTH) {
-        d.health = Math.min(
-          DISCIPLE_MAX_HEALTH,
-          d.health + (DISCIPLE_MAX_HEALTH / REST_TIME_SECONDS) * dt
-        );
-      } else {
-        d.stamina = Math.min(maxStamina, d.stamina + regenRate * dt);
-        if (d.stamina >= maxStamina) {
-          d.incapacitated = false;
-          sectState.discipleRest[d.id] = 0;
-        }
-      }
-      return;
-    }
-
-    if (scheduleAction === 'Training') {
-      d.foundationXp = (d.foundationXp || 0) + 0.4 * d.potential * d.potential * dt;
-      return;
-    }
-    if (scheduleAction !== 'Work') {
-      return;
-    }
-
-    const task = sectState.discipleTasks[d.id];
-    if (task === 'Exploration') {
-      // drain stamina once per completed cycle
-      if (!sectState.discipleProgress[d.id]) sectState.discipleProgress[d.id] = 0;
-    } else {
-      d.stamina = Math.min(maxStamina, d.stamina + regenRate * dt);
-    }
-    if (task === 'Gather Fruit' || task === 'Gather Softwood') {
-      if (!sectState.discipleProgress[d.id]) sectState.discipleProgress[d.id] = 0;
-      sectState.discipleProgress[d.id] += dt;
-      const prog = sectState.discipleProgress[d.id];
-      const group = TASK_GROUPS[task];
-      const skillXp = sectState.discipleSkills[d.id]?.[group] || 0;
-      const lvl = getTaskSkillProgress(skillXp).level;
-      const spot = GATHER_SPOTS[task];
-      const attr = ATTRIBUTE_FOR_GROUP[group];
-      const yieldMult = 1 + 0.05 * (d[attr] || 0) + 0.02 * lvl;
-      const gatherAmt = Math.min(
-        spot.baseYield * yieldMult * GATHER_WORK_SECONDS,
-        d.inventorySlots
-      );
-      const travel = Math.max(MIN_TRAVEL_SECONDS, spot.travel * TRAVEL_SECONDS_PER_UNIT);
-      const cycleSeconds = travel * 2 + GATHER_WORK_SECONDS;
-      const resKey = task === 'Gather Fruit' ? 'fruit' : 'softwood';
-      if (prog < travel) {
-        d.inventory = {};
-      } else if (prog < travel + GATHER_WORK_SECONDS) {
-        d.inventory = { [resKey]: gatherAmt };
-      } else {
-        d.inventory = {};
-      }
-      if (prog >= cycleSeconds) {
-        const cycles = Math.floor(prog / cycleSeconds);
-        sectState.discipleProgress[d.id] -= cycles * cycleSeconds;
-        const deposit = gatherAmt * cycles;
-        if (task === 'Gather Fruit') {
-          const actual = Math.min(deposit, sectState.availableFruits);
-          sectState.availableFruits -= actual;
-          sectState.fruits += actual;
-        } else {
-          sectState.softwood += deposit;
-        }
-        checkBuildingUnlock();
-        const mult = intelligenceXpMultiplier();
-        const baseXp = task === 'Gather Fruit' ? FRUIT_XP_PER_CYCLE : LOG_XP_PER_CYCLE;
-        const groupKey = TASK_GROUPS[task];
-        addSkillXp(d, groupKey, cycles * baseXp * mult);
-        d.inventory = {};
-        updateSectDisplay();
-      }
-    } else if (task === 'Research') {
-      const spend = Math.min(sectSystem.resources.water.current, 4 * dt);
-      sectSystem.resources.water.current -= spend;
-      sectState.researchProgress += spend;
-      if (sectState.researchProgress >= 500) {
-        const xp = sectState.discipleSkills[d.id]?.['Researching'] || 0;
-        const lvl = getTaskSkillProgress(xp).level;
-        const ptsBase = Math.floor(sectState.researchProgress / 500);
-        sectState.researchProgress -= ptsBase * 500;
-        const pts = Math.floor(ptsBase * (1 + 0.02 * lvl));
-        sectState.researchPoints += pts;
-        addSkillXp(
-          d,
-          'Researching',
-          ptsBase * RESEARCH_XP_PER_CYCLE * intelligenceXpMultiplier()
-        );
-        if (!systems.researchUnlocked) {
-          systems.researchUnlocked = true;
-          if (colonyResearchTabButton) colonyResearchTabButton.style.display = '';
-        }
-        if (colonyResearchPanel && colonyResearchPanel.style.display !== 'none') {
-          renderColonyResearchPanel();
-        }
-      }
-    } else if (task === 'Chant') {
-      if (!sectState.discipleProgress[d.id]) sectState.discipleProgress[d.id] = 0;
-      sectState.discipleProgress[d.id] += dt;
-      if (sectState.discipleProgress[d.id] >= 5) {
-        sectState.discipleProgress[d.id] -= 5;
-        const target = sectState.chantAssignments[d.id];
-        if (target) {
-          const xp = sectState.discipleSkills[d.id]?.['Chanting'] || 0;
-          const lvl = getTaskSkillProgress(xp).level;
-          const pot = 0.3 * (1 + 0.02 * lvl) * attributes.Intelligence.constructPotencyMultiplier;
-          castConstruct(target, null, pot, d.id);
-            addSkillXp(d, 'Chanting', CHANT_XP_PER_CYCLE * intelligenceXpMultiplier());
-        }
-      }
-      const spend = Math.min(sectSystem.resources.water.current, dt);
-      sectSystem.resources.water.current -= spend;
-    } else if (task === 'Hunt') {
-      if (!sectState.discipleProgress[d.id]) sectState.discipleProgress[d.id] = 0;
-      sectState.discipleProgress[d.id] += dt;
-      if (sectState.discipleProgress[d.id] >= HUNT_CYCLE_SECONDS) {
-        sectState.discipleProgress[d.id] -= HUNT_CYCLE_SECONDS;
-        const available = Object.entries(sectState.animals).filter(([k, v]) => v > 0);
-        if (available.length > 0) {
-          const [name] = available[Math.floor(Math.random() * available.length)];
-          const animal = ANIMALS.find(a => a.name === name);
-          const skillXp = sectState.discipleSkills[d.id]?.['Hunting'] || 0;
-          const lvl = getTaskSkillProgress(skillXp).level;
-          let chance = (d.combatLevel / (d.combatLevel + animal.level)) * (1 + 0.2 * d.dexterity);
-          if (Math.random() < chance) {
-            const yieldAmt = Math.round(animal.yield * (1 + 0.1 * lvl) * (1 + 0.3 * d.strength));
-            sectState.fruits += yieldAmt;
-            sectState.animals[name] -= 1;
-            addSkillXp(d, 'Hunting', HUNT_XP_PER_SUCCESS);
-            d.gainCombatXp(calculateKillXp(animal.level, 1));
-            addLog(`${d.name} hunted a ${name}!`, 'good');
-          } else {
-            d.health = Math.max(0, d.health - 1);
-            addLog(`${d.name} failed to hunt a ${name}.`, 'bad');
-          }
-        } else {
-          addLog('No animals to hunt.', 'info');
-        }
-      }
-    } else if (task === 'Exploration') {
-      if (!sectState.discipleProgress[d.id]) sectState.discipleProgress[d.id] = 0;
-      sectState.discipleProgress[d.id] += dt;
-      if (sectState.discipleProgress[d.id] >= EXPLORATION_CYCLE_SECONDS) {
-        sectState.discipleProgress[d.id] -= EXPLORATION_CYCLE_SECONDS;
-        const maxDistance = d.stamina * 10;
-        const seasonBonus = sectSystem.seasonIndex === 0 ? 0.05 : sectSystem.seasonIndex === 4 ? -0.05 : 0;
-        const eligible = LOCATION_DEFS.filter(l => !discoveredLocations.includes(l.name) && l.reqDistance <= maxDistance);
-        shuffleArray(eligible);
-        let found = null;
-        eligible.forEach(loc => {
-          if (found) return;
-          let chance = loc.baseChance + (d.dexterity - 1) * 0.01 + seasonBonus;
-          if (Math.random() < chance) {
-            addDiscoveredLocation(loc.name, locationListContainer, LOCATION_DEFS);
-            found = loc.name;
-          }
-        });
-        if (found) addLog(`Discovered ${found}!`, 'good');
-        else addLog('No discovery this trip.', 'info');
-        d.stamina = Math.max(0, d.stamina - STAMINA_DRAIN_PER_EXPLORATION);
-      }
-    } else {
-      sectState.discipleProgress[d.id] = 0;
-    }
-  });
-  updateTaskProgressDisplay();
-  discipleEtaTimer += delta;
-  if (discipleEtaTimer >= 1000) {
-    updateSectCardInfo();
-    discipleEtaTimer = 0;
-  }
-  tickBuilding(dt);
-}
 
 function updateTaskProgressDisplay() {
   if (!colonyTasksPanel) return;
@@ -1512,15 +1320,6 @@ function renderColonyInfo() {
   colonyInfoPanel.appendChild(taskList);
 }
 
-function renderColonyResources() {
-  colonyResourcesPanel.innerHTML = '';
-  renderSectDiscipleList();
-  if (sectSummaryDisplay && resourceDisplay) {
-    const content = resourceDisplay.querySelector('.vignette-content');
-    (content || resourceDisplay).appendChild(sectSummaryDisplay);
-  }
-  checkBuildingUnlock();
-}
 
 function checkBuildingUnlock() {
   if (!systems.buildingUnlocked && sectState.softwood >= 20) {
