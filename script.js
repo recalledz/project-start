@@ -844,13 +844,14 @@ function updateSectDisplay() {
   if (!sectTabUnlocked || !playerSectPanel) return;
   const total = sectSystem.disciples.length;
   const assigned = Object.values(sectState.discipleTasks).filter(t => t && t !== 'Idle').length;
+  const idle = total - assigned;
   if (sectSummaryDisplay) {
     const remaining = Math.max(0, DAY_LENGTH_SECONDS - sectSystem.seasonTimer);
     const mm = String(Math.floor(remaining / 60)).padStart(2, '0');
     const ss = String(Math.floor(remaining % 60)).padStart(2, '0');
     const upkeep = DAILY_FRUIT_CONSUMPTION * sectSystem.disciples.length;
     sectSummaryDisplay.innerHTML = `
-      <span>👥 ${total - assigned}/${total} / ${sectState.maxDisciples}</span>
+      <span>👥 ${total}/${sectState.maxDisciples} (Idle: ${idle})</span>
       <span>${sectState.fruits}</span>
       <span>🪵 ${sectState.softwood}</span>`;
     const timer = document.getElementById('resourceTimer');
