@@ -36,7 +36,8 @@ export const SPEAKER_QUOTES = [
 export function showRestartScreen(onRestart) {
   if (restartOverlay) return;
 
-  restartOverlay = createOverlay({ className: 'restart-overlay' });
+  restartOverlay = createOverlay({ className: 'restart-overlay', boxClass: 'parchment-box' });
+  restartOverlay.box.classList.add('parchment-box');
   const { box } = restartOverlay;
 
   const canvas = document.createElement('canvas');

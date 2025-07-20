@@ -1,7 +1,8 @@
 import { createOverlay } from './overlay.js';
 
 export function showLoadErrorOverlay(error, onReset) {
-  const overlay = createOverlay({ className: 'load-error-overlay' });
+  const overlay = createOverlay({ className: 'load-error-overlay', boxClass: 'parchment-box' });
+  overlay.box.classList.add('parchment-box');
   const { box } = overlay;
 
   const msg = document.createElement('div');

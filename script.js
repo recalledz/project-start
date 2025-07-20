@@ -1784,7 +1784,8 @@ function openDiscipleOverlay(d) {
       discipleOverlayActiveTab = 'general';
     }
   }
-  discipleOverlay = createOverlay({ className: 'disciple-overlay' });
+  discipleOverlay = createOverlay({ className: 'disciple-overlay', boxClass: 'parchment-box' });
+  discipleOverlay.box.classList.add('parchment-box');
   const { box } = discipleOverlay;
 
   const closeBtn = document.createElement('button');
@@ -2676,7 +2677,8 @@ function openCamp(onCloseCallback = null) {
   setCampOverlayOpen(true);
   setGamePaused(true);
   hidePlayerAttackBar(playerAttackFill);
-  setCampOverlay(createOverlay({ className: 'camp-overlay' }));
+  setCampOverlay(createOverlay({ className: 'camp-overlay', boxClass: 'parchment-box' }));
+  campOverlay.box.classList.add('parchment-box');
   campOverlay.onClose(() => {
     setCampOverlayOpen(false);
     setGamePaused(false);

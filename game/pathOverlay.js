@@ -2,7 +2,8 @@ import { createOverlay } from '../ui/overlay.js';
 import { STARTER_PATHS } from './paths.js';
 
 export function showPathOverlay({ onSelect, available = 3 } = {}) {
-  const overlay = createOverlay({ className: 'path-overlay' });
+  const overlay = createOverlay({ className: 'path-overlay', boxClass: 'parchment-box' });
+  overlay.box.classList.add('parchment-box');
   const { box, close } = overlay;
   const title = document.createElement('h2');
   title.textContent = 'Choose a Path';

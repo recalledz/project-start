@@ -534,6 +534,12 @@ body.darkenshift-mode .tabsContainer button.active {
     max-width: 600px;
 }
 
+.parchment-box {
+  background: url('img/parchment.png') center/cover no-repeat;
+  color: #000;
+  border: 1px solid #7d8b50;
+}
+
 .overlay-box button {
     padding: 6px 12px;
     font-size: 1rem;
@@ -3689,9 +3695,6 @@ body.darkenshift-mode .tabsContainer button.active {
 }
 
 .disciple-badge {
-  background: url('img/parchment.png') center/cover no-repeat;
-  color: #000;
-  border: 1px solid #7d8b50;
   border-radius: 6px;
   padding: 2px;
   width: 64px;

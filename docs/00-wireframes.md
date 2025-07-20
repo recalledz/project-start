@@ -85,6 +85,7 @@ Footer
 * Exploration and sect disciple lists now use a unified badge styled purely via CSS.
   Each badge displays a parchment background inside a bamboo border along with the
   disciple's name, mood, HP bar and current task.
+* All overlays now use the same parchment-style box for a consistent look.
 
 #dicsiple overlay card on pressing disciple
 

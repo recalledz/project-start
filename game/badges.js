@@ -4,7 +4,7 @@ import { DISCIPLE_MAX_HEALTH } from './constants.js';
 
 export function createDiscipleBadge(d) {
   const badge = document.createElement('div');
-  badge.className = 'disciple-badge';
+  badge.className = 'disciple-badge parchment-box';
 
   const name = document.createElement('div');
   name.className = 'disciple-name';
