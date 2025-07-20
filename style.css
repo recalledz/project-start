@@ -543,6 +543,13 @@ body.darkenshift-mode .tabsContainer button.active {
     flex-direction: column;
 }
 
+.path-overlay {
+    flex-direction: column;
+}
+.path-overlay button {
+    margin: 4px;
+}
+
 .camp-overlay button {
     font-size: 1rem;
     padding: 6px 10px;
@@ -688,6 +695,29 @@ body.darkenshift-mode .tabsContainer button.active {
 .schedule-row.current {
     color: var(--verdantia-highlight);
     font-weight: bold;
+}
+
+.resource-overlay .overlay-box {
+    max-width: 300px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.resource-deltas {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 0.9rem;
+}
+.resource-delta-row {
+    display: flex;
+    justify-content: space-between;
+}
+.resource-delta-row .gain {
+    color: #8f8;
+}
+.resource-delta-row .loss {
+    color: #f88;
 }
 
 .work-disciples .sect-disciple-card.selected {
@@ -1943,6 +1973,7 @@ body.darkenshift-mode .tabsContainer button.active {
     justify-content: flex-start;
     gap: 10px;
     flex: 1;
+    height: 100vh;
     background: var(--core-bg);
     border: 1px solid var(--core-border);
     border-radius: 8px;
@@ -1994,6 +2025,7 @@ body.darkenshift-mode .tabsContainer button.active {
     gap: 6px;
     position: relative;
     width: 100%;
+    height: 100%;
 }
 #metamorphosisTabContent svg {
     max-width: 360px;
@@ -2030,6 +2062,19 @@ body.darkenshift-mode .tabsContainer button.active {
 .metamorphosis-progress:hover .progress-ring-fill,
 .metamorphosis-progress.near-complete .progress-ring-fill {
     filter: drop-shadow(0 0 6px gold) drop-shadow(0 0 4px cyan);
+}
+.breakthrough-btn {
+    padding: 6px 12px;
+    border: 2px solid var(--core-accent);
+    background: var(--core-bg);
+    color: var(--core-text);
+    border-radius: 6px;
+    cursor: pointer;
+    box-shadow: 0 0 8px var(--core-glow);
+    font-size: 0.8rem;
+}
+.breakthrough-btn:hover {
+    box-shadow: 0 0 12px var(--core-glow);
 }
 .construct-main {
     display: flex;

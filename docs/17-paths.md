@@ -13,6 +13,7 @@ Path of the Ember	Fire (火)	Mage	Combat Spells, Water generation, culture speed
 Path of the Emerald	Wood (木)	Ranger	Travel speed, gathering, stat boosts
 Path of the Azure Saint	Water (水)	Healer	Healing, crowd control, weather control
 Path of the Searing Shield	Fire (火)	Tank	Defense, resilience, frontline combat
+At the start of the game only the first three starter Paths can be chosen.
 
 
 

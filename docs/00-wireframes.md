@@ -52,6 +52,7 @@ This row appears above the sect map. The previous row of disciple cards beneath 
 Left panel (Resource / Items)
 
 Shows stackable resources (fruit, wood, stone, etc.).
+Selecting the Resources nav opens an overlay showing daily gains and losses.
 
 
 Right panel (Navigation)
