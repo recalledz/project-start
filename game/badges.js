@@ -34,5 +34,7 @@ export function createDiscipleBadge(d) {
   wrapper.appendChild(label);
   badge.appendChild(wrapper);
 
+  applyBadgeTexture(badge);
+  
   return badge;
 }
