@@ -2,7 +2,7 @@
 
 let app = null;
 const sprites = new Map();
-let parchmentTexture = null;
+const parchmentTexture = PIXI.Texture.from('img/parchment.jpg');
 
 // only once PIXI is loaded will this run
 function ensureApp() {
@@ -10,17 +10,23 @@ function ensureApp() {
   if (
     typeof document === 'undefined' ||
     !globalThis.HTMLCanvasElement
-  ) return;
 
-  // create the Application
-  app = new PIXI.Application({
-    width: window.innerWidth,
-    height: window.innerHeight,
-    transparent: true
-  });
-
-  // now that PIXI is definitely there, make the texture
-  parchmentTexture = PIXI.Texture.from('img/parchment.jpg');
+  ) {
+    // Skip if canvas is unavailable (e.g. during server-side tests)
+    return;
+  }
+  const testCanvas = document.createElement('canvas');
+  if (!testCanvas.getContext || !testCanvas.getContext('2d')) return;
+  try {
+    app = new PIXI.Application({
+      width: window.innerWidth,
+      height: window.innerHeight,
+      backgroundAlpha: 0
+    });
+  } catch (e) {
+    console.error('PIXI init failed', e);
+    return;
+  }
 
   app.view.classList.add('badge-texture-layer');
   Object.assign(app.view.style, {
@@ -54,8 +60,9 @@ function updateAll() {
 
 export function applyBadgeTexture(el) {
   ensureApp();
-  // guard in case PIXI wasn't loaded or texture failed
-  if (!app || !parchmentTexture) return;
+
+  if (!app) return;
+
   const sprite = new PIXI.Sprite(parchmentTexture);
 
   sprites.set(el, sprite);
