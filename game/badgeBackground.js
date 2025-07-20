@@ -11,6 +11,7 @@ const parchmentTexture = PIXI.Texture.from(
   new URL('../img/parchment.png', import.meta.url).href
 );
 const PARCHMENT_SCALE = 0.9;
+const BADGE_SIZE = 64;
 
 // only once PIXI is loaded will this run
 function ensureApp() {
@@ -55,12 +56,11 @@ function ensureApp() {
 function updateContainer(objs, el) {
   const r = el.getBoundingClientRect();
   const { container, bamboo, parchment } = objs;
-  Object.assign(container, {
-    x: r.left + r.width / 2,
-    y: r.top + r.height / 2
-  });
-  Object.assign(bamboo, { width: r.width, height: r.height, x: 0, y: 0 });
-  Object.assign(parchment, { width: r.width, height: r.height });
+  container.x = r.left + r.width / 2;
+  container.y = r.top + r.height / 2;
+  container.pivot.set(BADGE_SIZE / 2, BADGE_SIZE / 2);
+  Object.assign(bamboo, { width: BADGE_SIZE, height: BADGE_SIZE, x: 0, y: 0 });
+  Object.assign(parchment, { width: BADGE_SIZE, height: BADGE_SIZE });
   parchment.position = bamboo.position;
   parchment.scale.set(PARCHMENT_SCALE);
 }
