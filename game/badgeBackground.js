@@ -17,6 +17,7 @@ const DEBUG_BORDERS =
     globalThis.process.env.NODE_ENV === 'development') ||
   new URLSearchParams(window.location.search).has('dev');
 
+
 // only once PIXI is loaded will this run
 function ensureApp() {
   if (app) return;

@@ -5,7 +5,16 @@ import { generateDiscipleAttributes } from '../discipleAttributes.js';
 import Disciple from '../disciple.js';
 import { initializeDisciple } from '../utils/discipleInit.js';
 import { createOverlay } from '../ui/overlay.js';
-import { DAILY_FRUIT_CONSUMPTION } from './constants.js';
+import {
+  DAILY_FRUIT_CONSUMPTION,
+  GATHER_WORK_SECONDS,
+  MIN_TRAVEL_SECONDS,
+  TRAVEL_SECONDS_PER_UNIT,
+  GATHER_SPOTS,
+  TASK_GROUPS,
+  ATTRIBUTE_FOR_GROUP
+} from './constants.js';
+import { getTaskSkillProgress } from '../utils/skills.js';
 
 export { addDiscoveredLocation } from "./ui.js";
 export const discoveredLocations = [];
@@ -1380,6 +1389,29 @@ export function openWaterRegenPopup() {
 
   box.appendChild(list);
   overlay.appendButton('Close', overlay.close);
+}
+
+export function getDiscipleDailyOutput(d) {
+  const task = sectState.discipleTasks[d.id];
+  if (task === 'Gather Fruit' || task === 'Gather Softwood') {
+    const group = TASK_GROUPS[task];
+    const skillXp = sectState.discipleSkills[d.id]?.[group] || 0;
+    const lvl = getTaskSkillProgress(skillXp).level;
+    const spot = GATHER_SPOTS[task];
+    const attr = ATTRIBUTE_FOR_GROUP[group];
+    const yieldMult = 1 + 0.05 * (d[attr] || 0) + 0.02 * lvl;
+    const gatherAmt = spot.baseYield * yieldMult * GATHER_WORK_SECONDS;
+    const travel = Math.max(
+      MIN_TRAVEL_SECONDS,
+      spot.travel * TRAVEL_SECONDS_PER_UNIT
+    );
+    const cycleSeconds = travel * 2 + GATHER_WORK_SECONDS;
+    const perSecond = gatherAmt / cycleSeconds;
+    return perSecond * DAY_LENGTH_SECONDS;
+  } else if (task === 'Research') {
+    return 4 * DAY_LENGTH_SECONDS;
+  }
+  return 0;
 }
 
 export function getDailyResourceDelta() {
