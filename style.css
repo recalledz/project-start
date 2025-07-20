@@ -3673,3 +3673,10 @@ body.darkenshift-mode .tabsContainer button.active {
   font-size: 0.55rem;
 }
 
+.badge-texture-layer {
+  pointer-events: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 2;
+}
