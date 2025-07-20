@@ -773,10 +773,7 @@ function updateTaskProgressDisplay() {
       const spot = GATHER_SPOTS[taskName];
       const attr = ATTRIBUTE_FOR_GROUP[group];
       const yieldMult = 1 + 0.05 * (d[attr] || 0) + 0.02 * lvl;
-      const gatherAmt = Math.min(
-        spot.baseYield * yieldMult * GATHER_WORK_SECONDS,
-        d.inventorySlots
-      );
+      const gatherAmt = spot.baseYield * yieldMult * GATHER_WORK_SECONDS;
       const travel = Math.max(MIN_TRAVEL_SECONDS, spot.travel * TRAVEL_SECONDS_PER_UNIT);
       const cycleSeconds = travel * 2 + GATHER_WORK_SECONDS;
       let phase = 0;
@@ -992,10 +989,7 @@ function updateDiscipleGather(id, el) {
   const spot = GATHER_SPOTS[task];
   const attr = ATTRIBUTE_FOR_GROUP[group];
   const yieldMult = 1 + 0.05 * (d[attr] || 0) + 0.02 * lvl;
-  const gatherAmt = Math.min(
-    spot.baseYield * yieldMult * GATHER_WORK_SECONDS,
-    d?.inventorySlots || 10
-  );
+  const gatherAmt = spot.baseYield * yieldMult * GATHER_WORK_SECONDS;
   const travel = Math.max(MIN_TRAVEL_SECONDS, spot.travel * TRAVEL_SECONDS_PER_UNIT);
   const cycleSeconds = travel * 2 + GATHER_WORK_SECONDS;
   let phase = 0;
@@ -1458,7 +1452,7 @@ function buildDiscipleStatusView(d) {
 
   const invRow = document.createElement('div');
   const entries = Object.entries(d.inventory || {});
-  const filled = entries.reduce((a, [_, v]) => a + v, 0);
+  const filled = entries.length;
   const desc = entries.map(([k, v]) => `${v} ${k}`).join(', ');
   invRow.textContent = `Inventory: ${filled}/${d.inventorySlots}` + (desc ? ` (${desc})` : '');
   body.appendChild(invRow);
@@ -1634,7 +1628,7 @@ function buildDiscipleGeneralView(d) {
   body.appendChild(task);
 
   const entries = Object.entries(d.inventory || {});
-  const filled = entries.reduce((a, [_, v]) => a + v, 0);
+  const filled = entries.length;
   const desc = entries.map(([k, v]) => `${v} ${k}`).join(', ');
   const inv = document.createElement('div');
   inv.className = 'disciple-inventory-summary';
