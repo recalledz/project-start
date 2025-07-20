@@ -1989,7 +1989,7 @@ function init() {
   document.addEventListener('schedule-phase', e => {
     updateMapBrightness(e.detail.phase);
     if (e.detail.phase === 'Evening') feedDisciples();
-    if (e.detail.phase !== 'Work') {
+    if (e.detail.action !== 'Work')  {
       sectSystem.disciples.forEach(d => {
         sectState.discipleProgress[d.id] = 0;
       });
