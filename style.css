@@ -2997,7 +2997,7 @@ body.darkenshift-mode .tabsContainer button.active {
     white-space: nowrap;
 }
 .sect-disciple-list .disciple-progress {
-    width: 64px;
+    width: 72px;
     height: 10px;
 }
 .sect-disciple-list .disciple-progress-label {
@@ -3694,7 +3694,7 @@ body.darkenshift-mode .tabsContainer button.active {
   border: 1px solid #7d8b50;
   border-radius: 6px;
   padding: 2px;
-  width: 64px;
+  width: 72px;
   font-size: 0.55rem;
   display: flex;
   flex-direction: column;
@@ -3733,7 +3733,7 @@ body.darkenshift-mode .tabsContainer button.active {
   margin-bottom: 1px;
 }
 .disciple-badge .disciple-progress {
-  width: 64px;
+  width: 72px;
   height: 10px;
 }
 .disciple-badge .disciple-progress-label {
