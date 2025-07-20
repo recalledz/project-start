@@ -67,6 +67,7 @@ Zones curve around the Water Orb in an ellipse:
 - Storage / Items
 - Research Zone
 - Housing Zone (between the upper zones)
+- Soft misty trails link each zone back to the Water Orb
 
 The Water Orb now sits at the exact center, with the housing zone forming the tip
 of a loose triangle above the lower zones.

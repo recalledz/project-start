@@ -38,6 +38,7 @@ import { openExplorationOverlay, closeExplorationOverlay, openWorkOverlay, openS
 import { createDiscipleBadge } from "./game/badges.js";
 import { calculateKillXp } from './utils/xp.js';
 import { initTooltip } from './game/tooltip.js';
+import { initMistTrails } from './game/mistTrails.js';
 import {
   calculateMaxStamina,
   calculateStaminaRegen
@@ -1938,6 +1939,7 @@ function init() {
   initSect();
   initTabs();
   initPollen();
+  initMistTrails();
   initCombat();
   initUi({
     mainTab,

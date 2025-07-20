@@ -2739,22 +2739,25 @@ body.darkenshift-mode .tabsContainer button.active {
     background: radial-gradient(circle, rgba(180,160,220,0.15), transparent 80%);
 }
 
-.zone-path {
+.zone-path { display: none; }
+
+.mist-trails {
     position: absolute;
     inset: 0;
     pointer-events: none;
-    z-index: 0;
+    z-index: 1;
+    overflow: visible;
 }
-.zone-path path {
-    fill: none;
-    stroke: rgba(255,255,200,0.25);
-    stroke-width: 1.5;
-    stroke-dasharray: 5 5;
-    animation: zonePathPulse 6s linear infinite;
-}
-@keyframes zonePathPulse {
-    from { stroke-dashoffset: 0; }
-    to { stroke-dashoffset: -30; }
+
+.mist {
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    background-image: url('img/mist.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    filter: blur(2px);
+    opacity: 0;
 }
 
 .pollen-layer {
@@ -3657,3 +3660,4 @@ body.darkenshift-mode .tabsContainer button.active {
 .disciple-badge .disciple-progress-label {
   font-size: 0.55rem;
 }
+
