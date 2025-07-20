@@ -4,12 +4,12 @@ let app = null;
 // track containers for each badge element
 const sprites = new Map();
 // load textures for bamboo border and parchment background
-// Parcel only bundles assets that are referenced via import
-import bambooUrl from '../img/bamboo.png';
-import parchmentUrl from '../img/parchment.png';
-
-const bambooTexture = PIXI.Texture.from(bambooUrl);
-const parchmentTexture = PIXI.Texture.from(parchmentUrl);
+const bambooTexture = PIXI.Texture.from(
+  new URL('../img/bamboo.png', import.meta.url).href
+);
+const parchmentTexture = PIXI.Texture.from(
+  new URL('../img/parchment.png', import.meta.url).href
+);
 
 // only once PIXI is loaded will this run
 function ensureApp() {
