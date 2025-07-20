@@ -238,7 +238,9 @@ export function openResourceOverlay() {
   if (resourceOverlay) return;
   resourceOverlay = createOverlay({ className: 'resource-overlay', boxClass: 'parchment-box' });
   resourceOverlay.box.classList.add('parchment-box');
+  let interval;
   resourceOverlay.onClose(() => {
+    if (interval) clearInterval(interval);
     resourceOverlay = null;
   });
   const { box } = resourceOverlay;
@@ -267,6 +269,7 @@ export function openResourceOverlay() {
   }
 
   render();
+  interval = setInterval(render, 1000);
 }
 
 export function openBuildOverlay() {
