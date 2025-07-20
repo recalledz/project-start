@@ -10,6 +10,7 @@ const bambooTexture = PIXI.Texture.from(
 const parchmentTexture = PIXI.Texture.from(
   new URL('../img/parchment.png', import.meta.url).href
 );
+const PARCHMENT_SCALE = 0.9;
 
 // only once PIXI is loaded will this run
 function ensureApp() {
@@ -54,15 +55,14 @@ function ensureApp() {
 function updateContainer(objs, el) {
   const r = el.getBoundingClientRect();
   const { container, bamboo, parchment } = objs;
-  Object.assign(container, { x: r.left, y: r.top });
-  Object.assign(bamboo, { width: r.width, height: r.height });
-  const pad = 4;
-  Object.assign(parchment, {
-    x: pad,
-    y: pad,
-    width: Math.max(0, r.width - pad * 2),
-    height: Math.max(0, r.height - pad * 2)
+  Object.assign(container, {
+    x: r.left + r.width / 2,
+    y: r.top + r.height / 2
   });
+  Object.assign(bamboo, { width: r.width, height: r.height, x: 0, y: 0 });
+  Object.assign(parchment, { width: r.width, height: r.height });
+  parchment.position = bamboo.position;
+  parchment.scale.set(PARCHMENT_SCALE);
 }
 
 function updateAll() {
@@ -75,11 +75,13 @@ export function applyBadgeTexture(el) {
   if (!app) return;
 
   const container = new PIXI.Container();
-  const bamboo = new PIXI.Sprite(bambooTexture);
   const parchment = new PIXI.Sprite(parchmentTexture);
+  parchment.anchor.set(0.5);
+  const bamboo = new PIXI.Sprite(bambooTexture);
+  bamboo.anchor.set(0.5);
 
-  container.addChild(bamboo);
   container.addChild(parchment);
+  container.addChild(bamboo);
 
   const objs = { container, bamboo, parchment };
 
