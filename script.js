@@ -921,8 +921,8 @@ function updateDiscipleGather(id, el) {
       el.style.opacity = '1';
       el.style.transform = `translate(${px}px, ${py}px)`;
       break;
-    case 1: // gathering (stay outside, hidden)
-      el.style.opacity = '0';
+    case 1: // gathering at spot
+      el.style.opacity = '1';
       el.style.transform = `translate(${px}px, ${py}px)`;
       break;
     case 2: // hauling back
