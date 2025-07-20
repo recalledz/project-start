@@ -87,6 +87,7 @@ Footer
 * Exploration and sect disciple lists now use a unified badge styled purely via CSS.
   Each badge displays a parchment background inside a bamboo border along with the
   disciple's name, mood, HP bar and current task.
+* Disciples on the sect map appear as tiny side-facing coquí sprites. Every 10–20 seconds they emit a small croak bubble, and when assigned work they display a task icon such as a pickaxe or scroll.
 * All overlays now use the same parchment-style box for a consistent look.
 
 #dicsiple overlay card on pressing disciple
