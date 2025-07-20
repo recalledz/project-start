@@ -3064,6 +3064,7 @@ function gameLoop(currentTime) {
 
   tickSectSystem(deltaTime);
   tickSect(deltaTime);
+  tickBuilding(deltaTime / 1000);
   const dtSeconds = deltaTime / 1000;
   sectSystem.gains.water =
     dtSeconds > 0
