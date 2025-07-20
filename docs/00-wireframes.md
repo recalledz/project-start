@@ -274,7 +274,7 @@ You can adjust button labels, add icons, or tweak layout widths to fit your fina
 │ └───────────────────────┘   └─────────────────────────┘   └─────────────────┘ │
 │                                                                              │
 │ ┌─────────────────────────────────────────────────────────────────────────┐  │
-│ │ **Room Stats**       **Cultivation Stats**                              │  │
+│ │ **Room Stats**       **metamorphosis Stats**                              │  │
 │ │ - Materials Used     - Speed: 1.2× base                                │  │
 │ │ - Ornaments: 3 × Jade   - Season: Solaria (×1.0)                        │  │
 │ │ - Comfort: 75/100       - Stability: 68/100                            │  │

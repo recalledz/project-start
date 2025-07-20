@@ -659,11 +659,11 @@ function updateTaskProgressDisplay() {
     ? ((1 - sectState.buildProgress) * buildData.time) / builderCount
     : 0;
   sectSystem.disciples.forEach(d => {
-    const wrapper = document.getElementById(`disciple-task-${d.id}`);
-    if (!wrapper) return;
-    const fill = wrapper.querySelector('.disciple-progress-fill');
-    const label = wrapper.querySelector('.disciple-progress-label');
-    const rateEl = wrapper.querySelector('.disciple-task-rate');
+    const wrappers = document.querySelectorAll(`[data-disciple-id="${d.id}"]`);
+    wrappers.forEach(wrapper => {
+      const fill = wrapper.querySelector('.disciple-progress-fill');
+      const label = wrapper.querySelector('.disciple-progress-label');
+      const rateEl = wrapper.querySelector('.disciple-task-rate');
     const phase = getCurrentSchedule().action;
     const taskName = d.incapacitated
       ? 'Resting'
@@ -746,6 +746,7 @@ function updateTaskProgressDisplay() {
       if (label) label.textContent = '';
       if (rateEl) rateEl.textContent = '';
     }
+    });
   });
 }
 
@@ -1593,7 +1594,7 @@ function init() {
   document.addEventListener('schedule-phase', e => {
     updateMapBrightness(e.detail.phase);
     if (e.detail.phase === 'Evening') feedDisciples();
-    if (e.detail.phase !== 'Work') {
+    if (e.detail.action !== 'Work')  {
       sectSystem.disciples.forEach(d => {
         sectState.discipleProgress[d.id] = 0;
       });
