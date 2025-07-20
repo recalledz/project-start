@@ -24,11 +24,6 @@ export function openExplorationOverlay() {
   });
   const { box } = explorationOverlay;
 
-  const closeBtn = document.createElement('button');
-  closeBtn.className = 'close-btn';
-  closeBtn.innerHTML = '&times;';
-  closeBtn.addEventListener('click', explorationOverlay.close);
-  box.appendChild(closeBtn);
 
   const map = document.createElement('img');
   map.src = 'img/Map.jpg';
@@ -113,11 +108,6 @@ export function openWorkOverlay() {
     workOverlaySelected = null;
   });
   const { box } = workOverlay;
-  const closeBtn = document.createElement('button');
-  closeBtn.className = 'close-btn';
-  closeBtn.innerHTML = '&times;';
-  closeBtn.addEventListener('click', workOverlay.close);
-  box.appendChild(closeBtn);
 
   const header = document.createElement('div');
   header.className = 'panel-heading';
@@ -203,11 +193,6 @@ export function openScheduleOverlay() {
     scheduleOverlay = null;
   });
   const { box } = scheduleOverlay;
-  const closeBtn = document.createElement('button');
-  closeBtn.className = 'close-btn';
-  closeBtn.innerHTML = '&times;';
-  closeBtn.addEventListener('click', scheduleOverlay.close);
-  box.appendChild(closeBtn);
 
   const header = document.createElement('div');
   header.className = 'panel-heading';
@@ -243,11 +228,6 @@ export function openPlaceholderOverlay(title) {
   const ov = createOverlay({ boxClass: 'parchment-box' });
   ov.box.classList.add('parchment-box');
   const { box } = ov;
-  const closeBtn = document.createElement('button');
-  closeBtn.className = 'close-btn';
-  closeBtn.innerHTML = '&times;';
-  closeBtn.addEventListener('click', ov.close);
-  box.appendChild(closeBtn);
   const msg = document.createElement('div');
   msg.textContent = `${title} coming soon`;
   box.appendChild(msg);
@@ -263,11 +243,6 @@ export function openResourceOverlay() {
   });
   const { box } = resourceOverlay;
 
-  const closeBtn = document.createElement('button');
-  closeBtn.className = 'close-btn';
-  closeBtn.innerHTML = '&times;';
-  closeBtn.addEventListener('click', resourceOverlay.close);
-  box.appendChild(closeBtn);
 
   const header = document.createElement('div');
   header.className = 'panel-heading';
@@ -310,11 +285,6 @@ export function openDungeonOverlay() {
   dungeonOverlay.onClose(() => { dungeonOverlay = null; });
   const { box } = dungeonOverlay;
 
-  const closeBtn = document.createElement('button');
-  closeBtn.className = 'close-btn';
-  closeBtn.innerHTML = '&times;';
-  closeBtn.addEventListener('click', dungeonOverlay.close);
-  box.appendChild(closeBtn);
 
   const partyList = document.createElement('div');
   partyList.className = 'exploration-list casino-section';

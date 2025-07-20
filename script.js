@@ -1788,11 +1788,6 @@ function openDiscipleOverlay(d) {
   discipleOverlay.box.classList.add('parchment-box');
   const { box } = discipleOverlay;
 
-  const closeBtn = document.createElement('button');
-  closeBtn.className = 'close-btn';
-  closeBtn.innerHTML = '&times;';
-  closeBtn.addEventListener('click', discipleOverlay.close);
-  box.appendChild(closeBtn);
 
   const tabs = document.createElement('div');
   tabs.className = 'disciple-tabs';
