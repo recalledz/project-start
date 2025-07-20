@@ -80,7 +80,9 @@ Water Orb displays its regen rate within the orb itself and glows softly at nigh
 Footer
 
 “Gate” button to open the full map/exploration/tasks overlay.
-* Exploration and sect disciple lists now use a unified bamboo-colored badge showing the disciple's name, mood, HP bar and current task.
+* Exploration and sect disciple lists now use a unified badge built in PixiJS.
+  Each badge layers a bamboo border beneath a parchment background, with the
+  disciple's name, mood, HP bar and current task rendered on top.
 
 #dicsiple overlay card on pressing disciple
 

@@ -1,8 +1,11 @@
 /* global PIXI */
 
 let app = null;
+// track containers for each badge element
 const sprites = new Map();
-const parchmentTexture = PIXI.Texture.from('img/parchment.jpg');
+// load textures for bamboo border and parchment background
+const bambooTexture = PIXI.Texture.from('img/bamboo.png');
+const parchmentTexture = PIXI.Texture.from('img/parchment.png');
 
 // only once PIXI is loaded will this run
 function ensureApp() {
@@ -44,18 +47,22 @@ function ensureApp() {
   window.addEventListener('scroll', updateAll);
 }
 
-function updateSprite(sprite, el) {
+function updateContainer(objs, el) {
   const r = el.getBoundingClientRect();
-  Object.assign(sprite, {
-    x: r.left,
-    y: r.top,
-    width:  r.width,
-    height: r.height
+  const { container, bamboo, parchment } = objs;
+  Object.assign(container, { x: r.left, y: r.top });
+  Object.assign(bamboo, { width: r.width, height: r.height });
+  const pad = 4;
+  Object.assign(parchment, {
+    x: pad,
+    y: pad,
+    width: Math.max(0, r.width - pad * 2),
+    height: Math.max(0, r.height - pad * 2)
   });
 }
 
 function updateAll() {
-  sprites.forEach((spr, el) => updateSprite(spr, el));
+  sprites.forEach((objs, el) => updateContainer(objs, el));
 }
 
 export function applyBadgeTexture(el) {
@@ -63,12 +70,19 @@ export function applyBadgeTexture(el) {
 
   if (!app) return;
 
-  const sprite = new PIXI.Sprite(parchmentTexture);
+  const container = new PIXI.Container();
+  const bamboo = new PIXI.Sprite(bambooTexture);
+  const parchment = new PIXI.Sprite(parchmentTexture);
 
-  sprites.set(el, sprite);
-  updateSprite(sprite, el);
-  app.stage.addChild(sprite);
+  container.addChild(bamboo);
+  container.addChild(parchment);
 
-  new ResizeObserver(() => updateSprite(sprite, el))
+  const objs = { container, bamboo, parchment };
+
+  sprites.set(el, objs);
+  updateContainer(objs, el);
+  app.stage.addChild(container);
+
+  new ResizeObserver(() => updateContainer(objs, el))
     .observe(el);
 }
