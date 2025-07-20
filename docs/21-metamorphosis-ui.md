@@ -41,3 +41,9 @@ metamorphosis XP/sec = 0.4
 ## Taino‑styled Glyph
 
 Integrate a Taino‑inspired frog glyph around the icon for ambient feedback.
+
+## Styling
+
+- The metamorphosis panel now uses a parchment texture background at 30% opacity.
+- Progress rings feature a lilac to teal gradient with a subtle glow.
+- Progress numbers appear on semi-transparent parchment panels.
