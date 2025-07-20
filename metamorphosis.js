@@ -2,6 +2,7 @@ import { sectSystem, getCurrentSchedule } from './game/sect.js';
 import { sectState } from './game/state.js';
 import { createDiscipleBadge } from './game/badges.js';
 import { METAMORPHOSIS_STAGE_REQ } from './game/constants.js';
+import { showPathOverlay } from './game/pathOverlay.js';
 
 export const metamorphosisState = {
   requirement: METAMORPHOSIS_STAGE_REQ
@@ -13,6 +14,7 @@ let progressText;
 let ringFill;
 let ringWrapper;
 let listContainer;
+let breakthroughBtn;
 let selectedDiscipleId = null;
 const RING_RADIUS = 80;
 const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
@@ -53,6 +55,7 @@ const bodyPath = `M200 150
         <div id="metamorphosisProgressText" class="progress-text"></div>
         <div class="progress-bar"><div id="metamorphosisBarFill" class="progress-fill"></div></div>
       </div>
+      <button id="breakthroughBtn" class="breakthrough-btn" style="display:none;">Breakthrough</button>
       <div class="assigned-disciple">Assigned to <span id="assignedDisciple">disciple 1</span></div>
     </div>
   `;
@@ -60,6 +63,12 @@ const bodyPath = `M200 150
   progressText = container.querySelector('#metamorphosisProgressText');
   ringFill = container.querySelector('#metamorphosisRing');
   ringWrapper = container.querySelector('.metamorphosis-progress');
+  breakthroughBtn = container.querySelector('#breakthroughBtn');
+  if (breakthroughBtn) {
+    breakthroughBtn.addEventListener('click', () => {
+      if (selectedDiscipleId) breakthrough(selectedDiscipleId);
+    });
+  }
   selectedDiscipleId = sectSystem.disciples[0]?.id || null;
   window.addEventListener('orbs-changed', renderMetamorphosis);
   if (window.lucide) window.lucide.createIcons({ icons: window.lucide.icons });
@@ -101,6 +110,9 @@ function breakthrough(id) {
   meta.xp = 0;
   meta.stage += 1;
   sectSystem.orbs.water.current = 0;
+  if (meta.stage === 1) {
+    showPathOverlay({ onSelect: path => { sectState.disciplePaths[id] = path; } });
+  }
   renderMetamorphosis();
 }
 
@@ -145,6 +157,10 @@ function renderMetamorphosis() {
   const halo = container.querySelector('#metamorphosisHalo');
   if (halo) halo.setAttribute('opacity', meta.xp >= metamorphosisState.requirement ? '1' : '0');
 
+  if (breakthroughBtn) {
+    breakthroughBtn.style.display = meta.xp >= metamorphosisState.requirement ? 'block' : 'none';
+  }
+
   const label = container.querySelector('#assignedDisciple');
   if (label && d) label.textContent = d.name || `Disciple ${d.id}`;
 }
@@ -168,9 +184,6 @@ export function tickMetamorphosis(dt) {
         getCultivationSpeed(d) *
         getSeasonMultiplier();
       meta.xp = Math.min(metamorphosisState.requirement, meta.xp + rate * dt);
-        if (meta.xp >= metamorphosisState.requirement) {
-          breakthrough(d.id);
-      }
     }
   });
 }
