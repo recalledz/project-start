@@ -1,10 +1,11 @@
 import addLog from '../log.js';
 import { refreshMetamorphosis, tickMetamorphosis } from '../metamorphosis.js';
-import { sectState, currentEnemy } from './state.js';
+import { sectState, currentEnemy, FRUIT_GROWTH_RATES } from './state.js';
 import { generateDiscipleAttributes } from '../discipleAttributes.js';
 import Disciple from '../disciple.js';
 import { initializeDisciple } from '../utils/discipleInit.js';
 import { createOverlay } from '../ui/overlay.js';
+import { DAILY_FRUIT_CONSUMPTION } from './constants.js';
 
 export { addDiscoveredLocation } from "./ui.js";
 export const discoveredLocations = [];
@@ -1379,6 +1380,24 @@ export function openWaterRegenPopup() {
 
   box.appendChild(list);
   overlay.appendButton('Close', overlay.close);
+}
+
+export function getDailyResourceDelta() {
+  const fruitGain = FRUIT_GROWTH_RATES[sectSystem.seasonIndex] || 0;
+  const fruitLoss = DAILY_FRUIT_CONSUMPTION * sectSystem.disciples.length;
+  const waterPerDay = sectSystem.gains.water * DAY_LENGTH_SECONDS;
+  return [
+    {
+      name: 'Fruit',
+      gain: fruitGain,
+      loss: fruitLoss
+    },
+    {
+      name: 'Water',
+      gain: waterPerDay >= 0 ? waterPerDay : 0,
+      loss: waterPerDay < 0 ? -waterPerDay : 0
+    }
+  ];
 }
 
 

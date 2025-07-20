@@ -4,7 +4,7 @@ export let explorationListContainer = null;
 export let startDungeonBtn = null;
 
 import { createOverlay } from './overlay.js';
-import { sectSystem, SECT_SCHEDULE, getCurrentSchedule, renderConstructCards } from '../game/sect.js';
+import { sectSystem, SECT_SCHEDULE, getCurrentSchedule, renderConstructCards, getDailyResourceDelta } from '../game/sect.js';
 import { systems, sectState, worldProgress } from '../game/state.js';
 import { createSectDiscipleCard, renderColonyTasks, renderExplorationTab, startExploration, startWorldCombat, discipleGatherPhase } from '../script.js';
 
@@ -232,8 +232,44 @@ export function openPlaceholderOverlay(title) {
   box.appendChild(msg);
 }
 
+let resourceOverlay = null;
 export function openResourceOverlay() {
-  openPlaceholderOverlay('Resources');
+  if (resourceOverlay) return;
+  resourceOverlay = createOverlay({ className: 'resource-overlay' });
+  resourceOverlay.onClose(() => {
+    resourceOverlay = null;
+  });
+  const { box } = resourceOverlay;
+
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 'close-btn';
+  closeBtn.innerHTML = '&times;';
+  closeBtn.addEventListener('click', resourceOverlay.close);
+  box.appendChild(closeBtn);
+
+  const header = document.createElement('div');
+  header.className = 'panel-heading';
+  header.textContent = 'Daily Resource Change';
+  box.appendChild(header);
+
+  const list = document.createElement('div');
+  list.className = 'resource-deltas';
+  box.appendChild(list);
+
+  function render() {
+    list.innerHTML = '';
+    const deltas = getDailyResourceDelta();
+    deltas.forEach(d => {
+      const row = document.createElement('div');
+      row.className = 'resource-delta-row';
+      const gain = d.gain.toFixed(1);
+      const loss = d.loss.toFixed(1);
+      row.innerHTML = `<span>${d.name}</span><span class="gain">+${gain}</span><span class="loss">-${loss}</span>`;
+      list.appendChild(row);
+    });
+  }
+
+  render();
 }
 
 export function openBuildOverlay() {
