@@ -1316,7 +1316,8 @@ function showConstructCloud(text, target, color) {
 }
 
 export function openWaterRegenPopup() {
-  const overlay = createOverlay({ className: 'water-regen-overlay' });
+  const overlay = createOverlay({ className: 'water-regen-overlay', boxClass: 'parchment-box' });
+  overlay.box.classList.add('parchment-box');
   const box = overlay.box;
   const header = document.createElement('h2');
   header.textContent = 'Water Regeneration';

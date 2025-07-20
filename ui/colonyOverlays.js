@@ -17,7 +17,8 @@ export function closeExplorationOverlay() {
 
 export function openExplorationOverlay() {
   if (explorationOverlay) return;
-  explorationOverlay = createOverlay({ className: 'exploration-overlay' });
+  explorationOverlay = createOverlay({ className: 'exploration-overlay', boxClass: 'parchment-box' });
+  explorationOverlay.box.classList.add('parchment-box');
   explorationOverlay.onClose(() => {
     explorationOverlay = null;
   });
@@ -105,7 +106,8 @@ let workOverlay = null;
 let workOverlaySelected = null;
 export function openWorkOverlay() {
   if (workOverlay) return;
-  workOverlay = createOverlay({ className: 'work-overlay' });
+  workOverlay = createOverlay({ className: 'work-overlay', boxClass: 'parchment-box' });
+  workOverlay.box.classList.add('parchment-box');
   workOverlay.onClose(() => {
     workOverlay = null;
     workOverlaySelected = null;
@@ -193,7 +195,8 @@ export function openWorkOverlay() {
 let scheduleOverlay = null;
 export function openScheduleOverlay() {
   if (scheduleOverlay) return;
-  scheduleOverlay = createOverlay({ className: 'schedule-overlay' });
+  scheduleOverlay = createOverlay({ className: 'schedule-overlay', boxClass: 'parchment-box' });
+  scheduleOverlay.box.classList.add('parchment-box');
   let interval;
   scheduleOverlay.onClose(() => {
     if (interval) clearInterval(interval);
@@ -237,7 +240,8 @@ export function openScheduleOverlay() {
 }
 
 export function openPlaceholderOverlay(title) {
-  const ov = createOverlay({});
+  const ov = createOverlay({ boxClass: 'parchment-box' });
+  ov.box.classList.add('parchment-box');
   const { box } = ov;
   const closeBtn = document.createElement('button');
   closeBtn.className = 'close-btn';
@@ -252,7 +256,8 @@ export function openPlaceholderOverlay(title) {
 let resourceOverlay = null;
 export function openResourceOverlay() {
   if (resourceOverlay) return;
-  resourceOverlay = createOverlay({ className: 'resource-overlay' });
+  resourceOverlay = createOverlay({ className: 'resource-overlay', boxClass: 'parchment-box' });
+  resourceOverlay.box.classList.add('parchment-box');
   resourceOverlay.onClose(() => {
     resourceOverlay = null;
   });
@@ -300,7 +305,8 @@ export function closeDungeonOverlay() {
 
 export function openDungeonOverlay() {
   if (dungeonOverlay) return;
-  dungeonOverlay = createOverlay({ className: 'dungeon-overlay' });
+  dungeonOverlay = createOverlay({ className: 'dungeon-overlay', boxClass: 'parchment-box' });
+  dungeonOverlay.box.classList.add('parchment-box');
   dungeonOverlay.onClose(() => { dungeonOverlay = null; });
   const { box } = dungeonOverlay;
 

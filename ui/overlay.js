@@ -1,4 +1,4 @@
-export function createOverlay({ className = '', container = document.body } = {}) {
+export function createOverlay({ className = '', boxClass = '', container = document.body } = {}) {
   const element = document.createElement('div');
   element.classList.add('overlay');
   if (className) {
@@ -7,6 +7,9 @@ export function createOverlay({ className = '', container = document.body } = {}
 
   const box = document.createElement('div');
   box.classList.add('overlay-box');
+  if (boxClass) {
+    boxClass.split(' ').forEach(cls => cls && box.classList.add(cls));
+  }
   element.appendChild(box);
 
   const closeHandlers = new Set();
