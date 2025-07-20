@@ -10,21 +10,17 @@ function ensureApp() {
     typeof document === 'undefined' ||
     !globalThis.HTMLCanvasElement
   ) {
-    // Skip if canvas is unavailable (e.g. server-side tests)
+    // Skip if canvas is unavailable (e.g. during server-side tests)
     return;
   }
   const testCanvas = document.createElement('canvas');
   if (!testCanvas.getContext || !testCanvas.getContext('2d')) return;
   try {
-    app = new Application({
+    app = new PIXI.Application({
       width: window.innerWidth,
       height: window.innerHeight,
       transparent: true
     });
-    if (!parchmentTexture) {
-      parchmentTexture = Texture.from('img/parchment.jpg');
-
-    }
   } catch (e) {
     console.error('PIXI init failed', e);
     return;
