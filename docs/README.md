@@ -1,6 +1,6 @@
 Game Design Documentation
 
-Last updated: July 15, 2025
+Last updated: July 19, 2025
 
 Welcome to the Reality Constructor design documentation. This folder contains all high‑level design notes, organized by feature for easy navigation.
 
@@ -64,3 +64,5 @@ Table of Contents
 
 
 20. [Skills](20-skills.md)
+
+21. [Metamorphosis UI Expansion](21-metamorphosis-ui.md)

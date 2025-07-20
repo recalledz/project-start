@@ -11,8 +11,12 @@ let container;
 let meditateBtn;
 let progressFill;
 let progressText;
+let ringFill;
+let ringWrapper;
 let listContainer;
 let selectedDiscipleId = null;
+const RING_RADIUS = 80;
+const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
 
 export function initMetamorphosis() {
   container = document.getElementById('metamorphosisTabContent');
@@ -28,15 +32,21 @@ const bodyPath = `M200 150
                Z`;
   container.innerHTML = `
     <div class="metamorphosis-room">
-      <div class="metamorphosis-figure">
-        <svg id="metamorphosisDiagram" viewBox="0 0 400 400" width="100%" height="100%">
-          <defs>
-            <clipPath id="bodyShapeClip"><path d="${bodyPath}" /></clipPath>
-          </defs>
-          <path d="${bodyPath}" fill="rgba(0,0,0,0.3)" stroke="#888" stroke-width="2" />
-          <circle id="metamorphosisHalo" cx="200" cy="180" r="70" fill="none" stroke="gold" stroke-width="4" opacity="0" />
-          <rect id="bodyFill" x="170" y="240" width="60" height="0" fill="rgba(255,255,255,0.4)" clip-path="url(#bodyShapeClip)" />
+      <div class="progress-wrapper metamorphosis-progress">
+        <svg class="progress-ring" width="${RING_RADIUS * 2 + 20}" height="${RING_RADIUS * 2 + 20}">
+          <circle class="progress-ring-bg" cx="${RING_RADIUS + 10}" cy="${RING_RADIUS + 10}" r="${RING_RADIUS}" />
+          <circle id="metamorphosisRing" class="progress-ring-fill" cx="${RING_RADIUS + 10}" cy="${RING_RADIUS + 10}" r="${RING_RADIUS}" />
         </svg>
+        <div class="metamorphosis-figure">
+          <svg id="metamorphosisDiagram" viewBox="0 0 400 400" width="100%" height="100%">
+            <defs>
+              <clipPath id="bodyShapeClip"><path d="${bodyPath}" /></clipPath>
+            </defs>
+            <path d="${bodyPath}" fill="rgba(0,0,0,0.3)" stroke="#888" stroke-width="2" />
+            <circle id="metamorphosisHalo" cx="200" cy="180" r="70" fill="none" stroke="gold" stroke-width="4" opacity="0" />
+            <rect id="bodyFill" x="170" y="240" width="60" height="0" fill="rgba(255,255,255,0.4)" clip-path="url(#bodyShapeClip)" />
+          </svg>
+        </div>
       </div>
       <div class="progress-area">
         <div id="metamorphosisProgressText" class="progress-text"></div>
@@ -51,6 +61,8 @@ const bodyPath = `M200 150
   meditateBtn = container.querySelector('#meditateMetamorphosisBtn');
   progressFill = container.querySelector('#metamorphosisBarFill');
   progressText = container.querySelector('#metamorphosisProgressText');
+  ringFill = container.querySelector('#metamorphosisRing');
+  ringWrapper = container.querySelector('.metamorphosis-progress');
   selectedDiscipleId = sectSystem.disciples[0]?.id || null;
   window.addEventListener('orbs-changed', renderMetamorphosis);
   meditateBtn.addEventListener('click', toggleMeditation);
@@ -137,6 +149,15 @@ function renderMetamorphosis() {
 
   updateRect('#bodyFill', 200, 180, 60, coreFill);
 
+  if (ringFill) {
+    ringFill.style.strokeDasharray = RING_CIRCUMFERENCE;
+    ringFill.style.strokeDashoffset = RING_CIRCUMFERENCE * (1 - coreFill);
+  }
+  if (ringWrapper) {
+    if (coreFill >= 0.9) ringWrapper.classList.add('near-complete');
+    else ringWrapper.classList.remove('near-complete');
+  }
+
   if (progressText) progressText.textContent = `${Math.floor(meta.xp)}/${metamorphosisState.requirement}`;
   if (progressFill) progressFill.style.width = `${coreFill * 100}%`;
   if (meta.xp >= metamorphosisState.requirement) {
@@ -162,9 +183,26 @@ export function tickMetamorphosis(dt) {
     ensureMeta(d.id);
     const meta = sectState.discipleMetamorphosis[d.id];
     if (meta.meditating && meta.xp < metamorphosisState.requirement) {
-      const rate = 0.4 * d.potential * d.potential;
+      const rate = 0.4 *
+        getMethodMultiplier(d) *
+        getBuildingMultiplier(d) *
+        getRoomMultiplier(d) *
+        getPathMatchMultiplier(d) *
+        getStabilityFactor(d) *
+        getCultivationSpeed(d) *
+        getSeasonMultiplier();
       meta.xp = Math.min(metamorphosisState.requirement, meta.xp + rate * dt);
     }
   });
 }
+
+function getMethodMultiplier() { return 1; }
+function getBuildingMultiplier() { return 1; }
+function getRoomMultiplier() { return 1; }
+function getPathMatchMultiplier() { return 1; }
+function getStabilityFactor() { return 1; }
+function getCultivationSpeed(d) {
+  return d.potential * d.potential;
+}
+function getSeasonMultiplier() { return 1; }
 
