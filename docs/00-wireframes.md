@@ -86,7 +86,8 @@ Footer
 “Gate” button to open the full map/exploration/tasks overlay.
 * Exploration and sect disciple lists now use a unified badge styled purely via CSS.
   Each badge displays a parchment background inside a bamboo border along with the
-  disciple's name, mood, HP bar and current task.
+  disciple's name, mood, HP bar and current task. The bamboo frame is drawn using
+  the CSS `border-image` property so the texture tiles cleanly around the badge.
 * All overlays now use the same parchment-style box for a consistent look.
 
 #dicsiple overlay card on pressing disciple

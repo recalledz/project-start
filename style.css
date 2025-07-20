@@ -3676,15 +3676,22 @@ body.darkenshift-mode .tabsContainer button.active {
 
 .disciple-badge {
   border-radius: 6px;
-  padding: 2px;
+  border: 10px solid transparent;
+  border-image: url('img/bamboo.png') 10 round;
+  padding: 6px;
   width: 72px;
   font-size: 0.55rem;
-  display: flex;
+  display: inline-flex;
   flex-direction: column;
   align-items: center;
   position: relative;
   z-index: 1;
   gap: 2px;
+  transition: box-shadow 0.2s;
+}
+
+.disciple-badge:hover {
+  box-shadow: 0 0 6px var(--verdantia-highlight);
 }
 .disciple-badge .mood-icon {
   position: absolute;
