@@ -1,36 +1,36 @@
-import { Application, Sprite, Texture } from 'pixi.min.js';
+/* badgeBackground.js – loaded _after_ pixi.js‑legacy (and pixi‑filters.umd.js) via plain <script> tags */
 
 let app = null;
 const sprites = new Map();
 let parchmentTexture = null;
 
+// only once PIXI is loaded will this run
 function ensureApp() {
   if (app) return;
   if (
     typeof document === 'undefined' ||
     !globalThis.HTMLCanvasElement
-  ) {
-    // Skip if canvas is unavailable (e.g. during server-side tests)
-    return;
-  }
-  const testCanvas = document.createElement('canvas');
-  if (!testCanvas.getContext || !testCanvas.getContext('2d')) return;
-  try {
-    app = new PIXI.Application({
-      width: window.innerWidth,
-      height: window.innerHeight,
-      transparent: true
-    });
-  } catch (e) {
-    console.error('PIXI init failed', e);
-    return;
-  }
+  ) return;
+
+  // create the Application
+  app = new PIXI.Application({
+    width: window.innerWidth,
+    height: window.innerHeight,
+    transparent: true
+  });
+
+  // now that PIXI is definitely there, make the texture
+  parchmentTexture = PIXI.Texture.from('img/parchment.jpg');
+
   app.view.classList.add('badge-texture-layer');
-  app.view.style.position = 'fixed';
-  app.view.style.top = '0';
-  app.view.style.left = '0';
-  app.view.style.pointerEvents = 'none';
+  Object.assign(app.view.style, {
+    position: 'fixed',
+    top:       '0',
+    left:      '0',
+    pointerEvents: 'none'
+  });
   document.body.appendChild(app.view);
+
   window.addEventListener('resize', () => {
     app.renderer.resize(window.innerWidth, window.innerHeight);
     updateAll();
@@ -39,25 +39,31 @@ function ensureApp() {
 }
 
 function updateSprite(sprite, el) {
-  const rect = el.getBoundingClientRect();
-  sprite.x = rect.left;
-  sprite.y = rect.top;
-  sprite.width = rect.width;
-  sprite.height = rect.height;
+  const r = el.getBoundingClientRect();
+  Object.assign(sprite, {
+    x: r.left,
+    y: r.top,
+    width:  r.width,
+    height: r.height
+  });
 }
 
 function updateAll() {
-  sprites.forEach((sprite, el) => updateSprite(sprite, el));
+  sprites.forEach((spr, el) => updateSprite(spr, el));
 }
 
 export function applyBadgeTexture(el) {
   ensureApp();
+  // guard in case PIXI wasn't loaded or texture failed
   if (!app || !parchmentTexture) return;
-  const sprite = new Sprite(parchmentTexture);
+
+  // ← use PIXI.Sprite, not bare Sprite
+  const sprite = new PIXI.Sprite(parchmentTexture);
 
   sprites.set(el, sprite);
   updateSprite(sprite, el);
   app.stage.addChild(sprite);
-  const ro = new ResizeObserver(() => updateSprite(sprite, el));
-  ro.observe(el);
+
+  new ResizeObserver(() => updateSprite(sprite, el))
+    .observe(el);
 }
