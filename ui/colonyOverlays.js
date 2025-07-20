@@ -6,7 +6,7 @@ export let startDungeonBtn = null;
 import { createOverlay } from './overlay.js';
 import { sectSystem, SECT_SCHEDULE, getCurrentSchedule, renderConstructCards, getDailyResourceDelta, getDiscipleDailyOutput } from '../game/sect.js';
 import { systems, sectState, worldProgress } from '../game/state.js';
-import { createSectDiscipleCard, renderColonyTasks, renderExplorationTab, startExploration, startWorldCombat, discipleGatherPhase } from '../script.js';
+import { createSectDiscipleCard, renderExplorationTab, startExploration, startWorldCombat, discipleGatherPhase } from '../script.js';
 
 let explorationOverlay = null;
 let explorationOverlayActiveTab = 'explore';
@@ -172,7 +172,6 @@ export function openWorkOverlay() {
             renderConstructCards();
           }
         }
-        if (typeof renderColonyTasks === 'function') renderColonyTasks();
         render();
       });
       right.appendChild(btn);

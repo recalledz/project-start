@@ -2933,9 +2933,6 @@ body.darkenshift-mode .tabsContainer button.active {
 .colony-tabs button.active {
     outline: 1px solid #555;
 }
-#colonyTasksTabBtn {
-    color: #fff;
-}
 
 .colony-main {
     flex: 1;
@@ -2968,48 +2965,6 @@ body.darkenshift-mode .tabsContainer button.active {
     transition: filter 2s linear;
 }
 
-.colony-side {
-    display: none;
-}
-#colonyTasksPanel {
-    border-right: 1px solid var(--core-border);
-}
-#colonyInfoPanel {
-    border-left: 1px solid var(--core-border);
-}
-.colony-panel {
-    flex: 1;
-    overflow-y: auto;
-    padding: 6px;
-    border: 1px solid #555;
-    display: none;
-    flex-direction: column;
-    gap: 6px;
-    font-size: 0.75rem;
-}
-.task-entry {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 6px;
-    border: 1px solid #555;
-    padding: 4px;
-}
-.task-entry.selected {
-    background: #333;
-}
-.task-entry.idle {
-    opacity: 0.5;
-}
-.disciple-task-name {
-    min-width: 80px;
-}
-.disciple-task-info {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-}
 .disciple-progress {
     position: relative;
     width: 120px;
@@ -3044,12 +2999,6 @@ body.darkenshift-mode .tabsContainer button.active {
 }
 .sect-disciple-list .disciple-progress-label {
     font-size: 0.55rem;
-}
-.disciple-task-rate {
-    min-width: 50px;
-    font-size: 0.7rem;
-    text-align: right;
-    color: #ddd;
 }
 .panel-heading {
     font-weight: 600;
@@ -3180,10 +3129,6 @@ body.darkenshift-mode .tabsContainer button.active {
 .sect-disciple.incapacitated {
     background: rgba(255, 64, 64, 0.9);
     box-shadow: 0 0 6px rgba(255, 0, 0, 0.9);
-}
-#colonyTasksPanel .task-entry {
-    width: 100%;
-    font-size: 0.75rem;
 }
 @keyframes sectPulse {
     from { transform: scale(1); opacity: 0.8; }
@@ -3360,7 +3305,6 @@ body.darkenshift-mode .tabsContainer button.active {
   .sect-disciple { width: 3px; height: 3px; font-size: 0; }
   .sect-basket { width: 6px; height: 4px; }
   .sect-bohio { width: 24px; height: 18px; }
-#colonyTasksPanel .task-entry { width: 100%; flex-direction: column; gap: 4px; }
 }
 
 /* Desktop scaling */
