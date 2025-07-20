@@ -6,3 +6,5 @@
 - Low‑food disciples divert to orb to replenish (+0.383 food/s) at cost of Water input.
 - Orb distributes Water as global energy; buildings can boost its output.
 - Disciples can direct % of personal Water to orb.
+- The orb is now larger and displays its regeneration rate centered within.
+- At night the orb glows brightly, illuminating nearby terrain.

@@ -2240,13 +2240,15 @@ body.darkenshift-mode .tabsContainer button.active {
 }
 
 .orb-regen {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
     font-size: 0.6rem;
     text-align: center;
-    color: #aaa;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 2px;
+    color: #fff;
+    pointer-events: none;
 }
 
 .construct-orb {
@@ -2859,6 +2861,7 @@ body.darkenshift-mode .tabsContainer button.active {
     position: relative;
     min-height: 200px;
     height: 100%;
+    transition: filter 2s linear;
 }
 
 .colony-side {
@@ -2969,8 +2972,8 @@ body.darkenshift-mode .tabsContainer button.active {
 }
 .sect-orb {
     position: absolute;
-    width: 50px;
-    height: 50px;
+    width: 100px;
+    height: 100px;
     border-radius: 50%;
     opacity: 0.9;
     box-shadow: 0 0 4px rgba(255, 255, 255, 0.6);
@@ -2993,14 +2996,8 @@ body.darkenshift-mode .tabsContainer button.active {
     color: #7fd9ff;
 }
 .sect-orb.water .orb-fill { background: rgba(127,217,255,0.6); }
-.water-rate {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    color: #fff;
-    text-shadow: 0 0 4px #000;
-    font-size: 0.75rem;
-    pointer-events: none;
+.colony-map.night .sect-orb.water {
+    box-shadow: 0 0 20px rgba(127,217,255,0.8), 0 0 60px rgba(127,217,255,0.6);
 }
 .sect-basket {
     position: absolute;
@@ -3250,7 +3247,7 @@ body.darkenshift-mode .tabsContainer button.active {
 
 /* Mobile adjustments */
 @media (max-width: 600px) {
-  .sect-orb { width: 30px; height: 30px; }
+  .sect-orb { width: 60px; height: 60px; }
   .disciple-orb { width: 12px; height: 12px; }
   .sect-disciple { width: 3px; height: 3px; font-size: 0; }
   .sect-basket { width: 6px; height: 4px; }
@@ -3260,7 +3257,7 @@ body.darkenshift-mode .tabsContainer button.active {
 
 /* Desktop scaling */
 @media (min-width: 1024px) {
-  .sect-orb { width: 70px; height: 70px; }
+  .sect-orb { width: 140px; height: 140px; }
   .disciple-orb { width: 20px; height: 20px; }
   .sect-disciple { width: 7px; height: 7px; }
   .sect-basket { width: 12px; height: 8px; }
