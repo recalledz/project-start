@@ -21,7 +21,7 @@ export function createDiscipleBadge(d) {
   badge.appendChild(lifeBar);
 
   const wrapper = document.createElement('div');
-  wrapper.id = `disciple-task-${d.id}`;
+  wrapper.dataset.discipleId = d.id;
   wrapper.className = 'disciple-progress';
   const fill = document.createElement('div');
   fill.className = 'disciple-progress-fill';

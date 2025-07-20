@@ -748,11 +748,11 @@ function updateTaskProgressDisplay() {
     ? ((1 - sectState.buildProgress) * buildData.time) / builderCount
     : 0;
   sectSystem.disciples.forEach(d => {
-    const wrapper = document.getElementById(`disciple-task-${d.id}`);
-    if (!wrapper) return;
-    const fill = wrapper.querySelector('.disciple-progress-fill');
-    const label = wrapper.querySelector('.disciple-progress-label');
-    const rateEl = wrapper.querySelector('.disciple-task-rate');
+    const wrappers = document.querySelectorAll(`[data-disciple-id="${d.id}"]`);
+    wrappers.forEach(wrapper => {
+      const fill = wrapper.querySelector('.disciple-progress-fill');
+      const label = wrapper.querySelector('.disciple-progress-label');
+      const rateEl = wrapper.querySelector('.disciple-task-rate');
     const phase = getCurrentSchedule().action;
     const taskName = d.incapacitated
       ? 'Resting'
@@ -835,6 +835,7 @@ function updateTaskProgressDisplay() {
       if (label) label.textContent = '';
       if (rateEl) rateEl.textContent = '';
     }
+    });
   });
 }
 
@@ -1097,7 +1098,7 @@ function startDiscipleMovement() {
 
     const taskInfo = document.createElement('div');
     taskInfo.className = 'disciple-task-info';
-    taskInfo.id = `disciple-task-${d.id}`;
+    taskInfo.dataset.discipleId = d.id;
 
     const bar = document.createElement('div');
     bar.className = 'disciple-progress';
@@ -1110,7 +1111,6 @@ function startDiscipleMovement() {
     taskInfo.appendChild(bar);
     const rate = document.createElement('div');
     rate.className = 'disciple-task-rate';
-    rate.id = `disciple-rate-${d.id}`;
     taskInfo.appendChild(rate);
 
     row.appendChild(icon);
