@@ -68,6 +68,8 @@ Zones curve around the Water Orb in an ellipse:
 - Research Zone
 - Housing Zone (between the upper zones)
 
+Zones are sized to **26%** of the main canvas so they no longer overlap.
+
 The Water Orb now sits at the exact center, with the housing zone forming the tip
 of a loose triangle above the lower zones.
 
