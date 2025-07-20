@@ -8,7 +8,6 @@ export const metamorphosisState = {
 };
 
 let container;
-let meditateBtn;
 let progressFill;
 let progressText;
 let ringFill;
@@ -17,6 +16,7 @@ let listContainer;
 let selectedDiscipleId = null;
 const RING_RADIUS = 80;
 const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
+const STAGE_NAMES = ['Egg', 'Tadpole', 'Young Coquí', 'Elder Frog', 'Divine Coquí'];
 
 export function initMetamorphosis() {
   container = document.getElementById('metamorphosisTabContent');
@@ -32,6 +32,7 @@ const bodyPath = `M200 150
                Z`;
   container.innerHTML = `
     <div class="metamorphosis-room">
+          <div id="metamorphosisStageLabel" class="metamorphosis-stage"></div>
       <div class="progress-wrapper metamorphosis-progress">
         <svg class="progress-ring" width="${RING_RADIUS * 2 + 20}" height="${RING_RADIUS * 2 + 20}">
           <circle class="progress-ring-bg" cx="${RING_RADIUS + 10}" cy="${RING_RADIUS + 10}" r="${RING_RADIUS}" />
@@ -54,22 +55,13 @@ const bodyPath = `M200 150
       </div>
       <div class="assigned-disciple">Assigned to <span id="assignedDisciple">disciple 1</span></div>
     </div>
-    <div class="core-button-wrapper">
-      <button id="meditateMetamorphosisBtn" disabled>Meditate</button>
-    </div>
   `;
-  meditateBtn = container.querySelector('#meditateMetamorphosisBtn');
   progressFill = container.querySelector('#metamorphosisBarFill');
   progressText = container.querySelector('#metamorphosisProgressText');
   ringFill = container.querySelector('#metamorphosisRing');
   ringWrapper = container.querySelector('.metamorphosis-progress');
   selectedDiscipleId = sectSystem.disciples[0]?.id || null;
   window.addEventListener('orbs-changed', renderMetamorphosis);
-  meditateBtn.addEventListener('click', toggleMeditation);
-  meditateBtn.addEventListener('mouseenter', e => {
-    window.showTooltip('Toggle meditation focus', e.pageX + 10, e.pageY + 10);
-  });
-  meditateBtn.addEventListener('mouseleave', window.hideTooltip);
   if (window.lucide) window.lucide.createIcons({ icons: window.lucide.icons });
   document.addEventListener('disciple-gained', refreshMetamorphosis);
   renderDiscipleList();
@@ -78,7 +70,7 @@ const bodyPath = `M200 150
 
 function ensureMeta(id) {
   if (!sectState.discipleMetamorphosis[id]) {
-    sectState.discipleMetamorphosis[id] = { xp: 0, stage: 0, meditating: false };
+        sectState.discipleMetamorphosis[id] = { xp: 0, stage: 0 };
   }
 }
 
@@ -103,27 +95,12 @@ function renderDiscipleList() {
 }
 
 
-function toggleMeditation() {
-  if (!selectedDiscipleId) return;
-  const meta = sectState.discipleMetamorphosis[selectedDiscipleId];
-  if (!meta) return;
-  if (meta.xp >= metamorphosisState.requirement) {
-    breakthrough();
-    return;
-  }
-  meta.meditating = !meta.meditating;
-  meditateBtn.textContent = meta.meditating ? 'Meditating...' : 'Meditate';
-}
-
-function breakthrough() {
-  if (!selectedDiscipleId) return;
-  const meta = sectState.discipleMetamorphosis[selectedDiscipleId];
+function breakthrough(id) {
+  const meta = sectState.discipleMetamorphosis[id];
   if (!meta) return;
   meta.xp = 0;
   meta.stage += 1;
   sectSystem.orbs.water.current = 0;
-  meta.meditating = false;
-  meditateBtn.textContent = 'Meditate';
   renderMetamorphosis();
 }
 
@@ -132,6 +109,8 @@ function renderMetamorphosis() {
   if (!selectedDiscipleId) {
     if (progressText) progressText.textContent = '';
     if (progressFill) progressFill.style.width = '0%';
+    const stageLabel = container.querySelector('#metamorphosisStageLabel');
+    if (stageLabel) stageLabel.textContent = '';
     return;
   }
   const meta = sectState.discipleMetamorphosis[selectedDiscipleId];
@@ -160,12 +139,8 @@ function renderMetamorphosis() {
 
   if (progressText) progressText.textContent = `${Math.floor(meta.xp)}/${metamorphosisState.requirement}`;
   if (progressFill) progressFill.style.width = `${coreFill * 100}%`;
-  if (meta.xp >= metamorphosisState.requirement) {
-    meditateBtn.textContent = 'Breakthrough';
-  } else {
-    meditateBtn.textContent = meta.meditating ? 'Meditating...' : 'Meditate';
-  }
-  meditateBtn.disabled = false;
+  const stageLabel = container.querySelector('#metamorphosisStageLabel');
+  if (stageLabel) stageLabel.textContent = STAGE_NAMES[meta.stage] || 'Unknown';
 
   const halo = container.querySelector('#metamorphosisHalo');
   if (halo) halo.setAttribute('opacity', meta.xp >= metamorphosisState.requirement ? '1' : '0');
@@ -179,10 +154,11 @@ export function refreshMetamorphosis() {
 }
 
 export function tickMetamorphosis(dt) {
+  const training = getCurrentSchedule().action === 'Training';
   sectSystem.disciples.forEach(d => {
     ensureMeta(d.id);
     const meta = sectState.discipleMetamorphosis[d.id];
-    if (meta.meditating && meta.xp < metamorphosisState.requirement) {
+    if (training && meta.xp < metamorphosisState.requirement) {
       const rate = 0.4 *
         getMethodMultiplier(d) *
         getBuildingMultiplier(d) *
@@ -192,6 +168,9 @@ export function tickMetamorphosis(dt) {
         getCultivationSpeed(d) *
         getSeasonMultiplier();
       meta.xp = Math.min(metamorphosisState.requirement, meta.xp + rate * dt);
+        if (meta.xp >= metamorphosisState.requirement) {
+          breakthrough(d.id);
+      }
     }
   });
 }
