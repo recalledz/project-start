@@ -895,16 +895,12 @@ function updateSectDisplay() {
       orb.style.top = p.top;
       if (p.cls === 'water') {
         orb.addEventListener('click', openWaterRegenPopup);
+        const rateEl = document.createElement('div');
+        rateEl.className = 'orb-regen';
+        rateEl.textContent = `${sectSystem.gains.water.toFixed(2)}/s`;
+        orb.appendChild(rateEl);
       }
       orbs.appendChild(orb);
-      if (p.cls === 'water') {
-        const rateEl = document.getElementById('waterRate');
-        if (rateEl) {
-          const orbSize = mobile ? 30 : 50;
-          rateEl.style.top = `calc(${p.top} + ${orbSize / 2 + 4}px)`;
-          rateEl.textContent = `${sectSystem.gains.water.toFixed(2)}/s`;
-        }
-      }
     });
   }
 
@@ -947,6 +943,7 @@ function updateMapBrightness(phase) {
     Night: 0.3
   };
   map.style.filter = `brightness(${values[phase] || 1})`;
+  map.classList.toggle('night', phase === 'Night');
 }
 
 function feedDisciples() {

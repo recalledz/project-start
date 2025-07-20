@@ -74,7 +74,7 @@ Zones are sized to **26%** of the main canvas so they no longer overlap.
 The Water Orb now sits at the exact center, with the housing zone forming the tip
 of a loose triangle above the lower zones.
 
-Water Orb widget shows current Water per second.
+Water Orb displays its regen rate within the orb itself and glows softly at night.
 
 
 Footer
