@@ -1,4 +1,4 @@
-import { sectSystem } from './game/sect.js';
+import { sectSystem, getCurrentSchedule } from './game/sect.js';
 import { sectState } from './game/state.js';
 import { createDiscipleBadge } from './game/badges.js';
 import { METAMORPHOSIS_STAGE_REQ } from './game/constants.js';
