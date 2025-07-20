@@ -984,13 +984,16 @@ function renderOrbs() {
 function renderSeasonBanner() {
   const banner = document.getElementById('seasonBanner');
   if (!banner) return;
+  const textEl = banner.querySelector('.season-text');
+  const weatherEl = banner.querySelector('.weather-icon');
   const idx = sectSystem.seasonIndex;
   const season = seasons[idx];
   setSeasonBackdrop(season.name);
   const day = sectSystem.seasonDay + 1;
   const daysLeft = SEASON_LENGTH_DAYS - day;
   const temp = seasonTemps[idx];
-  banner.textContent = `${season.name} Day ${day} (${daysLeft}d) ${temp}°C`;
+  if (textEl) textEl.textContent = `${season.name} Day ${day} (${daysLeft}d) ${temp}°C`;
+  if (weatherEl) weatherEl.textContent = sectSystem.weather ? sectSystem.weather.icon : '';
   banner.className = `season-banner ${seasonClasses[idx]}`;
   if (container) {
     seasonClasses.forEach(cls => container.classList.remove(cls));
@@ -1000,9 +1003,6 @@ function renderSeasonBanner() {
     } else {
       container.classList.remove('verdantia-bg');
     }
-  }
-  if (sectSystem.weather) {
-    banner.innerHTML = `${season.name} Day ${day} (${daysLeft}d) ${temp}°C<span class="weather-icon">${sectSystem.weather.icon}</span>`;
   }
 }
 

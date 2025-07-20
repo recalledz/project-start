@@ -43,7 +43,8 @@ Header
 
 inside sect tab:
 
-left top: current season, date, weather.
+left top: current season, date, weather. The season banner now shows the day and
+weather icon side‑by‑side for quick reference.
 
 center top: disciple list with name, task and fill for each bar.
 This row appears above the sect map. The previous row of disciple cards beneath the map has been removed for clarity.

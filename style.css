@@ -3236,13 +3236,17 @@ body.darkenshift-mode .tabsContainer button.active {
 }
 
 .season-banner {
-    text-align: center;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     font-weight: bold;
     font-size: 0.75rem;
-    padding: 2px 0;
+    padding: 2px 4px;
     border-radius: 4px;
     margin-bottom: 4px;
+    min-width: 120px;
 }
+.season-banner .season-text { flex: 1; }
 .season-banner.spring { background: #4caf50; }
 .season-banner.summer { background: #d4af37; color: #000; }
 .season-banner.autumn { background: #e09028; }
