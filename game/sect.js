@@ -1,3 +1,4 @@
+/* global updateSectDisplay */
 import addLog from '../log.js';
 import { refreshMetamorphosis, tickMetamorphosis } from '../metamorphosis.js';
 import { sectState, currentEnemy, FRUIT_GROWTH_RATES } from './state.js';
@@ -1478,7 +1479,20 @@ export function tickSect(delta) {
         (task === 'Gather Fruit' ? FRUIT_XP_PER_CYCLE : LOG_XP_PER_CYCLE) /
         cycleSeconds;
       xpRate = rate;
-      progress = (progress + dt) % cycleSeconds;
+
+      const groupAttr = ATTRIBUTE_FOR_GROUP[TASK_GROUPS[task]];
+      const skillXp = sectState.discipleSkills[d.id]?.[TASK_GROUPS[task]] || 0;
+      const lvl = getTaskSkillProgress(skillXp).level;
+      const yieldMult = 1 + 0.05 * (d[groupAttr] || 0) + 0.02 * lvl;
+      const gatherAmt = spot.baseYield * yieldMult * GATHER_WORK_SECONDS;
+
+      progress += dt;
+      if (progress >= cycleSeconds) {
+        progress -= cycleSeconds;
+        if (task === 'Gather Fruit') sectState.fruits += gatherAmt;
+        else sectState.softwood += gatherAmt;
+        if (typeof updateSectDisplay === 'function') updateSectDisplay();
+      }
       sectState.discipleProgress[d.id] = progress;
     } else if (task === 'Research') {
       sectState.researchProgress += 4 * dt;
