@@ -11,7 +11,11 @@ const parchmentTexture = PIXI.Texture.from(
   new URL('../img/parchment.png', import.meta.url).href
 );
 const PARCHMENT_SCALE = 0.9;
-const BADGE_SIZE = 64;
+const DEBUG_BORDERS =
+  (typeof globalThis.process !== 'undefined' &&
+    globalThis.process.env &&
+    globalThis.process.env.NODE_ENV === 'development') ||
+  new URLSearchParams(window.location.search).has('dev');
 
 // only once PIXI is loaded will this run
 function ensureApp() {
@@ -55,7 +59,7 @@ function ensureApp() {
 
 function updateContainer(objs, el) {
   const r = el.getBoundingClientRect();
-  const { container, bamboo, parchment } = objs;
+  const { container, bamboo, parchment, containerBorder, bambooBorder, parchmentBorder } = objs;
   const { width, height } = r;
   container.pivot.set(width / 2, height / 2);
   container.x = r.left + width / 2;
@@ -65,6 +69,23 @@ function updateContainer(objs, el) {
 
   parchment.position = bamboo.position;
   parchment.scale.set(PARCHMENT_SCALE);
+
+  if (DEBUG_BORDERS) {
+    containerBorder
+      .clear()
+      .lineStyle(1, 0xff0000)
+      .drawRect(-width / 2, -height / 2, width, height);
+
+    bambooBorder
+      .clear()
+      .lineStyle(1, 0x00ff00)
+      .drawRect(-bamboo.width / 2, -bamboo.height / 2, bamboo.width, bamboo.height);
+
+    parchmentBorder
+      .clear()
+      .lineStyle(1, 0x0000ff)
+      .drawRect(-parchment.width / 2, -parchment.height / 2, parchment.width, parchment.height);
+  }
 }
 
 function updateAll() {
@@ -81,11 +102,24 @@ export function applyBadgeTexture(el) {
   parchment.anchor.set(0.5);
   const bamboo = new PIXI.Sprite(bambooTexture);
   bamboo.anchor.set(0.5);
+  const containerBorder = new PIXI.Graphics();
+  const bambooBorder = new PIXI.Graphics();
+  const parchmentBorder = new PIXI.Graphics();
 
   container.addChild(parchment);
+  bamboo.addChild(bambooBorder);
   container.addChild(bamboo);
+  parchment.addChild(parchmentBorder);
+  container.addChild(containerBorder);
 
-  const objs = { container, bamboo, parchment };
+  const objs = {
+    container,
+    bamboo,
+    parchment,
+    containerBorder,
+    bambooBorder,
+    parchmentBorder
+  };
 
   sprites.set(el, objs);
   updateContainer(objs, el);
