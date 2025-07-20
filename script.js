@@ -811,6 +811,7 @@ function updateSectDisplay() {
       }
       orbs.appendChild(orb);
     });
+    initMistTrails();
   }
 
   if (sectDisciplesContainer) {
