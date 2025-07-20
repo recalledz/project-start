@@ -1169,6 +1169,7 @@ function renderColonyInfo() {
       const prev = sectState.discipleTasks[d.id];
       sectState.discipleTasks[d.id] = t;
       discipleGatherPhase[d.id] = -1;
+      sectState.discipleProgress[d.id] = 0;
       if (prev === 'Chant' && t !== 'Chant') {
         delete sectState.chantAssignments[d.id];
         if (typeof renderConstructCards === 'function') {
@@ -1988,6 +1989,12 @@ function init() {
   document.addEventListener('schedule-phase', e => {
     updateMapBrightness(e.detail.phase);
     if (e.detail.phase === 'Evening') feedDisciples();
+    if (e.detail.phase !== 'Work') {
+      sectSystem.disciples.forEach(d => {
+        sectState.discipleProgress[d.id] = 0;
+      });
+    }
+    updateTaskProgressDisplay();
   });
   document.addEventListener('disciple-gained', e => {
     if (!sectTabUnlocked && e.detail.count >= 1) {
@@ -3070,6 +3077,7 @@ function gameLoop(currentTime) {
     dtSeconds > 0
       ? (sectSystem.resources.water.current - startWater) / dtSeconds
       : 0;
+  updateTaskProgressDisplay();
   requestAnimationFrame(gameLoop);
 }
 
