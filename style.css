@@ -3697,9 +3697,11 @@ body.darkenshift-mode .tabsContainer button.active {
 
 .disciple-badge {
   border-radius: 6px;
-  border: 10px solid transparent;
-  border-image: url('img/bamboo.png') 10 round;
+  border: 12px solid transparent;
+  border-image: url('img/bamboo.png') 12 round;
   padding: 6px;
+  box-sizing: border-box;
+
   width: 72px;
   font-size: 0.55rem;
   display: inline-flex;
