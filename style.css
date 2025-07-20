@@ -1,6 +1,6 @@
 * {
     overflow-x: hidden;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Patrick Hand', 'Quicksand', sans-serif;
     padding: 0;
     margin: 0;
     box-sizing: border-box;
@@ -20,9 +20,9 @@ body {
     background-position: center;
     background-repeat: no-repeat;
     background-attachment: fixed;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Patrick Hand', 'Quicksand', sans-serif;
     padding: 5px;
-    color: #fff;
+    color: var(--body-color);
     min-height: 100vh;
     overflow-y: auto;
     line-height: 1.4;
@@ -41,6 +41,17 @@ body {
     --verdantia-jade: #52795c;
     --verdantia-parchment: #fefae0;
     --zone-size: 26%;
+    --title-color: #fcecc2;
+    --body-color: #ddd3a0;
+    --highlight-number: #bca4ff;
+}
+
+h1, h2, h3 {
+    color: var(--title-color);
+}
+
+.highlight-number {
+    color: var(--highlight-number);
 }
 
 body.darkenshift-mode {
@@ -1393,7 +1404,7 @@ body.darkenshift-mode .tabsContainer button.active {
     width: 100%;
     line-height: 1em;
     font-size: 0.6em;
-    color: white;
+    color: var(--highlight-number);
     pointer-events: none; /* clicks pass through */
     text-align: center;
     white-space: nowrap;
@@ -1684,6 +1695,10 @@ body.darkenshift-mode .tabsContainer button.active {
 .world-progress-text {
     font-size: 12px;
     margin-left: 4px;
+}
+
+.progress-text {
+    color: var(--highlight-number);
 }
 
 /* Stage traversal progress bar */
@@ -1992,6 +2007,17 @@ body.darkenshift-mode .tabsContainer button.active {
     border-radius: 8px;
     padding: 8px;
     box-shadow: 0 0 10px var(--core-glow);
+    position: relative;
+}
+.player-metamorphosis-panel::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url('img/parchment.png');
+    background-size: cover;
+    opacity: 0.3;
+    pointer-events: none;
+    border-radius: inherit;
 }
 
 .metamorphosis-side-panel {
@@ -2061,9 +2087,20 @@ body.darkenshift-mode .tabsContainer button.active {
     gap: 6px;
     flex: 1;
 }
+.metamorphosis-room .progress-area,
+.metamorphosis-room .assigned-disciple,
+.metamorphosis-room .metamorphosis-stage {
+    background: rgba(252, 236, 194, 0.5);
+    padding: 4px 8px;
+    border-radius: 6px;
+}
 .metamorphosis-progress {
     width: 200px;
     height: 200px;
+}
+#metamorphosisRing {
+    filter: drop-shadow(0 0 8px rgba(188,164,255,0.7));
+    stroke: url(#metaRingGradient);
 }
 .metamorphosis-figure {
     width: 100%;
@@ -2140,7 +2177,7 @@ body.darkenshift-mode .tabsContainer button.active {
 
 .core-activity-text {
     font-size: 0.9rem;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Patrick Hand', 'Quicksand', sans-serif;
     height: auto;
     text-align: center;
     margin-top: 4px;
@@ -2165,7 +2202,7 @@ body.darkenshift-mode .tabsContainer button.active {
 .stamina-text {
     text-align: center;
     font-size: 0.8rem;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Patrick Hand', 'Quicksand', sans-serif;
     margin-bottom: 4px;
 }
 

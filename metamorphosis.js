@@ -37,6 +37,12 @@ const bodyPath = `M200 150
           <div id="metamorphosisStageLabel" class="metamorphosis-stage"></div>
       <div class="progress-wrapper metamorphosis-progress">
         <svg class="progress-ring" width="${RING_RADIUS * 2 + 20}" height="${RING_RADIUS * 2 + 20}">
+          <defs>
+            <linearGradient id="metaRingGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#c8a2ff" />
+              <stop offset="100%" stop-color="#50e3c2" />
+            </linearGradient>
+          </defs>
           <circle class="progress-ring-bg" cx="${RING_RADIUS + 10}" cy="${RING_RADIUS + 10}" r="${RING_RADIUS}" />
           <circle id="metamorphosisRing" class="progress-ring-fill" cx="${RING_RADIUS + 10}" cy="${RING_RADIUS + 10}" r="${RING_RADIUS}" />
         </svg>
