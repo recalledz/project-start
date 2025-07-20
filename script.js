@@ -763,8 +763,8 @@ function updateSectDisplay() {
     const upkeep = DAILY_FRUIT_CONSUMPTION * sectSystem.disciples.length;
     sectSummaryDisplay.innerHTML = `
       <span>👥 ${total}/${sectState.maxDisciples} (Idle: ${idle})</span>
-      <span>${sectState.fruits}</span>
-      <span>🪵 ${sectState.softwood}</span>`;
+      <span>${sectState.fruits.toFixed(2)}</span>
+      <span>🪵 ${sectState.softwood.toFixed(2)}</span>`;
     const timer = document.getElementById('resourceTimer');
     if (timer) {
       timer.textContent = `${mm}:${ss}`;
