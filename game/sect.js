@@ -1419,11 +1419,22 @@ export function getDailyResourceDelta() {
   const fruitGain = FRUIT_GROWTH_RATES[sectSystem.seasonIndex] || 0;
   const fruitLoss = DAILY_FRUIT_CONSUMPTION * sectSystem.disciples.length;
   const waterPerDay = sectSystem.gains.water * DAY_LENGTH_SECONDS;
+  let softwoodGain = 0;
+  sectSystem.disciples.forEach(d => {
+    if (sectState.discipleTasks[d.id] === 'Gather Softwood') {
+      softwoodGain += getDiscipleDailyOutput(d);
+    }
+  });
   return [
     {
       name: 'Fruit',
       gain: fruitGain,
       loss: fruitLoss
+    },
+    {
+      name: 'Softwood',
+      gain: softwoodGain,
+      loss: 0
     },
     {
       name: 'Water',
