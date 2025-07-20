@@ -93,10 +93,7 @@ body.darkenshift-mode {
 }
 
 #themeToggle {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    z-index: 1001;
+    align-self: flex-end;
     background: #222;
     color: #fff;
     border: 1px solid var(--core-accent);
