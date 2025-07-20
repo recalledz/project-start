@@ -1,22 +1,22 @@
-export function initMistTrails() {
+export function initQiRibbons() {
   const container = document.getElementById('sectDisciplesContainer');
   if (!container) return;
 
   const orb = container.querySelector('#sectOrbs .sect-orb.water');
   const zones = container.querySelectorAll('.zone');
-  const layer = container.querySelector('#mistLayer');
+  const layer = container.querySelector('#qiLayer');
   if (!orb || !zones.length || !layer) return;
 
   layer.innerHTML = '';
 
   zones.forEach(zone => {
     for (let i = 0; i < 3; i++) {
-      createMistParticle(orb, zone, layer);
+      createQiRibbon(orb, zone, layer);
     }
   });
 }
 
-function createMistParticle(orbEl, zoneEl, layer) {
+function createQiRibbon(orbEl, zoneEl, layer) {
   const orbRect = orbEl.getBoundingClientRect();
   const zoneRect = zoneEl.getBoundingClientRect();
 
@@ -28,14 +28,16 @@ function createMistParticle(orbEl, zoneEl, layer) {
   const endX = zoneRect.left + zoneRect.width / 2;
   const endY = zoneRect.top + zoneRect.height / 2;
 
+  const angle = Math.atan2(endY - startY, endX - startX) * 180 / Math.PI;
+
   const particle = document.createElement('div');
-  particle.className = 'mist';
+  particle.className = 'qi-ribbon';
   layer.appendChild(particle);
 
   const frames = [
-    { transform: `translate(${startX}px, ${startY}px) scale(0)`, opacity: 0 },
-    { transform: `translate(${midX}px, ${midY}px) scale(1)`, opacity: 0.4 },
-    { transform: `translate(${endX}px, ${endY}px) scale(0)`, opacity: 0 }
+    { transform: `translate(${startX}px, ${startY}px) rotate(${angle}deg) scale(0)`, opacity: 0 },
+    { transform: `translate(${midX}px, ${midY}px) rotate(${angle}deg) scale(1)`, opacity: 0.6 },
+    { transform: `translate(${endX}px, ${endY}px) rotate(${angle}deg) scale(0)`, opacity: 0 }
   ];
 
   const duration = 5000 + Math.random() * 3000;

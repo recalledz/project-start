@@ -2862,7 +2862,7 @@ body.darkenshift-mode .tabsContainer button.active {
 
 .zone-path { display: none; }
 
-.mist-trails {
+.qi-trails {
     position: absolute;
     inset: 0;
     pointer-events: none;
@@ -2870,15 +2870,25 @@ body.darkenshift-mode .tabsContainer button.active {
     overflow: visible;
 }
 
-.mist {
+.qi-ribbon {
     position: absolute;
-    width: 16px;
-    height: 16px;
-    background-image: url('img/mist.png');
-    background-size: contain;
-    background-repeat: no-repeat;
-    filter: blur(2px);
+    width: 8px;
+    height: 40px;
+    background: linear-gradient(to bottom, #008b8b 0%, #4dc0c0 60%, rgba(240,250,255,0.8) 100%);
+    background-size: cover;
+    border-radius: 4px 4px 12px 12px;
+    filter: blur(1px) drop-shadow(0 0 6px rgba(79,209,197,0.7));
     opacity: 0;
+}
+
+.qi-ribbon::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+CiAgPHBhdGggZD0iTTE2IDIgQzIyIDIgMzAgMTAgMzAgMTYgMzAgMjIgMjIgMzAgMTYgMzAgMTAgMzAgMiAyMiAyIDE2IiBzdHJva2U9IiNhZWYiIHN0cm9rZS13aWR0aD0iMiIgZmlsbD0ibm9uZSIvPgogIDxjaXJjbGUgY3g9IjE2IiBjeT0iMTYiIHI9IjQiIHN0cm9rZT0iI2FlZiIgc3Ryb2tlLXdpZHRoPSIxIiBmaWxsPSJub25lIi8+Cjwvc3ZnPgo=");
+    background-size: cover;
+    opacity: 0.3;
+    pointer-events: none;
 }
 
 .pollen-layer {
