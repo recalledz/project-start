@@ -82,7 +82,7 @@ Footer
 
 “Gate” button to open the full map/exploration/tasks overlay.
 * Exploration and sect disciple lists now use a unified badge built in PixiJS.
-  Each badge layers a bamboo border beneath a parchment background, with the
+  Each badge draws a parchment background centered inside a bamboo border, with the
   disciple's name, mood, HP bar and current task rendered on top.
 
 #dicsiple overlay card on pressing disciple
