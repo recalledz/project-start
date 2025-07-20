@@ -2,7 +2,7 @@
 
 let app = null;
 const sprites = new Map();
-const parchmentTexture = PIXI.Texture.from('img/parchment.jpg');
+let parchmentTexture = null;
 
 function ensureApp() {
   if (app) return;
@@ -22,6 +22,9 @@ function ensureApp() {
       height: window.innerHeight,
       transparent: true
     });
+    if (!parchmentTexture) {
+      parchmentTexture = PIXI.Texture.from('img/parchment.jpg');
+    }
   } catch (e) {
     console.error('PIXI init failed', e);
     return;
@@ -53,7 +56,7 @@ function updateAll() {
 
 export function applyBadgeTexture(el) {
   ensureApp();
-  if (!app) return;
+  if (!app || !parchmentTexture) return;
   const sprite = new PIXI.Sprite(parchmentTexture);
   sprites.set(el, sprite);
   updateSprite(sprite, el);
