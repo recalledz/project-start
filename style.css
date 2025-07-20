@@ -3676,7 +3676,7 @@ body.darkenshift-mode .tabsContainer button.active {
 }
 
 .disciple-badge {
-  background: #d4e4b0;
+  background: url('img/parchment.png') center/cover no-repeat;
   color: #000;
   border: 1px solid #7d8b50;
   border-radius: 6px;
@@ -3727,10 +3727,3 @@ body.darkenshift-mode .tabsContainer button.active {
   font-size: 0.55rem;
 }
 
-.badge-texture-layer {
-  pointer-events: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 0;
-}
