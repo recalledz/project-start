@@ -15,6 +15,7 @@ let ringFill;
 let ringWrapper;
 let listContainer;
 let breakthroughBtn;
+let statsContainer;
 let selectedDiscipleId = null;
 const RING_RADIUS = 80;
 const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
@@ -23,6 +24,7 @@ const STAGE_NAMES = ['Egg', 'Tadpole', 'Young Coquí', 'Elder Frog', 'Divine Coq
 export function initMetamorphosis() {
   container = document.getElementById('metamorphosisTabContent');
   listContainer = document.getElementById('metamorphosisDiscipleList');
+  statsContainer = document.getElementById('metamorphosisStats');
   if (!container) return;
 const bodyPath = `M200 150
                m -25 0
@@ -169,6 +171,8 @@ function renderMetamorphosis() {
 
   const label = container.querySelector('#assignedDisciple');
   if (label && d) label.textContent = d.name || `Disciple ${d.id}`;
+
+  updateStats();
 }
 
 export function refreshMetamorphosis() {
@@ -193,6 +197,7 @@ export function tickMetamorphosis(dt) {
     }
   });
   renderMetamorphosis();
+  updateStats();
 }
 
 function getMethodMultiplier() { return 1; }
@@ -204,4 +209,30 @@ function getCultivationSpeed(d) {
   return d.potential * d.potential;
 }
 function getSeasonMultiplier() { return 1; }
+
+function updateStats() {
+  if (!statsContainer || !selectedDiscipleId) return;
+  const d = sectSystem.disciples.find(x => x.id === selectedDiscipleId);
+  const stats = {
+    method: getMethodMultiplier(d),
+    building: getBuildingMultiplier(d),
+    room: getRoomMultiplier(d),
+    pathMatch: getPathMatchMultiplier(d),
+    stability: getStabilityFactor(d),
+    cultivation: getCultivationSpeed(d),
+    season: getSeasonMultiplier()
+  };
+  let rate = 0.4;
+  Object.values(stats).forEach(v => { rate *= v; });
+  statsContainer.innerHTML = `
+    <div class="meta-stat">XP/sec: ${rate.toFixed(2)}</div>
+    <div class="meta-stat">Method ×${stats.method}</div>
+    <div class="meta-stat">Building ×${stats.building}</div>
+    <div class="meta-stat">Room ×${stats.room}</div>
+    <div class="meta-stat">Path Match ×${stats.pathMatch}</div>
+    <div class="meta-stat">Stability ×${stats.stability}</div>
+    <div class="meta-stat">Cultivation ${stats.cultivation}</div>
+    <div class="meta-stat">Season ×${stats.season}</div>
+  `;
+}
 
