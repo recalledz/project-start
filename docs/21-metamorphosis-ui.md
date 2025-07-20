@@ -21,7 +21,7 @@ Egg → Tail → Limbs → Body → Crown. Hovering near a threshold causes the 
 
 ## Optional Modifiers Panel
 
-The game displays a stats panel on the right side of the metamorphosis screen. This panel lists the season, room and weather multipliers that affect the growth formula and shows the resulting XP per second.
+The game displays a stats panel on the right side of the metamorphosis screen. This panel lists the season, room and weather multipliers that affect the growth formula and shows the resulting XP per second. **Hover over any stat** to view a tooltip detailing how that value is calculated.
 
 ## Formula
 

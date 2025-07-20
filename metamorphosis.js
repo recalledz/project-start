@@ -225,14 +225,22 @@ function updateStats() {
   let rate = 0.4;
   Object.values(stats).forEach(v => { rate *= v; });
   statsContainer.innerHTML = `
-    <div class="meta-stat">XP/sec: ${rate.toFixed(2)}</div>
-    <div class="meta-stat">Method ×${stats.method}</div>
-    <div class="meta-stat">Building ×${stats.building}</div>
-    <div class="meta-stat">Room ×${stats.room}</div>
-    <div class="meta-stat">Path Match ×${stats.pathMatch}</div>
-    <div class="meta-stat">Stability ×${stats.stability}</div>
-    <div class="meta-stat">Cultivation ${stats.cultivation}</div>
-    <div class="meta-stat">Season ×${stats.season}</div>
+    <div class="meta-stat" data-tip="XP/sec = 0.4 × method × building × room × path match × stability × cultivation × season">XP/sec: ${rate.toFixed(2)}</div>
+    <div class="meta-stat" data-tip="Multiplier from assigned cultivation method">Method ×${stats.method}</div>
+    <div class="meta-stat" data-tip="Multiplier from cultivation building effects">Building ×${stats.building}</div>
+    <div class="meta-stat" data-tip="Room bonuses like humidity and ornaments">Room ×${stats.room}</div>
+    <div class="meta-stat" data-tip="Bonus when method matches disciple's Path">Path Match ×${stats.pathMatch}</div>
+    <div class="meta-stat" data-tip="Penalty or boost based on current Stability">Stability ×${stats.stability}</div>
+    <div class="meta-stat" data-tip="Potential squared (discipline talent)">Cultivation ${stats.cultivation}</div>
+    <div class="meta-stat" data-tip="Seasonal multiplier from weather">Season ×${stats.season}</div>
   `;
+  statsContainer.querySelectorAll('.meta-stat').forEach(el => {
+    const tip = el.dataset.tip;
+    if (!tip) return;
+    el.addEventListener('mouseenter', e => {
+      window.showTooltip(tip, e.pageX + 10, e.pageY + 10);
+    });
+    el.addEventListener('mouseleave', window.hideTooltip);
+  });
 }
 
