@@ -1,8 +1,8 @@
-/* global PIXI */
+import { Application, Sprite, Texture } from 'pixi.min.js';
 
 let app = null;
 const sprites = new Map();
-const parchmentTexture = PIXI.Texture.from('img/parchment.jpg');
+let parchmentTexture = null;
 
 function ensureApp() {
   if (app) return;
@@ -52,8 +52,9 @@ function updateAll() {
 
 export function applyBadgeTexture(el) {
   ensureApp();
-  if (!app) return;
-  const sprite = new PIXI.Sprite(parchmentTexture);
+  if (!app || !parchmentTexture) return;
+  const sprite = new Sprite(parchmentTexture);
+
   sprites.set(el, sprite);
   updateSprite(sprite, el);
   app.stage.addChild(sprite);
