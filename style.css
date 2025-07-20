@@ -2018,6 +2018,18 @@ body.darkenshift-mode .tabsContainer button.active {
     font-size: 0.8rem;
     min-width: 160px;
 }
+.metamorphosis-stats-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 0.8rem;
+    min-width: 160px;
+}
+.metamorphosis-stats-panel .meta-stat {
+    background: rgba(252, 236, 194, 0.5);
+    padding: 4px 6px;
+    border-radius: 6px;
+}
 .metamorphosis-side-panel .sect-disciple-list {
     flex-direction: column;
     overflow-x: visible;
