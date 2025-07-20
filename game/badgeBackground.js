@@ -6,15 +6,25 @@ const parchmentTexture = PIXI.Texture.from('img/parchment.jpg');
 
 function ensureApp() {
   if (app) return;
-  if (typeof document === 'undefined' || !globalThis.HTMLCanvasElement) {
+  if (
+    typeof document === 'undefined' ||
+    !globalThis.HTMLCanvasElement
+  ) {
     // Skip if canvas is unavailable (e.g. during server-side tests)
     return;
   }
-  app = new PIXI.Application({
-    width: window.innerWidth,
-    height: window.innerHeight,
-    transparent: true
-  });
+  const testCanvas = document.createElement('canvas');
+  if (!testCanvas.getContext || !testCanvas.getContext('2d')) return;
+  try {
+    app = new PIXI.Application({
+      width: window.innerWidth,
+      height: window.innerHeight,
+      transparent: true
+    });
+  } catch (e) {
+    console.error('PIXI init failed', e);
+    return;
+  }
   app.view.classList.add('badge-texture-layer');
   app.view.style.position = 'fixed';
   app.view.style.top = '0';
