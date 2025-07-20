@@ -192,6 +192,7 @@ export function tickMetamorphosis(dt) {
       meta.xp = Math.min(metamorphosisState.requirement, meta.xp + rate * dt);
     }
   });
+  renderMetamorphosis();
 }
 
 function getMethodMultiplier() { return 1; }
