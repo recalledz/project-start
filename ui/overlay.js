@@ -1,4 +1,4 @@
-export function createOverlay({ className = '', boxClass = '', container = document.body } = {}) {
+export function createOverlay({ className = '', boxClass = '', container = document.body, closable = true } = {}) {
   const element = document.createElement('div');
   element.classList.add('overlay');
   if (className) {
@@ -9,6 +9,14 @@ export function createOverlay({ className = '', boxClass = '', container = docum
   box.classList.add('overlay-box');
   if (boxClass) {
     boxClass.split(' ').forEach(cls => cls && box.classList.add(cls));
+  }
+  let closeBtn = null;
+  if (closable) {
+    closeBtn = document.createElement('button');
+    closeBtn.className = 'close-btn';
+    closeBtn.innerHTML = '&times;';
+    closeBtn.addEventListener('click', close);
+    box.appendChild(closeBtn);
   }
   element.appendChild(box);
 

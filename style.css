@@ -535,6 +535,7 @@ body.darkenshift-mode .tabsContainer button.active {
 
 /* Box that holds overlay contents */
 .overlay-box {
+    position: relative;
     background: rgba(0, 0, 0, 0.85);
     border-radius: 8px;
     padding: 16px;
@@ -554,6 +555,23 @@ body.darkenshift-mode .tabsContainer button.active {
 .overlay-box button {
     padding: 6px 12px;
     font-size: 1rem;
+}
+
+.overlay .close-btn {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 16px;
+    height: 16px;
+    background: #c33;
+    color: #fff;
+    border: none;
+    border-radius: 0;
+    padding: 0;
+    font-size: 12px;
+    line-height: 16px;
+    text-align: center;
+    cursor: pointer;
 }
 
 .camp-overlay {
@@ -596,21 +614,6 @@ body.darkenshift-mode .tabsContainer button.active {
     background: var(--verdantia-parchment);
     color: #000;
     border: 1px solid #3a5a3a;
-}
-.disciple-overlay .close-btn {
-    position: absolute;
-    top: 4px;
-    right: 4px;
-    width: 16px;
-    height: 16px;
-    background: #c33;
-    color: #fff;
-    border: none;
-    border-radius: 50%;
-    font-size: 12px;
-    line-height: 14px;
-    text-align: center;
-    cursor: pointer;
 }
 .disciple-stats-general,
 .disciple-stats-combat {
@@ -687,21 +690,6 @@ body.darkenshift-mode .tabsContainer button.active {
     color: #ddd;
 }
 
-.work-overlay .close-btn {
-    position: absolute;
-    top: 4px;
-    right: 4px;
-    width: 16px;
-    height: 16px;
-    background: #c33;
-    color: #fff;
-    border: none;
-    border-radius: 50%;
-    font-size: 12px;
-    line-height: 14px;
-    text-align: center;
-    cursor: pointer;
-}
 
 .location-entry {
     cursor: pointer;
