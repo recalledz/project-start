@@ -1957,6 +1957,10 @@ body.darkenshift-mode .tabsContainer button.active {
     font-size: 0.8rem;
     min-width: 160px;
 }
+.metamorphosis-side-panel .sect-disciple-list {
+    flex-direction: column;
+    overflow-x: visible;
+}
 .construct-side-panel {
     display: flex;
     flex-direction: column;
