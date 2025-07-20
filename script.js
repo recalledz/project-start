@@ -39,6 +39,7 @@ import { createDiscipleBadge } from "./game/badges.js";
 import { calculateKillXp } from './utils/xp.js';
 import { initTooltip } from './game/tooltip.js';
 import { initMistTrails } from './game/mistTrails.js';
+import { initDiscipleVisual, updateDiscipleVisual } from './game/disciplesVisuals.js';
 import {
   calculateMaxStamina,
   calculateStaminaRegen
@@ -819,10 +820,10 @@ function updateSectDisplay() {
       if (!sectDiscipleEls[d.id]) {
         const el = document.createElement('div');
         el.className = 'sect-disciple';
-        el.textContent = d.id;
         sectDiscipleEls[d.id] = el;
         sectDisciplesContainer.appendChild(el);
         moveDisciple(el);
+        initDiscipleVisual(d, el);
       }
     });
     Object.keys(sectDiscipleEls).forEach(id => {
@@ -937,6 +938,7 @@ function startDiscipleMovement() {
     sectSystem.disciples.forEach(d => {
       const el = sectDiscipleEls[d.id];
       if (!el) return;
+      let taskName = 'Idle';
       if (d.incapacitated) {
         const orb = document.querySelector('#sectOrbs .water');
         if (orb) {
@@ -945,6 +947,7 @@ function startDiscipleMovement() {
           el.style.transform = `translate(${bx}px, ${by}px)`;
         }
         el.classList.add('incapacitated');
+        taskName = 'Resting';
       } else {
         el.classList.remove('incapacitated');
         const phase = getCurrentSchedule().action;
@@ -955,13 +958,16 @@ function startDiscipleMovement() {
             const by = orb.offsetTop + orb.offsetHeight / 2 - 2;
             el.style.transform = `translate(${bx}px, ${by}px)`;
           }
+          taskName = phase;
         } else {
           const task = sectState.discipleTasks[d.id];
+          taskName = task || 'Idle';
           if (task === 'Gather Fruit' || task === 'Gather Softwood')
             updateDiscipleGather(d.id, el);
           else moveDisciple(el);
         }
       }
+      updateDiscipleVisual(d, el, taskName);
     });
   }, 3000);
 }
