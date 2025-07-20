@@ -409,16 +409,7 @@ let playerSectPanel;
 let constructLexiconContainer;
 let sectSummaryDisplay;
 let resourceDisplay;
-let colonyTasksPanel;
-let colonyInfoPanel;
-let colonyResourcesPanel;
-let colonyBuildPanel;
-let colonyResearchPanel;
-let colonyTasksTabButton;
-let colonyInfoTabButton;
 let colonyResourcesTabButton;
-let colonyBuildTabButton;
-let colonyResearchTabButton;
 let locationsPanelBtn;
 let gateBtn;
 let sectDisciplesContainer;
@@ -490,71 +481,6 @@ function selectWorld(id) {
 }
 
 
-function showColonyTab(name) {
-  if (!colonyTasksPanel || !colonyInfoPanel || !colonyResourcesPanel || !colonyBuildPanel) return;
-  if (name === 'tasks') {
-    colonyTasksPanel.style.display = 'flex';
-    colonyInfoPanel.style.display = 'flex';
-    colonyResourcesPanel.style.display = 'none';
-    colonyBuildPanel.style.display = 'none';
-    if (colonyResearchPanel) colonyResearchPanel.style.display = 'none';
-    if (colonyTasksTabButton) colonyTasksTabButton.classList.add('active');
-    if (colonyInfoTabButton) colonyInfoTabButton.classList.remove('active');
-    if (colonyResourcesTabButton) colonyResourcesTabButton.classList.remove('active');
-    if (colonyBuildTabButton) colonyBuildTabButton.classList.remove('active');
-    if (colonyResearchTabButton) colonyResearchTabButton.classList.remove('active');
-  } else if (name === 'info') {
-    colonyTasksPanel.style.display = 'none';
-    colonyInfoPanel.style.display = 'flex';
-    colonyResourcesPanel.style.display = 'flex';
-    colonyBuildPanel.style.display = 'none';
-    if (colonyResearchPanel) colonyResearchPanel.style.display = 'none';
-    renderDiscipleList();
-    renderDiscipleDetails();
-    if (colonyTasksTabButton) colonyTasksTabButton.classList.remove('active');
-    if (colonyInfoTabButton) colonyInfoTabButton.classList.add('active');
-    if (colonyResourcesTabButton) colonyResourcesTabButton.classList.remove('active');
-    if (colonyBuildTabButton) colonyBuildTabButton.classList.remove('active');
-    if (colonyResearchTabButton) colonyResearchTabButton.classList.remove('active');
-  } else if (name === 'resources') {
-    colonyTasksPanel.style.display = 'none';
-    colonyInfoPanel.style.display = 'none';
-    colonyResourcesPanel.style.display = 'flex';
-    colonyBuildPanel.style.display = 'none';
-    if (colonyResearchPanel) colonyResearchPanel.style.display = 'none';
-    renderColonyResources();
-    if (colonyTasksTabButton) colonyTasksTabButton.classList.remove('active');
-    if (colonyInfoTabButton) colonyInfoTabButton.classList.remove('active');
-    if (colonyResourcesTabButton) colonyResourcesTabButton.classList.add('active');
-    if (colonyBuildTabButton) colonyBuildTabButton.classList.remove('active');
-    if (colonyResearchTabButton) colonyResearchTabButton.classList.remove('active');
-  } else if (name === 'build') {
-    colonyTasksPanel.style.display = 'none';
-    colonyInfoPanel.style.display = 'none';
-    colonyResourcesPanel.style.display = 'none';
-    colonyBuildPanel.style.display = 'flex';
-    renderColonyBuildPanel();
-    if (colonyTasksTabButton) colonyTasksTabButton.classList.remove('active');
-    if (colonyInfoTabButton) colonyInfoTabButton.classList.remove('active');
-    if (colonyResourcesTabButton) colonyResourcesTabButton.classList.remove('active');
-    if (colonyBuildTabButton) colonyBuildTabButton.classList.add('active');
-    if (colonyResearchTabButton) colonyResearchTabButton.classList.remove('active');
-  } else if (name === 'research') {
-    colonyTasksPanel.style.display = 'none';
-    colonyInfoPanel.style.display = 'none';
-    colonyResourcesPanel.style.display = 'none';
-    colonyBuildPanel.style.display = 'none';
-    if (colonyResearchPanel) {
-      colonyResearchPanel.style.display = 'flex';
-      renderColonyResearchPanel();
-    }
-    if (colonyTasksTabButton) colonyTasksTabButton.classList.remove('active');
-    if (colonyInfoTabButton) colonyInfoTabButton.classList.remove('active');
-    if (colonyResourcesTabButton) colonyResourcesTabButton.classList.remove('active');
-    if (colonyBuildTabButton) colonyBuildTabButton.classList.remove('active');
-    if (colonyResearchTabButton) colonyResearchTabButton.classList.add('active');
-  }
-}
 
 
 function initTabs() {
@@ -587,16 +513,7 @@ function initTabs() {
   resourceDisplay = document.getElementById('resourceDisplay');
   sectDisciplesContainer = document.getElementById('sectDisciplesContainer');
   sectDiscipleListContainer = document.getElementById('sectDiscipleList');
-  colonyTasksPanel = document.getElementById('colonyTasksPanel');
-  colonyInfoPanel = document.getElementById('colonyInfoPanel');
-  colonyResourcesPanel = document.getElementById('colonyResourcesPanel');
-  colonyBuildPanel = document.getElementById('colonyBuildPanel');
-  colonyResearchPanel = document.getElementById('colonyResearchPanel');
-  colonyTasksTabButton = document.getElementById('colonyTasksTabBtn');
-  colonyInfoTabButton = document.getElementById('colonyInfoTabBtn');
   colonyResourcesTabButton = document.getElementById('colonyResourcesTabBtn');
-  colonyBuildTabButton = document.getElementById('colonyBuildTabBtn');
-  colonyResearchTabButton = document.getElementById('colonyResearchTabBtn');
   locationsPanelBtn = document.getElementById('locationsPanelBtn');
   gateBtn = document.getElementById('gateBtn');
   sectNavWorkBtn = document.getElementById("sectNavWorkBtn");
@@ -612,16 +529,11 @@ function initTabs() {
   statsEconomySubTabButton = document.querySelector('.statsEconomySubTabButton');
   statsOverviewContainer = document.getElementById('statsOverviewContainer');
   statsEconomyContainer = document.getElementById('statsEconomyContainer');
-  if (colonyBuildTabButton) colonyBuildTabButton.style.display = systems.buildingUnlocked ? '' : 'none';
-  if (colonyResearchTabButton) colonyResearchTabButton.style.display = systems.researchUnlocked ? '' : 'none';
   if (playerSectTabButton) playerSectTabButton.style.display = sectTabUnlocked ? '' : 'none';
   setupTabHandlers();
 
-  if (colonyTasksTabButton) colonyTasksTabButton.addEventListener('click', () => showColonyTab('tasks'));
-  if (colonyInfoTabButton) colonyInfoTabButton.addEventListener('click', () => showColonyTab('info'));
-  if (colonyResourcesTabButton) colonyResourcesTabButton.addEventListener('click', () => showColonyTab('resources'));
-  if (colonyBuildTabButton) colonyBuildTabButton.addEventListener('click', () => showColonyTab('build'));
-  if (colonyResearchTabButton) colonyResearchTabButton.addEventListener('click', () => showColonyTab('research'));
+  if (colonyResourcesTabButton)
+    colonyResourcesTabButton.addEventListener('click', openResourceOverlay);
 
 
 
@@ -729,7 +641,6 @@ function initVignetteToggles() {
 
 
 function updateTaskProgressDisplay() {
-  if (!colonyTasksPanel) return;
   const researcherCount = sectSystem.disciples.filter(
     d => sectState.discipleTasks[d.id] === 'Research'
   ).length;
@@ -924,9 +835,6 @@ function updateSectDisplay() {
   // Refresh the simplified disciple list
   renderSectDiscipleList();
 
-  if (colonyTasksPanel) renderColonyTasks();
-  if (colonyInfoPanel) renderColonyInfo();
-  if (colonyResourcesPanel) renderColonyResources();
 }
 
 function updateMapBrightness(phase) {
@@ -1056,146 +964,10 @@ function startDiscipleMovement() {
   }, 3000);
 }
 
- export function renderColonyTasks() {
-  colonyTasksPanel.innerHTML = '';
-  const heading = document.createElement('div');
-  heading.className = 'panel-heading';
-  heading.textContent = 'Tasks';
-  colonyTasksPanel.appendChild(heading);
-
-  sectSystem.disciples.forEach(d => {
-    const row = document.createElement('div');
-    row.className = 'task-entry';
-    if (d.id === selectedDiscipleId) row.classList.add('selected');
-    const phase = getCurrentSchedule().action;
-    const current = d.incapacitated
-      ? 'Resting'
-      : phase !== 'Work'
-        ? phase
-        : sectState.discipleTasks[d.id] || 'Idle';
-    if (current === 'Idle') row.classList.add('idle');
-    row.addEventListener('click', () => {
-      selectedDiscipleId = d.id;
-      renderColonyTasks();
-      renderColonyInfo();
-    });
-    const icon = document.createElement('span');
-    icon.textContent = TASK_ICONS[current] || '⚪️';
-    const label = document.createElement('div');
-    label.textContent = d.name || `Disciple ${d.id}`;
-    label.addEventListener('dblclick', () => {
-      const nn = prompt('Rename disciple', d.name || `Disciple ${d.id}`);
-      if (nn) {
-        d.name = nn;
-        renderColonyTasks();
-        renderColonyInfo();
-      }
-    });
-    const taskName = document.createElement('div');
-    taskName.className = 'disciple-task-name';
-    taskName.textContent = current;
-
-    const taskInfo = document.createElement('div');
-    taskInfo.className = 'disciple-task-info';
-    taskInfo.id = `disciple-task-${d.id}`;
-
-    const bar = document.createElement('div');
-    bar.className = 'disciple-progress';
-    const fill = document.createElement('div');
-    fill.className = 'disciple-progress-fill';
-    const text = document.createElement('div');
-    text.className = 'disciple-progress-label';
-    bar.appendChild(fill);
-    bar.appendChild(text);
-    taskInfo.appendChild(bar);
-    const rate = document.createElement('div');
-    rate.className = 'disciple-task-rate';
-    rate.id = `disciple-rate-${d.id}`;
-    taskInfo.appendChild(rate);
-
-    row.appendChild(icon);
-    row.appendChild(label);
-    row.appendChild(taskName);
-    row.appendChild(taskInfo);
-    colonyTasksPanel.appendChild(row);
-  });
-  updateTaskProgressDisplay();
-}
-
-function renderColonyInfo() {
-  colonyInfoPanel.innerHTML = '';
-  const heading = document.createElement('div');
-  heading.className = 'panel-heading';
-  heading.textContent = 'Proficiencies';
-  colonyInfoPanel.appendChild(heading);
-  const d = sectSystem.disciples.find(x => x.id === selectedDiscipleId);
-  if (!d) {
-    const info = document.createElement('div');
-    info.textContent = 'Select a disciple';
-    colonyInfoPanel.appendChild(info);
-    return;
-  }
-  const taskList = document.createElement('div');
-  taskList.className = 'disciple-skill-list';
-  const tasks = ['Idle', 'Gather Fruit', 'Gather Softwood', 'Hunt', 'Building'];
-  if (sectState.buildings.researchDesk > 0) tasks.push('Research');
-  if (sectState.buildings.chantingHall > 0) tasks.push('Chant');
-  if (systems.explorationUnlocked) tasks.push('Exploration');
-  tasks.forEach(t => {
-    const option = document.createElement('div');
-    option.className = 'disciple-skill-option';
-    if (d.incapacitated) option.classList.add('disabled');
-
-    const skills = sectState.discipleSkills[d.id] || {};
-    const groupKey = TASK_GROUPS[t];
-    const prog = getTaskSkillProgress(skills[groupKey] || 0);
-
-    const label = document.createElement('div');
-    label.className = 'disciple-skill-label';
-    label.textContent = `${t} (Lv ${prog.level})`;
-
-    const bar = document.createElement('div');
-    bar.className = 'disciple-skill-progress';
-    const fill = document.createElement('div');
-    fill.className = 'disciple-skill-progress-fill';
-    fill.style.width = `${Math.floor(prog.progress * 100)}%`;
-    bar.appendChild(fill);
-
-    option.appendChild(label);
-    option.appendChild(bar);
-
-    option.addEventListener('click', () => {
-      if (d.incapacitated) return;
-      const prev = sectState.discipleTasks[d.id];
-      sectState.discipleTasks[d.id] = t;
-      discipleGatherPhase[d.id] = -1;
-      sectState.discipleProgress[d.id] = 0;
-      if (prev === 'Chant' && t !== 'Chant') {
-        delete sectState.chantAssignments[d.id];
-        if (typeof renderConstructCards === 'function') {
-          renderConstructCards();
-        }
-      }
-      renderColonyTasks();
-      renderColonyInfo();
-      updateSectDisplay();
-      // Ensure constructor panel reflects new chanter assignments
-      if (typeof renderChantDisciples === 'function') {
-        renderChantDisciples();
-      }
-    });
-
-    taskList.appendChild(option);
-  });
-
-  colonyInfoPanel.appendChild(taskList);
-}
-
 
 function checkBuildingUnlock() {
   if (!systems.buildingUnlocked && sectState.softwood >= 20) {
     systems.buildingUnlocked = true;
-    if (colonyBuildTabButton) colonyBuildTabButton.style.display = '';
   }
 }
 
@@ -1212,8 +984,7 @@ function startBuilding(key) {
   sectState.softwood -= cost;
   sectState.currentBuild = key;
   sectState.buildProgress = 0;
-  renderColonyResources();
-  renderColonyBuildPanel();
+  // update overlays if present
   if (updateBuildOverlay) updateBuildOverlay();
 }
 
@@ -1251,9 +1022,8 @@ function tickBuilding(dt) {
     }
     if (builtKey === 'researchDesk' && !systems.researchUnlocked) {
       systems.researchUnlocked = true;
-      if (colonyResearchTabButton) colonyResearchTabButton.style.display = '';
     }
-    renderColonyBuildPanel();
+    // update overlay if present
     if (updateBuildOverlay) updateBuildOverlay();
   }
   else {
@@ -1261,163 +1031,6 @@ function tickBuilding(dt) {
   }
 }
 
-function renderColonyBuildPanel() {
-  if (!colonyBuildPanel) return;
-  colonyBuildPanel.innerHTML = '';
-  Object.entries(BUILDINGS).forEach(([key, b]) => {
-    if (b.requires && sectState.buildings[b.requires] < b.max) return;
-    if (key === 'chantingHall' && !systems.chantingHallUnlocked) return;
-    const row = document.createElement('div');
-    const btn = document.createElement('button');
-    const built = sectState.buildings[key] || 0;
-    const name = key === 'bohio' ? getHousingName(built + 1) : b.name;
-    btn.textContent = `${name} (${built}/${b.max})`;
-    btn.disabled = built >= b.max || sectState.currentBuild;
-    btn.addEventListener('click', () => startBuilding(key));
-    row.appendChild(btn);
-    if (sectState.currentBuild === key) {
-      const bar = document.createElement('div');
-      bar.className = 'disciple-progress';
-      const fill = document.createElement('div');
-      fill.className = 'disciple-progress-fill';
-      fill.style.width = `${(sectState.buildProgress * 100).toFixed(0)}%`;
-      const text = document.createElement('div');
-      text.className = 'disciple-progress-label';
-      text.textContent = `${(sectState.buildProgress * 100).toFixed(0)}%`;
-      bar.appendChild(fill);
-      bar.appendChild(text);
-      row.appendChild(bar);
-    } else {
-      const cost = document.createElement('div');
-      const c = b.costFunc ? b.costFunc(built + 1) : b.cost;
-      cost.textContent = `Cost: ${c} Softwood`;
-      row.appendChild(cost);
-    }
-  colonyBuildPanel.appendChild(row);
-  });
-}
-
-function renderColonyResearchPanel() {
-  if (!colonyResearchPanel) return;
-  colonyResearchPanel.innerHTML = '';
-  const pts = document.createElement('div');
-  pts.textContent = `Research Points: ${sectState.researchPoints}`;
-  colonyResearchPanel.appendChild(pts);
-
-  const bar = document.createElement('div');
-  bar.className = 'research-progress';
-  const fill = document.createElement('div');
-  fill.className = 'research-progress-fill';
-  const prog = sectState.researchProgress % 500;
-  fill.style.width = `${(prog / 500) * 100}%`;
-  bar.appendChild(fill);
-  colonyResearchPanel.appendChild(bar);
-
-  const researchers = sectSystem.disciples.filter(
-    d => sectState.discipleTasks[d.id] === 'Research'
-  ).length;
-  const rate = researchers * 4;
-  const time = rate > 0 ? ((500 - prog) / rate).toFixed(1) : '∞';
-  const info = document.createElement('div');
-  info.className = 'research-progress-info';
-  info.textContent = `Water Rate: ${rate}/s | Next RP in ${time}s`;
-  colonyResearchPanel.appendChild(info);
-  if (!systems.chantingHallUnlocked) {
-    const btn = document.createElement('button');
-    btn.textContent = 'Unlock Chanting Halls (3 RP)';
-    btn.disabled = sectState.researchPoints < 3;
-    btn.addEventListener('click', () => {
-      if (sectState.researchPoints >= 3) {
-        sectState.researchPoints -= 3;
-        systems.chantingHallUnlocked = true;
-        renderColonyResearchPanel();
-        renderColonyBuildPanel();
-      }
-    });
-    colonyResearchPanel.appendChild(btn);
-  }
-  if (!systems.explorationUnlocked) {
-    const btn = document.createElement('button');
-    btn.textContent = 'Foreseers Research (10 RP)';
-    btn.disabled = sectState.researchPoints < 10;
-    btn.addEventListener('click', () => {
-      if (sectState.researchPoints >= 10) {
-        sectState.researchPoints -= 10;
-        systems.explorationUnlocked = true;
-        addLog('Research complete: Foreseers', 'good');
-        unlockConstruct('Sonic Boom');
-        renderColonyResearchPanel();
-        if (typeof renderColonyTasks === 'function') renderColonyTasks();
-        if (typeof renderColonyInfo === 'function') renderColonyInfo();
-      }
-    });
-    colonyResearchPanel.appendChild(btn);
-  }
-}
-
-function renderDiscipleList() {
-  if (!colonyInfoPanel) return;
-  colonyInfoPanel.innerHTML = '';
-  sectSystem.disciples.forEach(d => {
-    const row = document.createElement('div');
-    row.className = 'task-entry';
-    if (d.id === selectedDiscipleId) row.classList.add('selected');
-    row.textContent = d.name || `Disciple ${d.id}`;
-    row.addEventListener('click', () => {
-      selectedDiscipleId = d.id;
-      discipleInfoView = 'status';
-      renderDiscipleList();
-      renderDiscipleDetails();
-    });
-    colonyInfoPanel.appendChild(row);
-  });
-}
-
-function renderDiscipleDetails() {
-  if (!colonyResourcesPanel) return;
-  colonyResourcesPanel.innerHTML = '';
-  const d = sectSystem.disciples.find(x => x.id === selectedDiscipleId);
-  if (!d) {
-    colonyResourcesPanel.textContent = 'Select a disciple';
-    return;
-  }
-
-  const container = document.createElement('div');
-  container.className = 'disciple-details';
-
-  const header = document.createElement('div');
-  header.className = 'disciple-details-header';
-  const nameSpan = document.createElement('span');
-  nameSpan.textContent = d.name || `Disciple ${d.id}`;
-  header.appendChild(nameSpan);
-
-  const views = [
-    { key: 'status', label: 'Status' },
-    { key: 'life', label: 'Life Stats' },
-    { key: 'casting', label: 'Casting Stats' },
-    { key: 'combat', label: 'Combat Stats' }
-  ];
-  views.forEach(v => {
-    const btn = document.createElement('button');
-    btn.textContent = v.label;
-    if (discipleInfoView === v.key) btn.classList.add('active');
-    btn.addEventListener('click', () => {
-      discipleInfoView = v.key;
-      renderDiscipleDetails();
-    });
-    header.appendChild(btn);
-  });
-  container.appendChild(header);
-
-  let body;
-  if (discipleInfoView === 'status') body = buildDiscipleStatusView(d);
-  else if (discipleInfoView === 'life') body = buildDiscipleLifeStatsView(d);
-  else if (discipleInfoView === 'casting') body = buildDiscipleCastingStatsView(d);
-  else if (discipleInfoView === 'combat') body = buildDiscipleCombatStatsView(d);
-  if (body) container.appendChild(body);
-
-  colonyResourcesPanel.appendChild(container);
-}
 
 function buildDiscipleStatusView(d) {
   const body = document.createElement('div');
@@ -1953,12 +1566,6 @@ function init() {
     updateSectDisplay();
   }
   checkBuildingUnlock();
-  if (systems.researchUnlocked && colonyResearchTabButton) {
-    colonyResearchTabButton.style.display = '';
-  }
-  if (systems.buildingUnlocked && colonyBuildTabButton) {
-    colonyBuildTabButton.style.display = '';
-  }
   updateSectDisplay();
   initVignetteToggles();
   if (window.lucide) lucide.createIcons({ icons: lucide.icons });
@@ -1982,9 +1589,6 @@ function init() {
       }
     });
     updateSectDisplay();
-    if (colonyResourcesPanel && colonyResourcesPanel.style.display !== 'none') {
-      renderDiscipleDetails();
-    }
   });
   document.addEventListener('schedule-phase', e => {
     updateMapBrightness(e.detail.phase);
@@ -2006,12 +1610,7 @@ function init() {
       playerSectTabButton.classList.add('glow-notify');
     }
     updateSectDisplay();
-    if (colonyInfoTabButton && colonyInfoTabButton.classList.contains('active')) {
-      renderDiscipleList();
-      renderDiscipleDetails();
-    }
   });
-  showColonyTab('resources');
   updatePlayerStats(stats);
   // Game starts in sect view; exploration initiates combat
   renderWorldsMenu();
@@ -2830,8 +2429,6 @@ function returnPartyToSect() {
   showTab(sectTab);
   setActiveTabButton(playerSectTabButton);
   updateSectDisplay();
-  renderDiscipleList();
-  renderDiscipleDetails();
 }
 
 setPartyDefeatHandler(returnPartyToSect);
