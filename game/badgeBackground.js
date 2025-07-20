@@ -17,7 +17,6 @@ function ensureApp() {
   if (!testCanvas.getContext || !testCanvas.getContext('2d')) return;
   try {
     app = new Application({
-=
       width: window.innerWidth,
       height: window.innerHeight,
       transparent: true
