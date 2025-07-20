@@ -1,6 +1,7 @@
 import { makeBar } from './ui.js';
 import { sectState } from './state.js';
 import { DISCIPLE_MAX_HEALTH } from './constants.js';
+import { applyBadgeTexture } from './badgeBackground.js';
 
 export function createDiscipleBadge(d) {
   const badge = document.createElement('div');
