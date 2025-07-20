@@ -656,6 +656,19 @@ body.darkenshift-mode .tabsContainer button.active {
     max-height: 300px;
     overflow-y: auto;
 }
+.work-entry {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.work-task {
+    min-width: 80px;
+    font-size: 0.7rem;
+}
+.work-output {
+    font-size: 0.7rem;
+    color: #ddd;
+}
 
 .work-overlay .close-btn {
     position: absolute;

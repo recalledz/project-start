@@ -11,7 +11,6 @@ const parchmentTexture = PIXI.Texture.from(
   new URL('../img/parchment.png', import.meta.url).href
 );
 const PARCHMENT_SCALE = 0.9;
-const BADGE_SIZE = 64;
 
 // only once PIXI is loaded will this run
 function ensureApp() {

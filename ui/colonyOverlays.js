@@ -4,7 +4,7 @@ export let explorationListContainer = null;
 export let startDungeonBtn = null;
 
 import { createOverlay } from './overlay.js';
-import { sectSystem, SECT_SCHEDULE, getCurrentSchedule, renderConstructCards, getDailyResourceDelta } from '../game/sect.js';
+import { sectSystem, SECT_SCHEDULE, getCurrentSchedule, renderConstructCards, getDailyResourceDelta, getDiscipleDailyOutput } from '../game/sect.js';
 import { systems, sectState, worldProgress } from '../game/state.js';
 import { createSectDiscipleCard, renderColonyTasks, renderExplorationTab, startExploration, startWorldCombat, discipleGatherPhase } from '../script.js';
 
@@ -137,13 +137,30 @@ export function openWorkOverlay() {
   function render() {
     left.innerHTML = '';
     sectSystem.disciples.forEach(d => {
+      const entry = document.createElement('div');
+      entry.className = 'work-entry';
+
       const card = createSectDiscipleCard(d);
       if (d.id === workOverlaySelected) card.classList.add('selected');
       card.addEventListener('click', () => {
         workOverlaySelected = d.id;
         render();
       });
-      left.appendChild(card);
+
+      const taskLabel = document.createElement('div');
+      taskLabel.className = 'work-task';
+      const task = sectState.discipleTasks[d.id] || 'Idle';
+      taskLabel.textContent = task;
+
+      const output = getDiscipleDailyOutput(d);
+      const outLabel = document.createElement('div');
+      outLabel.className = 'work-output';
+      outLabel.textContent = output > 0 ? `+${output.toFixed(1)}/day` : '';
+
+      entry.appendChild(card);
+      entry.appendChild(taskLabel);
+      entry.appendChild(outLabel);
+      left.appendChild(entry);
     });
 
     right.innerHTML = '';
