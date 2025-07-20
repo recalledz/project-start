@@ -1,4 +1,4 @@
-/* global PIXI */
+import { Application, Sprite, Texture } from 'pixi.js';
 
 let app = null;
 const sprites = new Map();
@@ -8,22 +8,23 @@ function ensureApp() {
   if (app) return;
   if (
     typeof document === 'undefined' ||
-    !globalThis.HTMLCanvasElement ||
-    typeof PIXI === 'undefined'
+    !globalThis.HTMLCanvasElement
   ) {
-    // Skip if canvas or PIXI is unavailable (e.g. server-side tests)
+    // Skip if canvas is unavailable (e.g. server-side tests)
     return;
   }
   const testCanvas = document.createElement('canvas');
-  if (!testCanvas.getContext) return;
+  if (!testCanvas.getContext || !testCanvas.getContext('2d')) return;
   try {
-    app = new PIXI.Application({
+    app = new Application({
+=
       width: window.innerWidth,
       height: window.innerHeight,
       transparent: true
     });
     if (!parchmentTexture) {
-      parchmentTexture = PIXI.Texture.from('img/parchment.jpg');
+      parchmentTexture = Texture.from('img/parchment.jpg');
+
     }
   } catch (e) {
     console.error('PIXI init failed', e);
@@ -57,7 +58,8 @@ function updateAll() {
 export function applyBadgeTexture(el) {
   ensureApp();
   if (!app || !parchmentTexture) return;
-  const sprite = new PIXI.Sprite(parchmentTexture);
+  const sprite = new Sprite(parchmentTexture);
+
   sprites.set(el, sprite);
   updateSprite(sprite, el);
   app.stage.addChild(sprite);
