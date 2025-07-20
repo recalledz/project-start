@@ -40,6 +40,9 @@ export function initializeDisciple(d) {
       meditating: false
     };
   }
+  if (sectState.disciplePaths[d.id] === undefined) {
+    sectState.disciplePaths[d.id] = null;
+  }
   Object.setPrototypeOf(d, Disciple.prototype);
   if (typeof d.updateCombatStats === 'function') d.updateCombatStats();
   return d;

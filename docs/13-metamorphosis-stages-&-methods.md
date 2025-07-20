@@ -32,6 +32,8 @@ Potential = 5
 → `0.4 × 25 = 10 XP/s`  
 → `25,000 ÷ 10 = 2,500s ≈ 41.7 minutes` real-time work
 
+When the required XP is reached, progress pauses and a **Breakthrough** button appears. The disciple cannot gain additional XP until you press the button. Completing the Egg stage opens the Path selection screen, where you may choose from the available starter Paths.
+
 ---
 
 ### 2. 🐛 Tadpole Stage *(Water shaping)*
