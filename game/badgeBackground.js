@@ -1,4 +1,4 @@
-import { Application, Sprite, Texture } from 'pixi.js';
+import { Application, Sprite, Texture } from 'pixi.min.js';
 
 let app = null;
 const sprites = new Map();
