@@ -17,12 +17,14 @@ function ensureApp() {
   if (!testCanvas.getContext || !testCanvas.getContext('2d')) return;
   try {
     app = new Application({
+=
       width: window.innerWidth,
       height: window.innerHeight,
       transparent: true
     });
     if (!parchmentTexture) {
       parchmentTexture = Texture.from('img/parchment.jpg');
+
     }
   } catch (e) {
     console.error('PIXI init failed', e);
@@ -57,6 +59,7 @@ export function applyBadgeTexture(el) {
   ensureApp();
   if (!app || !parchmentTexture) return;
   const sprite = new Sprite(parchmentTexture);
+
   sprites.set(el, sprite);
   updateSprite(sprite, el);
   app.stage.addChild(sprite);
