@@ -1,20 +1,33 @@
-/* global PIXI */
+import { Application, Sprite, Texture } from 'pixi.js';
 
 let app = null;
 const sprites = new Map();
-const parchmentTexture = PIXI.Texture.from('img/parchment.jpg');
+let parchmentTexture = null;
 
 function ensureApp() {
   if (app) return;
-  if (typeof document === 'undefined' || !globalThis.HTMLCanvasElement) {
-    // Skip if canvas is unavailable (e.g. during server-side tests)
+  if (
+    typeof document === 'undefined' ||
+    !globalThis.HTMLCanvasElement
+  ) {
+    // Skip if canvas is unavailable (e.g. server-side tests)
     return;
   }
-  app = new PIXI.Application({
-    width: window.innerWidth,
-    height: window.innerHeight,
-    transparent: true
-  });
+  const testCanvas = document.createElement('canvas');
+  if (!testCanvas.getContext || !testCanvas.getContext('2d')) return;
+  try {
+    app = new Application({
+      width: window.innerWidth,
+      height: window.innerHeight,
+      transparent: true
+    });
+    if (!parchmentTexture) {
+      parchmentTexture = Texture.from('img/parchment.jpg');
+    }
+  } catch (e) {
+    console.error('PIXI init failed', e);
+    return;
+  }
   app.view.classList.add('badge-texture-layer');
   app.view.style.position = 'fixed';
   app.view.style.top = '0';
@@ -42,8 +55,8 @@ function updateAll() {
 
 export function applyBadgeTexture(el) {
   ensureApp();
-  if (!app) return;
-  const sprite = new PIXI.Sprite(parchmentTexture);
+  if (!app || !parchmentTexture) return;
+  const sprite = new Sprite(parchmentTexture);
   sprites.set(el, sprite);
   updateSprite(sprite, el);
   app.stage.addChild(sprite);
