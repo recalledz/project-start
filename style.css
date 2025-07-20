@@ -690,6 +690,29 @@ body.darkenshift-mode .tabsContainer button.active {
     font-weight: bold;
 }
 
+.resource-overlay .overlay-box {
+    max-width: 300px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.resource-deltas {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 0.9rem;
+}
+.resource-delta-row {
+    display: flex;
+    justify-content: space-between;
+}
+.resource-delta-row .gain {
+    color: #8f8;
+}
+.resource-delta-row .loss {
+    color: #f88;
+}
+
 .work-disciples .sect-disciple-card.selected {
     background: #fbf6e0;
     color: #000;
