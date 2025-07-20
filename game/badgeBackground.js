@@ -1,4 +1,4 @@
-/* badgeBackground.js – loaded _after_ pixi.js‑legacy (and pixi‑filters.umd.js) via plain <script> tags */
+/* global PIXI */
 
 let app = null;
 const sprites = new Map();
@@ -56,8 +56,6 @@ export function applyBadgeTexture(el) {
   ensureApp();
   // guard in case PIXI wasn't loaded or texture failed
   if (!app || !parchmentTexture) return;
-
-  // ← use PIXI.Sprite, not bare Sprite
   const sprite = new PIXI.Sprite(parchmentTexture);
 
   sprites.set(el, sprite);
