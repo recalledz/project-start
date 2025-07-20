@@ -4,21 +4,24 @@ import { DISCIPLE_MAX_HEALTH } from './constants.js';
 
 export function createDiscipleBadge(d) {
   const badge = document.createElement('div');
-  badge.className = 'disciple-badge parchment-box';
+  badge.className = 'disciple-badge';
+
+  const content = document.createElement('div');
+  content.className = 'disciple-content parchment-box';
 
   const name = document.createElement('div');
   name.className = 'disciple-name';
   name.textContent = d.name || `Disciple ${d.id}`;
-  badge.appendChild(name);
+  content.appendChild(name);
 
   const mood = document.createElement('span');
   mood.className = 'mood-icon';
   mood.textContent = d.mood || '🙂';
-  badge.appendChild(mood);
+  content.appendChild(mood);
 
   const lifeBar = makeBar(d.health, DISCIPLE_MAX_HEALTH, '#a33');
   lifeBar.classList.add('life-bar');
-  badge.appendChild(lifeBar);
+  content.appendChild(lifeBar);
 
   const wrapper = document.createElement('div');
   wrapper.dataset.discipleId = d.id;
@@ -31,7 +34,9 @@ export function createDiscipleBadge(d) {
   const curTask = d.incapacitated ? 'Resting' : sectState.discipleTasks[d.id] || 'Idle';
   label.textContent = curTask;
   wrapper.appendChild(label);
-  badge.appendChild(wrapper);
+  content.appendChild(wrapper);
+
+  badge.appendChild(content);
 
   
   return badge;
