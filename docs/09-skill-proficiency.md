@@ -28,3 +28,8 @@
 Each disciple rolls two random skill affinities when created. These grant either
 1.5× or 3× XP for the chosen skills. Attributes other than Intelligence do not
 affect proficiency gain.
+
+### In-game Implementation
+Proficiency XP is applied every tick while a disciple performs a task. The base
+rates above are multiplied by the disciple's Intelligence modifier and any
+affinity bonuses.

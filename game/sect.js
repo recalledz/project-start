@@ -14,7 +14,14 @@ import {
   TASK_GROUPS,
   ATTRIBUTE_FOR_GROUP
 } from './constants.js';
-import { getTaskSkillProgress } from '../utils/skills.js';
+import { intelligenceXpMultiplier } from '../attributes.js';
+import { addSkillXp, ensureDiscipleSkills, getTaskSkillProgress } from '../utils/skills.js';
+import {
+  FRUIT_XP_PER_CYCLE,
+  LOG_XP_PER_CYCLE,
+  RESEARCH_XP_PER_CYCLE,
+  CHANT_XP_PER_CYCLE
+} from './constants.js';
 
 export { addDiscoveredLocation } from "./ui.js";
 export const discoveredLocations = [];
@@ -1435,6 +1442,44 @@ export function getDailyResourceDelta() {
 
 
 // placeholder colony functions
-export function tickSect() {}
+
+export function tickSect(delta) {
+  const dt = delta / 1000;
+  sectSystem.disciples.forEach(d => {
+    if (d.incapacitated) return;
+    const task = sectState.discipleTasks[d.id];
+    if (!task || task === 'Idle' || task === 'Resting') return;
+    ensureDiscipleSkills(d.id);
+    const group = TASK_GROUPS[task];
+    let xpRate = 0;
+
+    if (task === 'Gather Fruit' || task === 'Gather Softwood') {
+      const spot = GATHER_SPOTS[task];
+      const travel = Math.max(
+        MIN_TRAVEL_SECONDS,
+        spot.travel * TRAVEL_SECONDS_PER_UNIT
+      );
+      const cycleSeconds = travel * 2 + GATHER_WORK_SECONDS;
+      const rate =
+        (task === 'Gather Fruit' ? FRUIT_XP_PER_CYCLE : LOG_XP_PER_CYCLE) /
+        cycleSeconds;
+      xpRate = rate;
+    } else if (task === 'Research') {
+      sectState.researchProgress += 4 * dt;
+      while (sectState.researchProgress >= 500) {
+        sectState.researchProgress -= 500;
+        sectState.researchPoints += 1;
+      }
+      xpRate = RESEARCH_XP_PER_CYCLE / 125;
+    } else if (task === 'Chant') {
+      xpRate = CHANT_XP_PER_CYCLE / 5;
+    }
+
+    if (xpRate > 0 && group) {
+      addSkillXp(d, group, xpRate * dt * intelligenceXpMultiplier());
+    }
+  });
+
+}
 
 export function renderColonyResources() {}
