@@ -19,6 +19,10 @@ During the **Training** schedule phase, disciples gain metamorphosis XP automati
 
 ## 🐸 Metamorphosis Stages
 
+As a disciple progresses, their sprite on the sect map gains a brighter aura.
+Early stages feature a subtle glow while higher stages emit pulsing colors to
+reflect growing power.
+
 ### 1. 🥚 Egg Stage
 
 - **Requirement**: 25,000 metamorphosis XP
@@ -53,6 +57,7 @@ When the required XP is reached, progress pauses and a **Breakthrough** button a
 ### 5. 🐸✨ Divine Coquí *(Godhood)*
 
 - Final metamorphosis into mythic form
+- Sprite glows with a shimmering golden aura
 
 
 ### Progress bar and numeric values

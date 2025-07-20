@@ -3135,6 +3135,41 @@ body.darkenshift-mode .tabsContainer button.active {
 .sect-disciple.incapacitated {
     filter: grayscale(1) drop-shadow(0 0 2px rgba(255,0,0,0.8));
 }
+
+/* metamorphosis stage glow effects */
+.sect-disciple[data-stage="1"] {
+    filter: drop-shadow(0 0 2px rgba(0,0,0,0.8)) drop-shadow(0 0 4px rgba(255,255,255,0.6));
+}
+.sect-disciple[data-stage="2"] {
+    filter: drop-shadow(0 0 2px rgba(0,0,0,0.8)) drop-shadow(0 0 5px rgba(0,255,0,0.7));
+}
+.sect-disciple[data-stage="3"] {
+    filter: drop-shadow(0 0 2px rgba(0,0,0,0.8)) drop-shadow(0 0 6px rgba(0,150,255,0.8));
+}
+.sect-disciple[data-stage="4"] {
+    animation: violetPulse 2s infinite;
+}
+.sect-disciple[data-stage="5"] {
+    animation: goldShimmer 2s infinite;
+}
+
+@keyframes violetPulse {
+    0%, 100% {
+        filter: drop-shadow(0 0 2px rgba(0,0,0,0.8)) drop-shadow(0 0 7px rgba(180,0,255,0.8));
+    }
+    50% {
+        filter: drop-shadow(0 0 2px rgba(0,0,0,0.8)) drop-shadow(0 0 12px rgba(180,0,255,1));
+    }
+}
+
+@keyframes goldShimmer {
+    0%, 100% {
+        filter: drop-shadow(0 0 2px rgba(0,0,0,0.8)) drop-shadow(0 0 8px rgba(255,215,0,0.8));
+    }
+    50% {
+        filter: drop-shadow(0 0 2px rgba(0,0,0,0.8)) drop-shadow(0 0 14px rgba(255,215,0,1));
+    }
+}
 .croak-bubble {
     position: absolute;
     bottom: 12px;
