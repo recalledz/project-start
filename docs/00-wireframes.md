@@ -53,6 +53,7 @@ Left panel (Resource / Items)
 
 Shows stackable resources (fruit, wood, stone, etc.).
 Selecting the Resources nav opens an overlay showing daily gains and losses.
+Softwood production appears once a disciple is assigned to gather it.
 
 
 Right panel (Navigation)
