@@ -38,7 +38,7 @@ import { openExplorationOverlay, closeExplorationOverlay, openWorkOverlay, openS
 import { createDiscipleBadge } from "./game/badges.js";
 import { calculateKillXp } from './utils/xp.js';
 import { initTooltip } from './game/tooltip.js';
-import { initMistTrails } from './game/mistTrails.js';
+import { initQiRibbons } from './game/qiRibbons.js';
 import { initDiscipleVisual, updateDiscipleVisual } from './game/disciplesVisuals.js';
 import {
   calculateMaxStamina,
@@ -812,7 +812,7 @@ function updateSectDisplay() {
       }
       orbs.appendChild(orb);
     });
-    initMistTrails();
+    initQiRibbons();
   }
 
   if (sectDisciplesContainer) {
@@ -1548,7 +1548,7 @@ function init() {
   initSect();
   initTabs();
   initPollen();
-  initMistTrails();
+  initQiRibbons();
   initCombat();
   initUi({
     mainTab,
