@@ -56,11 +56,13 @@ function ensureApp() {
 function updateContainer(objs, el) {
   const r = el.getBoundingClientRect();
   const { container, bamboo, parchment } = objs;
-  container.x = r.left + r.width / 2;
-  container.y = r.top + r.height / 2;
-  container.pivot.set(BADGE_SIZE / 2, BADGE_SIZE / 2);
-  Object.assign(bamboo, { width: BADGE_SIZE, height: BADGE_SIZE, x: 0, y: 0 });
-  Object.assign(parchment, { width: BADGE_SIZE, height: BADGE_SIZE });
+  const { width, height } = r;
+  container.pivot.set(width / 2, height / 2);
+  container.x = r.left + width / 2;
+  container.y = r.top + height / 2;
+  Object.assign(bamboo, { width, height, x: 0, y: 0 });
+  Object.assign(parchment, { width, height });
+
   parchment.position = bamboo.position;
   parchment.scale.set(PARCHMENT_SCALE);
 }
