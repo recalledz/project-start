@@ -20,7 +20,9 @@ import {
   FRUIT_XP_PER_CYCLE,
   LOG_XP_PER_CYCLE,
   RESEARCH_XP_PER_CYCLE,
-  CHANT_XP_PER_CYCLE
+  CHANT_XP_PER_CYCLE,
+  HUNT_CYCLE_SECONDS,
+  EXPLORATION_CYCLE_SECONDS
 } from './constants.js';
 
 export { addDiscoveredLocation } from "./ui.js";
@@ -1463,6 +1465,7 @@ export function tickSect(delta) {
     ensureDiscipleSkills(d.id);
     const group = TASK_GROUPS[task];
     let xpRate = 0;
+    let progress = sectState.discipleProgress[d.id] || 0;
 
     if (task === 'Gather Fruit' || task === 'Gather Softwood') {
       const spot = GATHER_SPOTS[task];
@@ -1475,6 +1478,8 @@ export function tickSect(delta) {
         (task === 'Gather Fruit' ? FRUIT_XP_PER_CYCLE : LOG_XP_PER_CYCLE) /
         cycleSeconds;
       xpRate = rate;
+      progress = (progress + dt) % cycleSeconds;
+      sectState.discipleProgress[d.id] = progress;
     } else if (task === 'Research') {
       sectState.researchProgress += 4 * dt;
       while (sectState.researchProgress >= 500) {
@@ -1484,6 +1489,12 @@ export function tickSect(delta) {
       xpRate = RESEARCH_XP_PER_CYCLE / 125;
     } else if (task === 'Chant') {
       xpRate = CHANT_XP_PER_CYCLE / 5;
+    } else if (task === 'Hunt') {
+      progress = (progress + dt) % HUNT_CYCLE_SECONDS;
+      sectState.discipleProgress[d.id] = progress;
+    } else if (task === 'Exploration') {
+      progress = (progress + dt) % EXPLORATION_CYCLE_SECONDS;
+      sectState.discipleProgress[d.id] = progress;
     }
 
     if (xpRate > 0 && group) {
