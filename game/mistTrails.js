@@ -4,11 +4,10 @@ export function initMistTrails() {
 
   const orb = container.querySelector('#sectOrbs .sect-orb.water');
   const zones = container.querySelectorAll('.zone');
-  if (!orb || !zones.length) return;
+  const layer = container.querySelector('#mistLayer');
+  if (!orb || !zones.length || !layer) return;
 
-  const layer = document.createElement('div');
-  layer.className = 'mist-trails';
-  container.appendChild(layer);
+  layer.innerHTML = '';
 
   zones.forEach(zone => {
     for (let i = 0; i < 3; i++) {
