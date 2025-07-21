@@ -9,3 +9,4 @@
 - First minutes: auto‑gather fruit (see **Skills & Proficiency → Gathering**).
 - Default work block: 120 s per task.
 - After food is secured, send disciples to Scrubland Trees for softwood.
+- Accumulating 20 Softwood unlocks the **Build** menu where the first building can be constructed.
