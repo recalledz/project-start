@@ -88,7 +88,7 @@ Footer
   Each badge displays a parchment background inside a bamboo border along with the
 
   disciple's name, mood, HP bar and current task.
-* Disciples on the sect map appear as tiny side-facing coquí sprites. The bamboo frame is drawn using
+* Disciples on the sect map appear as slightly larger side-facing coquí sprites (about 20% bigger). The bamboo frame is drawn using
   the CSS `border-image` property so the texture tiles cleanly around the badge. Every 10–20 seconds they emit a small croak bubble, and when assigned work they display a task icon such as a pickaxe or scroll.
 
 * All overlays now use the same parchment-style box for a consistent look.
