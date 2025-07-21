@@ -7,6 +7,7 @@ import { createOverlay } from './overlay.js';
 import { sectSystem, SECT_SCHEDULE, getCurrentSchedule, renderConstructCards, getDailyResourceDelta, getDiscipleDailyOutput } from '../game/sect.js';
 import { systems, sectState, worldProgress } from '../game/state.js';
 import { createSectDiscipleCard, renderExplorationTab, startExploration, startWorldCombat, discipleGatherPhase } from '../script.js';
+import { BUILDINGS, startBuilding } from '../game/buildings.js';
 
 let explorationOverlay = null;
 let explorationOverlayActiveTab = 'explore';
@@ -271,8 +272,61 @@ export function openResourceOverlay() {
   interval = setInterval(render, 1000);
 }
 
+let buildOverlay = null;
 export function openBuildOverlay() {
-  openPlaceholderOverlay('Build');
+  if (buildOverlay) return;
+  buildOverlay = createOverlay({ className: 'build-overlay', boxClass: 'parchment-box' });
+  buildOverlay.box.classList.add('parchment-box');
+  buildOverlay.onClose(() => {
+    buildOverlay = null;
+    globalThis.updateBuildOverlay = null;
+  });
+  const { box } = buildOverlay;
+
+  const header = document.createElement('div');
+  header.className = 'panel-heading';
+  header.textContent = 'Buildings';
+  box.appendChild(header);
+
+  const list = document.createElement('div');
+  list.className = 'build-list';
+  box.appendChild(list);
+
+  function render() {
+    list.innerHTML = '';
+    Object.entries(BUILDINGS).forEach(([key, def]) => {
+      if (def.requires && !(sectState.buildings[def.requires] > 0)) return;
+      const built = sectState.buildings[key] || 0;
+      const row = document.createElement('div');
+      row.className = 'build-entry';
+      const label = document.createElement('div');
+      label.textContent = `${def.name} (Lv${built}/${def.max})`;
+      row.appendChild(label);
+      if (sectState.currentBuild === key) {
+        const progress = document.createElement('div');
+        progress.className = 'build-progress';
+        const fill = document.createElement('div');
+        fill.className = 'build-progress-fill';
+        fill.style.width = `${Math.floor(sectState.buildProgress * 100)}%`;
+        progress.appendChild(fill);
+        row.appendChild(progress);
+      } else {
+        const cost = def.costFunc ? def.costFunc(built + 1) : def.cost;
+        const btn = document.createElement('button');
+        btn.textContent = `Build (${cost}\u{1FAB5})`;
+        btn.disabled = sectState.softwood < cost || built >= def.max || sectState.currentBuild;
+        btn.addEventListener('click', () => {
+          startBuilding(key);
+          render();
+        });
+        row.appendChild(btn);
+      }
+      list.appendChild(row);
+    });
+  }
+
+  globalThis.updateBuildOverlay = render;
+  render();
 }
 
 let dungeonOverlay = null;
