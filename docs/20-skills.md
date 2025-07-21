@@ -135,3 +135,11 @@ HuntYield ≈ BaseRate × (1 + DEX × 0.20 + STR × 0.30) × ActivityTime
 
 All formulas subject to balancing.
 
+
+---
+
+09.8 Casting
+
+spell power and cost reduction.
+
+Each level increases spell power by 7.5% and decreases water cost by -7.5%. Stacks multiplicatively.
