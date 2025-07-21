@@ -752,6 +752,10 @@ function updateTaskProgressDisplay() {
 }
 
 function updateSectDisplay() {
+  checkBuildingUnlock();
+  if (sectNavBuildBtn) {
+    sectNavBuildBtn.style.display = systems.buildingUnlocked ? '' : 'none';
+  }
   if (!sectTabUnlocked || !playerSectPanel) return;
   const total = sectSystem.disciples.length;
   const assigned = Object.values(sectState.discipleTasks).filter(t => t && t !== 'Idle').length;
