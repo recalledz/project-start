@@ -144,6 +144,8 @@ Here’s the updated **Disciple Overlay UI wireframe** with the added `Cultivati
 └────────────────────────────────────────────────────┘
 ```
 
+Heart and thumbs-up icons denote loved and liked skills respectively.
+
 ---
 
 ### 🔮 **Constructs Tab**

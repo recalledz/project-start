@@ -590,10 +590,10 @@ body.darkenshift-mode .tabsContainer button.active {
 
 /* Disciple overlay positioning and style */
 .disciple-overlay.overlay {
-    background: none;
+    background: var(--verdantia-parchment);
     backdrop-filter: none;
-    justify-content: flex-end;
-    align-items: flex-start;
+    justify-content: flex-start;
+    align-items: flex-end;
     pointer-events: none;
 }
 .disciple-overlay .overlay-box {
@@ -3602,6 +3602,14 @@ body.darkenshift-mode .tabsContainer button.active {
 .skill-group > div:first-child {
     cursor: pointer;
 }
+.affinity-icon {
+    width: 1em;
+    height: 1em;
+    vertical-align: middle;
+    margin-right: 2px;
+}
+.affinity-icon.liked { color: #d97e00; }
+.affinity-icon.loved { color: #c0392b; }
 .verdantia-bg::before {
   content: "";
   position: absolute;
