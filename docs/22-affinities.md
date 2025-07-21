@@ -1,12 +1,12 @@
 ### Affinities
--affinities increase starting levels of skills and skill proficiency gained.
-- on creating a disicple it will gain affinity "liked" towards 0-3 skills.
-- a disicple will also gained "love" to 0-3 random skills. Overrides "liked".
+Affinities increase starting skill levels and proficiency gain.
+When a disciple is created it gains "liked" affinity toward 0‑3 skills.
+A disciple also gains "loved" affinity for 0‑3 random skills, overriding "liked".
 
 ### Liked
--  increases proficiency gained per 40%
-- gain in starting skill levels on generation. [see recruitment]
+- Increases proficiency gain by **40%**.
+- Grants bonus starting skill levels. See [recruitment](02‑recruitment.md).
 
 ### Loved
-- 100% increase in proficiency gain.
-- gain in starting skill level. 
+- Doubles proficiency gain.
+- Grants bonus starting skill levels.
