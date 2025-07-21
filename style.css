@@ -3124,8 +3124,8 @@ body.darkenshift-mode .tabsContainer button.active {
     position: absolute;
     left: 0;
     top: 0;
-    width: 12px;
-    height: 12px;
+    width: 14.4px;
+    height: 14.4px;
     background-image: url('img/coqui.png');
     background-size: contain;
     background-repeat: no-repeat;
@@ -3138,8 +3138,8 @@ body.darkenshift-mode .tabsContainer button.active {
 .sect-disciple::after {
     content: attr(data-item);
     position: absolute;
-    bottom: -6px;
-    right: -6px;
+    bottom: -7.2px;
+    right: -7.2px;
     font-size: 0.55rem;
 }
 .sect-disciple.incapacitated {
@@ -3182,7 +3182,7 @@ body.darkenshift-mode .tabsContainer button.active {
 }
 .croak-bubble {
     position: absolute;
-    bottom: 12px;
+    bottom: 14.4px;
     left: 50%;
     transform: translateX(-50%);
     padding: 1px 2px;
@@ -3194,7 +3194,7 @@ body.darkenshift-mode .tabsContainer button.active {
 }
 @keyframes croakFade {
     from { opacity: 1; transform: translate(-50%, 0); }
-    to { opacity: 0; transform: translate(-50%, -6px); }
+    to { opacity: 0; transform: translate(-50%, -7.2px); }
 }
 @keyframes sectPulse {
     from { transform: scale(1); opacity: 0.8; }
@@ -3368,7 +3368,7 @@ body.darkenshift-mode .tabsContainer button.active {
 @media (max-width: 600px) {
   .sect-orb { width: 60px; height: 60px; }
   .disciple-orb { width: 12px; height: 12px; }
-  .sect-disciple { width: 8px; height: 8px; font-size: 0; }
+  .sect-disciple { width: 9.6px; height: 9.6px; font-size: 0; }
   .sect-basket { width: 6px; height: 4px; }
   .sect-bohio { width: 24px; height: 18px; }
 }
@@ -3377,7 +3377,7 @@ body.darkenshift-mode .tabsContainer button.active {
 @media (min-width: 1024px) {
   .sect-orb { width: 140px; height: 140px; }
   .disciple-orb { width: 20px; height: 20px; }
-  .sect-disciple { width: 16px; height: 16px; }
+  .sect-disciple { width: 19.2px; height: 19.2px; }
   .sect-basket { width: 12px; height: 8px; }
   .sect-bohio { width: 36px; height: 28px; }
   .sect-nav-panel button { width: 32px; height: 32px; font-size: 0.65rem; }
