@@ -64,6 +64,9 @@ export const SECT_SCHEDULE = [
   { phase: 'Night', duration: 60, action: 'Sleep' }
 ];
 
+export const DAILY_WORK_SECONDS = SECT_SCHEDULE.filter(p => p.action === 'Work')
+  .reduce((sum, p) => sum + p.duration, 0);
+
 export const SEASON_COLORS = {
   Verdantia: ['rgba(80,160,80,0.9)', 'rgba(30,70,30,1.0)'],
   Solaria: ['rgba(200,120,40,0.9)', 'rgba(90,40,10,1.0)'],
@@ -1418,7 +1421,7 @@ export function getDiscipleDailyOutput(d) {
     );
     const cycleSeconds = travel * 2 + GATHER_WORK_SECONDS;
     const perSecond = gatherAmt / cycleSeconds;
-    return perSecond * DAY_LENGTH_SECONDS;
+    return perSecond * DAILY_WORK_SECONDS;
   } else if (task === 'Research') {
     return 4 * DAY_LENGTH_SECONDS;
   }
