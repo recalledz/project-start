@@ -33,3 +33,5 @@ Attributes other than Intelligence do not affect proficiency gain.
 Proficiency XP is applied every tick while a disciple performs a task. The base
 rates above are multiplied by the disciple's Intelligence modifier and any
 affinity bonuses.
+Loved skills display a heart icon in the Proficiency tab, while liked skills
+show a thumbs-up icon.

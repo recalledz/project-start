@@ -1277,8 +1277,17 @@ function buildDiscipleProficiencyView(d) {
     const isGather = name === 'Gathering' || name === 'Logging';
     const mult = 1 + (isGather ? 0.05 : 0.02) * prog.level;
     const effect = effects[name];
-    head.textContent = `${name} Lv ${prog.level}` +
+    const label = document.createElement('span');
+    label.textContent = `${name} Lv ${prog.level}` +
       (effect ? ` (×${mult.toFixed(2)} ${effect})` : '');
+    const affinity = d.affinities?.[name];
+    if (affinity === 'liked' || affinity === 'loved') {
+      const icon = document.createElement('i');
+      icon.dataset.lucide = affinity === 'loved' ? 'heart' : 'thumbs-up';
+      icon.className = `affinity-icon ${affinity}`;
+      head.appendChild(icon);
+    }
+    head.appendChild(label);
     const bar = document.createElement('div');
     bar.className = 'disciple-skill-progress';
     const fill = document.createElement('div');
