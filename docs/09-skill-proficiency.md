@@ -22,12 +22,12 @@
 
 ### Affinity & Intelligence Example
 - **Formula**: `XP = BaseXP × IntMultiplier × Affinity`
-- E.g. Int=5 → 1.5×, Gathering affinity=3× → total **4.5×**
-  – 10 XP action → 45 XP actual
+- Example: Int 5 → 1.5× from Intelligence. A **loved** skill (×2) yields
+  `BaseXP × 3`.
 
-Each disciple rolls two random skill affinities when created. These grant either
-1.5× or 3× XP for the chosen skills. Attributes other than Intelligence do not
-affect proficiency gain.
+Each disciple begins with 0‑3 **liked** skills and 0‑3 **loved** skills.
+Liked skills grant 1.4× proficiency gain while loved skills grant 2×.
+Attributes other than Intelligence do not affect proficiency gain.
 
 ### In-game Implementation
 Proficiency XP is applied every tick while a disciple performs a task. The base
