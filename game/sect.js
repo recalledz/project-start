@@ -17,6 +17,8 @@ import {
 } from './constants.js';
 import { intelligenceXpMultiplier } from '../attributes.js';
 import { addSkillXp, ensureDiscipleSkills, getTaskSkillProgress } from '../utils/skills.js';
+import { generateSkillAffinities, initializeStartingSkills } from './affinities.js';
+import { getAffinityMultiplier } from './affinities.js';
 import {
   FRUIT_XP_PER_CYCLE,
   LOG_XP_PER_CYCLE,
@@ -462,6 +464,8 @@ const constructEffects = {
       };
       const newDisc = new Disciple({ id: targetIdx, name: `Disciple ${targetIdx}`, attributes: attrs });
       initializeDisciple(newDisc);
+      newDisc.affinities = generateSkillAffinities();
+      initializeStartingSkills(newDisc);
       sectSystem.disciples.push(newDisc);
       sectState.discipleConstructXp[targetIdx] = {};
       addLog('A new Disciple has answered your call!', 'info');
@@ -1512,7 +1516,8 @@ export function tickSect(delta) {
     }
 
     if (xpRate > 0 && group) {
-      addSkillXp(d, group, xpRate * dt * intelligenceXpMultiplier());
+      const mult = intelligenceXpMultiplier() * getAffinityMultiplier(d, group);
+      addSkillXp(d, group, xpRate * dt * mult);
     }
   });
 
