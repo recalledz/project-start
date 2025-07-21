@@ -12,5 +12,6 @@ The project organizes game logic under the `game/` directory.
 - **game/constants.js** – collection of shared gameplay constants used across systems.
 - **game/tooltip.js** – simple helpers for showing and hiding the UI tooltip.
 - **game/sect.js** – implements the sect management system including constructs and colony helpers.
+- **game/buildings.js** – handles sect building logic and construction timers.
 
 The top-level `script.js` now merely orchestrates initialization, delegating all logic to the modules above.
