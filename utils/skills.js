@@ -34,7 +34,16 @@ export function getTaskSkillProgress(xp) {
   const progress = (xp - total) / next;
   return { level, progress, next };
 }
-
+export function taskXpForLevel(level) {
+  let xp = 0;
+  const whole = Math.floor(level);
+  for (let i = 0; i < whole; i++) {
+    xp += taskXpRequired(i);
+  }
+  const fractional = level - whole;
+  if (fractional > 0) xp += taskXpRequired(whole) * fractional;
+  return xp;
+}
 export function addSkillXp(d, group, amount) {
   ensureDiscipleSkills(d.id);
   const prevXp = sectState.discipleSkills[d.id][group] || 0;
