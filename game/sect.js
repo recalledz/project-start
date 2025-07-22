@@ -519,13 +519,17 @@ export function initSect() {
   `;
   panel = container.querySelector('#modalConstructorPanel');
   const toggleBtn = container.querySelector('#constructToggle');
-  toggleBtn.addEventListener('click', togglePanel);
-  toggleBtn.addEventListener('mouseenter', e => {
-    window.showTooltip('Toggle constructor panel', e.pageX + 10, e.pageY + 10);
-  });
-  toggleBtn.addEventListener('mouseleave', window.hideTooltip);
-  panel.querySelector('#closeConstructBtn').addEventListener('click', togglePanel);
-  panel.querySelector('#performConstruct').addEventListener('click', performConstruct);
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', togglePanel);
+    toggleBtn.addEventListener('mouseenter', e => {
+      window.showTooltip('Toggle constructor panel', e.pageX + 10, e.pageY + 10);
+    });
+    toggleBtn.addEventListener('mouseleave', window.hideTooltip);
+  }
+  const closeBtn = panel?.querySelector('#closeConstructBtn');
+  if (closeBtn) closeBtn.addEventListener('click', togglePanel);
+  const performBtn = panel?.querySelector('#performConstruct');
+  if (performBtn) performBtn.addEventListener('click', performConstruct);
   renderResourcesUI();
   renderPot();
   renderOrbs();
