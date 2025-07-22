@@ -214,72 +214,6 @@ function getTaskEta(d) {
   return 0;
 }
 
-function createDiscipleCard(d) {
-  const card = document.createElement('div');
-  card.className = 'disciple-card';
-  const head = document.createElement('div');
-  head.className = 'disciple-card-head';
-  const icon = document.createElement('div');
-  icon.className = 'disciple-card-icon';
-  icon.textContent = (d.name || `Disciple ${d.id}`).charAt(0);
-  const name = document.createElement('span');
-  name.textContent = d.name || `Disciple ${d.id}`;
-  const level = document.createElement('span');
-  level.className = 'disciple-card-level';
-  level.textContent = `Lv${d.combatLevel || 1}`;
-  const gLevel = document.createElement('span');
-  gLevel.className = 'disciple-card-glevel';
-  gLevel.textContent = `Skill ${d.globalLevel || 0}`;
-  head.append(icon, name, level, gLevel);
-  card.appendChild(head);
-
-  card.appendChild(createLabeledBar('❤️', d.health, DISCIPLE_MAX_HEALTH, '#a33'));
-  card.appendChild(
-    createLabeledBar('⚡', d.stamina, calculateMaxStamina(), '#cc3')
-  );
-  card.appendChild(createLabeledBar('🍖', d.hunger, 20, '#996633'));
-
-  const task = document.createElement('div');
-  task.className = 'disciple-card-task';
-  const curTask = d.incapacitated ? 'Resting' : sectState.discipleTasks[d.id] || 'Idle';
-  task.textContent = `Task: ${curTask}`;
-  const eta = document.createElement('div');
-  eta.className = 'disciple-card-eta';
-  eta.textContent = `ETA: ${formatTime(getTaskEta(d))}`;
-  card.append(task, eta);
-
-  const actions = document.createElement('div');
-  actions.className = 'disciple-card-actions';
-  const assign = document.createElement('button');
-  assign.textContent = 'Assign';
-  assign.addEventListener('click', e => {
-    e.stopPropagation();
-    openDiscipleOverlay(d);
-  });
-  const statsBtn = document.createElement('button');
-  statsBtn.textContent = 'Stats';
-  statsBtn.addEventListener('click', e => {
-    e.stopPropagation();
-    openDiscipleOverlay(d);
-  });
-  const feedBtn = document.createElement('button');
-  feedBtn.textContent = 'Feed';
-  feedBtn.addEventListener('click', e => {
-    e.stopPropagation();
-    if (sectState.fruits > 0 && d.hunger < 20) {
-      sectState.fruits -= 1;
-      d.hunger = 20;
-      updateSectDisplay();
-    }
-  });
-  actions.append(assign, statsBtn, feedBtn);
-  card.appendChild(actions);
-  d.gLevelLabel = gLevel;
-  d.etaLabel = eta;
-  d.cardElement = card;
-  return card;
-}
-
 // Simplified card used in the sect overview list
 export function createSectDiscipleCard(d) {
   const card = createDiscipleBadge(d);
@@ -958,140 +892,6 @@ function startDiscipleMovement() {
 
 
 
-function buildDiscipleStatusView(d) {
-  const body = document.createElement('div');
-  const stats = [
-    { label: 'Health', color: '#a33', value: d.health, max: 10 },
-    {
-      label: 'Stamina',
-      color: '#cc3',
-      value: d.stamina,
-      max: calculateMaxStamina()
-    },
-    { label: 'Hunger', color: '#cc3', value: d.hunger, max: 20 }
-  ];
-  stats.forEach(s => {
-    const wrapper = document.createElement('div');
-    wrapper.textContent = `${s.label} ${s.value}/${s.max}`;
-    const bar = document.createElement('div');
-    bar.className = 'disciple-progress';
-    const fill = document.createElement('div');
-    fill.className = 'disciple-progress-fill';
-    fill.style.background = s.color;
-    fill.style.width = `${(s.value / s.max) * 100}%`;
-    bar.appendChild(fill);
-    wrapper.appendChild(bar);
-    body.appendChild(wrapper);
-  });
-  const task = document.createElement('div');
-  const curTask = d.incapacitated
-    ? 'Resting'
-    : sectState.discipleTasks[d.id] || 'Idle';
-  task.textContent = `Current Task: ${curTask}`;
-  body.appendChild(task);
-
-  const invRow = document.createElement('div');
-  const entries = Object.entries(d.inventory || {});
-  const filled = entries.length;
-  const desc = entries.map(([k, v]) => `${v} ${k}`).join(', ');
-  invRow.textContent = `Inventory: ${filled}/${d.inventorySlots}` + (desc ? ` (${desc})` : '');
-  body.appendChild(invRow);
-
-  const learning = (0.5 + 0.15 * d.intelligence).toFixed(2);
-  const attrInfo = [
-    {
-      label: 'Strength',
-      value: d.strength,
-      base: d.baseStrength ?? 1,
-      effect: `Yield ×${(1 + 0.05 * (d.strength - 1)).toFixed(2)}`,
-      desc: 'Boosts woodcutting, hunting & mining yield'
-    },
-    {
-      label: 'Dexterity',
-      value: d.dexterity,
-      base: d.baseDexterity ?? 1,
-      effect: `Yield ×${(1 + 0.05 * (d.dexterity - 1)).toFixed(2)}`,
-      desc: 'Raises gathering & hunting yield and discovery chance'
-    },
-    {
-      label: 'Intelligence',
-      value: d.intelligence,
-      base: d.baseIntelligence ?? 1,
-      effect:
-        `Potency ×${(1 + 0.03 * (d.intelligence - 1)).toFixed(2)}, ` +
-        `Learning ×${learning}`,
-      desc: 'Improves Chanting and Research'
-    },
-    {
-      label: 'Endurance',
-      value: d.endurance,
-      base: d.baseEndurance ?? 1,
-      effect: `Build Speed ×${(1 + 0.05 * (d.endurance - 1)).toFixed(2)}`,
-      desc: 'Speeds building and farming'
-    },
-    {
-      label: 'Charisma',
-      value: d.charisma,
-      base: d.baseCharisma ?? 1,
-      effect: `Recruit Chance ×${(1 + 0.05 * (d.charisma - 1)).toFixed(2)}`,
-      desc: 'Influences diplomacy and disciple potential'
-    },
-    {
-      label: 'Potential',
-      value: d.potential,
-      base: d.basePotential ?? d.potential,
-      effect: `Inner Cauldron Size ${d.potential * 500}`,
-      desc: null
-    }
-  ];
-  const attrContainer = document.createElement('div');
-  attrInfo.forEach(a => {
-    const row = document.createElement('div');
-    const diff = a.value - a.base;
-    const gainText = diff > 0 ? ` (+${diff})` : '';
-    const extra = a.desc ? `; ${a.desc}` : '';
-    row.textContent = `${a.label} ${a.value}${gainText} – ${a.effect}${extra}`;
-    attrContainer.appendChild(row);
-  });
-  body.appendChild(attrContainer);
-  return body;
-}
-
-function buildDiscipleLifeStatsView(d) {
-  const body = document.createElement('div');
-  const skillMap = sectState.discipleSkills[d.id] || {};
-  const tasks = [
-    { name: 'Gather Fruit', effect: 'yield' },
-    { name: 'Gather Softwood', effect: 'yield' },
-    { name: 'Building', effect: 'speed' },
-    { name: 'Research', effect: 'research pts' },
-    { name: 'Chant', effect: 'potency' }
-  ];
-  tasks.forEach(t => {
-    const groupKey = TASK_GROUPS[t.name] || t.name;
-    const xp = skillMap[groupKey] || 0;
-    const prog = getTaskSkillProgress(xp);
-    const row = document.createElement('div');
-    const isGather = t.name === 'Gather Fruit' || t.name === 'Gather Softwood';
-    const mult = 1 + (isGather ? 0.05 : 0.02) * prog.level;
-    row.textContent = `${t.name} Lv ${prog.level} (×${mult.toFixed(2)} ${t.effect})`;
-    body.appendChild(row);
-  });
-  return body;
-}
-
-function buildDiscipleCastingStatsView(d) {
-  const body = document.createElement('div');
-  Object.keys(sectSystem.constructPotency).forEach(name => {
-    const mult = sectSystem.constructPotency[name] || 1;
-    const row = document.createElement('div');
-    row.className = 'disciple-skill-option';
-    row.textContent = `${name} ×${mult.toFixed(2)}`;
-    body.appendChild(row);
-  });
-  return body;
-}
-
 function buildDiscipleCombatStatsView(d) {
   const body = document.createElement('div');
   const atkPerSec = (1000 / d.attackSpeed).toFixed(2);
@@ -1593,9 +1393,6 @@ document.addEventListener("DOMContentLoaded", init);
 
 // life rendering moved to rendering.js
 
-//function updateSanityBar() {}
-//function updateInsanityOrb(ratio) {}
-
 //stage
 
 export function renderStageInfo() {
@@ -1973,7 +1770,6 @@ function updateBossProgress() {
 }
 
 // Enable the next stage button when kill requirements met
-//function nextStageChecker() {}
 
 //dealer
 
@@ -2007,11 +1803,6 @@ export function spawnBossEvent() {
 
 
 
-//function updateStageProgressDisplay() {}
-//function stopStageProgress() {}
-//function stepStageProgress() {}
-//function startStageProgress() {}
-//function moveForward() {}
 
 // After a kill, decide whether to spawn a dealer or a boss
 export function respawnDealerStage() {
@@ -2176,22 +1967,6 @@ function updateHandDisplay() {
     }
     updateDiscipleStatsDisplay(d);
     updateBloodSplat(d);
-  });
-}
-
-function updateSectCardInfo() {
-  sectSystem.disciples.forEach(d => {
-    if (d.etaLabel) {
-      d.etaLabel.textContent = `ETA: ${formatTime(getTaskEta(d))}`;
-    }
-    const lvl = computeGlobalSkillLevel(d.id);
-    if (lvl > d.globalLevel) {
-      d.globalLevel = lvl;
-      if (d.gLevelLabel) d.gLevelLabel.textContent = `Skill ${d.globalLevel}`;
-      if (d.cardElement) runAnimation(d.cardElement, 'levelup-animate');
-    } else if (d.gLevelLabel) {
-      d.gLevelLabel.textContent = `Skill ${d.globalLevel}`;
-    }
   });
 }
 
