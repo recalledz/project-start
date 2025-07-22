@@ -590,7 +590,7 @@ body.darkenshift-mode .tabsContainer button.active {
 
 /* Disciple overlay positioning and style */
 .disciple-overlay.overlay {
-    background: var(--verdantia-parchment);
+    background: transparent;
     backdrop-filter: none;
     justify-content: flex-start;
     align-items: flex-end;
