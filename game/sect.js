@@ -490,11 +490,11 @@ let lastConstructTarget = null;
 
 export function initSect() {
   container = document.getElementById('constructTabCardContainer');
-  if (!container) return;
-  container.innerHTML = `
-    <div id="constructToggle" class="construct-toggle">❮</div>
-    <div id="constructHotbar" class="construct-hotbar"></div>
-    <div id="modalConstructorPanel" class="modal-constructor-panel">
+  if (container) {
+    container.innerHTML = `
+      <div id="constructToggle" class="construct-toggle">❮</div>
+      <div id="constructHotbar" class="construct-hotbar"></div>
+      <div id="modalConstructorPanel" class="modal-constructor-panel">
       <div class="construct-header">
         <span class="construct-title">Modal Panel Constructor</span>
         <button id="closeConstructBtn" class="cast-button">❌</button>
@@ -517,15 +517,22 @@ export function initSect() {
       </div>
     </div>
   `;
-  panel = container.querySelector('#modalConstructorPanel');
-  const toggleBtn = container.querySelector('#constructToggle');
-  toggleBtn.addEventListener('click', togglePanel);
-  toggleBtn.addEventListener('mouseenter', e => {
-    window.showTooltip('Toggle constructor panel', e.pageX + 10, e.pageY + 10);
-  });
-  toggleBtn.addEventListener('mouseleave', window.hideTooltip);
-  panel.querySelector('#closeConstructBtn').addEventListener('click', togglePanel);
-  panel.querySelector('#performConstruct').addEventListener('click', performConstruct);
+    panel = container.querySelector('#modalConstructorPanel');
+    const toggleBtn = container.querySelector('#constructToggle');
+    if (toggleBtn) {
+      toggleBtn.addEventListener('click', togglePanel);
+      toggleBtn.addEventListener('mouseenter', e => {
+        window.showTooltip('Toggle constructor panel', e.pageX + 10, e.pageY + 10);
+      });
+      toggleBtn.addEventListener('mouseleave', window.hideTooltip);
+    }
+    const closeBtn = panel?.querySelector('#closeConstructBtn');
+    if (closeBtn) closeBtn.addEventListener('click', togglePanel);
+    const performBtn = panel?.querySelector('#performConstruct');
+    if (performBtn) performBtn.addEventListener('click', performConstruct);
+  } else {
+    panel = null;
+  }
   renderResourcesUI();
   renderPot();
   renderOrbs();
