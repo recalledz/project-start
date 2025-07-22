@@ -25,9 +25,14 @@ import {
   openWaterRegenPopup,
   unlockConstruct,
   renderConstructCards,
-  renderHotbar
+  renderHotbar,
+  SECT_SCHEDULE,
+  getCurrentSchedule,
+  tickSect,
+  renderColonyResources,
+  addDiscoveredLocation,
+  discoveredLocations
 } from "./game/sect.js";
-import { SECT_SCHEDULE, getCurrentSchedule } from "./game/sect.js";
 import {
   BUILDINGS,
   checkBuildingUnlock,
@@ -102,7 +107,6 @@ import {
   showTab,
 
 } from "./game/ui.js";
-import { tickSect, renderColonyResources, addDiscoveredLocation, discoveredLocations } from "./game/sect.js";
 // disciple selection for combat
 import {
   init as initDisciples,
