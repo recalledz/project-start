@@ -2052,14 +2052,14 @@ body.darkenshift-mode .tabsContainer button.active {
     flex-direction: column;
     gap: 8px;
     font-size: 0.8rem;
-    min-width: 160px;
+    min-width: 120px;
 }
 .metamorphosis-stats-panel {
     display: flex;
     flex-direction: column;
     gap: 6px;
     font-size: 0.8rem;
-    min-width: 160px;
+    min-width: 120px;
 }
 .metamorphosis-stats-panel .meta-stat {
     background: rgba(252, 236, 194, 0.5);
@@ -2069,6 +2069,10 @@ body.darkenshift-mode .tabsContainer button.active {
 .metamorphosis-side-panel .sect-disciple-list {
     flex-direction: column;
     overflow-x: visible;
+}
+.metamorphosis-side-panel .disciple-badge .disciple-content,
+.metamorphosis-side-panel .disciple-badge .disciple-progress {
+    width: 60px;
 }
 .construct-side-panel {
     display: flex;
