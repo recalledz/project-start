@@ -49,7 +49,8 @@ export const TASK_ICONS = {
   Resting: '🛌',
   Training: '🥋',
   Eat: '🍽️',
-  Sleep: '💤'
+  Sleep: '💤',
+  Defend: '🛡️'
 };
 
 export const TASK_GROUPS = {
@@ -61,7 +62,8 @@ export const TASK_GROUPS = {
   'Chant': 'Chanting',
   'Exploration': 'Exploration',
   Idle: 'Idle',
-  Resting: 'Idle'
+  Resting: 'Idle',
+  Defend: 'Combat'
 };
 
 export const ATTRIBUTE_FOR_GROUP = {
@@ -72,7 +74,8 @@ export const ATTRIBUTE_FOR_GROUP = {
   Researching: 'intelligence',
   Chanting: 'intelligence',
   Exploration: 'dexterity',
-  Idle: null
+  Idle: null,
+  Combat: 'strength'
 };
 
 export const LOCATION_DEFS = [
