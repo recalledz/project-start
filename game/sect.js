@@ -27,6 +27,7 @@ import {
   HUNT_CYCLE_SECONDS,
   EXPLORATION_CYCLE_SECONDS
 } from './constants.js';
+import { startRaid, tickRaid, raidState, endRaid } from './raids.js';
 
 export { addDiscoveredLocation } from "./ui.js";
 export const discoveredLocations = [];
@@ -1190,6 +1191,7 @@ export function tickSectSystem(delta) {
     document.dispatchEvent(
       new CustomEvent('schedule-phase', { detail: getCurrentSchedule() })
     );
+    if (getCurrentSchedule().phase === 'Night') startRaid();
   }
   sectSystem.seasonTimer += dt;
   if (sectSystem.seasonTimer >= DAY_LENGTH_SECONDS) {
@@ -1199,6 +1201,7 @@ export function tickSectSystem(delta) {
     document.dispatchEvent(
       new CustomEvent('schedule-phase', { detail: getCurrentSchedule() })
     );
+    if (getCurrentSchedule().phase === 'Night') startRaid();
     sectSystem.seasonDay += 1;
     document.dispatchEvent(new CustomEvent('day-passed', {
       detail: { day: sectSystem.seasonDay, season: sectSystem.seasonIndex }
@@ -1309,6 +1312,7 @@ export function tickSectSystem(delta) {
   }
   tickActiveConstructs(dt);
   tickMetamorphosis(dt);
+  tickRaid(delta);
   ins.current = Math.min(ins.max, Math.max(0, ins.current));
   if (hasUI) {
     updateCooldownOverlays();
@@ -1516,6 +1520,17 @@ export function tickSect(delta) {
     } else if (task === 'Exploration') {
       progress = (progress + dt) % EXPLORATION_CYCLE_SECONDS;
       sectState.discipleProgress[d.id] = progress;
+    } else if (task === 'Defend') {
+      if (raidState.active && raidState.enemy) {
+        if (!raidState.attackTimers[d.id]) raidState.attackTimers[d.id] = 0;
+        raidState.attackTimers[d.id] += delta;
+        const atkTime = d.attackSpeed;
+        if (raidState.attackTimers[d.id] >= atkTime) {
+          raidState.enemy.takeDamage(d.damage);
+          raidState.attackTimers[d.id] = 0;
+          if (raidState.enemy.isDefeated()) endRaid();
+        }
+      }
     }
 
     if (xpRate > 0 && group) {
