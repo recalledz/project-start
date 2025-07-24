@@ -1420,14 +1420,8 @@ export function getDiscipleDailyOutput(d) {
     const spot = GATHER_SPOTS[task];
     const attr = ATTRIBUTE_FOR_GROUP[group];
     const yieldMult = 1 + 0.05 * (d[attr] || 0) + 0.02 * lvl;
-    const gatherAmt = spot.baseYield * yieldMult * GATHER_WORK_SECONDS;
-    const travel = Math.max(
-      MIN_TRAVEL_SECONDS,
-      spot.travel * TRAVEL_SECONDS_PER_UNIT
-    );
-    const cycleSeconds = travel * 2 + GATHER_WORK_SECONDS;
-    const perSecond = gatherAmt / cycleSeconds;
-    return perSecond * DAILY_WORK_SECONDS;
+    const gatherRate = spot.baseYield * yieldMult;
+    return gatherRate * DAILY_WORK_SECONDS;
   } else if (task === 'Research') {
     return 4 * DAY_LENGTH_SECONDS;
   }
