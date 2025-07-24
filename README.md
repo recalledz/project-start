@@ -39,6 +39,7 @@ This is not a standard Wuxia knockoff — **Taino and Caribbean mysticism** blen
 ## 🛠 Dev Info
 
 - HTML/JS-based project, optimized for web and mobile
+- Built for Node.js v18 environment
 - Disciples battle system with a dynamic simulation loop
 - Branches organized per feature (e.g. `sect-ui`, `resource-loop`, `card-art`)
 - See `docs/module-structure.md` for an overview of the game modules.
