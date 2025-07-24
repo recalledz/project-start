@@ -7,10 +7,8 @@ import Disciple from '../disciple.js';
 import { initializeDisciple } from '../utils/discipleInit.js';
 import { createOverlay } from '../ui/overlay.js';
 import {
-  DAILY_FRUIT_CONSUMPTION,
+  FRUIT_CONSUMPTION_RATE,
   GATHER_WORK_SECONDS,
-  MIN_TRAVEL_SECONDS,
-  TRAVEL_SECONDS_PER_UNIT,
   GATHER_SPOTS,
   TASK_GROUPS,
   ATTRIBUTE_FOR_GROUP
