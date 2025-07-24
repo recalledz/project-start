@@ -61,8 +61,8 @@ export const SECT_SCHEDULE = [
   { phase: 'Morning', duration: 60, action: 'Training' },
   { phase: 'Midday', duration: 60, action: 'Work' },
   { phase: 'Afternoon', duration: 60, action: 'Work' },
-  { phase: 'Evening', duration: 60, action: 'Eat' },
-  { phase: 'Night', duration: 60, action: 'Sleep' }
+  { phase: 'Evening', duration: 60, action: 'Work' },
+  { phase: 'Night', duration: 60, action: 'Work' }
 ];
 
 export const DAILY_WORK_SECONDS = SECT_SCHEDULE.filter(p => p.action === 'Work')
