@@ -7,7 +7,7 @@ Each skill has its own progression, yield formula, and spot data. Skills gain XP
 
 09.1 Water Sense
 
-Base Water: 100, 1 Water/s regen
+Base Water: 10, 1 Water/s regen
 
 Max Water Bonus: +2.4% of base Max Water per level
 
