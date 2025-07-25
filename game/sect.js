@@ -1008,6 +1008,7 @@ function renderOrbs() {
 }
 
 function renderSeasonBanner() {
+  if (typeof document === 'undefined') return;
   const banner = document.getElementById('seasonBanner');
   if (!banner) return;
   const textEl = banner.querySelector('.season-text');
@@ -1310,10 +1311,11 @@ export function tickSectSystem(delta) {
     updateIntoneUI();
     updateMnemonicUI();
     renderOrbs();
-    renderSeasonBanner();
     renderResources();
     refreshMetamorphosis();
   }
+  // Always update the season banner if the element exists
+  renderSeasonBanner();
 }
 
 function showConstructCloud(text, target, color) {
