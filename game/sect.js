@@ -994,10 +994,15 @@ export function renderHotbar() {
 
 
 function renderOrbs() {
-  const fill = document.querySelector('#sectOrbs .sect-orb.water .orb-fill');
+  const orb = document.querySelector('#sectOrbs .sect-orb.water');
+  const fill = orb?.querySelector('.orb-fill');
+  const value = orb?.querySelector('.orb-value');
   if (fill) {
     const pct = Math.max(0, Math.min(1, sectSystem.orbs.water.current / sectSystem.orbs.water.max)) * 100;
     fill.style.height = `${pct}%`;
+  }
+  if (value) {
+    value.textContent = `${Math.floor(sectSystem.orbs.water.current)}/${sectSystem.orbs.water.max}`;
   }
   window.dispatchEvent(new CustomEvent('orbs-changed'));
 }
