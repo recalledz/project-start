@@ -1663,6 +1663,25 @@ body.darkenshift-mode .tabsContainer button.active {
     animation: fogFade 7s ease-in-out;
 }
 
+.raid-alert {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 2rem;
+    color: #ff5555;
+    text-shadow: 0 0 6px #ffaaaa;
+    pointer-events: none;
+    animation: raidFade 3s ease-in-out forwards;
+    z-index: 5002;
+}
+
+@keyframes raidFade {
+    from { opacity: 0; }
+    10%, 90% { opacity: 1; }
+    to { opacity: 0; }
+}
+
 /* Floating construct effect */
 .construct-cloud {
     position: absolute;

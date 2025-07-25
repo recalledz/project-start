@@ -3,6 +3,7 @@ import { sectSystem } from './sect.js';
 import { sectState } from './state.js';
 import { spawnDealer } from '../enemySpawning.js';
 import addLog from '../log.js';
+import { showRaidAlert } from './alerts.js';
 
 export const raidState = {
   active: false,
@@ -32,6 +33,7 @@ export function startRaid() {
   raidState.attackTimers = {};
   raidState.orbTimer = 0;
   addLog('Raiders have attacked!', 'info');
+  showRaidAlert('Raiders incoming!');
   document.dispatchEvent(new CustomEvent('raid-start', { detail: raidState.enemy }));
   if (typeof updateSectDisplay === 'function') updateSectDisplay();
 }
