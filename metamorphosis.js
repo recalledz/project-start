@@ -205,6 +205,7 @@ export function tickMetamorphosis(dt) {
           metamorphosisState.requirement,
           meta.xp + rate * dt
         );
+      }
     }
   });
   renderMetamorphosis();
