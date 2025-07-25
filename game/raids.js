@@ -12,6 +12,7 @@ import { showRaidSummaryOverlay } from '../ui/raidSummaryOverlay.js';
 import { spawnDealer } from '../enemySpawning.js';
 import addLog from '../log.js';
 import { showRaidAlert } from './alerts.js';
+import { runAnimation } from '../utils/animation.js';
 
 export const raidState = {
   active: false,
@@ -41,6 +42,8 @@ function shootWaterBurst(targetEl) {
   proj.style.setProperty('--duration', `${Math.max(300, dist)}ms`);
   map.appendChild(proj);
   proj.addEventListener('animationend', () => proj.remove(), { once: true });
+  runAnimation(targetEl, 'hit-animate');
+  runAnimation(orb, 'orb-hit');
 }
 
 const ORB_INTERVAL = 10000; // ms
@@ -55,6 +58,8 @@ export function startRaid() {
     const dmg = enemy.damage;
     raidState.damageReceived += dmg;
     sectSystem.orbs.water.current = Math.max(0, sectSystem.orbs.water.current - dmg);
+    const orbEl = document.querySelector('#sectOrbs .sect-orb.water');
+    if (orbEl) runAnimation(orbEl, 'orb-hit');
     if (sectSystem.orbs.water.current === 0) {
       sectState.fruits = Math.floor(sectState.fruits * 0.5);
       sectState.softwood = Math.floor(sectState.softwood * 0.5);
