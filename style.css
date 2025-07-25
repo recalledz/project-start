@@ -548,6 +548,7 @@ body.darkenshift-mode .tabsContainer button.active {
     border-radius: 50%;
     background: #7fd9ff;
     pointer-events: none;
+    z-index: 15;
     animation: burstMove var(--duration) linear forwards;
 }
 
@@ -3173,6 +3174,9 @@ body.darkenshift-mode .tabsContainer button.active {
 .sect-orb.orb-hit {
     animation: orb-pulse 0.3s ease;
 }
+.sect-orb.orb-burst {
+    animation: orb-pulse 0.3s ease;
+}
 .colony-map.night .sect-orb.water {
     box-shadow: 0 0 30px rgba(80,180,255,0.9), 0 0 80px rgba(80,180,255,0.7);
     filter: brightness(1.2) saturate(1.2);
@@ -3940,6 +3944,9 @@ body.darkenshift-mode .tabsContainer button.active {
   height: 100%;
   width: 0%;
   background: var(--verdantia-jade);
+}
+.disciple-badge .water-bar .bar-fill {
+  background: #7fd9ff;
 }
 .disciple-badge .disciple-name {
   font-size: 0.55rem;
