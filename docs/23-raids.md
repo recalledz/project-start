@@ -24,4 +24,6 @@ Disciples may be called upon to defend the sect from occasional raids.
 * Dealer enemies display a small life bar on their card during raids.
 * Defeating a raid yields **Undead Nectar** in addition to experience.
 * The raid ends when the enemy is defeated or the orb is drained.
-* A summary overlay appears after victory showing damage dealt, damage received and rewards.
+* A summary overlay appears after victory showing damage dealt, damage received,
+  rewards and how much combat XP each participating disciple earned. Level ups
+  are noted next to the fighter's name.

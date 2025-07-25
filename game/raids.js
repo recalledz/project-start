@@ -13,6 +13,7 @@ import { spawnDealer } from '../enemySpawning.js';
 import addLog from '../log.js';
 import { showRaidAlert } from './alerts.js';
 import { runAnimation } from '../utils/animation.js';
+import { ensureDiscipleSkills, getTaskSkillProgress } from '../utils/skills.js';
 
 export const raidState = {
   active: false,
@@ -20,7 +21,8 @@ export const raidState = {
   attackTimers: {},
   orbTimer: 0,
   damageDealt: 0,
-  damageReceived: 0
+  damageReceived: 0,
+  xpStart: {}
 };
 
 function shootWaterBurst(targetEl) {
@@ -54,6 +56,19 @@ export function startRaid() {
   const world = stageData.world;
   raidState.damageDealt = 0;
   raidState.damageReceived = 0;
+  raidState.xpStart = {};
+  sectSystem.disciples.forEach(d => {
+    if (sectState.discipleTasks[d.id] === 'Fight' && !d.incapacitated) {
+      ensureDiscipleSkills(d.id);
+      raidState.xpStart[d.id] = {
+        xp: sectState.discipleSkills[d.id].Combat || 0,
+        level: getTaskSkillProgress(
+          sectState.discipleSkills[d.id].Combat || 0
+        ).level,
+        name: d.name
+      };
+    }
+  });
   const onAttack = enemy => {
     let dmg = enemy.damage;
     const fighters = sectSystem.disciples.filter(
@@ -89,10 +104,24 @@ export function startRaid() {
     sectState.undeadNectar = (sectState.undeadNectar || 0) + 1;
     addLog('Raiders dropped Undead Nectar!', 'good');
     endRaid();
+    const fighters = Object.entries(raidState.xpStart).map(([id, info]) => {
+      ensureDiscipleSkills(id);
+      const endXp = sectState.discipleSkills[id].Combat || 0;
+      const gained = endXp - info.xp;
+      const startLvl = info.level;
+      const endLvl = getTaskSkillProgress(endXp).level;
+      return {
+        name: info.name,
+        xp: gained,
+        leveled: endLvl > startLvl
+      };
+    });
+    raidState.xpStart = {};
     showRaidSummaryOverlay({
       damageDealt: raidState.damageDealt,
       damageReceived: raidState.damageReceived,
-      rewards: { undeadNectar: 1 }
+      rewards: { undeadNectar: 1 },
+      fighters
     });
   };
   raidState.enemy = spawnDealer({ stage, world }, 0, onAttack, onDefeat);
@@ -115,6 +144,7 @@ export function endRaid() {
   raidState.enemy = null;
   raidState.attackTimers = {};
   raidState.orbTimer = 0;
+  raidState.xpStart = {};
   addLog('The raid has ended.', 'info');
   updateDealerLifeDisplay(null);
   document.dispatchEvent(new CustomEvent('raid-end'));

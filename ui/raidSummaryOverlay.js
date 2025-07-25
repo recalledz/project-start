@@ -1,6 +1,11 @@
 import { createOverlay } from './overlay.js';
 
-export function showRaidSummaryOverlay({ damageDealt = 0, damageReceived = 0, rewards = {} } = {}) {
+export function showRaidSummaryOverlay({
+  damageDealt = 0,
+  damageReceived = 0,
+  rewards = {},
+  fighters = []
+} = {}) {
   const overlay = createOverlay({ className: 'raid-summary-overlay', boxClass: 'parchment-box' });
   overlay.box.classList.add('parchment-box');
   const { box, close } = overlay;
@@ -16,6 +21,17 @@ export function showRaidSummaryOverlay({ damageDealt = 0, damageReceived = 0, re
     <p>Damage Received: ${Math.round(damageReceived)}</p>
   `;
   box.appendChild(stats);
+
+  if (fighters.length > 0) {
+    const fighterSection = document.createElement('div');
+    fighterSection.className = 'raid-summary-fighters';
+    const lines = fighters.map(f => {
+      const xp = Math.round(f.xp);
+      return `<li>${f.name}: +${xp} XP${f.leveled ? ' (Level Up!)' : ''}</li>`;
+    }).join('');
+    fighterSection.innerHTML = '<p>Participants:</p><ul>' + lines + '</ul>';
+    box.appendChild(fighterSection);
+  }
 
   const rewardLines = [];
   if (rewards.undeadNectar) rewardLines.push(`Undead Nectar +${rewards.undeadNectar}`);
