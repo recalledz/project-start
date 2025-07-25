@@ -8,5 +8,5 @@
 - Disciples can direct % of personal Water to orb.
 - The orb is now larger and displays its regeneration rate centered within.
 - The orb fill displays the current Water against its maximum capacity.
-- At night the orb glows brightly, illuminating nearby terrain.
+- At night the orb glows with a bright blue hue, illuminating nearby terrain.
 - The orb now holds up to 20 Water and regenerates at a flat 0.1 Water per second.
