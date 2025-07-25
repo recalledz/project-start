@@ -26,5 +26,6 @@ Disciples may be called upon to defend the sect from occasional raids.
   is added to your resources side panel for later use.
 * The raid ends when the enemy is defeated or the orb is drained.
 * A summary overlay appears after victory showing damage dealt, damage received,
-  rewards and how much combat XP each participating disciple earned. Level ups
-  are noted next to the fighter's name.
+  rewards and how much combat XP each participating disciple earned. Each
+  fighter now displays a small progress bar indicating their level and progress
+  toward the next. Level ups are noted next to the fighter's name.

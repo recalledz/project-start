@@ -3976,3 +3976,18 @@ body.darkenshift-mode .tabsContainer button.active {
   font-size: 0.55rem;
 }
 
+/* Raid summary overlay */
+.raid-summary-fighters ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.raid-summary-fighters li {
+  margin-bottom: 4px;
+}
+.raid-summary-fighters .disciple-progress {
+  width: 100px;
+  height: 8px;
+  margin-top: 2px;
+}
+

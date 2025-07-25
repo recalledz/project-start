@@ -115,11 +115,13 @@ export function startRaid() {
       const endXp = sectState.discipleSkills[id].Combat || 0;
       const gained = endXp - info.xp;
       const startLvl = info.level;
-      const endLvl = getTaskSkillProgress(endXp).level;
+      const endProg = getTaskSkillProgress(endXp);
       return {
         name: info.name,
         xp: gained,
-        leveled: endLvl > startLvl
+        leveled: endProg.level > startLvl,
+        level: endProg.level,
+        progress: endProg.progress
       };
     });
     raidState.xpStart = {};

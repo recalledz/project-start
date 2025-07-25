@@ -897,11 +897,30 @@ function buildDiscipleCombatStatsView(d) {
   const body = document.createElement('div');
   const atkPerSec = (1000 / d.attackSpeed).toFixed(2);
   const defense = Math.round(d.defense ?? 0);
-  body.innerHTML =
-    `Level ${d.combatLevel}<br>` +
+
+  const levelRow = document.createElement('div');
+  levelRow.textContent = `Level ${d.combatLevel}`;
+  body.appendChild(levelRow);
+
+  const bar = document.createElement('div');
+  bar.className = 'disciple-progress';
+  const fill = document.createElement('div');
+  fill.className = 'disciple-progress-fill';
+  const pct = Math.min(1, d.combatXp / d.xpForNextLevel());
+  fill.style.width = `${Math.floor(pct * 100)}%`;
+  const label = document.createElement('div');
+  label.className = 'disciple-progress-label';
+  label.textContent = `${Math.floor(d.combatXp)}/${d.xpForNextLevel()}`;
+  bar.append(fill, label);
+  body.appendChild(bar);
+
+  const stats = document.createElement('div');
+  stats.innerHTML =
     `Damage ${Math.round(d.damage)}<br>` +
     `Attack/s ${atkPerSec}<br>` +
     `Defense ${defense}`;
+  body.appendChild(stats);
+
   return body;
 }
 

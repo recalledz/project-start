@@ -25,11 +25,25 @@ export function showRaidSummaryOverlay({
   if (fighters.length > 0) {
     const fighterSection = document.createElement('div');
     fighterSection.className = 'raid-summary-fighters';
-    const lines = fighters.map(f => {
-      const xp = Math.round(f.xp);
-      return `<li>${f.name}: +${xp} XP${f.leveled ? ' (Level Up!)' : ''}</li>`;
-    }).join('');
-    fighterSection.innerHTML = '<p>Participants:</p><ul>' + lines + '</ul>';
+    const list = document.createElement('ul');
+    fighters.forEach(f => {
+      const li = document.createElement('li');
+      li.textContent = `${f.name}: +${Math.round(f.xp)} XP` +
+        (f.leveled ? ' (Level Up!)' : '');
+      const bar = document.createElement('div');
+      bar.className = 'disciple-progress';
+      const fill = document.createElement('div');
+      fill.className = 'disciple-progress-fill';
+      fill.style.width = `${Math.floor(f.progress * 100)}%`;
+      const label = document.createElement('div');
+      label.className = 'disciple-progress-label';
+      label.textContent = `LV ${f.level}`;
+      bar.append(fill, label);
+      li.appendChild(bar);
+      list.appendChild(li);
+    });
+    fighterSection.innerHTML = '<p>Participants:</p>';
+    fighterSection.appendChild(list);
     box.appendChild(fighterSection);
   }
 
