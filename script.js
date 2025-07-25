@@ -118,6 +118,7 @@ import {
 import { raidState } from './game/raids.js';
 // developer debug tools
 import { init as initDebug } from "./game/debug.js";
+import { attachOrbGlow, enableOrbGlow, disableOrbGlow, updateOrbGlow } from './game/orbGlow.js';
 // Shared game state and configuration
 import {
   currentEnemy,
@@ -148,7 +149,8 @@ import {
   setSpeakerOverlay,
   worldProgressTimer,
   setWorldProgressTimer,
-  worldProgressRateTracker
+  worldProgressRateTracker,
+  setNightMode
 } from "./game/state.js";
 import {
   BASE_STATS,
@@ -733,6 +735,7 @@ function updateSectDisplay() {
         rateEl.className = 'orb-regen';
         rateEl.textContent = `${sectSystem.gains.water.toFixed(2)}/s`;
         orb.appendChild(rateEl);
+        attachOrbGlow(orb);
       }
       orbs.appendChild(orb);
     });
@@ -1317,6 +1320,12 @@ function init() {
   });
   document.addEventListener('schedule-phase', e => {
     updateMapBrightness(e.detail.phase);
+    setNightMode(e.detail.phase === 'Night');
+    if (e.detail.phase === 'Night') {
+      enableOrbGlow();
+    } else {
+      disableOrbGlow();
+    }
     if (e.detail.action !== 'Work')  {
       sectSystem.disciples.forEach(d => {
         sectState.discipleProgress[d.id] = 0;
@@ -2415,6 +2424,7 @@ function gameLoop(currentTime) {
   // refresh sect resource UI every tick for real-time updates
   if (typeof updateSectDisplay === 'function') updateSectDisplay();
   updateTaskProgressDisplay();
+  updateOrbGlow(deltaTime);
   requestAnimationFrame(gameLoop);
 }
 
