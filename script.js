@@ -44,7 +44,7 @@ import { initMetamorphosis, refreshMetamorphosis } from './metamorphosis.js';
 import { intelligenceXpMultiplier } from './attributes.js';
 import { createOverlay } from './ui/overlay.js';
 import { showLoadErrorOverlay } from './ui/loadErrorOverlay.js';
-import { openExplorationOverlay, closeExplorationOverlay, openWorkOverlay, openScheduleOverlay, openPlaceholderOverlay, openResourceOverlay, openBuildOverlay, openResearchOverlay, closeDungeonOverlay, locationListContainer, explorationListContainer } from "./ui/colonyOverlays.js";
+import { openExplorationOverlay, closeExplorationOverlay, openWorkOverlay, openScheduleOverlay, openPlaceholderOverlay, openResourceOverlay, openBuildOverlay, openResearchOverlay, openOrbOverlay, closeDungeonOverlay, locationListContainer, explorationListContainer } from "./ui/colonyOverlays.js";
 import { createDiscipleBadge } from "./game/badges.js";
 import { calculateKillXp } from './utils/xp.js';
 import { initTooltip } from './game/tooltip.js';
@@ -341,6 +341,7 @@ let sectNavChantBtn;
 let sectNavMapBtn;
 let sectNavInfluenceBtn;
 let sectNavResearchBtn;
+let sectNavOrbBtn;
 let sectNavCultivationBtn;
 let sectNavScheduleBtn;
 
@@ -436,6 +437,7 @@ function initTabs() {
   sectNavMapBtn = document.getElementById("sectNavMapBtn");
   sectNavInfluenceBtn = document.getElementById("sectNavInfluenceBtn");
   sectNavResearchBtn = document.getElementById("sectNavResearchBtn");
+  sectNavOrbBtn = document.getElementById("sectNavOrbBtn");
   sectNavCultivationBtn = document.getElementById("sectNavCultivationBtn");
   sectNavScheduleBtn = document.getElementById("sectNavScheduleBtn");
   statsOverviewSubTabButton = document.querySelector('.statsOverviewSubTabButton');
@@ -461,7 +463,7 @@ function initTabs() {
       }
       openExplorationOverlay();
     });
-  const navButtons = [sectNavWorkBtn, sectNavResourceBtn, sectNavBuildBtn, sectNavScheduleBtn, sectNavChantBtn, sectNavMapBtn, sectNavInfluenceBtn, sectNavResearchBtn, sectNavCultivationBtn];
+  const navButtons = [sectNavWorkBtn, sectNavResourceBtn, sectNavBuildBtn, sectNavScheduleBtn, sectNavChantBtn, sectNavMapBtn, sectNavInfluenceBtn, sectNavResearchBtn, sectNavOrbBtn, sectNavCultivationBtn];
   function setActiveNavBtn(btn) {
     navButtons.forEach(b => b && b.classList.remove("active"));
     if (btn) btn.classList.add("active");
@@ -487,6 +489,12 @@ function initTabs() {
       setActiveNavBtn(sectNavResearchBtn);
       if (systems.researchUnlocked) openResearchOverlay();
       else openPlaceholderOverlay("Research");
+    });
+  if (sectNavOrbBtn)
+    sectNavOrbBtn.addEventListener("click", () => {
+      setActiveNavBtn(sectNavOrbBtn);
+      if (systems.orbManagementUnlocked) openOrbOverlay();
+      else openPlaceholderOverlay("Orbs");
     });
   if (sectNavCultivationBtn)
     sectNavCultivationBtn.addEventListener("click", () => {
@@ -655,6 +663,9 @@ function updateSectDisplay() {
   }
   if (sectNavResearchBtn) {
     sectNavResearchBtn.style.display = systems.researchUnlocked ? '' : 'none';
+  }
+  if (sectNavOrbBtn) {
+    sectNavOrbBtn.style.display = systems.orbManagementUnlocked ? '' : 'none';
   }
   if (!sectTabUnlocked || !playerSectPanel) return;
   const total = sectSystem.disciples.length;

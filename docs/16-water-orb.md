@@ -10,3 +10,4 @@
 - The orb fill displays the current Water against its maximum capacity.
 - At night the orb glows with a bright blue hue, illuminating nearby terrain.
 - The orb now holds up to 20 Water and regenerates at a flat 0.1 Water per second.
+- Orb Revival research grants access to an Orb Management panel showing spells like Water Burst.

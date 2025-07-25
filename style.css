@@ -3589,6 +3589,42 @@ body.darkenshift-mode .tabsContainer button.active {
     text-align: center;
 }
 
+.research-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 8px;
+}
+
+.research-entry {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 4px;
+    border: 1px solid #333;
+    border-radius: 4px;
+}
+
+.research-entry button {
+    align-self: flex-start;
+    margin-top: 2px;
+}
+
+.orb-overlay .overlay-box {
+    max-width: 300px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.orb-spell-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 0.9rem;
+    margin-left: 16px;
+}
+
 /* disciple combat cards reuse generic card styles */
 .disciple-hp {
     margin-top: 2px;
