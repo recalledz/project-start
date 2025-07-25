@@ -1273,6 +1273,8 @@ function init() {
   initDebug();
   window.addEventListener('location-discovered', e => addDiscoveredLocation(e.detail.name, locationListContainer, LOCATION_DEFS));
   loadGame();
+  // Apply current brightness settings immediately after loading saved data
+  updateMapBrightness(getCurrentSchedule().phase);
   if (sectSystem.disciples.length === 0) {
     sectSystem.disciples.push(...disciples);
     sectTabUnlocked = true;
