@@ -8,6 +8,7 @@ import {
 } from './state.js';
 import { updateRaidLifeBar, updateDealerLifeDisplay } from './ui.js';
 import { showRaidSummaryOverlay } from '../ui/raidSummaryOverlay.js';
+import { orbDamageMultiplier } from './orbSpells.js';
 
 import { spawnDealer } from '../enemySpawning.js';
 import addLog from '../log.js';
@@ -162,8 +163,9 @@ export function tickRaid(delta) {
   raidState.orbTimer += delta;
   if (raidState.orbTimer >= ORB_INTERVAL) {
     raidState.orbTimer -= ORB_INTERVAL;
-    raidState.enemy.takeDamage(5);
-    raidState.damageDealt += 5;
+    const dmg = 5 * orbDamageMultiplier();
+    raidState.enemy.takeDamage(dmg);
+    raidState.damageDealt += dmg;
     const card = document.querySelector('.raidCardContainer .dCardPane');
     shootWaterBurst(card);
     if (raidState.enemy) {

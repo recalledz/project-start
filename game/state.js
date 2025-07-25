@@ -83,7 +83,8 @@ export const systems = {
   researchUnlocked: false,
   chantingHallUnlocked: false,
   explorationUnlocked: false,
-  orbManagementUnlocked: false
+  orbManagementUnlocked: false,
+  spellStrengthUnlocked: false
 };
 
 // Fruit gathering and growth configuration
@@ -107,7 +108,7 @@ export const sectState = {
   discipleRest: {},
   maxDisciples: 3,
   housingBonus: 0,
-  buildings: { bohio: 0, researchDesk: 0, chantingHall: 0 },
+  buildings: { bohio: 0, researchDesk: 0, chantingHall: 0, orbSpellStrength: 0 },
   researchPoints: 0,
   researchProgress: 0,
   completedResearch: [],

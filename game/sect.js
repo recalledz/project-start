@@ -28,6 +28,7 @@ import {
 } from './constants.js';
 import { startRaid, tickRaid, raidState, endRaid } from './raids.js';
 import { updateRaidLifeBar } from './ui.js';
+import { tickOrbSpells } from './orbSpells.js';
 
 export { addDiscoveredLocation } from "./ui.js";
 export const discoveredLocations = [];
@@ -128,6 +129,10 @@ export const sectSystem = {
   mnemonicTimer: 0,
   mnemonicBeats: 0,
   mnemonicPotency: 1,
+  wordOfHasteTimer: 0,
+  wordOfHasteCd: 0,
+  orbReverbActive: false,
+  attackSpeedMult: 1,
   murmurChain: 0,
   scheduleIndex: 0,
   scheduleTimer: 0
@@ -1310,6 +1315,7 @@ export function tickSectSystem(delta) {
     }
   }
   tickActiveConstructs(dt);
+  tickOrbSpells(dt);
   tickMetamorphosis(dt);
   tickRaid(delta);
   ins.current = Math.min(ins.max, Math.max(0, ins.current));
@@ -1478,7 +1484,7 @@ export function tickSect(delta) {
       if (raidState.active && raidState.enemy) {
         if (!raidState.attackTimers[d.id]) raidState.attackTimers[d.id] = 0;
         raidState.attackTimers[d.id] += delta;
-        const atkTime = d.attackSpeed;
+        const atkTime = d.attackSpeed / sectSystem.attackSpeedMult;
         if (raidState.attackTimers[d.id] >= atkTime) {
           raidState.enemy.takeDamage(d.damage);
           updateRaidLifeBar(raidState.enemy);

@@ -13,7 +13,14 @@ export const BUILDINGS = {
     costFunc: lvl => 20 * Math.pow(2, lvl)
   },
   researchDesk: { name: 'Research Desk', cost: 15, time: 300, max: 1, requires: 'bohio' },
-  chantingHall: { name: 'Chanting Hall', cost: 50, time: 600, max: 1, requires: 'researchDesk' }
+  chantingHall: { name: 'Chanting Hall', cost: 50, time: 600, max: 1, requires: 'researchDesk' },
+  orbSpellStrength: {
+    name: 'Orb Spell Strength',
+    time: 300,
+    costFunc: lvl => Math.round(100 * Math.pow(1.3, lvl)),
+    max: 10,
+    requires: 'researchDesk'
+  }
 };
 
 export function getHousingName(level) {
@@ -49,6 +56,7 @@ export function startBuilding(key) {
   if (sectState.currentBuild) return;
   if (b.requires && sectState.buildings[b.requires] < b.max) return;
   if (key === 'chantingHall' && !systems.chantingHallUnlocked) return;
+  if (key === 'orbSpellStrength' && !systems.spellStrengthUnlocked) return;
   sectState.softwood -= cost;
   sectState.currentBuild = key;
   sectState.buildProgress = 0;
@@ -72,6 +80,7 @@ export function tickBuilding(dt) {
     }
   });
   if (speed === 0) return;
+  if (sectSystem.wordOfHasteTimer > 0) speed *= 1.5;
   const b = BUILDINGS[sectState.currentBuild];
   sectState.buildProgress += (dt * speed) / b.time;
   if (sectState.buildProgress >= 1) {

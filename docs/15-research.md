@@ -78,3 +78,15 @@ Orb Revival
 
 Unlocks the Orb Management screen, providing details on abilities like Water Burst.
 
+Word of Haste
+
+Costs 2 points. Grants an orb spell that spends 15 Water to boost sect work speed for 1 minute. Shares a 1 minute cooldown.
+
+Orb Spell Strength
+
+Costs 3 points. Unlocks the Orb Spell Strength building. Each level increases orb damage spells by 20%.
+
+Orb Reverberation
+
+Costs 4 points. Unlocks a continuous orb spell that boosts disciple attack speed by 30% while draining 1 Water per second.
+

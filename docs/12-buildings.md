@@ -38,6 +38,7 @@ Research Table	Softwood: 30 × (lvl^1.3)	Convert 4% global Water → Insight per
 Library	Wood: 200 × (lvl^1.1); Stone: 100 × (lvl^1.1)	Unlock learning/spell teaching; +4% teaching rate per level	Research Table Lv1
 Jadefire Pavilion	Softwood & Stone: 20 × (1.1^lvl) each	Enables Transmutation; +3% spell potency per level	Transmutation research
 Chanting Halls	Wood: 300 × (1.15^lvl)	–4% chant cooldown per level; +1 chanter per 3 levels	Library Lv2
+Orb Spell Strength  Softwood: 100 × (1.3^lvl)  +20% orb spell damage per level   Research: Orb Spell Strength
 
 
 Ornaments / Cultivation Enhancers

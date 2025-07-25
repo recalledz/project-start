@@ -8,6 +8,7 @@ import { sectSystem, SECT_SCHEDULE, getCurrentSchedule, renderConstructCards, ge
 import { systems, sectState, worldProgress } from '../game/state.js';
 import { createSectDiscipleCard, renderExplorationTab, startExploration, startWorldCombat, discipleGatherPhase } from '../script.js';
 import { BUILDINGS, startBuilding } from '../game/buildings.js';
+import { castWordOfHaste, toggleReverberation, orbDamageMultiplier } from '../game/orbSpells.js';
 
 let explorationOverlay = null;
 let explorationOverlayActiveTab = 'explore';
@@ -296,8 +297,36 @@ export function openOrbOverlay() {
 
   const burst = document.createElement('li');
   burst.className = 'orb-spell';
-  burst.innerHTML = '<b>Water Burst</b> - Automatically hits raiders every 10s for 5 damage.';
+  burst.innerHTML = `<b>Water Burst</b> - Automatically hits raiders every 10s for ${5 * orbDamageMultiplier()} damage.`;
   list.appendChild(burst);
+
+  function render() {
+    list.querySelectorAll('.dynamic-spell').forEach(el => el.remove());
+    if (sectState.completedResearch.includes('wordOfHaste')) {
+      const li = document.createElement('li');
+      li.className = 'orb-spell dynamic-spell';
+      const btn = document.createElement('button');
+      btn.textContent = 'Cast Word of Haste';
+      btn.disabled = sectSystem.wordOfHasteCd > 0 || sectSystem.orbs.water.current < 15;
+      btn.addEventListener('click', () => { castWordOfHaste(); render(); });
+      li.appendChild(btn);
+      li.appendChild(document.createTextNode(' - Boost work speed for 1m'));
+      list.appendChild(li);
+    }
+    if (sectState.completedResearch.includes('orbReverb')) {
+      const li = document.createElement('li');
+      li.className = 'orb-spell dynamic-spell';
+      const btn = document.createElement('button');
+      btn.textContent = sectSystem.orbReverbActive ? 'Stop Reverberation' : 'Start Reverberation';
+      btn.disabled = !sectSystem.orbReverbActive && sectSystem.orbs.water.current < 1;
+      btn.addEventListener('click', () => { toggleReverberation(); render(); });
+      li.appendChild(btn);
+      li.appendChild(document.createTextNode(' - +30% attack speed, drains 1 Water/s'));
+      list.appendChild(li);
+    }
+  }
+
+  render();
 }
 
 let buildOverlay = null;
@@ -324,6 +353,7 @@ export function openBuildOverlay() {
     list.innerHTML = '';
     Object.entries(BUILDINGS).forEach(([key, def]) => {
       if (def.requires && !(sectState.buildings[def.requires] > 0)) return;
+      if (key === 'orbSpellStrength' && !systems.spellStrengthUnlocked) return;
       const built = sectState.buildings[key] || 0;
       const row = document.createElement('div');
       row.className = 'build-entry';
@@ -457,6 +487,29 @@ export function openResearchOverlay() {
       unlock() {
         if (!systems.orbManagementUnlocked) systems.orbManagementUnlocked = true;
       }
+    },
+    {
+      key: 'wordOfHaste',
+      label: 'Word of Haste',
+      cost: 2,
+      desc: 'Orb spell granting 1m work speed boost (15 Water)',
+      unlock() {}
+    },
+    {
+      key: 'orbSpellStrength',
+      label: 'Orb Spell Strength',
+      cost: 3,
+      desc: 'Unlocks building to raise orb damage by 20%/level',
+      unlock() {
+        systems.spellStrengthUnlocked = true;
+      }
+    },
+    {
+      key: 'orbReverb',
+      label: 'Orb Reverberation',
+      cost: 4,
+      desc: 'Continuous spell: +30% attack speed, drains 1 Water/s',
+      unlock() {}
     }
   ];
 
