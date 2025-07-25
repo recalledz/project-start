@@ -2314,6 +2314,8 @@ function gameLoop(currentTime) {
     sectSystem.gains.fruits = 0;
     sectSystem.gains.softwood = 0;
   }
+  // refresh sect resource UI every tick for real-time updates
+  if (typeof updateSectDisplay === 'function') updateSectDisplay();
   updateTaskProgressDisplay();
   requestAnimationFrame(gameLoop);
 }

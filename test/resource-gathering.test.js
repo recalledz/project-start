@@ -55,7 +55,7 @@ describe('resource gathering', () => {
     const group = TASK_GROUPS[task];
     const attr = ATTRIBUTE_FOR_GROUP[group];
     const lvl = getTaskSkillProgress(0).level;
-    cconst gatherRate = spot.baseYield * (1 + 0.05 * d[attr] + 0.02 * lvl);
+    const gatherRate = spot.baseYield * (1 + 0.05 * d[attr] + 0.02 * lvl);
 
     let called = false;
     globalThis.updateSectDisplay = () => { called = true; };
