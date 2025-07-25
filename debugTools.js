@@ -22,6 +22,7 @@ import {
 } from './game/state.js';
 import { activeDisciples } from './game/disciples.js';
 import { toggleZones } from './game/zones.js';
+import { sectState } from './game/state.js';
 
 export const devTools = {
   spawnBoss: () => spawnBossEvent(),
@@ -67,6 +68,11 @@ export const devTools = {
     systems.explorationUnlocked = true;
     addDiscoveredLocation('Esoteric Dungeon');
     unlockConstruct('Sonic Boom');
+  },
+  giveCash: () => {
+    const amount = parseFloat(document.getElementById('debugCash').value);
+    if (isNaN(amount)) return;
+    sectState.fruits += amount;
   },
   toggleZones,
   save: saveGame,
