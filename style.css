@@ -3169,8 +3169,8 @@ body.darkenshift-mode .tabsContainer button.active {
 }
 .sect-orb.water .orb-fill { background: rgba(127,217,255,0.6); }
 .colony-map.night .sect-orb.water {
-    box-shadow: 0 0 20px rgba(127,217,255,0.8), 0 0 60px rgba(127,217,255,0.6);
-    filter: brightness(1.5);
+    box-shadow: 0 0 30px rgba(80,180,255,0.9), 0 0 80px rgba(80,180,255,0.7);
+    filter: brightness(1.2) saturate(1.2);
 }
 .sect-basket {
     position: absolute;

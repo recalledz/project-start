@@ -756,14 +756,26 @@ function updateSectDisplay() {
 function applyNightFilters(brightness) {
   const inv = brightness < 1 ? 1 / brightness : 1;
   document.querySelectorAll('#sectOrbs .sect-orb.water').forEach(o => {
+    if (!o.dataset.baseFilter) o.dataset.baseFilter = o.style.filter || '';
     if (brightness < 1) {
-      o.style.filter = `brightness(${1.5 * inv})`;
+      o.style.filter = `${o.dataset.baseFilter} brightness(${inv}) saturate(1.2)`;
     } else {
-      o.style.filter = '';
+      o.style.filter = o.dataset.baseFilter;
     }
   });
   document.querySelectorAll('.raidCardContainer .dCardPane').forEach(c => {
     c.style.filter = brightness < 1 ? `brightness(${inv})` : '';
+  });
+  document.querySelectorAll('.raidCardContainer .dCard__icon').forEach(icon => {
+    if (!icon.dataset.baseFilter) icon.dataset.baseFilter = icon.style.filter || '';
+    if (!icon.dataset.baseStroke) icon.dataset.baseStroke = icon.style.stroke || '';
+    if (brightness < 1) {
+      icon.style.filter = `${icon.dataset.baseFilter} drop-shadow(0 0 6px red)`;
+      icon.style.stroke = 'red';
+    } else {
+      icon.style.filter = icon.dataset.baseFilter;
+      icon.style.stroke = icon.dataset.baseStroke;
+    }
   });
 }
 
