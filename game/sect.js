@@ -58,6 +58,10 @@ export const SECT_SCHEDULE = [
   { phase: 'Night', duration: 60, action: 'Work' }
 ];
 
+const NIGHT_INDEX = SECT_SCHEDULE.findIndex(p => p.phase === 'Night');
+const NIGHT_START_SECONDS = SECT_SCHEDULE.slice(0, NIGHT_INDEX)
+  .reduce((sum, p) => sum + p.duration, 0);
+
 export const DAILY_WORK_SECONDS = SECT_SCHEDULE.filter(p => p.action === 'Work')
   .reduce((sum, p) => sum + p.duration, 0);
 
@@ -1489,3 +1493,27 @@ export function tickSect(delta) {
 }
 
 export function renderColonyResources() {}
+
+export function skipToNextNight() {
+  const nightIndex = NIGHT_INDEX;
+  const nightStart = NIGHT_START_SECONDS;
+  if (sectSystem.scheduleIndex >= nightIndex) {
+    sectSystem.seasonDay += 1;
+    document.dispatchEvent(
+      new CustomEvent('day-passed', {
+        detail: { day: sectSystem.seasonDay, season: sectSystem.seasonIndex }
+      })
+    );
+    if (sectSystem.seasonDay >= SEASON_LENGTH_DAYS) {
+      sectSystem.seasonDay = 0;
+      sectSystem.seasonIndex = (sectSystem.seasonIndex + 1) % seasons.length;
+    }
+  }
+  sectSystem.seasonTimer = nightStart;
+  sectSystem.scheduleIndex = nightIndex;
+  sectSystem.scheduleTimer = 0;
+  document.dispatchEvent(
+    new CustomEvent('schedule-phase', { detail: getCurrentSchedule() })
+  );
+  startRaid();
+}

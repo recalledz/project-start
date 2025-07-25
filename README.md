@@ -46,3 +46,9 @@ This is not a standard Wuxia knockoff — **Taino and Caribbean mysticism** blen
 - The `Disciple` class lives in `disciple.js` while `game/disciples.js` tracks
   which disciples are currently participating in combat.
 
+## Dev Tools
+
+Run the game with the `?dev` query parameter to enable a debug panel.
+It offers helpers like spawning bosses, toggling fast mode, and skipping
+directly to the next night.
+

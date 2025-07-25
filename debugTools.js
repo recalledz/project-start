@@ -1,5 +1,5 @@
 import { Boss } from './boss.js';
-import { unlockConstruct } from './game/sect.js';
+import { unlockConstruct, skipToNextNight } from './game/sect.js';
 import {
   spawnBossEvent,
   spawnDealerEvent,
@@ -41,6 +41,7 @@ export const devTools = {
   },
   logEnemy: () => console.log(currentEnemy),
   advanceStage: () => nextStage(),
+  nextNight: () => skipToNextNight(),
   setStageWorld: () => {
     const stage = parseInt(document.getElementById('debugStage').value);
     const world = parseInt(document.getElementById('debugWorld').value);
