@@ -49,31 +49,35 @@ describe('resource gathering', () => {
     initializeDisciple(d);
     sectSystem.disciples.push(d);
     sectState.discipleTasks[d.id] = task;
+    sectState.fruits = 1;
 
     const spot = GATHER_SPOTS[task];
-    const travel = Math.max(MIN_TRAVEL_SECONDS, spot.travel * TRAVEL_SECONDS_PER_UNIT);
-    const cycleSeconds = travel * 2 + GATHER_WORK_SECONDS;
     const group = TASK_GROUPS[task];
     const attr = ATTRIBUTE_FOR_GROUP[group];
     const lvl = getTaskSkillProgress(0).level;
-    const gatherAmt = spot.baseYield * (1 + 0.05 * d[attr] + 0.02 * lvl) * cycleSeconds;
+    cconst gatherRate = spot.baseYield * (1 + 0.05 * d[attr] + 0.02 * lvl);
 
     let called = false;
     globalThis.updateSectDisplay = () => { called = true; };
 
-    tickSect(cycleSeconds * 1000);
+   tickSect(1000);
 
-    if (task === 'Gather Fruit') expect(sectState.fruits).to.be.closeTo(gatherAmt, 1e-6);
-    else expect(sectState.softwood).to.be.closeTo(gatherAmt, 1e-6);
+   if (task === 'Gather Fruit') {
+      const expected = 1 - FRUIT_CONSUMPTION_RATE + gatherRate;
+      expect(sectState.fruits).to.be.closeTo(expected, 1e-6);
+    } else {
+      expect(sectState.softwood).to.be.closeTo(gatherRate, 1e-6);
+      expect(sectState.fruits).to.be.closeTo(1 - FRUIT_CONSUMPTION_RATE, 1e-6);
+    }
     expect(sectState.discipleProgress[d.id]).to.be.closeTo(0, 1e-6);
     expect(called).to.be.true;
   }
 
-  it('collects fruit after a full cycle', () => {
+  it('collects fruit each second', () => {
     runGatherTest('Gather Fruit');
   });
 
-  it('collects softwood after a full cycle', () => {
+  it('collects softwood each second', () => {
     runGatherTest('Gather Softwood');
   });
 });
