@@ -6,6 +6,11 @@ export function setIsDarkenshift(val) {
   isDarkenshift = val;
 }
 
+export let nightMode = false;
+export function setNightMode(val) {
+  nightMode = val;
+}
+
 export const lifeCore = { real: false };
 
 export const WORLD_PROGRESS_TARGET = 1820;
