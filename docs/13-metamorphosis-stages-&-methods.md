@@ -107,7 +107,7 @@ Speed ×0.5 past 70 stability; ×0.25 past 90
 
 –0.12 Stability/sec
 
-- Egg stage has no active methods. Disciples simply train during the schedule's **Training** phase to gain metamorphosis XP.
+- Egg stage has no active methods. Disciples simply train when assigned to **Training** to gain metamorphosis XP.
 
 
 ---
