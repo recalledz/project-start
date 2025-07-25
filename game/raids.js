@@ -42,7 +42,7 @@ function shootWaterBurst(targetEl) {
   proj.style.top = `${orbRect.top - mapRect.top + orbRect.height / 2}px`;
   proj.style.setProperty('--dx', `${dx}px`);
   proj.style.setProperty('--dy', `${dy}px`);
-  proj.style.setProperty('--duration', `${Math.max(300, dist)}ms`);
+  proj.style.setProperty('--duration', `${Math.max(600, dist * 2)}ms`);
   map.appendChild(proj);
   proj.addEventListener('animationend', () => proj.remove(), { once: true });
   runAnimation(targetEl, 'hit-animate');
