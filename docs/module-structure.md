@@ -9,6 +9,7 @@ The project organizes game logic under the `game/` directory.
 - **game/combat.js** – centralizes all combat logic including damage
   resolution and disciple hit animations.
 - **game/debug.js** – wiring for optional debug controls.
+- **debugTools.js** – development helpers loaded when `?dev` is present.
 - **game/constants.js** – collection of shared gameplay constants used across systems.
 - **game/tooltip.js** – simple helpers for showing and hiding the UI tooltip.
 - **game/sect.js** – implements the sect management system including constructs and colony helpers.
