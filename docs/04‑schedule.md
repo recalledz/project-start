@@ -6,7 +6,7 @@ A full in-game day lasts **300 seconds** (five minutes). Each phase below spans 
 
 | Phase     | Duration (s) | Action               |
 |-----------|-------------:|----------------------|
-| Morning   |           60 | Training             |
+| Morning   |           60 | Work                 |
 | Midday    |           60 | Work                  |
 | Afternoon |           60 | Work                  |
 | Evening   |           60 | Eat                   |
