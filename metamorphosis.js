@@ -1,7 +1,7 @@
-import { sectSystem, getCurrentSchedule } from './game/sect.js';
+import { sectSystem } from './game/sect.js';
 import { sectState } from './game/state.js';
 import { createDiscipleBadge } from './game/badges.js';
-import { METAMORPHOSIS_STAGE_REQ } from './game/constants.js';
+import { METAMORPHOSIS_STAGE_REQ, TRAINING_NECTAR_RATE } from './game/constants.js';
 import { showPathOverlay } from './game/pathOverlay.js';
 
 export const metamorphosisState = {
@@ -180,20 +180,31 @@ export function refreshMetamorphosis() {
 }
 
 export function tickMetamorphosis(dt) {
-  const training = getCurrentSchedule().action === 'Training';
   sectSystem.disciples.forEach(d => {
     ensureMeta(d.id);
     const meta = sectState.discipleMetamorphosis[d.id];
+    const training = sectState.discipleTasks[d.id] === 'Training';
     if (training && meta.xp < metamorphosisState.requirement) {
-      const rate = 0.4 *
-        getMethodMultiplier(d) *
-        getBuildingMultiplier(d) *
-        getRoomMultiplier(d) *
-        getPathMatchMultiplier(d) *
-        getStabilityFactor(d) *
-        getCultivationSpeed(d) *
-        getSeasonMultiplier();
-      meta.xp = Math.min(metamorphosisState.requirement, meta.xp + rate * dt);
+      const cost = TRAINING_NECTAR_RATE * dt;
+      if (sectState.undeadNectar >= cost) {
+        sectState.undeadNectar -= cost;
+        if (sectSystem.resources.undeadNectar) {
+          const res = sectSystem.resources.undeadNectar;
+          res.current = Math.max(0, res.current - cost);
+        }
+        const rate =
+          0.4 *
+          getMethodMultiplier(d) *
+          getBuildingMultiplier(d) *
+          getRoomMultiplier(d) *
+          getPathMatchMultiplier(d) *
+          getStabilityFactor(d) *
+          getCultivationSpeed(d) *
+          getSeasonMultiplier();
+        meta.xp = Math.min(
+          metamorphosisState.requirement,
+          meta.xp + rate * dt
+        );
     }
   });
   renderMetamorphosis();
