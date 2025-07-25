@@ -6,7 +6,7 @@ import {
   setCurrentEnemy,
   currentEnemy
 } from './state.js';
-import { updateRaidLifeBar } from './ui.js';
+import { updateRaidLifeBar, updateDealerLifeDisplay } from './ui.js';
 
 import { spawnDealer } from '../enemySpawning.js';
 import addLog from '../log.js';
