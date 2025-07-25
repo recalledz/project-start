@@ -54,3 +54,9 @@ directly to the next night. A new button lets you toggle the sect map's
 zone overlays on or off for layout testing. You can also grant yourself
 extra fruit by entering an amount and clicking **Give**.
 
+### Building
+
+Run `npm run build` to generate the `dist/` folder. The build script uses
+`--public-url ./` so the game assets load correctly even when you open
+`dist/index.html` directly without a web server.
+
