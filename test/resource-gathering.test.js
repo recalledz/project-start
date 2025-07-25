@@ -5,11 +5,9 @@ import { initializeDisciple } from '../utils/discipleInit.js';
 import { sectState } from '../game/state.js';
 import {
   GATHER_SPOTS,
-  GATHER_WORK_SECONDS,
-  MIN_TRAVEL_SECONDS,
-  TRAVEL_SECONDS_PER_UNIT,
   TASK_GROUPS,
-  ATTRIBUTE_FOR_GROUP
+  ATTRIBUTE_FOR_GROUP,
+  FRUIT_CONSUMPTION_RATE
 } from '../game/constants.js';
 import { getTaskSkillProgress } from '../utils/skills.js';
 
