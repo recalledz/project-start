@@ -20,7 +20,8 @@ Disciples may be called upon to defend the sect from occasional raids.
 * Raiders randomly target a fighter when multiple disciples are on guard.
 * If the orb is depleted the sect loses **half** of its stored fruit and softwood.
 * The Water orb periodically lashes out with a **Water Burst** every 10&nbsp;s, dealing 5 damage.
-  The burst now appears as a blue projectile traveling from the orb to the dealer card and the orb pulses when firing.
+  The burst now appears as a bright blue projectile traveling from the orb to the dealer card and the orb pulses when firing.
+  The projectile is larger and moves more slowly so it can be clearly seen.
 * Dealer enemies display a small life bar on their card during raids.
 * Defeating a raid yields **Undead Nectar** in addition to experience. The nectar
   is added to your resources side panel for later use.
