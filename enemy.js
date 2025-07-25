@@ -8,10 +8,10 @@ class Enemy  {
     this.rarity = config.rarity || "basic";
 
     // We expect the caller to supply these values
-    this.maxHp = config.maxHp
+    this.maxHp = config.maxHp;
     this.currentHp = this.maxHp;
-    this.damage = config.damage 
-    this.xp = config.xp
+    this.damage = config.damage;
+    this.xp = config.xp;
     this.attackInterval = config.attackInterval || 10000;
     this.abilities = config.abilities || [];
     this.attackTimer = 0;
@@ -35,7 +35,7 @@ class Enemy  {
 
   tick(deltaTime) {
     this.attackTimer += deltaTime;
-    this.abilities.forEach(ability => ability.tick(deltaTime, this))
+    this.abilities.forEach(ability => ability.tick(deltaTime, this));
     if (this.attackTimer >= this.attackInterval) {
       if (this.onAttack) this.onAttack(this);
       this.attackTimer = 0;
@@ -45,4 +45,4 @@ class Enemy  {
   
 }
 
-export default Enemy
+export default Enemy;
