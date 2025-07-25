@@ -77,7 +77,8 @@ export const systems = {
   buildingUnlocked: false,
   researchUnlocked: false,
   chantingHallUnlocked: false,
-  explorationUnlocked: false
+  explorationUnlocked: false,
+  orbManagementUnlocked: false
 };
 
 // Fruit gathering and growth configuration
@@ -104,6 +105,7 @@ export const sectState = {
   buildings: { bohio: 0, researchDesk: 0, chantingHall: 0 },
   researchPoints: 0,
   researchProgress: 0,
+  completedResearch: [],
   currentBuild: null,
   buildProgress: 0
 };

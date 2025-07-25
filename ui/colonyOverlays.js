@@ -273,6 +273,33 @@ export function openResourceOverlay() {
   interval = setInterval(render, 1000);
 }
 
+let orbOverlay = null;
+export function openOrbOverlay() {
+  if (orbOverlay) return;
+  orbOverlay = createOverlay({ className: 'orb-overlay', boxClass: 'parchment-box' });
+  orbOverlay.box.classList.add('parchment-box');
+  orbOverlay.onClose(() => { orbOverlay = null; });
+  const { box } = orbOverlay;
+
+  const header = document.createElement('div');
+  header.className = 'panel-heading';
+  header.textContent = 'Orb Management';
+  box.appendChild(header);
+
+  const spellHeader = document.createElement('h3');
+  spellHeader.textContent = 'Spells';
+  box.appendChild(spellHeader);
+
+  const list = document.createElement('ul');
+  list.className = 'orb-spell-list';
+  box.appendChild(list);
+
+  const burst = document.createElement('li');
+  burst.className = 'orb-spell';
+  burst.innerHTML = '<b>Water Burst</b> - Automatically hits raiders every 10s for 5 damage.';
+  list.appendChild(burst);
+}
+
 let buildOverlay = null;
 export function openBuildOverlay() {
   if (buildOverlay) return;
@@ -417,6 +444,52 @@ export function openResearchOverlay() {
   info.className = 'research-progress-info';
   box.appendChild(info);
 
+  const researchList = document.createElement('div');
+  researchList.className = 'research-list';
+  box.appendChild(researchList);
+
+  const topics = [
+    {
+      key: 'orbRevival',
+      label: 'Orb Revival',
+      cost: 1,
+      desc: 'Unlocks orb management controls',
+      unlock() {
+        if (!systems.orbManagementUnlocked) systems.orbManagementUnlocked = true;
+      }
+    }
+  ];
+
+  function renderResearch() {
+    researchList.innerHTML = '';
+    topics.forEach(t => {
+      if (sectState.completedResearch.includes(t.key)) return;
+      const row = document.createElement('div');
+      row.className = 'research-entry';
+      const name = document.createElement('div');
+      name.className = 'research-name';
+      name.textContent = t.label;
+      const desc = document.createElement('div');
+      desc.className = 'research-desc';
+      desc.textContent = t.desc;
+      const btn = document.createElement('button');
+      btn.textContent = `Unlock (${t.cost})`;
+      btn.disabled = sectState.researchPoints < t.cost;
+      btn.addEventListener('click', () => {
+        if (sectState.researchPoints < t.cost) return;
+        sectState.researchPoints -= t.cost;
+        sectState.completedResearch.push(t.key);
+        t.unlock();
+        if (typeof window.updateSectDisplay === 'function') window.updateSectDisplay();
+        renderResearch();
+      });
+      row.appendChild(name);
+      row.appendChild(desc);
+      row.appendChild(btn);
+      researchList.appendChild(row);
+    });
+  }
+
   function render() {
     pointsEl.textContent = `Research Points: ${sectState.researchPoints}`;
     const prog = sectState.researchProgress % 500;
@@ -426,6 +499,7 @@ export function openResearchOverlay() {
     const rate = researchers * 4;
     const time = rate > 0 ? (500 - prog) / rate : Infinity;
     info.textContent = `Next point: ${rate > 0 ? time.toFixed(1) : '∞'}s`;
+    renderResearch();
   }
 
   render();
