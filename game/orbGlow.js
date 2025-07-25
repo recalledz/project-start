@@ -26,7 +26,7 @@ export function attachOrbGlow(element) {
     distance: 30,
     outerStrength: 2.5,
     innerStrength: 0.5,
-    color: 0xffffff
+    color: 0x7fd9ff
   });
   orbSprite.filters = [];
 }
