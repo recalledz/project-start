@@ -22,7 +22,8 @@ Disciples may be called upon to defend the sect from occasional raids.
 * The Water orb periodically lashes out with a **Water Burst** every 10&nbsp;s, dealing 5 damage.
   The burst now appears as a blue projectile traveling from the orb to the dealer card and the orb pulses when firing.
 * Dealer enemies display a small life bar on their card during raids.
-* Defeating a raid yields **Undead Nectar** in addition to experience.
+* Defeating a raid yields **Undead Nectar** in addition to experience. The nectar
+  is added to your resources side panel for later use.
 * The raid ends when the enemy is defeated or the orb is drained.
 * A summary overlay appears after victory showing damage dealt, damage received,
   rewards and how much combat XP each participating disciple earned. Level ups

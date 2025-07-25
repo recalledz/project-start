@@ -2756,6 +2756,7 @@ body.darkenshift-mode .tabsContainer button.active {
 .resource-fill.water { background: #7fd9ff; }
 .resource-fill.thought { background: #c785ff; }
 .resource-fill.structure { background: #a97b5d; }
+.resource-fill.undeadNectar { background: #ff7fd9; }
 }
 
 .resource-text {

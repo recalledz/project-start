@@ -2311,6 +2311,11 @@ Object.assign(playerStats, state.playerStats || {});
   if (state.sectState) {
     Object.assign(sectState, state.sectState);
     sectState.researchProgress = 0; // progress is not persisted
+    if (sectSystem.resources && sectSystem.resources.undeadNectar) {
+      const res = sectSystem.resources.undeadNectar;
+      res.current = sectState.undeadNectar || 0;
+      res.unlocked = res.current > 0;
+    }
   }
 
   // synchronize disciple global levels with saved skill data

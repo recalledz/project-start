@@ -93,7 +93,8 @@ export const sectSystem = {
     fireEssence: { current: 0, max: 10, regen: 0, unlocked: false },
     earthEssence: { current: 0, max: 10, regen: 0, unlocked: false },
     summerEssence: { current: 0, max: 10, regen: 0, unlocked: false },
-    waterEssence: { current: 0, max: 10, regen: 0, unlocked: false }
+    waterEssence: { current: 0, max: 10, regen: 0, unlocked: false },
+    undeadNectar: { current: 0, max: 10, regen: 0, unlocked: false }
   },
   gains: {
     water: 0,
@@ -267,7 +268,8 @@ const resourceIcons = {
   fireEssence: 'flame',
   earthEssence: 'mountain',
   summerEssence: 'sun',
-  waterEssence: 'droplet'
+  waterEssence: 'droplet',
+  undeadNectar: 'test-tube'
 };
 
 
