@@ -203,6 +203,7 @@
     </div>
     <div id="tooltip"></div>
     <script type="module" src="script.js"></script>
+    <script>window.devTools = new Proxy({}, { get: () => () => {} });</script>
     <script type="module">
       const isDev = (typeof process !== 'undefined' && process.env && process.env.NODE_ENV === 'development') ||
                     new URLSearchParams(window.location.search).has('dev');
