@@ -278,6 +278,7 @@ const dom = {
   killsDisplay: document.getElementById("kills"),
   worldProgressPerSecDisplay: document.getElementById("worldProgressPerSecDisplay"),
   dCardContainer: document.getElementsByClassName("dCardContainer")[0],
+  raidCardContainer: document.querySelector('.raidCardContainer'),
   dealerContainer: document.querySelector('.dealerContainer'),
   combatResources: document.getElementById('combatResources'),
 };
@@ -1255,6 +1256,21 @@ function init() {
     }
     updateSectDisplay();
   });
+  document.addEventListener('raid-start', e => {
+    setInCombat(true);
+    removeDealerLifeBar();
+    setCurrentEnemy(e.detail);
+    renderDealerCard(dom.raidCardContainer);
+    enemyAttackFill = renderEnemyAttackBar();
+    showPlayerAttackBar();
+  });
+  document.addEventListener('raid-end', () => {
+    setInCombat(false);
+    setCurrentEnemy(null);
+    hidePlayerAttackBar(enemyAttackFill);
+    removeDealerLifeBar();
+    if (dom.raidCardContainer) dom.raidCardContainer.innerHTML = '';
+  });
   updatePlayerStats(stats);
   // Game starts in sect view; exploration initiates combat
   renderWorldsMenu();
@@ -1424,22 +1440,30 @@ function renderDealerCardBase(enemy) {
     : `<i data-lucide="skull" class="dCard__icon" style="stroke:${color}; filter: drop-shadow(0 0 ${blur}px ${color});"></i>`;
   const { minDamage, maxDamage } = calculateEnemyBasicDamage(enemy.stage, enemy.world);
   pane.innerHTML = `\n    ${iconHtml}\n    <span class="dCard__text">\n    ${enemy.name}<br>\n    Damage: ${formatNumber(Math.floor(minDamage))} - ${formatNumber(Math.floor(maxDamage))}\n    </span>\n    `;
+  const lifeBar = document.createElement('div');
+  lifeBar.className = 'raid-life-bar';
+  const lifeFill = document.createElement('div');
+  lifeFill.className = 'raid-life-fill';
+  lifeFill.style.width = `${(enemy.currentHp / enemy.maxHp) * 100}%`;
+  lifeBar.appendChild(lifeFill);
+  pane.appendChild(lifeBar);
   abilityPane.innerHTML = renderAbilityIcons(enemy.abilities, false);
   wrapper.append(pane, abilityPane);
   if (enemy.isSpeaker) {
     const canvas = pane.querySelector('canvas.speaker-icon');
     if (canvas) drawSpeakerIcon(canvas);
   }
+  enemy.raidLifeFill = lifeFill;
   return wrapper;
 }
 
-function renderDealerCard() {
-  if (!currentEnemy) return;
+function renderDealerCard(container = dom.dCardContainer) {
+  if (!currentEnemy || !container) return;
   const card = currentEnemy instanceof Boss
     ? renderBossCard(currentEnemy)
     : renderDealerCardBase(currentEnemy);
-  dom.dCardContainer.innerHTML = '';
-  dom.dCardContainer.appendChild(card);
+  container.innerHTML = '';
+  container.appendChild(card);
   lucide.createIcons({ icons: lucide.icons });
 }
 

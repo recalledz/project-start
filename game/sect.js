@@ -26,6 +26,7 @@ import {
   EXPLORATION_CYCLE_SECONDS
 } from './constants.js';
 import { startRaid, tickRaid, raidState, endRaid } from './raids.js';
+import { updateRaidLifeBar } from './ui.js';
 
 export { addDiscoveredLocation } from "./ui.js";
 export const discoveredLocations = [];
@@ -1464,6 +1465,7 @@ export function tickSect(delta) {
         const atkTime = d.attackSpeed;
         if (raidState.attackTimers[d.id] >= atkTime) {
           raidState.enemy.takeDamage(d.damage);
+          updateRaidLifeBar(raidState.enemy);
           raidState.attackTimers[d.id] = 0;
           if (raidState.enemy.isDefeated()) endRaid();
         }

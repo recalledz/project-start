@@ -70,6 +70,12 @@ export function updateDealerLifeDisplay(currentEnemy) {
   renderDealerLifeBarFill(currentEnemy);
 }
 
+export function updateRaidLifeBar(enemy) {
+  if (!enemy || !enemy.raidLifeFill) return;
+  const ratio = Math.max(0, Math.min(1, enemy.currentHp / enemy.maxHp));
+  enemy.raidLifeFill.style.width = `${ratio * 100}%`;
+}
+
 export function updateDiscipleStatsDisplay(d) {
   if (!d.statsElement) return;
   d.statsElement.innerHTML = '';

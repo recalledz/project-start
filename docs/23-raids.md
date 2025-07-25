@@ -15,6 +15,8 @@ Disciples may be called upon to defend the sect from occasional raids.
 * Raids begin automatically during the Night phase.
 * Raiders attack the Water orb, reducing its stored energy.
 * Disciples assigned to **Defend** fight the raiders using their combat stats.
-* If the orb is depleted the sect loses a small amount of fruit and softwood.
-* The Water orb periodically lashes out at the raiders.
+* If the orb is depleted the sect loses **half** of its stored fruit and softwood.
+* The Water orb periodically lashes out with a **Water Burst** every 10&nbsp;s, dealing 5 damage.
+* Dealer enemies display a small life bar on their card during raids.
+* Defeating a raid yields **Undead Nectar** in addition to experience.
 * The raid ends when the enemy is defeated or the orb is drained.
