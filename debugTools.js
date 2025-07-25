@@ -21,6 +21,7 @@ import {
   setTimeScale
 } from './game/state.js';
 import { activeDisciples } from './game/disciples.js';
+import { toggleZones } from './game/zones.js';
 
 export const devTools = {
   spawnBoss: () => spawnBossEvent(),
@@ -67,6 +68,7 @@ export const devTools = {
     addDiscoveredLocation('Esoteric Dungeon');
     unlockConstruct('Sonic Boom');
   },
+  toggleZones,
   save: saveGame,
   load: loadGame,
   newGame: startNewGame

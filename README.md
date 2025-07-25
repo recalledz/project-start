@@ -50,5 +50,6 @@ This is not a standard Wuxia knockoff — **Taino and Caribbean mysticism** blen
 
 Run the game with the `?dev` query parameter to enable a debug panel.
 It offers helpers like spawning bosses, toggling fast mode, and skipping
-directly to the next night.
+directly to the next night. A new button lets you toggle the sect map's
+zone overlays on or off for layout testing.
 
