@@ -7,10 +7,8 @@ import Disciple from '../disciple.js';
 import { initializeDisciple } from '../utils/discipleInit.js';
 import { createOverlay } from '../ui/overlay.js';
 import {
-  DAILY_FRUIT_CONSUMPTION,
+  FRUIT_CONSUMPTION_RATE,
   GATHER_WORK_SECONDS,
-  MIN_TRAVEL_SECONDS,
-  TRAVEL_SECONDS_PER_UNIT,
   GATHER_SPOTS,
   TASK_GROUPS,
   ATTRIBUTE_FOR_GROUP
@@ -27,6 +25,7 @@ import {
   HUNT_CYCLE_SECONDS,
   EXPLORATION_CYCLE_SECONDS
 } from './constants.js';
+import { startRaid, tickRaid, raidState, endRaid } from './raids.js';
 
 export { addDiscoveredLocation } from "./ui.js";
 export const discoveredLocations = [];
@@ -62,8 +61,8 @@ export const SECT_SCHEDULE = [
   { phase: 'Morning', duration: 60, action: 'Training' },
   { phase: 'Midday', duration: 60, action: 'Work' },
   { phase: 'Afternoon', duration: 60, action: 'Work' },
-  { phase: 'Evening', duration: 60, action: 'Eat' },
-  { phase: 'Night', duration: 60, action: 'Sleep' }
+  { phase: 'Evening', duration: 60, action: 'Work' },
+  { phase: 'Night', duration: 60, action: 'Work' }
 ];
 
 export const DAILY_WORK_SECONDS = SECT_SCHEDULE.filter(p => p.action === 'Work')
@@ -1190,6 +1189,7 @@ export function tickSectSystem(delta) {
     document.dispatchEvent(
       new CustomEvent('schedule-phase', { detail: getCurrentSchedule() })
     );
+    if (getCurrentSchedule().phase === 'Night') startRaid();
   }
   sectSystem.seasonTimer += dt;
   if (sectSystem.seasonTimer >= DAY_LENGTH_SECONDS) {
@@ -1199,6 +1199,7 @@ export function tickSectSystem(delta) {
     document.dispatchEvent(
       new CustomEvent('schedule-phase', { detail: getCurrentSchedule() })
     );
+    if (getCurrentSchedule().phase === 'Night') startRaid();
     sectSystem.seasonDay += 1;
     document.dispatchEvent(new CustomEvent('day-passed', {
       detail: { day: sectSystem.seasonDay, season: sectSystem.seasonIndex }
@@ -1309,6 +1310,7 @@ export function tickSectSystem(delta) {
   }
   tickActiveConstructs(dt);
   tickMetamorphosis(dt);
+  tickRaid(delta);
   ins.current = Math.min(ins.max, Math.max(0, ins.current));
   if (hasUI) {
     updateCooldownOverlays();
@@ -1418,14 +1420,8 @@ export function getDiscipleDailyOutput(d) {
     const spot = GATHER_SPOTS[task];
     const attr = ATTRIBUTE_FOR_GROUP[group];
     const yieldMult = 1 + 0.05 * (d[attr] || 0) + 0.02 * lvl;
-    const gatherAmt = spot.baseYield * yieldMult * GATHER_WORK_SECONDS;
-    const travel = Math.max(
-      MIN_TRAVEL_SECONDS,
-      spot.travel * TRAVEL_SECONDS_PER_UNIT
-    );
-    const cycleSeconds = travel * 2 + GATHER_WORK_SECONDS;
-    const perSecond = gatherAmt / cycleSeconds;
-    return perSecond * DAILY_WORK_SECONDS;
+    const gatherRate = spot.baseYield * yieldMult;
+    return gatherRate * DAILY_WORK_SECONDS;
   } else if (task === 'Research') {
     return 4 * DAY_LENGTH_SECONDS;
   }
@@ -1434,7 +1430,8 @@ export function getDiscipleDailyOutput(d) {
 
 export function getDailyResourceDelta() {
   const fruitGain = FRUIT_GROWTH_RATES[sectSystem.seasonIndex] || 0;
-  const fruitLoss = DAILY_FRUIT_CONSUMPTION * sectSystem.disciples.length;
+  const fruitLoss =
+    FRUIT_CONSUMPTION_RATE * sectSystem.disciples.length * DAY_LENGTH_SECONDS;
   const waterPerDay = sectSystem.gains.water * DAY_LENGTH_SECONDS;
   let softwoodGain = 0;
   sectSystem.disciples.forEach(d => {
@@ -1466,6 +1463,17 @@ export function getDailyResourceDelta() {
 
 export function tickSect(delta) {
   const dt = delta / 1000;
+  const foodNeed = FRUIT_CONSUMPTION_RATE * sectSystem.disciples.length * dt;
+  if (sectState.fruits >= foodNeed) {
+    sectState.fruits -= foodNeed;
+  } else {
+    const deficit = foodNeed - sectState.fruits;
+    sectState.fruits = 0;
+    sectSystem.orbs.water.current = Math.max(
+      0,
+      sectSystem.orbs.water.current - deficit
+    );
+  }
   sectSystem.disciples.forEach(d => {
     if (d.incapacitated) return;
     const task = sectState.discipleTasks[d.id];
@@ -1477,30 +1485,20 @@ export function tickSect(delta) {
 
     if (task === 'Gather Fruit' || task === 'Gather Softwood') {
       const spot = GATHER_SPOTS[task];
-      const travel = Math.max(
-        MIN_TRAVEL_SECONDS,
-        spot.travel * TRAVEL_SECONDS_PER_UNIT
-      );
-      const cycleSeconds = travel * 2 + GATHER_WORK_SECONDS;
       const rate =
         (task === 'Gather Fruit' ? FRUIT_XP_PER_CYCLE : LOG_XP_PER_CYCLE) /
-        cycleSeconds;
+        GATHER_WORK_SECONDS;
       xpRate = rate;
 
       const groupAttr = ATTRIBUTE_FOR_GROUP[TASK_GROUPS[task]];
       const skillXp = sectState.discipleSkills[d.id]?.[TASK_GROUPS[task]] || 0;
       const lvl = getTaskSkillProgress(skillXp).level;
       const yieldMult = 1 + 0.05 * (d[groupAttr] || 0) + 0.02 * lvl;
-      const gatherAmt = spot.baseYield * yieldMult * GATHER_WORK_SECONDS;
+      const gatherRate = spot.baseYield * yieldMult;
 
-      progress += dt;
-      if (progress >= cycleSeconds) {
-        progress -= cycleSeconds;
-        if (task === 'Gather Fruit') sectState.fruits += gatherAmt;
-        else sectState.softwood += gatherAmt;
-        if (typeof updateSectDisplay === 'function') updateSectDisplay();
-      }
-      sectState.discipleProgress[d.id] = progress;
+      if (task === 'Gather Fruit') sectState.fruits += gatherRate * dt;
+      else sectState.softwood += gatherRate * dt;
+      if (typeof updateSectDisplay === 'function') updateSectDisplay();
     } else if (task === 'Research') {
       sectState.researchProgress += 4 * dt;
       while (sectState.researchProgress >= 500) {
@@ -1515,8 +1513,19 @@ export function tickSect(delta) {
       sectState.discipleProgress[d.id] = progress;
     } else if (task === 'Exploration') {
       progress = (progress + dt) % EXPLORATION_CYCLE_SECONDS;
-      sectState.discipleProgress[d.id] = progress;
+    } else if (task === 'Defend') {
+      if (raidState.active && raidState.enemy) {
+        if (!raidState.attackTimers[d.id]) raidState.attackTimers[d.id] = 0;
+        raidState.attackTimers[d.id] += delta;
+        const atkTime = d.attackSpeed;
+        if (raidState.attackTimers[d.id] >= atkTime) {
+          raidState.enemy.takeDamage(d.damage);
+          raidState.attackTimers[d.id] = 0;
+          if (raidState.enemy.isDefeated()) endRaid();
+        }
+      }
     }
+    sectState.discipleProgress[d.id] = progress;
 
     if (xpRate > 0 && group) {
       const mult = intelligenceXpMultiplier() * getAffinityMultiplier(d, group);

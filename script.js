@@ -129,7 +129,6 @@ import {
   timeScale,
   setTimeScale,
   FRUIT_MAX_CAP,
-  FRUIT_GROWTH_RATES,
   isDarkenshift,
   setIsDarkenshift,
   lifeCore,
@@ -156,7 +155,6 @@ import {
   ANIMALS,
   SOFTWOOD_CYCLE_SECONDS,
   SOFTWOOD_CYCLE_AMOUNT,
-  DAILY_FRUIT_CONSUMPTION,
   FRUIT_XP_PER_CYCLE,
   LOG_XP_PER_CYCLE,
   BUILD_XP_RATE,
@@ -167,9 +165,8 @@ import {
   DISCIPLE_MAX_HEALTH,
   REST_TIME_SECONDS,
   GATHER_WORK_SECONDS,
-  MIN_TRAVEL_SECONDS,
-  TRAVEL_SECONDS_PER_UNIT,
   GATHER_SPOTS,
+  FRUIT_CONSUMPTION_RATE,
   TASK_ICONS,
   TASK_GROUPS,
   ATTRIBUTE_FOR_GROUP,
@@ -196,11 +193,7 @@ let { disciples } = initializeSect();
 function getTaskEta(d) {
   const task = d.incapacitated ? 'Resting' : sectState.discipleTasks[d.id] || 'Idle';
   if (task === 'Gather Fruit' || task === 'Gather Softwood') {
-    const progress = sectState.discipleProgress[d.id] || 0;
-    const spot = GATHER_SPOTS[task];
-    const travel = Math.max(MIN_TRAVEL_SECONDS, spot.travel * TRAVEL_SECONDS_PER_UNIT);
-    const cycleSeconds = travel * 2 + GATHER_WORK_SECONDS;
-    return cycleSeconds - progress;
+    return Infinity;
   } else if (task === 'Research') {
     const researcherCount = sectSystem.disciples.filter(x => sectState.discipleTasks[x.id] === 'Research').length;
     const researchRate = researcherCount * 4;
@@ -601,31 +594,11 @@ function updateTaskProgressDisplay() {
       const spot = GATHER_SPOTS[taskName];
       const attr = ATTRIBUTE_FOR_GROUP[group];
       const yieldMult = 1 + 0.05 * (d[attr] || 0) + 0.02 * lvl;
-      const gatherAmt = spot.baseYield * yieldMult * GATHER_WORK_SECONDS;
-      const travel = Math.max(MIN_TRAVEL_SECONDS, spot.travel * TRAVEL_SECONDS_PER_UNIT);
-      const cycleSeconds = travel * 2 + GATHER_WORK_SECONDS;
-      let phase = 0;
-      let phaseStart = 0;
-      let phaseDur = travel;
-      if (progress < travel) {
-        phase = 0;
-        phaseStart = 0;
-        phaseDur = travel;
-      } else if (progress < travel + GATHER_WORK_SECONDS) {
-        phase = 1;
-        phaseStart = travel;
-        phaseDur = GATHER_WORK_SECONDS;
-      } else {
-        phase = 2;
-        phaseStart = travel + GATHER_WORK_SECONDS;
-        phaseDur = travel;
-      }
-      const pct = ((progress - phaseStart) / phaseDur) * 100;
-      const phaseNames = ['Travelling', 'Gathering', 'Hauling'];
-      if (fill) fill.style.width = `${pct}%`;
-      if (label) label.textContent = phaseNames[phase];
+      const gatherRate = spot.baseYield * yieldMult;
+      if (fill) fill.style.width = '0%';
+      if (label) label.textContent = 'Gathering';
       if (rateEl) {
-        const rate = (gatherAmt / cycleSeconds) * 60;
+        const rate = gatherRate * 60;
         rateEl.textContent = `+${rate.toFixed(1)}/m`;
       }
     } else if (taskName === 'Research') {
@@ -680,7 +653,7 @@ function updateSectDisplay() {
     const remaining = Math.max(0, DAY_LENGTH_SECONDS - sectSystem.seasonTimer);
     const mm = String(Math.floor(remaining / 60)).padStart(2, '0');
     const ss = String(Math.floor(remaining % 60)).padStart(2, '0');
-    const upkeep = DAILY_FRUIT_CONSUMPTION * sectSystem.disciples.length;
+    const upkeep = FRUIT_CONSUMPTION_RATE * sectSystem.disciples.length * DAY_LENGTH_SECONDS;
     sectSummaryDisplay.innerHTML = `
       <span>👥 ${total}/${sectState.maxDisciples} (Idle: ${idle})</span>
       <span>${sectState.fruits.toFixed(2)}</span>
@@ -774,24 +747,7 @@ function updateMapBrightness(phase) {
   map.classList.toggle('night', phase === 'Night');
 }
 
-function feedDisciples() {
-  sectSystem.disciples.forEach(d => {
-    if (sectState.fruits >= DAILY_FRUIT_CONSUMPTION) {
-      sectState.fruits -= DAILY_FRUIT_CONSUMPTION;
-      d.hunger = 20;
-    } else {
-      d.hunger = Math.max(0, d.hunger - 1);
-      if (d.hunger === 0) {
-        d.health = Math.max(0, d.health - 5);
-        if (d.health === 0) {
-          sectState.discipleTasks[d.id] = 'Idle';
-          d.incapacitated = true;
-        }
-      }
-    }
-  });
-  updateSectDisplay();
-}
+function feedDisciples() {}
 
 function moveDisciple(el) {
   const cont = el.parentElement;
@@ -804,52 +760,12 @@ function moveDisciple(el) {
 }
 
 function updateDiscipleGather(id, el) {
-  const cont = el.parentElement;
-  if (!cont) return;
-  const basket = document.getElementById('sectBasket');
   const patch = document.getElementById('fruitPatch');
-  if (!basket || !patch) return;
-
-  const progress = sectState.discipleProgress[id] || 0;
-  const task = sectState.discipleTasks[id];
-  const d = sectSystem.disciples.find(x => x.id === id);
-  const group = TASK_GROUPS[task];
-  const lvl = getTaskSkillProgress(
-    sectState.discipleSkills[id]?.[group] || 0
-  ).level;
-  const spot = GATHER_SPOTS[task];
-  const attr = ATTRIBUTE_FOR_GROUP[group];
-  const yieldMult = 1 + 0.05 * (d[attr] || 0) + 0.02 * lvl;
-  const gatherAmt = spot.baseYield * yieldMult * GATHER_WORK_SECONDS;
-  const travel = Math.max(MIN_TRAVEL_SECONDS, spot.travel * TRAVEL_SECONDS_PER_UNIT);
-  const cycleSeconds = travel * 2 + GATHER_WORK_SECONDS;
-  let phase = 0;
-  if (progress < travel) phase = 0;
-  else if (progress < travel + GATHER_WORK_SECONDS) phase = 1;
-  else phase = 2;
-
-  if (discipleGatherPhase[id] === phase) return;
-  discipleGatherPhase[id] = phase;
-
-  const bx = basket.offsetLeft + basket.offsetWidth / 2 - 8;
-  const by = basket.offsetTop + basket.offsetHeight / 2 - 8;
+  if (!patch) return;
   const px = patch.offsetLeft + patch.offsetWidth / 2 - 8;
   const py = patch.offsetTop + patch.offsetHeight / 2 - 8;
-
-  switch (phase) {
-    case 0: // travelling out
-      el.style.opacity = '1';
-      el.style.transform = `translate(${px}px, ${py}px)`;
-      break;
-    case 1: // gathering at spot
-      el.style.opacity = '1';
-      el.style.transform = `translate(${px}px, ${py}px)`;
-      break;
-    case 2: // hauling back
-      el.style.opacity = '1';
-      el.style.transform = `translate(${bx}px, ${by}px)`;
-      break;
-  }
+  el.style.opacity = '1';
+  el.style.transform = `translate(${px}px, ${py}px)`;
 }
 
 function startDiscipleMovement() {
@@ -871,7 +787,7 @@ function startDiscipleMovement() {
       } else {
         el.classList.remove('incapacitated');
         const phase = getCurrentSchedule().action;
-        if (phase === 'Sleep' || phase === 'Training') {
+        if (phase === 'Training') {
           const orb = document.querySelector('#sectOrbs .water');
           if (orb) {
             const bx = orb.offsetLeft + orb.offsetWidth / 2 - 2;
@@ -952,16 +868,6 @@ function buildDiscipleGeneralView(d) {
   const waterRate = document.createElement('span');
   waterRate.textContent = ` (+${calculateWaterRegen(waterLvl).toFixed(2)}/s)`;
   waterRow.appendChild(waterRate);
-  vit.appendChild(waterRow);
-  const hungerRow = makeStatRow(
-    'Hunger',
-    d.hunger,
-    20,
-    'linear-gradient(90deg,#bb7,#dd5)'
-  );
-  const hungerRate = document.createElement('span');
-  hungerRate.textContent = ' (-1/day)';
-  hungerRow.appendChild(hungerRate);
   vit.appendChild(hungerRow);
   body.appendChild(vit);
 
@@ -1331,7 +1237,6 @@ function init() {
   });
   document.addEventListener('schedule-phase', e => {
     updateMapBrightness(e.detail.phase);
-    if (e.detail.phase === 'Evening') feedDisciples();
     if (e.detail.action !== 'Work')  {
       sectSystem.disciples.forEach(d => {
         sectState.discipleProgress[d.id] = 0;

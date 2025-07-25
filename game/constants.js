@@ -16,8 +16,8 @@ export const ANIMALS = [
 ];
 export const SOFTWOOD_CYCLE_SECONDS = 215;
 export const SOFTWOOD_CYCLE_AMOUNT = 10;
-export const DAILY_FRUIT_CONSUMPTION = 20; // fruits eaten by each disciple per day
-
+// Fruits consumed per disciple each second
+export const FRUIT_CONSUMPTION_RATE = 0.01;
 export const FRUIT_XP_PER_CYCLE = 1; // 0.005 XP/s × 200s
 export const LOG_XP_PER_CYCLE = 1; // 0.0047 XP/s × 215s ≈ 1
 export const BUILD_XP_RATE = 1; // per second
@@ -49,7 +49,8 @@ export const TASK_ICONS = {
   Resting: '🛌',
   Training: '🥋',
   Eat: '🍽️',
-  Sleep: '💤'
+  Sleep: '💤',
+  Defend: '🛡️'
 };
 
 export const TASK_GROUPS = {
@@ -61,7 +62,8 @@ export const TASK_GROUPS = {
   'Chant': 'Chanting',
   'Exploration': 'Exploration',
   Idle: 'Idle',
-  Resting: 'Idle'
+  Resting: 'Idle',
+  Defend: 'Combat'
 };
 
 export const ATTRIBUTE_FOR_GROUP = {
@@ -72,7 +74,8 @@ export const ATTRIBUTE_FOR_GROUP = {
   Researching: 'intelligence',
   Chanting: 'intelligence',
   Exploration: 'dexterity',
-  Idle: null
+  Idle: null,
+  Combat: 'strength'
 };
 
 export const LOCATION_DEFS = [

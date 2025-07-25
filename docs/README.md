@@ -66,5 +66,6 @@ Table of Contents
 20. [Skills](20-skills.md)
 
 21. [Metamorphosis UI Expansion](21-metamorphosis-ui.md)
+22. [Affinities](22-affinities.md)
+23. [Raids](23-raids.md)
 
-22. [Nightly Raids](23-raids.md)
