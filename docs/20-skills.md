@@ -72,9 +72,8 @@ Misty Quarry	0.08	25	1.7	Special reagents	4	2
 
 Yield Formula:
 
-GatherYield = BaseYield × (1 + DEX × 0.05 + GatheringSkill × 0.02) × WorkDuration
+GatherYield/sec = BaseYield × (1 + DEX × 0.05 + GatheringSkill × 0.02)
 
-WorkDuration defaults to 120 s per schedule slot.
 
 
 ---
@@ -94,7 +93,7 @@ Petrified Hollow	0.05	2.0	25	5	4	Stonebark	Ancient core bark
 
 Yield Formula:
 
-WoodYield = BaseYield × (1 + STR × 0.05 + WoodcuttingSkill × 0.02) × WorkDuration
+WoodYield/sec = BaseYield × (1 + STR × 0.05 + WoodcuttingSkill × 0.02)
 
 
 ---

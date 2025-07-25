@@ -91,7 +91,9 @@ export const sectSystem = {
     waterEssence: { current: 0, max: 10, regen: 0, unlocked: false }
   },
   gains: {
-    water: 0
+    water: 0,
+    fruits: 0,
+    softwood: 0
   },
   skills: {
     mind: { xp: 0, level: 0 },

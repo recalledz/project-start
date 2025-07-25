@@ -13,6 +13,7 @@ Night raids escalate the longer your sect survives. Each evening hostile frogs o
 Disciples may be called upon to defend the sect from occasional raids.
 
 * Raids begin automatically during the Night phase.
+* A red alert briefly appears on screen when a raid starts.
 * Raiders attack the Water orb, reducing its stored energy.
 * Disciples assigned to **Defend** fight the raiders using their combat stats.
 * If the orb is depleted the sect loses **half** of its stored fruit and softwood.

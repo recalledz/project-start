@@ -7,8 +7,10 @@ import {
   currentEnemy
 } from './state.js';
 import { updateRaidLifeBar } from './ui.js';
+
 import { spawnDealer } from '../enemySpawning.js';
 import addLog from '../log.js';
+import { showRaidAlert } from './alerts.js';
 
 export const raidState = {
   active: false,
@@ -63,10 +65,12 @@ export function startRaid() {
   raidState.enemy = spawnDealer({ stage, world }, 0, onAttack, onDefeat);
   setCurrentEnemy(raidState.enemy);
   updateRaidLifeBar(raidState.enemy);
+
   raidState.active = true;
   raidState.attackTimers = {};
   raidState.orbTimer = 0;
   addLog('Raiders have attacked!', 'info');
+  showRaidAlert('Raiders incoming!');
   document.dispatchEvent(new CustomEvent('raid-start', { detail: raidState.enemy }));
   if (typeof updateSectDisplay === 'function') updateSectDisplay();
 }
@@ -79,6 +83,7 @@ export function endRaid() {
   raidState.attackTimers = {};
   raidState.orbTimer = 0;
   addLog('The raid has ended.', 'info');
+  updateDealerLifeDisplay(null);
   document.dispatchEvent(new CustomEvent('raid-end'));
   if (typeof updateSectDisplay === 'function') updateSectDisplay();
 }

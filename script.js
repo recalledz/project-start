@@ -44,7 +44,7 @@ import { initMetamorphosis, refreshMetamorphosis } from './metamorphosis.js';
 import { intelligenceXpMultiplier } from './attributes.js';
 import { createOverlay } from './ui/overlay.js';
 import { showLoadErrorOverlay } from './ui/loadErrorOverlay.js';
-import { openExplorationOverlay, closeExplorationOverlay, openWorkOverlay, openScheduleOverlay, openPlaceholderOverlay, openResourceOverlay, openBuildOverlay, closeDungeonOverlay, locationListContainer, explorationListContainer } from "./ui/colonyOverlays.js";
+import { openExplorationOverlay, closeExplorationOverlay, openWorkOverlay, openScheduleOverlay, openPlaceholderOverlay, openResourceOverlay, openBuildOverlay, openResearchOverlay, closeDungeonOverlay, locationListContainer, explorationListContainer } from "./ui/colonyOverlays.js";
 import { createDiscipleBadge } from "./game/badges.js";
 import { calculateKillXp } from './utils/xp.js';
 import { initTooltip } from './game/tooltip.js';
@@ -480,7 +480,12 @@ function initTabs() {
   if (sectNavChantBtn) sectNavChantBtn.addEventListener("click", () => { setActiveNavBtn(sectNavChantBtn); openPlaceholderOverlay("Chanting"); });
   if (sectNavMapBtn) sectNavMapBtn.addEventListener("click", () => { setActiveNavBtn(sectNavMapBtn); openExplorationOverlay(); });
   if (sectNavInfluenceBtn) sectNavInfluenceBtn.addEventListener("click", () => { setActiveNavBtn(sectNavInfluenceBtn); openPlaceholderOverlay("Influence"); });
-  if (sectNavResearchBtn) sectNavResearchBtn.addEventListener("click", () => { setActiveNavBtn(sectNavResearchBtn); openPlaceholderOverlay("Research"); });
+  if (sectNavResearchBtn)
+    sectNavResearchBtn.addEventListener("click", () => {
+      setActiveNavBtn(sectNavResearchBtn);
+      if (systems.researchUnlocked) openResearchOverlay();
+      else openPlaceholderOverlay("Research");
+    });
   if (sectNavCultivationBtn)
     sectNavCultivationBtn.addEventListener("click", () => {
       setActiveNavBtn(sectNavCultivationBtn);
@@ -646,6 +651,9 @@ function updateSectDisplay() {
   if (sectNavBuildBtn) {
     sectNavBuildBtn.style.display = systems.buildingUnlocked ? '' : 'none';
   }
+  if (sectNavResearchBtn) {
+    sectNavResearchBtn.style.display = systems.researchUnlocked ? '' : 'none';
+  }
   if (!sectTabUnlocked || !playerSectPanel) return;
   const total = sectSystem.disciples.length;
   const assigned = Object.values(sectState.discipleTasks).filter(t => t && t !== 'Idle').length;
@@ -655,10 +663,13 @@ function updateSectDisplay() {
     const mm = String(Math.floor(remaining / 60)).padStart(2, '0');
     const ss = String(Math.floor(remaining % 60)).padStart(2, '0');
     const upkeep = FRUIT_CONSUMPTION_RATE * sectSystem.disciples.length * DAY_LENGTH_SECONDS;
+       const formatRate = v => `${v >= 0 ? '+' : ''}${v.toFixed(2)}`;
+    const fruitRate = formatRate(sectSystem.gains.fruits);
+    const woodRate = formatRate(sectSystem.gains.softwood);
     sectSummaryDisplay.innerHTML = `
       <span>👥 ${total}/${sectState.maxDisciples} (Idle: ${idle})</span>
-      <span>${sectState.fruits.toFixed(2)}</span>
-      <span>🪵 ${sectState.softwood.toFixed(2)}</span>`;
+      <span>${sectState.fruits.toFixed(2)} (${fruitRate}/s)</span>
+      <span>🪵 ${sectState.softwood.toFixed(2)} (${woodRate}/s)</span>`;
     const timer = document.getElementById('resourceTimer');
     if (timer) {
       timer.textContent = `${mm}:${ss}`;
@@ -1261,6 +1272,10 @@ function init() {
     removeDealerLifeBar();
     setCurrentEnemy(e.detail);
     renderDealerCard(dom.raidCardContainer);
+
+  
+    
+
     enemyAttackFill = renderEnemyAttackBar();
     showPlayerAttackBar();
   });
@@ -1270,6 +1285,7 @@ function init() {
     hidePlayerAttackBar(enemyAttackFill);
     removeDealerLifeBar();
     if (dom.raidCardContainer) dom.raidCardContainer.innerHTML = '';
+
   });
   updatePlayerStats(stats);
   // Game starts in sect view; exploration initiates combat
@@ -2285,6 +2301,9 @@ function gameLoop(currentTime) {
   lastFrameTime = currentTime;
   const deltaTime = rawDelta * timeScale;
   const startWater = sectSystem.resources.water.current;
+  const startFruit = sectState.fruits;
+  const startSoftwood = sectState.softwood;
+
 
   if (currentEnemy) {
     currentEnemy.tick(deltaTime);
@@ -2313,10 +2332,17 @@ function gameLoop(currentTime) {
   tickSect(deltaTime);
   tickBuilding(deltaTime / 1000);
   const dtSeconds = deltaTime / 1000;
-  sectSystem.gains.water =
-    dtSeconds > 0
-      ? (sectSystem.resources.water.current - startWater) / dtSeconds
-      : 0;
+  if (dtSeconds > 0) {
+    sectSystem.gains.water =
+      (sectSystem.resources.water.current - startWater) / dtSeconds;
+    sectSystem.gains.fruits = (sectState.fruits - startFruit) / dtSeconds;
+    sectSystem.gains.softwood =
+      (sectState.softwood - startSoftwood) / dtSeconds;
+  } else {
+    sectSystem.gains.water = 0;
+    sectSystem.gains.fruits = 0;
+    sectSystem.gains.softwood = 0;
+  }
   updateTaskProgressDisplay();
   requestAnimationFrame(gameLoop);
 }
