@@ -18,6 +18,7 @@ Disciples may be called upon to defend the sect from occasional raids.
 * Disciples assigned to **Defend** fight the raiders using their combat stats.
 * If the orb is depleted the sect loses **half** of its stored fruit and softwood.
 * The Water orb periodically lashes out with a **Water Burst** every 10&nbsp;s, dealing 5 damage.
+  The burst now appears as a blue projectile traveling from the orb to the dealer card.
 * Dealer enemies display a small life bar on their card during raids.
 * Defeating a raid yields **Undead Nectar** in addition to experience.
 * The raid ends when the enemy is defeated or the orb is drained.
