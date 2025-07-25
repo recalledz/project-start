@@ -7,6 +7,7 @@ import { calculateEnemyBasicDamage } from '../enemySpawning.js';
 import { runAnimation } from '../utils/animation.js';
 import { showRestartScreen } from '../ui/restartOverlay.js';
 import addLog from '../log.js';
+import { raidState } from './raids.js';
 
 export function init() {}
 
@@ -31,6 +32,7 @@ export function attack(deltaTime = 0) {
 
     if (discipleAttackTimers[d.id] >= d.attackSpeed && !enemy.isDefeated()) {
       enemy.takeDamage(d.damage);
+      if (raidState.active) raidState.damageDealt += d.damage;
       discipleAttackTimers[d.id] = 0;
       if (d.attackFill) d.attackFill.style.width = '0%';
     }
