@@ -3149,6 +3149,7 @@ body.darkenshift-mode .tabsContainer button.active {
     opacity: 0.9;
     box-shadow: 0 0 4px rgba(255, 255, 255, 0.6);
     animation: sectGlow 3s infinite alternate;
+    transform: translate(-50%, -50%);
 }
 .sect-orb .orb-fill {
     position: absolute;
