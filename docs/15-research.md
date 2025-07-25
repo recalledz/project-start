@@ -2,6 +2,8 @@
 
 This section outlines the major research branches and their unlock progression.
 
+Build a Research Desk to unlock the Research screen and begin accumulating Research Points.
+
 
 ---
 
