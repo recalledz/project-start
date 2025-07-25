@@ -543,10 +543,11 @@ body.darkenshift-mode .tabsContainer button.active {
 
 .water-burst {
     position: absolute;
-    width: 6px;
-    height: 6px;
+    width: 12px;
+    height: 12px;
     border-radius: 50%;
     background: #7fd9ff;
+    box-shadow: 0 0 6px rgba(127,217,255,0.9);
     pointer-events: none;
     z-index: 15;
     animation: burstMove var(--duration) linear forwards;

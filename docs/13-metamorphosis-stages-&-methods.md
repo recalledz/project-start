@@ -14,7 +14,7 @@ Each disciple evolves through frog-like spiritual metamorphosis. Accessible via 
 - **metamorphosis Stats**: method modifiers, room/building multipliers, season, humidity, and training bonuses
 - **Left panel disciple list** for selecting which coquí's progress to view
 
-During the **Training** schedule phase, disciples gain metamorphosis XP automatically.
+Disciples gain metamorphosis XP only when assigned to the **Training** task. While training, they consume Undead Nectar at 0.01 per second.
 ---
 
 ## 🐸 Metamorphosis Stages
@@ -107,7 +107,7 @@ Speed ×0.5 past 70 stability; ×0.25 past 90
 
 –0.12 Stability/sec
 
-- Egg stage has no active methods. Disciples simply train during the schedule's **Training** phase to gain metamorphosis XP.
+- Egg stage has no active methods. Disciples simply train when assigned to **Training** to gain metamorphosis XP.
 
 
 ---

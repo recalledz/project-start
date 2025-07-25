@@ -53,7 +53,7 @@ const seasonClasses = ['spring','summer','aurora','autumn','winter'];
 const seasonTemps = [15, 25, 20, 10, -5];
 
 export const SECT_SCHEDULE = [
-  { phase: 'Morning', duration: 60, action: 'Training' },
+  { phase: 'Morning', duration: 60, action: 'Work' },
   { phase: 'Midday', duration: 60, action: 'Work' },
   { phase: 'Afternoon', duration: 60, action: 'Work' },
   { phase: 'Evening', duration: 60, action: 'Work' },

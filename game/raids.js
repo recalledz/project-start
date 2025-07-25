@@ -26,7 +26,9 @@ export const raidState = {
   xpStart: {}
 };
 
+
 // blob raids handle their own visuals and timing
+
 
 export function startRaid() {
   if (raidState.active) return;
