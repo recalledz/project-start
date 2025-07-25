@@ -852,16 +852,18 @@ function startDiscipleMovement() {
       } else {
         el.classList.remove('incapacitated');
         const phase = getCurrentSchedule().action;
-        if (phase === 'Training') {
+        const task = sectState.discipleTasks[d.id];
+        if (task === 'Training') {
           const orb = document.querySelector('#sectOrbs .water');
           if (orb) {
             const bx = orb.offsetLeft + orb.offsetWidth / 2 - 2;
             const by = orb.offsetTop + orb.offsetHeight / 2 - 2;
             el.style.transform = `translate(${bx}px, ${by}px)`;
           }
+                    taskName = task;
+        } else if (phase !== 'Work') {
           taskName = phase;
         } else {
-          const task = sectState.discipleTasks[d.id];
           taskName = task || 'Idle';
           if (task === 'Gather Fruit' || task === 'Gather Softwood') {
             updateDiscipleGather(d.id, el);
