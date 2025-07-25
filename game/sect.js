@@ -22,6 +22,7 @@ import {
   LOG_XP_PER_CYCLE,
   RESEARCH_XP_PER_CYCLE,
   CHANT_XP_PER_CYCLE,
+  COMBAT_XP_RATE,
   HUNT_CYCLE_SECONDS,
   EXPLORATION_CYCLE_SECONDS
 } from './constants.js';
@@ -1471,7 +1472,7 @@ export function tickSect(delta) {
       sectState.discipleProgress[d.id] = progress;
     } else if (task === 'Exploration') {
       progress = (progress + dt) % EXPLORATION_CYCLE_SECONDS;
-    } else if (task === 'Defend') {
+    } else if (task === 'Fight') {
       if (raidState.active && raidState.enemy) {
         if (!raidState.attackTimers[d.id]) raidState.attackTimers[d.id] = 0;
         raidState.attackTimers[d.id] += delta;
@@ -1483,6 +1484,7 @@ export function tickSect(delta) {
           if (raidState.enemy.isDefeated()) endRaid();
         }
       }
+      xpRate = COMBAT_XP_RATE;
     }
     sectState.discipleProgress[d.id] = progress;
 

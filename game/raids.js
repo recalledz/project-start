@@ -55,7 +55,24 @@ export function startRaid() {
   raidState.damageDealt = 0;
   raidState.damageReceived = 0;
   const onAttack = enemy => {
-    const dmg = enemy.damage;
+    let dmg = enemy.damage;
+    const fighters = sectSystem.disciples.filter(
+      d => sectState.discipleTasks[d.id] === 'Fight' && !d.incapacitated
+    );
+    if (fighters.length > 0) {
+      const target = fighters[Math.floor(Math.random() * fighters.length)];
+      raidState.damageReceived += dmg;
+      const before = target.water;
+      const blocked = Math.min(before, dmg);
+      target.water -= blocked;
+      dmg -= blocked;
+      if (dmg > 0) {
+        target.currentHp = Math.max(0, target.currentHp - dmg);
+        if (target.currentHp === 0) target.incapacitated = true;
+      }
+      if (typeof updateSectDisplay === 'function') updateSectDisplay();
+      return;
+    }
     raidState.damageReceived += dmg;
     sectSystem.orbs.water.current = Math.max(0, sectSystem.orbs.water.current - dmg);
     const orbEl = document.querySelector('#sectOrbs .sect-orb.water');
