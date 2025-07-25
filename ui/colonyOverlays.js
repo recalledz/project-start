@@ -9,6 +9,8 @@ import { systems, sectState, worldProgress } from '../game/state.js';
 import { createSectDiscipleCard, renderExplorationTab, startExploration, startWorldCombat, discipleGatherPhase } from '../script.js';
 import { BUILDINGS, startBuilding } from '../game/buildings.js';
 import { castWordOfHaste, toggleReverberation, orbDamageMultiplier } from '../game/orbSpells.js';
+import { TASK_GROUPS } from '../game/constants.js';
+import { getTaskSkillProgress } from '../utils/skills.js';
 
 let explorationOverlay = null;
 let explorationOverlayActiveTab = 'explore';
@@ -161,7 +163,11 @@ export function openWorkOverlay() {
     const tasks = ['Gather Fruit', 'Gather Softwood', 'Fight'];
     if (systems.buildingUnlocked) tasks.push('Building');
     if (systems.researchUnlocked) tasks.push('Research');
+    const selected = sectSystem.disciples.find(d => d.id === workOverlaySelected);
     tasks.forEach(t => {
+      const option = document.createElement('div');
+      option.className = 'work-task-option';
+
       const btn = document.createElement('button');
       btn.textContent = t;
       btn.addEventListener('click', () => {
@@ -177,7 +183,30 @@ export function openWorkOverlay() {
         }
         render();
       });
-      right.appendChild(btn);
+      option.appendChild(btn);
+
+      if (selected) {
+        const group = TASK_GROUPS[t];
+        if (group) {
+          const xp = sectState.discipleSkills[selected.id]?.[group] || 0;
+          const lvl = getTaskSkillProgress(xp).level;
+          const info = document.createElement('div');
+          info.className = 'work-task-info';
+          const affinity = selected.affinities?.[group];
+          if (affinity === 'liked' || affinity === 'loved') {
+            const icon = document.createElement('i');
+            icon.dataset.lucide = affinity === 'loved' ? 'heart' : 'thumbs-up';
+            icon.className = `affinity-icon ${affinity}`;
+            info.appendChild(icon);
+          }
+          const label = document.createElement('span');
+          label.textContent = `Lv ${lvl}`;
+          info.appendChild(label);
+          option.appendChild(info);
+        }
+      }
+
+      right.appendChild(option);
     });
   }
 
