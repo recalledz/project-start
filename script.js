@@ -344,6 +344,9 @@ let sectNavResearchBtn;
 let sectNavCultivationBtn;
 let sectNavScheduleBtn;
 
+// Track current brightness applied to the sect map
+let currentMapBrightness = 1;
+
 const explorationParty = new Set();
 let currentExplorationParty = [];
 
@@ -746,6 +749,22 @@ function updateSectDisplay() {
   // Refresh the simplified disciple list
   renderSectDiscipleList();
 
+  // Reapply brightness adjustments for night elements
+  applyNightFilters(currentMapBrightness);
+}
+
+function applyNightFilters(brightness) {
+  const inv = brightness < 1 ? 1 / brightness : 1;
+  document.querySelectorAll('#sectOrbs .sect-orb.water').forEach(o => {
+    if (brightness < 1) {
+      o.style.filter = `brightness(${1.5 * inv})`;
+    } else {
+      o.style.filter = '';
+    }
+  });
+  document.querySelectorAll('.raidCardContainer .dCardPane').forEach(c => {
+    c.style.filter = brightness < 1 ? `brightness(${inv})` : '';
+  });
 }
 
 function updateMapBrightness(phase) {
@@ -758,8 +777,10 @@ function updateMapBrightness(phase) {
     Evening: 0.6,
     Night: 0.3
   };
-  map.style.filter = `brightness(${values[phase] || 1})`;
+  currentMapBrightness = values[phase] || 1;
+  map.style.filter = `brightness(${currentMapBrightness})`;
   map.classList.toggle('night', phase === 'Night');
+  applyNightFilters(currentMapBrightness);
 }
 
 function feedDisciples() {}
@@ -1484,6 +1505,7 @@ function renderDealerCard(container = dom.dCardContainer) {
   container.innerHTML = '';
   container.appendChild(card);
   lucide.createIcons({ icons: lucide.icons });
+  applyNightFilters(currentMapBrightness);
 }
 
 
