@@ -7,6 +7,7 @@ import {
   currentEnemy
 } from './state.js';
 import { updateRaidLifeBar, updateDealerLifeDisplay } from './ui.js';
+import { showRaidSummaryOverlay } from '../ui/raidSummaryOverlay.js';
 
 import { spawnDealer } from '../enemySpawning.js';
 import addLog from '../log.js';
@@ -16,7 +17,9 @@ export const raidState = {
   active: false,
   enemy: null,
   attackTimers: {},
-  orbTimer: 0
+  orbTimer: 0,
+  damageDealt: 0,
+  damageReceived: 0
 };
 
 function shootWaterBurst(targetEl) {
@@ -46,8 +49,11 @@ export function startRaid() {
   if (raidState.active) return;
   const stage = Math.max(1, stageData.stage);
   const world = stageData.world;
+  raidState.damageDealt = 0;
+  raidState.damageReceived = 0;
   const onAttack = enemy => {
     const dmg = enemy.damage;
+    raidState.damageReceived += dmg;
     sectSystem.orbs.water.current = Math.max(0, sectSystem.orbs.water.current - dmg);
     if (sectSystem.orbs.water.current === 0) {
       sectState.fruits = Math.floor(sectState.fruits * 0.5);
@@ -61,6 +67,11 @@ export function startRaid() {
     sectState.undeadNectar = (sectState.undeadNectar || 0) + 1;
     addLog('Raiders dropped Undead Nectar!', 'good');
     endRaid();
+    showRaidSummaryOverlay({
+      damageDealt: raidState.damageDealt,
+      damageReceived: raidState.damageReceived,
+      rewards: { undeadNectar: 1 }
+    });
   };
   raidState.enemy = spawnDealer({ stage, world }, 0, onAttack, onDefeat);
   setCurrentEnemy(raidState.enemy);
@@ -95,9 +106,12 @@ export function tickRaid(delta) {
   if (raidState.orbTimer >= ORB_INTERVAL) {
     raidState.orbTimer -= ORB_INTERVAL;
     raidState.enemy.takeDamage(5);
+    raidState.damageDealt += 5;
     const card = document.querySelector('.raidCardContainer .dCardPane');
     shootWaterBurst(card);
-    updateRaidLifeBar(raidState.enemy);
-    if (raidState.enemy.isDefeated()) endRaid();
+    if (raidState.enemy) {
+      updateRaidLifeBar(raidState.enemy);
+      if (raidState.enemy.isDefeated()) endRaid();
+    }
   }
 }
