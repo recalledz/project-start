@@ -1,6 +1,12 @@
 /* global updateSectDisplay */
 import { sectSystem } from './sect.js';
-import { sectState } from './state.js';
+import {
+  sectState,
+  stageData,
+  setCurrentEnemy,
+  currentEnemy
+} from './state.js';
+import { updateDealerLifeDisplay } from './ui.js';
 import { spawnDealer } from '../enemySpawning.js';
 import addLog from '../log.js';
 import { showRaidAlert } from './alerts.js';
@@ -16,7 +22,8 @@ const ORB_INTERVAL = 5000; // ms
 
 export function startRaid() {
   if (raidState.active) return;
-  const stage = Math.max(1, sectSystem.seasonDay + 1);
+  const stage = Math.max(1, stageData.stage);
+  const world = stageData.world;
   const onAttack = enemy => {
     const dmg = enemy.damage;
     sectSystem.orbs.water.current = Math.max(0, sectSystem.orbs.water.current - dmg);
@@ -28,7 +35,9 @@ export function startRaid() {
     }
     if (typeof updateSectDisplay === 'function') updateSectDisplay();
   };
-  raidState.enemy = spawnDealer({ stage, world: 1 }, 0, onAttack, endRaid);
+  raidState.enemy = spawnDealer({ stage, world }, 0, onAttack, endRaid);
+  setCurrentEnemy(raidState.enemy);
+  updateDealerLifeDisplay(raidState.enemy);
   raidState.active = true;
   raidState.attackTimers = {};
   raidState.orbTimer = 0;
@@ -41,17 +50,19 @@ export function startRaid() {
 export function endRaid() {
   if (!raidState.active) return;
   raidState.active = false;
+  setCurrentEnemy(null);
   raidState.enemy = null;
   raidState.attackTimers = {};
   raidState.orbTimer = 0;
   addLog('The raid has ended.', 'info');
+  updateDealerLifeDisplay(null);
   document.dispatchEvent(new CustomEvent('raid-end'));
   if (typeof updateSectDisplay === 'function') updateSectDisplay();
 }
 
 export function tickRaid(delta) {
   if (!raidState.active || !raidState.enemy) return;
-  raidState.enemy.tick(delta);
+  if (raidState.enemy !== currentEnemy) raidState.enemy.tick(delta);
   raidState.orbTimer += delta;
   if (raidState.orbTimer >= ORB_INTERVAL) {
     raidState.orbTimer -= ORB_INTERVAL;
