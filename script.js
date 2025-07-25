@@ -2174,8 +2174,8 @@ Object.assign(playerStats, state.playerStats || {});
         sectSystem.orbs = {
           water: {
             current: water.current || 0,
-            max: water.max || 2000,
-            regen: water.regen || 6
+            max: water.max || 20,
+            regen: water.regen || 0.1
           }
         };
       }

@@ -8,3 +8,4 @@
 - Disciples can direct % of personal Water to orb.
 - The orb is now larger and displays its regeneration rate centered within.
 - At night the orb glows brightly, illuminating nearby terrain.
+- The orb now holds up to 20 Water and regenerates at a flat 0.1 Water per second.

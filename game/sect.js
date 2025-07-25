@@ -31,16 +31,8 @@ export { addDiscoveredLocation } from "./ui.js";
 export const discoveredLocations = [];
 // Core state for the Constructs system. Orbs from the
 // previous implementation remain intact.
-// Water regeneration constants
-// Water regen follows a saturating logistic curve that gradually
-// approaches `R_MAX` with diminishing returns as Water accumulates.
-const R_MAX = 6;        // cap per-second regen
-const BASE_MIDPOINT = 1000;  // default inflection point
-const K = 150;          // controls steepness of taper
-
-function getWaterMidpoint() {
-  return BASE_MIDPOINT;
-}
+// Water regeneration constant
+export const ORB_REGEN_PER_SEC = 0.1;
 
 // Seasonal cycle configuration
 // A full in-game day lasts 5 real minutes (300 seconds). Each season spans
@@ -86,7 +78,7 @@ export function setSeasonBackdrop(season) {
 
 export const sectSystem = {
   orbs: {
-    water: { current: 0, max: 2000, regen: R_MAX }
+    water: { current: 0, max: 20, regen: ORB_REGEN_PER_SEC }
   },
   resources: {
     thought: { current: 0, max: 10, regen: 0, unlocked: false },
@@ -1225,15 +1217,8 @@ export function tickSectSystem(delta) {
     if (sectSystem.weather.duration <= 0) sectSystem.weather = null;
   }
   const ins = sectSystem.resources.water;
-  const seasonMult = seasons[sectSystem.seasonIndex].multiplier;
-  const baseRateRaw = R_MAX / (1 + Math.exp((ins.current - getWaterMidpoint()) / K));
-  const idleCount = 0;
-  const idleMult = 1 + idleCount * 0.05;
-  const baseTotal = baseRateRaw * 0.2 * idleMult;
-  let regen = baseTotal * seasonMult;
-  if (sectSystem.weather) regen *= sectSystem.weather.multiplier;
-  regen = Math.min(R_MAX, regen) * getIntoneMultiplier();
-  sectSystem.waterRegenBase = baseTotal;
+  const regen = ORB_REGEN_PER_SEC;
+  sectSystem.waterRegenBase = regen;
   ins.current = Math.min(ins.max, ins.current + regen * dt);
   const echo = recipes.find(r => r.name === 'Echo of Mind');
   if (
@@ -1344,60 +1329,19 @@ export function openWaterRegenPopup() {
 
   const info = document.createElement('p');
   info.className = 'water-info';
-  info.textContent =
-    `Base water regeneration follows a logistic curve that slows as your` +
-    ` total water rises. At ${getWaterMidpoint()} water the base rate is half of its` +
-    ` ${R_MAX}/s maximum before multipliers.`;
+  info.textContent = `The Water Orb passively restores ${ORB_REGEN_PER_SEC}/s.`;
   box.appendChild(info);
 
   const list = document.createElement('div');
   list.className = 'water-regen-list';
 
-  const ins = sectSystem.resources.water;
-  const season = seasons[sectSystem.seasonIndex];
-  const baseRateRaw = R_MAX / (1 + Math.exp((ins.current - getWaterMidpoint()) / K));
-  const idleCount = 0;
-  const idleMult = 1 + idleCount * 0.05;
-  const seasonMult = season.multiplier;
-  const weatherMult = sectSystem.weather ? sectSystem.weather.multiplier : 1;
-  const intoneMult = getIntoneMultiplier();
-  const researcherCount = sectSystem.disciples.filter(
-    d => sectState.discipleTasks[d.id] === 'Research'
-  ).length;
-  const chanterCount = sectSystem.disciples.filter(
-    d => sectState.discipleTasks[d.id] === 'Chant'
-  ).length;
-
   const rows = [
-    { label: 'Base Rate', value: `${baseRateRaw.toFixed(3)}/s` },
+    { label: 'Base Rate', value: `${ORB_REGEN_PER_SEC.toFixed(3)}/s` }
   ];
-  if (idleCount > 0) {
-    rows.push({ label: `Idle Disciples (${idleCount})`, value: `×${idleMult.toFixed(2)}` });
-  }
-  rows.push({ label: `Season (${season.name})`, value: `×${seasonMult.toFixed(2)}` });
-  if (sectSystem.weather) {
-    rows.push({ label: `Weather (${sectSystem.weather.type})`, value: `×${weatherMult.toFixed(2)}` });
-  }
-  rows.push({ label: 'Intone', value: `×${intoneMult.toFixed(2)}` });
-  if (researcherCount > 0) {
-    rows.push({
-      label: `Research (${researcherCount})`,
-      value: `-${(researcherCount * 4).toFixed(3)}/s`
-    });
-  }
-  if (chanterCount > 0) {
-    rows.push({
-      label: `Chant (${chanterCount})`,
-      value: `-${chanterCount.toFixed(3)}/s`
-    });
-  }
 
   rows.forEach(r => {
     const row = document.createElement('div');
-    const isNeg =
-      r.value.startsWith('-') ||
-      (r.value.startsWith('×') && parseFloat(r.value.slice(1)) < 1);
-    row.className = 'water-row' + (isNeg ? ' negative' : '');
+    row.className = 'water-row';
     row.innerHTML = `<span>${r.label}</span><span>${r.value}</span>`;
     list.appendChild(row);
   });
