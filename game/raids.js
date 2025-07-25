@@ -45,7 +45,7 @@ function shootWaterBurst(targetEl) {
   map.appendChild(proj);
   proj.addEventListener('animationend', () => proj.remove(), { once: true });
   runAnimation(targetEl, 'hit-animate');
-  runAnimation(orb, 'orb-hit');
+  runAnimation(orb, 'orb-burst');
 }
 
 const ORB_INTERVAL = 10000; // ms

@@ -865,8 +865,17 @@ function startDiscipleMovement() {
           } else if (raidState.active && task === 'Fight') {
             const orb = document.querySelector('#sectOrbs .water');
             if (orb) {
-              const bx = orb.offsetLeft + orb.offsetWidth / 2 - 10;
-              const by = orb.offsetTop - 20;
+              const fighters = sectSystem.disciples.filter(
+                x => sectState.discipleTasks[x.id] === 'Fight' && !x.incapacitated
+              );
+              const idx = fighters.findIndex(x => x.id === d.id);
+              const spacing = 20;
+              const startX =
+                orb.offsetLeft +
+                orb.offsetWidth / 2 -
+                ((fighters.length - 1) * spacing) / 2;
+              const bx = startX + idx * spacing - 10;
+              const by = orb.offsetTop + orb.offsetHeight + 4;
               el.style.transform = `translate(${bx}px, ${by}px)`;
             }
           } else moveDisciple(el);
