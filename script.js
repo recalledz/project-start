@@ -129,6 +129,7 @@ import {
   timeScale,
   setTimeScale,
   FRUIT_MAX_CAP,
+  FRUIT_GROWTH_RATES,
   isDarkenshift,
   setIsDarkenshift,
   lifeCore,
