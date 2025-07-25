@@ -179,8 +179,6 @@ import {
   getTaskSkillProgress
 } from './utils/skills.js';
 
-// expose combat damage handler for enemy AI
-globalThis.cDealerDamage = cDealerDamage;
 
 
 
@@ -1734,7 +1732,7 @@ export function spawnDealerEvent(powerMult = 1) {
   setInCombat(true);
   removeDealerLifeBar();
   const temp = { ...stageData, stage: Math.round(stageData.stage * powerMult) };
-  setCurrentEnemy(spawnEnemy('dealer', temp, enemyAttackProgress, onDealerDefeat));
+  setCurrentEnemy(spawnEnemy('dealer', temp, enemyAttackProgress, cDealerDamage, onDealerDefeat));
   updateDealerLifeDisplay();
   enemyAttackFill = renderEnemyAttackBar();
   showPlayerAttackBar();
@@ -1747,7 +1745,7 @@ export function spawnBossEvent() {
   const data = worldProgress[stageData.world];
   const bossStage = 10 * (data?.level || 1);
   const temp = { ...stageData, stage: bossStage };
-  setCurrentEnemy(spawnEnemy('boss', temp, enemyAttackProgress, () => onBossDefeat(currentEnemy)));
+  setCurrentEnemy(spawnEnemy('boss', temp, enemyAttackProgress, cDealerDamage, () => onBossDefeat(currentEnemy)));
   updateDealerLifeDisplay();
   enemyAttackFill = renderEnemyAttackBar();
   showPlayerAttackBar();
@@ -1762,9 +1760,9 @@ export function respawnDealerStage() {
   removeDealerLifeBar();
   if (speakerEncounterPending) {
     speakerEncounterPending = false;
-    setCurrentEnemy(spawnEnemy('speaker', stageData, enemyAttackProgress, onSpeakerDefeat));
+    setCurrentEnemy(spawnEnemy('speaker', stageData, enemyAttackProgress, cDealerDamage, onSpeakerDefeat));
   } else {
-    setCurrentEnemy(spawnEnemy('dealer', stageData, enemyAttackProgress, onDealerDefeat));
+    setCurrentEnemy(spawnEnemy('dealer', stageData, enemyAttackProgress, cDealerDamage, onDealerDefeat));
   }
   updateDealerLifeDisplay();
   enemyAttackFill = renderEnemyAttackBar();
