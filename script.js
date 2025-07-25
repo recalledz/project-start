@@ -115,6 +115,7 @@ import {
   deselectDisciple,
   clearActiveDisciples
 } from "./game/disciples.js";
+import { raidState } from './game/raids.js';
 // developer debug tools
 import { init as initDebug } from "./game/debug.js";
 // Shared game state and configuration
@@ -846,9 +847,16 @@ function startDiscipleMovement() {
         } else {
           const task = sectState.discipleTasks[d.id];
           taskName = task || 'Idle';
-          if (task === 'Gather Fruit' || task === 'Gather Softwood')
+          if (task === 'Gather Fruit' || task === 'Gather Softwood') {
             updateDiscipleGather(d.id, el);
-          else moveDisciple(el);
+          } else if (raidState.active && task === 'Fight') {
+            const orb = document.querySelector('#sectOrbs .water');
+            if (orb) {
+              const bx = orb.offsetLeft + orb.offsetWidth / 2 - 10;
+              const by = orb.offsetTop - 20;
+              el.style.transform = `translate(${bx}px, ${by}px)`;
+            }
+          } else moveDisciple(el);
         }
       }
       updateDiscipleVisual(d, el, taskName);

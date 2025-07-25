@@ -23,6 +23,7 @@ export const LOG_XP_PER_CYCLE = 1; // 0.0047 XP/s × 215s ≈ 1
 export const BUILD_XP_RATE = 1; // per second
 export const RESEARCH_XP_PER_CYCLE = 1; // 0.008 XP/s × ~125s ≈ 1
 export const CHANT_XP_PER_CYCLE = 1.665; // 0.333 XP/s × 5s
+export const COMBAT_XP_RATE = 0.1; // per second
 export const EXPLORATION_CYCLE_SECONDS = 150;
 export const STAMINA_DRAIN_PER_EXPLORATION = 1;
 export const DISCIPLE_MAX_HEALTH = 10;
@@ -50,7 +51,7 @@ export const TASK_ICONS = {
   Training: '🥋',
   Eat: '🍽️',
   Sleep: '💤',
-  Defend: '🛡️'
+  Fight: '⚔️'
 };
 
 export const TASK_GROUPS = {
@@ -63,7 +64,7 @@ export const TASK_GROUPS = {
   'Exploration': 'Exploration',
   Idle: 'Idle',
   Resting: 'Idle',
-  Defend: 'Combat'
+  Fight: 'Combat'
 };
 
 export const ATTRIBUTE_FOR_GROUP = {

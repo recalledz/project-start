@@ -157,7 +157,7 @@ export function openWorkOverlay() {
     });
 
     right.innerHTML = '';
-    const tasks = ['Gather Fruit', 'Gather Softwood'];
+    const tasks = ['Gather Fruit', 'Gather Softwood', 'Fight'];
     if (systems.buildingUnlocked) tasks.push('Building');
     if (systems.researchUnlocked) tasks.push('Research');
     tasks.forEach(t => {

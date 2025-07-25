@@ -15,7 +15,9 @@ Disciples may be called upon to defend the sect from occasional raids.
 * Raids begin automatically during the Night phase.
 * A red alert briefly appears on screen when a raid starts.
 * Raiders attack the Water orb, reducing its stored energy.
-* Disciples assigned to **Defend** fight the raiders using their combat stats.
+* Disciples assigned to **Fight** take position before the Water Orb, striking back each attack.
+* Fighters absorb damage with their personal Water first. When empty they lose HP.
+* Raiders randomly target a fighter when multiple disciples are on guard.
 * If the orb is depleted the sect loses **half** of its stored fruit and softwood.
 * The Water orb periodically lashes out with a **Water Burst** every 10&nbsp;s, dealing 5 damage.
   The burst now appears as a blue projectile traveling from the orb to the dealer card.
