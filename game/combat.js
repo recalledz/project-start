@@ -4,6 +4,7 @@ import { renderDealerLifeBarFill, removeBloodSplat, updateBloodSplat } from '../
 import { formatNumber } from '../utils/numberFormat.js';
 import { activeDisciples } from './disciples.js';
 import { calculateEnemyBasicDamage } from '../enemySpawning.js';
+import { sectSystem } from './sect.js';
 import { runAnimation } from '../utils/animation.js';
 import { showRestartScreen } from '../ui/restartOverlay.js';
 import addLog from '../log.js';
@@ -25,12 +26,13 @@ export function attack(deltaTime = 0) {
     if (!discipleAttackTimers[d.id]) discipleAttackTimers[d.id] = 0;
     discipleAttackTimers[d.id] += deltaTime;
 
+    const atkTime = d.attackSpeed / sectSystem.attackSpeedMult;
     if (d.attackFill) {
-      const pratio = Math.min(1, discipleAttackTimers[d.id] / d.attackSpeed);
+      const pratio = Math.min(1, discipleAttackTimers[d.id] / atkTime);
       d.attackFill.style.width = `${pratio * 100}%`;
     }
 
-    if (discipleAttackTimers[d.id] >= d.attackSpeed && !enemy.isDefeated()) {
+    if (discipleAttackTimers[d.id] >= atkTime && !enemy.isDefeated()) {
       enemy.takeDamage(d.damage);
       if (raidState.active) raidState.damageDealt += d.damage;
       discipleAttackTimers[d.id] = 0;
