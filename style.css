@@ -3168,7 +3168,7 @@ body.darkenshift-mode .tabsContainer button.active {
     color: #7fd9ff;
 }
 .sect-orb.water .orb-fill {
-    background: linear-gradient(to top, rgba(63,149,212,0.8), rgba(127,217,255,0.6));
+    background: linear-gradient(to top, rgba(40,110,180,0.9), rgba(80,160,220,0.7));
 }
 .sect-orb.orb-hit {
     animation: orb-pulse 0.3s ease;

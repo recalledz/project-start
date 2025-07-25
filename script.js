@@ -719,6 +719,7 @@ function updateSectDisplay() {
       orb.className = `sect-orb ${p.cls}`;
       const fill = document.createElement('div');
       fill.className = 'orb-fill';
+      fill.style.height = `${(sectSystem.orbs.water.current / sectSystem.orbs.water.max) * 100}%`;
       orb.appendChild(fill);
       const value = document.createElement('div');
       value.className = 'orb-value';
@@ -736,6 +737,7 @@ function updateSectDisplay() {
       orbs.appendChild(orb);
     });
     initQiRibbons();
+    window.dispatchEvent(new CustomEvent('orbs-changed'));
   }
 
   if (sectDisciplesContainer) {
