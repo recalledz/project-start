@@ -1255,6 +1255,23 @@ function init() {
     }
     updateSectDisplay();
   });
+  document.addEventListener('raid-start', e => {
+    setInCombat(true);
+    removeDealerLifeBar();
+    setCurrentEnemy(e.detail);
+    updateDealerLifeDisplay(e.detail);
+    renderDealerCard();
+    enemyAttackFill = renderEnemyAttackBar();
+    showPlayerAttackBar();
+  });
+  document.addEventListener('raid-end', () => {
+    setInCombat(false);
+    setCurrentEnemy(null);
+    updateDealerLifeDisplay();
+    hidePlayerAttackBar(enemyAttackFill);
+    removeDealerLifeBar();
+    dom.dCardContainer.innerHTML = '';
+  });
   updatePlayerStats(stats);
   // Game starts in sect view; exploration initiates combat
   renderWorldsMenu();
