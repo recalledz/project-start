@@ -5,7 +5,7 @@
 
 Night raids escalate the longer your sect survives. Each evening hostile frogs or spirits attack from the edge of the sect map and attempt to reach the Water Orb.
 
-- **Enemy scaling** – raid size and enemy stats grow with the current stage and world. Early attacks feature a single dealer while later nights spawn full groups and elite units.
+- **Enemy scaling** – raid size and enemy stats grow with the current stage and world. Early attacks feature sluggish "SlowBlob" spirits that spawn every few seconds and crawl toward the orb.
 - **Orb damage** – the Water Orb pulses damage in a small radius, harming nearby attackers. Buildings can boost this effect.
 - **Resource theft** – if any enemy touches the orb they steal a portion of stored resources (fruit, timber and ore) before escaping.
 - **Rewards** – defeating a raid grants small loot drops and experience for participating disciples.
@@ -19,9 +19,8 @@ Disciples may be called upon to defend the sect from occasional raids.
 * Fighters absorb damage with their personal Water first. When empty they lose HP.
 * Raiders randomly target a fighter when multiple disciples are on guard.
 * If the orb is depleted the sect loses **half** of its stored fruit and softwood.
-* The Water orb periodically lashes out with a **Water Burst** every 10&nbsp;s, dealing 5 damage.
-  The burst now appears as a blue projectile traveling from the orb to the dealer card and the orb pulses when firing.
-* Dealer enemies display a small life bar on their card during raids.
+* The Water orb lashes out every second, striking the closest blob for 5 damage.
+* Blobs show a small health meter as they crawl across the map.
 * Defeating a raid yields **Undead Nectar** in addition to experience. The nectar
   is added to your resources side panel for later use.
 * The raid ends when the enemy is defeated or the orb is drained.

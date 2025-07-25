@@ -3991,3 +3991,5 @@ body.darkenshift-mode .tabsContainer button.active {
   margin-top: 2px;
 }
 
+
+.slow-blob{position:absolute;background:purple;border-radius:50%;width:16px;height:16px;}

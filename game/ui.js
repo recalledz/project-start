@@ -32,7 +32,7 @@ export function init(elements = {}) {
 
 export const handContainer = document.getElementsByClassName('handContainer')[0];
 export const dealerLifeDisplay =
-  document.getElementsByClassName('dealerLifeDisplay')[0];
+  document.getElementsByClassName('dealerLifeDisplay')[0] || null;
 
 export function showPlayerAttackBar() {
   const bar = document.getElementById('playerAttackBar');
@@ -57,7 +57,7 @@ export function removeDealerLifeBar() {
   if (bar) bar.remove();
   const atk = document.querySelector('.enemyAttackBar');
   if (atk) atk.remove();
-  dealerLifeDisplay.textContent = '';
+  if (dealerLifeDisplay) dealerLifeDisplay.textContent = '';
 }
 
 export function updateDealerLifeDisplay(currentEnemy) {
@@ -65,6 +65,7 @@ export function updateDealerLifeDisplay(currentEnemy) {
     removeDealerLifeBar();
     return;
   }
+  if (!dealerLifeDisplay) return;
   dealerLifeDisplay.textContent = `Life: ${formatNumber(currentEnemy.currentHp)}/${formatNumber(currentEnemy.maxHp)}`;
   renderDealerLifeBar(dealerLifeDisplay, currentEnemy);
   renderDealerLifeBarFill(currentEnemy);

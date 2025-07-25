@@ -1366,13 +1366,14 @@ function init() {
   document.addEventListener('raid-start', e => {
     setInCombat(true);
     removeDealerLifeBar();
-    setCurrentEnemy(e.detail);
-    renderDealerCard(dom.raidCardContainer);
-
-  
-    
-
-    enemyAttackFill = renderEnemyAttackBar();
+    const detail = e.detail || {};
+    const enemy = detail.enemy ?? detail;
+    const useCard = detail.useCard !== false;
+    setCurrentEnemy(enemy);
+    if (useCard) {
+      renderDealerCard(dom.raidCardContainer);
+      enemyAttackFill = renderEnemyAttackBar();
+    }
     showPlayerAttackBar();
   });
   document.addEventListener('raid-end', () => {
