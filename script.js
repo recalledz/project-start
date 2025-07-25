@@ -705,6 +705,10 @@ function updateSectDisplay() {
       const fill = document.createElement('div');
       fill.className = 'orb-fill';
       orb.appendChild(fill);
+      const value = document.createElement('div');
+      value.className = 'orb-value';
+      value.textContent = `${Math.floor(sectSystem.orbs.water.current)}/${sectSystem.orbs.water.max}`;
+      orb.appendChild(value);
       orb.style.left = p.left;
       orb.style.top = p.top;
       if (p.cls === 'water') {
