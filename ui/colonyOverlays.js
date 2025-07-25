@@ -159,6 +159,7 @@ export function openWorkOverlay() {
     right.innerHTML = '';
     const tasks = ['Gather Fruit', 'Gather Softwood'];
     if (systems.buildingUnlocked) tasks.push('Building');
+    if (systems.researchUnlocked) tasks.push('Research');
     tasks.forEach(t => {
       const btn = document.createElement('button');
       btn.textContent = t;
@@ -383,4 +384,50 @@ export function openDungeonOverlay() {
     entry.appendChild(btn);
     worldsContainer.appendChild(entry);
   });
+}
+
+let researchOverlay = null;
+export function openResearchOverlay() {
+  if (researchOverlay) return;
+  researchOverlay = createOverlay({ className: 'research-overlay', boxClass: 'parchment-box' });
+  researchOverlay.box.classList.add('parchment-box');
+  let interval;
+  researchOverlay.onClose(() => {
+    if (interval) clearInterval(interval);
+    researchOverlay = null;
+  });
+  const { box } = researchOverlay;
+
+  const header = document.createElement('div');
+  header.className = 'panel-heading';
+  header.textContent = 'Research';
+  box.appendChild(header);
+
+  const pointsEl = document.createElement('div');
+  box.appendChild(pointsEl);
+
+  const progress = document.createElement('div');
+  progress.className = 'research-progress';
+  const fill = document.createElement('div');
+  fill.className = 'research-progress-fill';
+  progress.appendChild(fill);
+  box.appendChild(progress);
+
+  const info = document.createElement('div');
+  info.className = 'research-progress-info';
+  box.appendChild(info);
+
+  function render() {
+    pointsEl.textContent = `Research Points: ${sectState.researchPoints}`;
+    const prog = sectState.researchProgress % 500;
+    const pct = (prog / 500) * 100;
+    fill.style.width = `${pct}%`;
+    const researchers = sectSystem.disciples.filter(d => sectState.discipleTasks[d.id] === 'Research').length;
+    const rate = researchers * 4;
+    const time = rate > 0 ? (500 - prog) / rate : Infinity;
+    info.textContent = `Next point: ${rate > 0 ? time.toFixed(1) : '∞'}s`;
+  }
+
+  render();
+  interval = setInterval(render, 1000);
 }

@@ -44,7 +44,7 @@ import { initMetamorphosis, refreshMetamorphosis } from './metamorphosis.js';
 import { intelligenceXpMultiplier } from './attributes.js';
 import { createOverlay } from './ui/overlay.js';
 import { showLoadErrorOverlay } from './ui/loadErrorOverlay.js';
-import { openExplorationOverlay, closeExplorationOverlay, openWorkOverlay, openScheduleOverlay, openPlaceholderOverlay, openResourceOverlay, openBuildOverlay, closeDungeonOverlay, locationListContainer, explorationListContainer } from "./ui/colonyOverlays.js";
+import { openExplorationOverlay, closeExplorationOverlay, openWorkOverlay, openScheduleOverlay, openPlaceholderOverlay, openResourceOverlay, openBuildOverlay, openResearchOverlay, closeDungeonOverlay, locationListContainer, explorationListContainer } from "./ui/colonyOverlays.js";
 import { createDiscipleBadge } from "./game/badges.js";
 import { calculateKillXp } from './utils/xp.js';
 import { initTooltip } from './game/tooltip.js';
@@ -479,7 +479,12 @@ function initTabs() {
   if (sectNavChantBtn) sectNavChantBtn.addEventListener("click", () => { setActiveNavBtn(sectNavChantBtn); openPlaceholderOverlay("Chanting"); });
   if (sectNavMapBtn) sectNavMapBtn.addEventListener("click", () => { setActiveNavBtn(sectNavMapBtn); openExplorationOverlay(); });
   if (sectNavInfluenceBtn) sectNavInfluenceBtn.addEventListener("click", () => { setActiveNavBtn(sectNavInfluenceBtn); openPlaceholderOverlay("Influence"); });
-  if (sectNavResearchBtn) sectNavResearchBtn.addEventListener("click", () => { setActiveNavBtn(sectNavResearchBtn); openPlaceholderOverlay("Research"); });
+  if (sectNavResearchBtn)
+    sectNavResearchBtn.addEventListener("click", () => {
+      setActiveNavBtn(sectNavResearchBtn);
+      if (systems.researchUnlocked) openResearchOverlay();
+      else openPlaceholderOverlay("Research");
+    });
   if (sectNavCultivationBtn)
     sectNavCultivationBtn.addEventListener("click", () => {
       setActiveNavBtn(sectNavCultivationBtn);
@@ -644,6 +649,9 @@ function updateSectDisplay() {
   checkBuildingUnlock();
   if (sectNavBuildBtn) {
     sectNavBuildBtn.style.display = systems.buildingUnlocked ? '' : 'none';
+  }
+  if (sectNavResearchBtn) {
+    sectNavResearchBtn.style.display = systems.researchUnlocked ? '' : 'none';
   }
   if (!sectTabUnlocked || !playerSectPanel) return;
   const total = sectSystem.disciples.length;
