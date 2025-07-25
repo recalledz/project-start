@@ -87,6 +87,11 @@ export function startRaid() {
   };
   const onDefeat = () => {
     sectState.undeadNectar = (sectState.undeadNectar || 0) + 1;
+    if (sectSystem.resources.undeadNectar) {
+      const res = sectSystem.resources.undeadNectar;
+      res.current = Math.min(res.max, res.current + 1);
+      res.unlocked = true;
+    }
     addLog('Raiders dropped Undead Nectar!', 'good');
     endRaid();
     showRaidSummaryOverlay({
