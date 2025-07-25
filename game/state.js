@@ -87,6 +87,7 @@ export const FRUIT_GROWTH_RATES = [60, 40, 30, 20, 0];
 export const sectState = {
   fruits: 0,
   softwood: 0,
+  undeadNectar: 0,
   availableFruits: FRUIT_MAX_CAP,
   animals: { Chicken: 3, Boar: 1, Deer: 0 },
   discipleTasks: {},

@@ -507,6 +507,55 @@ body.darkenshift-mode .tabsContainer button.active {
     box-shadow: 0 0 10px rgba(0,0,0,0.6);
 }
 
+.raidCardContainer {
+    position: absolute;
+    bottom: 4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    pointer-events: none;
+    z-index: 5;
+}
+.raidCardContainer .card-wrapper {
+    pointer-events: auto;
+}
+
+.raid-life-bar {
+    position: absolute;
+    left: 4px;
+    right: 4px;
+    bottom: 2px;
+    height: 4px;
+    background: #333;
+    border: 1px solid #e74c3c;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.raid-life-fill {
+    height: 100%;
+    width: 100%;
+    background: #e74c3c;
+    transition: width 0.3s;
+}
+
+.water-burst {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #7fd9ff;
+    pointer-events: none;
+    animation: burstMove var(--duration) linear forwards;
+}
+
+@keyframes burstMove {
+    from { transform: translate(0,0); opacity: 1; }
+    to { transform: translate(var(--dx), var(--dy)); opacity: 0; }
+}
+
 /* Generic overlay background */
 .overlay {
     position: fixed;
