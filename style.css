@@ -737,6 +737,21 @@ body.darkenshift-mode .tabsContainer button.active {
     color: #ddd;
 }
 
+.work-task-option {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+}
+
+.work-task-info {
+    font-size: 0.7rem;
+    color: #ddd;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
 
 .location-entry {
     cursor: pointer;
