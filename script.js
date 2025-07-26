@@ -40,7 +40,7 @@ import {
 } from './game/buildings.js';
 import { formatNumber } from "./utils/numberFormat.js";
 import { runAnimation } from "./utils/animation.js";
-import { initMetamorphosis, refreshMetamorphosis } from './metamorphosis.js';
+import { initMetamorphosis, refreshMetamorphosis } from './game/metamorphosis.js';
 import { intelligenceXpMultiplier } from './attributes.js';
 import { createOverlay } from './ui/overlay.js';
 import { showLoadErrorOverlay } from './ui/loadErrorOverlay.js';

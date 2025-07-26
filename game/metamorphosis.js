@@ -1,8 +1,8 @@
-import { sectSystem } from './game/sect.js';
-import { sectState } from './game/state.js';
-import { createDiscipleBadge } from './game/badges.js';
-import { METAMORPHOSIS_STAGE_REQ, TRAINING_NECTAR_RATE } from './game/constants.js';
-import { showPathOverlay } from './game/pathOverlay.js';
+import { sectSystem } from './sect.js';
+import { sectState } from './state.js';
+import { createDiscipleBadge } from './badges.js';
+import { METAMORPHOSIS_STAGE_REQ, TRAINING_NECTAR_RATE } from './constants.js';
+import { showPathOverlay } from './pathOverlay.js';
 
 export const metamorphosisState = {
   requirement: METAMORPHOSIS_STAGE_REQ
