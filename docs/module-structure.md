@@ -17,5 +17,11 @@ The project organizes game logic under the `game/` directory.
 - **game/sect.js** – implements the sect management system including constructs and colony helpers.
 - **game/buildings.js** – handles sect building logic and construction timers.
 - **game/metamorphosis.js** – manages disciple metamorphosis progression and its UI. Exposes `destroyMetamorphosis()` to clean up event listeners when the interface is rebuilt.
+- **game/enemy.js** – defines the base `Enemy` class with stats and ability hooks.
+- **game/enemySpawning.js** – contains helpers for spawning enemies and bosses with stage scaling.
+- **game/boss.js** – extends `Enemy` for boss encounters and provides templates.
+- **game/dealerabilities.js** – registry of boss ability factories grouped by type.
+- **game/log.js** – utility for appending colored messages to the combat log.
+- **game/starChart.js** – renders the optional star chart exploration view with PIXI.
 
-The top-level `script.js` now merely orchestrates initialization, delegating all logic to the modules above.
+The top-level `script.js` continues to orchestrate initialization and now imports these modules from `game/`.
