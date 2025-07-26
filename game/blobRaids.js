@@ -2,9 +2,13 @@ import { sectSystem } from './sect.js';
 import { sectState } from './state.js';
 import { runAnimation } from '../utils/animation.js';
 
-const SPAWN_INTERVAL = 5000; // ms
+// Blobs emerge in waves during raids. One spawns every 10 seconds
+// for a total of four attackers.
+const SPAWN_INTERVAL = 10000; // ms
+const MAX_BLOBS = 4;
 const BLOB_SPEED = 10; // px per second
 const ORB_ATTACK_INTERVAL = 1000; // ms
+const ORB_ATTACK_RANGE = 75; // px
 const DISCIPLE_ATTACK_INTERVAL = 10000; // ms
 const DISCIPLE_RANGE = 50; // px
 const DISCIPLE_DAMAGE = 3;
@@ -12,6 +16,7 @@ const DISCIPLE_DAMAGE = 3;
 export const blobs = [];
 let spawnTimer = 0;
 let orbAttackTimer = 0;
+let spawnCount = 0;
 
 export function canSpawn() {
   return !!getMap() && !!getOrb();
@@ -19,9 +24,11 @@ export function canSpawn() {
 
 export function spawnBlob() {
   if (!canSpawn()) return false;
+  if (spawnCount >= MAX_BLOBS) return false;
   const blob = createBlob();
   if (blob) {
     blobs.push(blob);
+    spawnCount += 1;
     return true;
   }
   return false;
@@ -117,15 +124,17 @@ function orbAttack() {
   const ox = orbRect.left + orbRect.width / 2 - mapRect.left;
   const oy = orbRect.top + orbRect.height / 2 - mapRect.top;
   let target = null;
+  let minDist = Infinity;
   blobs.forEach(b => {
     const dist = Math.hypot(b.x - ox, b.y - oy);
-    if (!target || b.hp < target.hp) {
-      target = { blob: b, dist };
+    if (dist <= ORB_ATTACK_RANGE && dist < minDist) {
+      target = b;
+      minDist = dist;
     }
   });
   if (target) {
-    target.blob.takeDamage(5);
-    runAnimation(target.blob.el, 'hit-animate');
+    target.takeDamage(5);
+    runAnimation(target.el, 'hit-animate');
   }
 }
 
@@ -160,23 +169,18 @@ function discipleAttack() {
 }
 
 export function tickBlobRaid(delta) {
-  if (!hasBlobs() && canSpawn()) {
-    if (spawnBlob()) {
-      spawnTimer = 0;
-    }
-  }
   spawnTimer += delta;
-  if (spawnTimer >= SPAWN_INTERVAL) {
-    spawnTimer -= SPAWN_INTERVAL;
-    spawnBlob();
-  }
   orbAttackTimer += delta;
+  blobs.forEach(b => b.update(delta));
+  discipleAttack();
   if (orbAttackTimer >= ORB_ATTACK_INTERVAL) {
     orbAttackTimer -= ORB_ATTACK_INTERVAL;
     orbAttack();
   }
-  blobs.forEach(b => b.update(delta));
-  discipleAttack();
+  if (spawnTimer >= SPAWN_INTERVAL) {
+    spawnTimer -= SPAWN_INTERVAL;
+    if (spawnCount < MAX_BLOBS) spawnBlob();
+  }
 }
 
 export function clearBlobs() {
@@ -184,6 +188,7 @@ export function clearBlobs() {
   blobs.length = 0;
   spawnTimer = 0;
   orbAttackTimer = 0;
+  spawnCount = 0;
 }
 
 export function damageClosestBlob(dmg) {
@@ -197,4 +202,8 @@ export function damageClosestBlob(dmg) {
 
 export function hasBlobs() {
   return blobs.length > 0;
+}
+
+export function raidFinished() {
+  return spawnCount >= MAX_BLOBS && blobs.length === 0;
 }
