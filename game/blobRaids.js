@@ -1,5 +1,4 @@
 import { sectSystem } from './sect.js';
-import { sectState } from './state.js';
 import { runAnimation } from '../utils/animation.js';
 import addLog from './log.js';
 import { BASE_MOVE_SPEED } from './constants.js';
@@ -199,7 +198,7 @@ function orbAttack() {
 
 function discipleAttack() {
   if (!DISCIPLE_ATTACK_INTERVAL) return;
-  const fighters = sectSystem.disciples.filter(d => sectState.discipleTasks[d.id] === 'Fight' && !d.incapacitated);
+  const fighters = sectSystem.disciples.filter(d => !d.incapacitated);
   if (fighters.length === 0 || blobs.length === 0) return;
   const now = performance.now();
   fighters.forEach(d => {

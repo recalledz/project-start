@@ -41,7 +41,7 @@ export function startRaid() {
   raidState.damageReceived = 0;
   raidState.xpStart = {};
   sectSystem.disciples.forEach(d => {
-    if (sectState.discipleTasks[d.id] === 'Fight' && !d.incapacitated) {
+    if (!d.incapacitated) {
       ensureDiscipleSkills(d.id);
       raidState.xpStart[d.id] = {
         xp: sectState.discipleSkills[d.id].Combat || 0,

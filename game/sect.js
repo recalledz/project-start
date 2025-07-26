@@ -1454,13 +1454,26 @@ export function tickSect(delta) {
   sectSystem.disciples.forEach(d => {
     if (d.incapacitated) return;
     const task = sectState.discipleTasks[d.id];
-    if (!task || task === 'Idle' || task === 'Resting') return;
+    if (!task || task === 'Idle' || task === 'Resting') {
+      if (!(raidState.active && raidState.enemy)) return;
+    }
     ensureDiscipleSkills(d.id);
-    const group = TASK_GROUPS[task];
+    let group = TASK_GROUPS[task];
     let xpRate = 0;
     let progress = sectState.discipleProgress[d.id] || 0;
 
-    if (task === 'Gather Fruit' || task === 'Gather Softwood') {
+    if (raidState.active && raidState.enemy) {
+      applyDiscipleAttacks(
+        raidState.enemy,
+        [d],
+        raidState.attackTimers,
+        delta
+      );
+      updateRaidLifeBar(raidState.enemy);
+      if (raidState.enemy.isDefeated()) endRaid(true);
+      xpRate = COMBAT_XP_RATE;
+      group = 'Combat';
+    } else if (task === 'Gather Fruit' || task === 'Gather Softwood') {
       const spot = GATHER_SPOTS[task];
       const rate =
         (task === 'Gather Fruit' ? FRUIT_XP_PER_CYCLE : LOG_XP_PER_CYCLE) /
@@ -1499,18 +1512,6 @@ export function tickSect(delta) {
       sectState.discipleProgress[d.id] = progress;
     } else if (task === 'Exploration') {
       progress = (progress + dt) % EXPLORATION_CYCLE_SECONDS;
-    } else if (task === 'Fight') {
-      if (raidState.active && raidState.enemy) {
-        applyDiscipleAttacks(
-          raidState.enemy,
-          [d],
-          raidState.attackTimers,
-          delta
-        );
-        updateRaidLifeBar(raidState.enemy);
-        if (raidState.enemy.isDefeated()) endRaid(true);
-      }
-      xpRate = COMBAT_XP_RATE;
     }
     sectState.discipleProgress[d.id] = progress;
 

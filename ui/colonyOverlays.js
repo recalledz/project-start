@@ -160,7 +160,7 @@ export function openWorkOverlay() {
     });
 
     right.innerHTML = '';
-    const tasks = ['Gather Fruit', 'Gather Softwood', 'Fight'];
+    const tasks = ['Gather Fruit', 'Gather Softwood'];
     if (systems.buildingUnlocked) tasks.push('Building');
     if (systems.researchUnlocked) tasks.push('Research');
     const selected = sectSystem.disciples.find(d => d.id === workOverlaySelected);

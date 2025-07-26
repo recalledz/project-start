@@ -123,7 +123,8 @@ import { raidState } from './game/raids.js';
 // developer debug tools
 import { init as initDebug } from "./game/debug.js";
 import { attachOrbGlow, enableOrbGlow, disableOrbGlow, updateOrbGlow, flashOrbGlow } from './game/orbGlow.js';
-import { showOrbAttackBar } from './game/blobRaids.js';
+import { showOrbAttackBar, blobs } from './game/blobRaids.js';
+import { BASE_MOVE_SPEED } from './game/constants.js';
 import { initOrbMask, showOrbMask, hideOrbMask, updateOrbMaskPosition } from './game/orbMask.js';
 // Shared game state and configuration
 import {
@@ -879,21 +880,27 @@ function startDiscipleMovement() {
           taskName = task || 'Idle';
           if (task === 'Gather Fruit' || task === 'Gather Softwood') {
             updateDiscipleGather(d.id, el);
-          } else if (raidState.active && task === 'Fight') {
-            const orb = document.querySelector('#sectOrbs .water');
-            if (orb) {
-              const fighters = sectSystem.disciples.filter(
-                x => sectState.discipleTasks[x.id] === 'Fight' && !x.incapacitated
-              );
-              const idx = fighters.findIndex(x => x.id === d.id);
-              const spacing = 20;
-              const startX =
-                orb.offsetLeft +
-                orb.offsetWidth / 2 -
-                ((fighters.length - 1) * spacing) / 2;
-              const bx = startX + idx * spacing - 10;
-              const by = orb.offsetTop + orb.offsetHeight + 4;
-              moveElement(el, bx, by);
+          } else if (raidState.active && blobs.length > 0) {
+            const map = document.getElementById('colonyMap');
+            if (map) {
+              const mapRect = map.getBoundingClientRect();
+              const rect = el.getBoundingClientRect();
+              const px = rect.left + rect.width / 2 - mapRect.left;
+              const py = rect.top + rect.height / 2 - mapRect.top;
+              let target = null;
+              let minDist = Infinity;
+              blobs.forEach(b => {
+                const dist = Math.hypot(b.x - px, b.y - py);
+                if (dist < minDist) {
+                  minDist = dist;
+                  target = b;
+                }
+              });
+              if (target) {
+                moveElement(el, target.x, target.y, BASE_MOVE_SPEED);
+              } else {
+                moveDisciple(el);
+              }
             }
           } else moveDisciple(el);
         }
