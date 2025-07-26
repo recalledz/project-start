@@ -13,6 +13,11 @@ export const blobs = [];
 let spawnTimer = 0;
 let orbAttackTimer = 0;
 
+export function spawnBlob() {
+  const blob = createBlob();
+  if (blob) blobs.push(blob);
+}
+
 function getMap() {
   return document.getElementById('colonyMap');
 }

@@ -11,6 +11,7 @@ import { showRaidAlert } from './alerts.js';
 import { ensureDiscipleSkills, getTaskSkillProgress } from '../utils/skills.js';
 import {
   tickBlobRaid,
+  spawnBlob,
   clearBlobs,
   damageClosestBlob,
   hasBlobs
@@ -48,6 +49,7 @@ export function startRaid() {
     }
   });
   clearBlobs();
+  spawnBlob();
   raidState.enemy = {
     maxHp: 20,
     currentHp: 20,
