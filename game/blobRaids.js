@@ -13,9 +13,18 @@ export const blobs = [];
 let spawnTimer = 0;
 let orbAttackTimer = 0;
 
+export function canSpawn() {
+  return !!getMap() && !!getOrb();
+}
+
 export function spawnBlob() {
+  if (!canSpawn()) return false;
   const blob = createBlob();
-  if (blob) blobs.push(blob);
+  if (blob) {
+    blobs.push(blob);
+    return true;
+  }
+  return false;
 }
 
 function getMap() {
@@ -154,8 +163,7 @@ export function tickBlobRaid(delta) {
   spawnTimer += delta;
   if (spawnTimer >= SPAWN_INTERVAL) {
     spawnTimer -= SPAWN_INTERVAL;
-    const b = createBlob();
-    if (b) blobs.push(b);
+    spawnBlob();
   }
   orbAttackTimer += delta;
   if (orbAttackTimer >= ORB_ATTACK_INTERVAL) {
