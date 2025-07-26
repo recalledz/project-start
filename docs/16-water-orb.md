@@ -10,6 +10,7 @@
 - The orb fill displays the current Water against its maximum capacity.
 - At night the orb glows with a bright blue hue, illuminating nearby terrain using a Pixi.js GlowFilter (radius ~30, outer strength ~2.5, inner strength ~0.5).
 - The glow color is `#7fd9ff` and brightness is boosted 50% at night to help the orb stand out against the dimmed map.
+- Soft light particles swirl around the orb at night, further brightening the surrounding darkness.
 - The orb now holds up to 20 Water and regenerates at a flat 0.1 Water per second.
 - Orb Revival research grants access to an Orb Management panel showing spells like Water Burst.
 - Word of Haste orb spell speeds up work tasks for one minute at the cost of 15 Water.
