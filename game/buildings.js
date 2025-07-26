@@ -92,12 +92,10 @@ export function tickBuilding(dt) {
       sectState.maxDisciples = 3 + sectState.buildings.bohio;
       sectState.housingBonus = 0.05 * Math.floor(sectState.buildings.bohio / 10);
     }
-    if (sectState.buildings.bohio >= 1) {
-      const basket = document.getElementById('sectBasket');
+  if (sectState.buildings.bohio >= 1) {
       const shack = document.getElementById('sectBohio');
-      if (basket) basket.style.display = 'none';
       if (shack) shack.style.display = 'block';
-    }
+  }
     if (builtKey === 'researchDesk' && !systems.researchUnlocked) {
       systems.researchUnlocked = true;
     }

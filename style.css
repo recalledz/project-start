@@ -3212,16 +3212,6 @@ body.darkenshift-mode .tabsContainer button.active {
     box-shadow: 0 0 30px rgba(80,180,255,0.9), 0 0 80px rgba(80,180,255,0.7);
     filter: brightness(1.2) saturate(1.2);
 }
-.sect-basket {
-    position: absolute;
-    width: 8px;
-    height: 6px;
-    background: #845;
-    border-radius: 0 0 8px 8px;
-    left: 24%;
-    top: 74%;
-    transform: translate(-50%, -50%);
-}
 .sect-bohio {
     position: absolute;
     width: 30px;
@@ -3508,7 +3498,6 @@ body.darkenshift-mode .tabsContainer button.active {
   .sect-orb { width: 60px; height: 60px; }
   .disciple-orb { width: 12px; height: 12px; }
   .sect-disciple { width: 9.6px; height: 9.6px; font-size: 0; }
-  .sect-basket { width: 6px; height: 4px; }
   .sect-bohio { width: 24px; height: 18px; }
 }
 
@@ -3517,7 +3506,6 @@ body.darkenshift-mode .tabsContainer button.active {
   .sect-orb { width: 140px; height: 140px; }
   .disciple-orb { width: 20px; height: 20px; }
   .sect-disciple { width: 19.2px; height: 19.2px; }
-  .sect-basket { width: 12px; height: 8px; }
   .sect-bohio { width: 36px; height: 28px; }
   .sect-nav-panel button { width: 32px; height: 32px; font-size: 0.65rem; }
   .sect-nav-panel button svg { width: 20px; height: 20px; }
