@@ -181,6 +181,7 @@ import {
   ATTRIBUTE_FOR_GROUP,
   LOCATION_DEFS
 } from "./game/constants.js";
+import { moveElement } from './game/mapMovement.js';
 import {
   addSkillXp,
   computeGlobalSkillLevel,
@@ -829,7 +830,7 @@ function moveDisciple(el) {
   const maxY = Math.max(cont.clientHeight - 20, 0);
   const x = Math.random() * maxX;
   const y = Math.random() * maxY;
-  el.style.transform = `translate(${x}px, ${y}px)`;
+  moveElement(el, x, y);
 }
 
 function updateDiscipleGather(id, el) {
@@ -838,7 +839,7 @@ function updateDiscipleGather(id, el) {
   const px = patch.offsetLeft + patch.offsetWidth / 2 - 8;
   const py = patch.offsetTop + patch.offsetHeight / 2 - 8;
   el.style.opacity = '1';
-  el.style.transform = `translate(${px}px, ${py}px)`;
+  moveElement(el, px, py);
 }
 
 function startDiscipleMovement() {
@@ -853,7 +854,7 @@ function startDiscipleMovement() {
         if (orb) {
           const bx = orb.offsetLeft + orb.offsetWidth / 2 - 2;
           const by = orb.offsetTop + orb.offsetHeight / 2 - 2;
-          el.style.transform = `translate(${bx}px, ${by}px)`;
+          moveElement(el, bx, by);
         }
         el.classList.add('incapacitated');
         taskName = 'Resting';
@@ -866,7 +867,7 @@ function startDiscipleMovement() {
           if (orb) {
             const bx = orb.offsetLeft + orb.offsetWidth / 2 - 2;
             const by = orb.offsetTop + orb.offsetHeight / 2 - 2;
-            el.style.transform = `translate(${bx}px, ${by}px)`;
+            moveElement(el, bx, by);
           }
                     taskName = task;
         } else if (phase !== 'Work') {
@@ -889,7 +890,7 @@ function startDiscipleMovement() {
                 ((fighters.length - 1) * spacing) / 2;
               const bx = startX + idx * spacing - 10;
               const by = orb.offsetTop + orb.offsetHeight + 4;
-              el.style.transform = `translate(${bx}px, ${by}px)`;
+              moveElement(el, bx, by);
             }
           } else moveDisciple(el);
         }

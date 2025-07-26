@@ -3261,7 +3261,8 @@ body.darkenshift-mode .tabsContainer button.active {
     background-position: center;
     filter: drop-shadow(0 0 2px rgba(0,0,0,0.8));
     pointer-events: none;
-    transition: transform 3s;
+    transition-property: transform;
+    transition-timing-function: linear;
     font-size: 0;
 }
 .sect-disciple::after {

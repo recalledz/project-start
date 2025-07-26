@@ -23,6 +23,7 @@ Disciples may be called upon to defend the sect from occasional raids.
 
 * The Water orb lashes out every second at blobs within 75&nbsp;px, striking the closest target for 5 damage.
 * Blobs show a small health meter as they crawl across the map.
+* All units traverse the map at a base rate of 10&nbsp;px per second.
 * SlowBlob raiders now sport two glowing red eyes that move with them.
 
 * The Water orb periodically lashes out with a **Water Burst** every 10&nbsp;s, dealing 5 damage.
