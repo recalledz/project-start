@@ -3997,3 +3997,6 @@ body.darkenshift-mode .tabsContainer button.active {
 
 
 .slow-blob{position:absolute;background:purple;border-radius:50%;width:16px;height:16px;}
+.slow-blob .blob-eye{position:absolute;width:4px;height:4px;background:red;border-radius:50%;box-shadow:0 0 4px red;top:2px;}
+.slow-blob .blob-eye.left{left:4px;}
+.slow-blob .blob-eye.right{right:4px;}
