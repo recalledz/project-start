@@ -4040,7 +4040,7 @@ body.darkenshift-mode .tabsContainer button.active {
   width:100%;
   background:#7fd9ff;
   transition:width 0.3s ease;
-
+}
 .slow-blob .blob-eye{position:absolute;width:4px;height:4px;background:red;border-radius:50%;box-shadow:0 0 4px red;top:2px;}
 .slow-blob .blob-eye.left{left:4px;}
 .slow-blob .blob-eye.right{right:4px;}
