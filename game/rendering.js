@@ -1,3 +1,5 @@
+import { runAnimation } from '../utils/animation.js';
+
 export function renderDealerLifeBar(dealerLifeDisplay, currentEnemy) {
   if (document.querySelector('.dealerLifeContainer')) return;
   const container = document.createElement('div');
@@ -131,4 +133,37 @@ export function updateBloodSplat(card) {
   } else {
     removeBloodSplat(card);
   }
+}
+
+export function animateDiscipleHit(card) {
+  const w = card.wrapperElement;
+  if (!w) return;
+  const target = card.cardElement || w;
+  runAnimation(target, 'hit-animate');
+}
+
+export function showDamageFloat(card, amount) {
+  const hp = card.hpDisplay;
+  if (!hp) return;
+  const dmg = document.createElement('div');
+  dmg.classList.add('damage-float');
+  dmg.textContent = `-${amount}`;
+  hp.appendChild(dmg);
+  dmg.addEventListener(
+    'animationend',
+    () => dmg.remove(),
+    {
+      once: true
+    }
+  );
+  setTimeout(() => dmg.remove(), 3000);
+}
+
+export function animateDiscipleDeath(card, callback) {
+  const w = card.wrapperElement;
+  if (!w) {
+    callback?.();
+    return;
+  }
+  runAnimation(w, 'card-death', 600).then(() => callback?.());
 }

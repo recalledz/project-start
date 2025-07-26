@@ -76,7 +76,7 @@ import {
   applyBloodSplat,
   removeBloodSplat,
   updateBloodSplat
-} from "./rendering.js";
+} from "./game/rendering.js";
 
 // combat mechanics and timers
 import {

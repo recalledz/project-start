@@ -1,11 +1,10 @@
 import { currentEnemy, stageData, sectState, playerStats } from './state.js';
 import { dealerLifeDisplay } from './ui.js';
-import { renderDealerLifeBarFill, removeBloodSplat, updateBloodSplat } from '../rendering.js';
+import { renderDealerLifeBarFill, removeBloodSplat, updateBloodSplat, animateDiscipleHit, showDamageFloat, animateDiscipleDeath } from './rendering.js';
 import { formatNumber } from '../utils/numberFormat.js';
 import { activeDisciples } from './disciples.js';
 import { calculateEnemyBasicDamage } from '../enemySpawning.js';
 import { sectSystem } from './sect.js';
-import { runAnimation } from '../utils/animation.js';
 import { showRestartScreen } from '../ui/restartOverlay.js';
 import addLog from '../log.js';
 import { raidState } from './raids.js';
@@ -57,38 +56,6 @@ export function setPartyDefeatHandler(fn) {
   partyDefeatHandler = fn;
 }
 
-export function animateDiscipleHit(card) {
-  const w = card.wrapperElement;
-  if (!w) return;
-  const target = card.cardElement || w;
-  runAnimation(target, 'hit-animate');
-}
-
-export function showDamageFloat(card, amount) {
-  const hp = card.hpDisplay;
-  if (!hp) return;
-  const dmg = document.createElement('div');
-  dmg.classList.add('damage-float');
-  dmg.textContent = `-${amount}`;
-  hp.appendChild(dmg);
-  dmg.addEventListener(
-    'animationend',
-    () => dmg.remove(),
-    {
-      once: true
-    }
-  );
-  setTimeout(() => dmg.remove(), 3000);
-}
-
-export function animateDiscipleDeath(card, callback) {
-  const w = card.wrapperElement;
-  if (!w) {
-    callback?.();
-    return;
-  }
-  runAnimation(w, 'card-death', 600).then(() => callback?.());
-}
 
 export function cDealerDamage(damageAmount = null, source = 'dealer') {
   const targets = activeDisciples;

@@ -1,6 +1,5 @@
-import { renderDealerLifeBar, renderDealerLifeBarFill } from '../rendering.js';
+import { renderDealerLifeBar, renderDealerLifeBarFill, renderDiscipleCard } from './rendering.js';
 import { activeDisciples } from './disciples.js';
-import { renderDiscipleCard } from '../rendering.js';
 import { formatNumber } from '../utils/numberFormat.js';
 let mainTab;
 let starChartTab;
