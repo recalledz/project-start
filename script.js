@@ -40,7 +40,11 @@ import {
 } from './game/buildings.js';
 import { formatNumber } from "./utils/numberFormat.js";
 import { runAnimation } from "./utils/animation.js";
-import { initMetamorphosis, refreshMetamorphosis } from './game/metamorphosis.js';
+import {
+  initMetamorphosis,
+  refreshMetamorphosis,
+  destroyMetamorphosis
+} from './game/metamorphosis.js';
 import { intelligenceXpMultiplier } from './game/attributes.js';
 import { createOverlay } from './ui/overlay.js';
 import { showLoadErrorOverlay } from './ui/loadErrorOverlay.js';
@@ -2224,12 +2228,13 @@ function hideSpeakerQuote() {
 
 // Fully wipe saved data and reload the page
 export function startNewGame() {
-if (typeof localStorage !== "undefined") {
-localStorage.removeItem("gameSave");
-}
-window.removeEventListener("beforeunload", saveGame);
-clearInterval(saveInterval);
-location.reload();
+  destroyMetamorphosis();
+  if (typeof localStorage !== "undefined") {
+    localStorage.removeItem("gameSave");
+  }
+  window.removeEventListener("beforeunload", saveGame);
+  clearInterval(saveInterval);
+  location.reload();
 }
 
 // Regroup disciples and refresh the combat party
