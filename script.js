@@ -970,7 +970,7 @@ function buildDiscipleGeneralView(d) {
   const waterRate = document.createElement('span');
   waterRate.textContent = ` (+${calculateWaterRegen(waterLvl).toFixed(2)}/s)`;
   waterRow.appendChild(waterRate);
-  vit.appendChild(hungerRow);
+  vit.appendChild(waterRow);
   body.appendChild(vit);
 
   const task = document.createElement('div');
