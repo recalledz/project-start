@@ -3101,6 +3101,20 @@ body.darkenshift-mode .tabsContainer button.active {
     transition: filter 2s linear;
 }
 
+#orbLightMask {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(circle at var(--orb-x, 50%) var(--orb-y, 50%), rgba(0,0,0,0) 0%, rgba(0,0,0,0.5) 60%, rgba(0,0,0,0.8) 100%);
+    mix-blend-mode: multiply;
+    z-index: 4;
+    display: none;
+}
+
+.colony-map.night #orbLightMask {
+    display: block;
+}
+
 .disciple-progress {
     position: relative;
     width: 120px;

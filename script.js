@@ -119,6 +119,7 @@ import { raidState } from './game/raids.js';
 // developer debug tools
 import { init as initDebug } from "./game/debug.js";
 import { attachOrbGlow, enableOrbGlow, disableOrbGlow, updateOrbGlow } from './game/orbGlow.js';
+import { initOrbMask, showOrbMask, hideOrbMask, updateOrbMaskPosition } from './game/orbMask.js';
 // Shared game state and configuration
 import {
   currentEnemy,
@@ -1319,6 +1320,8 @@ function init() {
   }
   checkBuildingUnlock();
   updateSectDisplay();
+  initOrbMask();
+  window.addEventListener('orbs-changed', updateOrbMaskPosition);
   initVignetteToggles();
   if (window.lucide) lucide.createIcons({ icons: lucide.icons });
   initMetamorphosis();
@@ -1347,8 +1350,11 @@ function init() {
     setNightMode(e.detail.phase === 'Night');
     if (e.detail.phase === 'Night') {
       enableOrbGlow();
+      showOrbMask();
+      updateOrbMaskPosition();
     } else {
       disableOrbGlow();
+      hideOrbMask();
     }
     if (e.detail.action !== 'Work')  {
       sectSystem.disciples.forEach(d => {
