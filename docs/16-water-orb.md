@@ -8,6 +8,7 @@
 - Disciples can direct % of personal Water to orb.
 - The orb is now larger and displays its regeneration rate centered within.
 - The orb fill displays the current Water against its maximum capacity.
+- SlowBlob raiders display a small life bar above them as they approach.
 - At night the orb glows with a bright blue hue, illuminating nearby terrain using a Pixi.js GlowFilter (radius ~30, outer strength ~4, inner strength ~1).
 - The glow color is `#7fd9ff` and brightness is doubled at night to help the orb stand out against the dimmed map.
 - Soft light particles swirl around the orb at night, further brightening the surrounding darkness.
