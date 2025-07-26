@@ -6,8 +6,9 @@ The project organizes game logic under the `game/` directory.
 - **game/disciple.js** – defines the `Disciple` class representing a single frog disciple.
 - **game/disciples.js** – manages which disciples are active in combat.
 - **game/ui.js** – renders combat UI elements such as bars and disciple cards.
-- **game/combat.js** – centralizes all combat logic including damage
-  resolution and disciple hit animations.
+- **game/combat.js** – handles exploration battles and disciple hit animations.
+- **game/raids.js** and **game/blobRaids.js** – implement raid encounters and the
+  defensive combat loop.
 - **game/debug.js** – wiring for optional debug controls.
 - **debugTools.js** – development helpers lazily loaded when a debug
   button is clicked.
