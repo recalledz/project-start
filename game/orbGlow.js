@@ -8,6 +8,9 @@ let time = 0;
 let orbRadius = 0;
 let particleContainer = null;
 const particles = [];
+let flashTime = 0;
+const DEFAULT_OUTER = 4;
+const DEFAULT_INNER = 1;
 
 function resetParticle(p) {
   if (!p || !orbRadius) return;
@@ -78,10 +81,25 @@ export function disableOrbGlow() {
   enabled = false;
 }
 
+export function flashOrbGlow(duration = 0.3) {
+  if (!glowFilter) return;
+  if (!enabled) enableOrbGlow();
+  flashTime = Math.max(flashTime, duration);
+  glowFilter.outerStrength = DEFAULT_OUTER * 1.5;
+  glowFilter.innerStrength = DEFAULT_INNER * 1.5;
+}
+
 export function updateOrbGlow(delta) {
   if (!glowFilter || !enabled) return;
   time += delta / 1000;
   glowFilter.distance = 30 + Math.sin(time) * 5;
+  if (flashTime > 0) {
+    flashTime -= delta / 1000;
+    if (flashTime <= 0) {
+      glowFilter.outerStrength = DEFAULT_OUTER;
+      glowFilter.innerStrength = DEFAULT_INNER;
+    }
+  }
   particles.forEach(p => {
     p.life -= delta / 1000;
     p.sprite.x += p.vx * (delta / 1000);
