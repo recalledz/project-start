@@ -21,7 +21,7 @@ Disciples may be called upon to defend the sect from occasional raids.
 * If the orb is depleted the sect loses **half** of its stored fruit and softwood.
 * Early raids send four SlowBlob raiders, one every 10&nbsp;s for 40&nbsp;s.
 
-* The Water orb lashes out every second, striking the closest blob for 5 damage.
+* The Water orb lashes out every second at blobs within 75&nbsp;px, striking the closest target for 5 damage.
 * Blobs show a small health meter as they crawl across the map.
 
 * The Water orb periodically lashes out with a **Water Burst** every 10&nbsp;s, dealing 5 damage.

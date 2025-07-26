@@ -8,6 +8,7 @@ const SPAWN_INTERVAL = 10000; // ms
 const MAX_BLOBS = 4;
 const BLOB_SPEED = 10; // px per second
 const ORB_ATTACK_INTERVAL = 1000; // ms
+const ORB_ATTACK_RANGE = 75; // px
 const DISCIPLE_ATTACK_INTERVAL = 10000; // ms
 const DISCIPLE_RANGE = 50; // px
 const DISCIPLE_DAMAGE = 3;
@@ -123,15 +124,17 @@ function orbAttack() {
   const ox = orbRect.left + orbRect.width / 2 - mapRect.left;
   const oy = orbRect.top + orbRect.height / 2 - mapRect.top;
   let target = null;
+  let minDist = Infinity;
   blobs.forEach(b => {
     const dist = Math.hypot(b.x - ox, b.y - oy);
-    if (!target || b.hp < target.hp) {
-      target = { blob: b, dist };
+    if (dist <= ORB_ATTACK_RANGE && dist < minDist) {
+      target = b;
+      minDist = dist;
     }
   });
   if (target) {
-    target.blob.takeDamage(5);
-    runAnimation(target.blob.el, 'hit-animate');
+    target.takeDamage(5);
+    runAnimation(target.el, 'hit-animate');
   }
 }
 
