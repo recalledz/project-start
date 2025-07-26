@@ -1,4 +1,4 @@
-import Disciple from '../disciple.js';
+import Disciple from '../game/disciple.js';
 import { calculateMaxWater } from './water.js';
 import { sectState } from '../game/state.js';
 

@@ -2,8 +2,8 @@
 import addLog from '../log.js';
 import { refreshMetamorphosis, tickMetamorphosis } from './metamorphosis.js';
 import { sectState, currentEnemy, FRUIT_GROWTH_RATES } from './state.js';
-import { generateDiscipleAttributes } from '../discipleAttributes.js';
-import Disciple from '../disciple.js';
+import { generateDiscipleAttributes } from './discipleAttributes.js';
+import Disciple from './disciple.js';
 import { initializeDisciple } from '../utils/discipleInit.js';
 import { createOverlay } from '../ui/overlay.js';
 import {
@@ -13,7 +13,7 @@ import {
   TASK_GROUPS,
   ATTRIBUTE_FOR_GROUP
 } from './constants.js';
-import { intelligenceXpMultiplier } from '../attributes.js';
+import { intelligenceXpMultiplier } from './attributes.js';
 import { addSkillXp, ensureDiscipleSkills, getTaskSkillProgress } from '../utils/skills.js';
 import { generateSkillAffinities, initializeStartingSkills } from './affinities.js';
 import { getAffinityMultiplier } from './affinities.js';

@@ -1,4 +1,4 @@
-import Disciple from '../disciple.js';
+import Disciple from '../game/disciple.js';
 import { initializeDisciple } from './discipleInit.js';
 import { generateSkillAffinities, initializeStartingSkills } from '../game/affinities.js';
 import { sectState } from '../game/state.js';
