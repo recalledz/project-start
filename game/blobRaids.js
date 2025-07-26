@@ -160,6 +160,11 @@ function discipleAttack() {
 }
 
 export function tickBlobRaid(delta) {
+  if (!hasBlobs() && canSpawn()) {
+    if (spawnBlob()) {
+      spawnTimer = 0;
+    }
+  }
   spawnTimer += delta;
   if (spawnTimer >= SPAWN_INTERVAL) {
     spawnTimer -= SPAWN_INTERVAL;
