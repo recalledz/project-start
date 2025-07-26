@@ -122,7 +122,8 @@ import {
 import { raidState } from './game/raids.js';
 // developer debug tools
 import { init as initDebug } from "./game/debug.js";
-import { attachOrbGlow, enableOrbGlow, disableOrbGlow, updateOrbGlow } from './game/orbGlow.js';
+import { attachOrbGlow, enableOrbGlow, disableOrbGlow, updateOrbGlow, flashOrbGlow } from './game/orbGlow.js';
+import { showOrbAttackBar } from './game/blobRaids.js';
 import { initOrbMask, showOrbMask, hideOrbMask, updateOrbMaskPosition } from './game/orbMask.js';
 // Shared game state and configuration
 import {
@@ -751,6 +752,7 @@ function updateSectDisplay() {
     });
     initQiRibbons();
     window.dispatchEvent(new CustomEvent('orbs-changed'));
+    if (raidState.active) showOrbAttackBar();
   }
 
   if (sectDisciplesContainer) {

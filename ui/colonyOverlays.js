@@ -8,7 +8,7 @@ import { sectSystem, SECT_SCHEDULE, getCurrentSchedule, renderConstructCards, ge
 import { systems, sectState, worldProgress } from '../game/state.js';
 import { createSectDiscipleCard, renderExplorationTab, startExploration, startWorldCombat, discipleGatherPhase } from '../script.js';
 import { BUILDINGS, startBuilding } from '../game/buildings.js';
-import { castWordOfHaste, toggleReverberation, orbDamageMultiplier } from '../game/orbSpells.js';
+import { castWordOfHaste, toggleReverberation } from '../game/orbSpells.js';
 import { TASK_GROUPS } from '../game/constants.js';
 import { getTaskSkillProgress } from '../utils/skills.js';
 
@@ -324,10 +324,6 @@ export function openOrbOverlay() {
   list.className = 'orb-spell-list';
   box.appendChild(list);
 
-  const burst = document.createElement('li');
-  burst.className = 'orb-spell';
-  burst.innerHTML = `<b>Water Burst</b> - Automatically hits raiders every 10s for ${5 * orbDamageMultiplier()} damage.`;
-  list.appendChild(burst);
 
   function render() {
     list.querySelectorAll('.dynamic-spell').forEach(el => el.remove());

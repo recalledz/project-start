@@ -3,7 +3,9 @@ import { sectState } from './state.js';
 import { runAnimation } from '../utils/animation.js';
 import addLog from './log.js';
 import { BASE_MOVE_SPEED } from './constants.js';
+import { flashOrbGlow } from './orbGlow.js';
 import { raidState } from './raids.js';
+
 
 
 // Blobs emerge in waves during raids. One spawns every 10 seconds
@@ -12,7 +14,7 @@ const SPAWN_INTERVAL = 10000; // ms
 const MAX_BLOBS = 4;
 // Blobs move at the base unit speed
 const BLOB_SPEED = BASE_MOVE_SPEED;
-const ORB_ATTACK_INTERVAL = 1000; // ms
+const ORB_ATTACK_INTERVAL = 5000; // ms
 const ORB_ATTACK_RANGE = 75; // px
 const DISCIPLE_ATTACK_INTERVAL = 10000; // ms
 const DISCIPLE_RANGE = 50; // px
@@ -21,6 +23,7 @@ const DISCIPLE_DAMAGE = 3;
 export const blobs = [];
 let spawnTimer = 0;
 let orbAttackTimer = 0;
+let orbAttackFill = null;
 let spawnCount = 0;
 
 export function canSpawn() {
@@ -45,6 +48,31 @@ function getMap() {
 
 function getOrb() {
   return document.querySelector('#sectOrbs .sect-orb.water');
+}
+
+export function showOrbAttackBar() {
+  const orb = getOrb();
+  if (!orb) return;
+  if (orbAttackFill && orbAttackFill.isConnected) return;
+  const bar = document.createElement('div');
+  bar.className = 'orb-attack-bar';
+  const fill = document.createElement('div');
+  fill.className = 'orb-attack-fill';
+  bar.appendChild(fill);
+  orb.appendChild(bar);
+  orbAttackFill = fill;
+}
+
+export function hideOrbAttackBar() {
+  if (orbAttackFill && orbAttackFill.parentElement) {
+    orbAttackFill.parentElement.remove();
+  }
+  orbAttackFill = null;
+}
+
+function getOrbAttackFill() {
+  if (!orbAttackFill || !orbAttackFill.isConnected) showOrbAttackBar();
+  return orbAttackFill;
 }
 
 function createBlob() {
@@ -162,6 +190,9 @@ function orbAttack() {
     target.takeDamage(5);
     raidState.damageDealt += 5;
     runAnimation(target.el, 'hit-animate');
+    runAnimation(orb, 'orb-burst');
+    flashOrbGlow();
+    if (orbAttackFill) orbAttackFill.style.width = '0%';
     addLog('Water Orb hits a SlowBlob for 5 damage.', 'damage');
   }
 }
@@ -200,6 +231,11 @@ function discipleAttack() {
 export function tickBlobRaid(delta) {
   spawnTimer += delta;
   orbAttackTimer += delta;
+  const fill = getOrbAttackFill();
+  if (fill) {
+    const ratio = Math.min(1, orbAttackTimer / ORB_ATTACK_INTERVAL);
+    fill.style.width = `${ratio * 100}%`;
+  }
   blobs.forEach(b => b.update(delta));
   discipleAttack();
   if (orbAttackTimer >= ORB_ATTACK_INTERVAL) {
@@ -217,6 +253,7 @@ export function clearBlobs() {
   blobs.length = 0;
   spawnTimer = 0;
   orbAttackTimer = 0;
+  hideOrbAttackBar();
   spawnCount = 0;
 }
 

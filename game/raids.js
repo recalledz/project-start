@@ -16,7 +16,9 @@ import {
   clearBlobs,
   damageClosestBlob,
   canSpawn,
-  raidFinished
+  raidFinished,
+  showOrbAttackBar,
+  hideOrbAttackBar
 } from './blobRaids.js';
 
 export const raidState = {
@@ -83,6 +85,7 @@ export function startRaid() {
     }
   };
   setCurrentEnemy(raidState.enemy);
+  showOrbAttackBar();
 
   raidState.active = true;
   raidState.attackTimers = {};
@@ -106,6 +109,7 @@ export function endRaid(victory = false) {
   const xpStart = raidState.xpStart;
   raidState.xpStart = {};
   clearBlobs();
+  hideOrbAttackBar();
   addLog('The raid has ended.', 'info');
   updateDealerLifeDisplay(null);
   if (victory && enemy) {

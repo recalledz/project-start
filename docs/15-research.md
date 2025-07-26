@@ -76,7 +76,7 @@ Unlocks the Golden Mausoleum building for advanced cultivation legacy effects.
 
 Orb Revival
 
-Unlocks the Orb Management screen, providing details on abilities like Water Burst.
+Unlocks the Orb Management screen with Water Orb details.
 
 Word of Haste
 
