@@ -14,7 +14,8 @@ import {
   spawnBlob,
   clearBlobs,
   damageClosestBlob,
-  hasBlobs
+  hasBlobs,
+  canSpawn
 } from './blobRaids.js';
 
 export const raidState = {
@@ -57,6 +58,7 @@ export function startRaid() {
       damageClosestBlob(dmg);
     },
     isDefeated() {
+      if (!canSpawn()) return false;
       return !hasBlobs();
     },
     tick(dt) {
