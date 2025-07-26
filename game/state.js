@@ -1,5 +1,5 @@
 import RateTracker from '../utils/rateTracker.js';
-import { BossTemplates } from '../boss.js';
+import { BossTemplates } from './boss.js';
 
 export let isDarkenshift = false;
 export function setIsDarkenshift(val) {

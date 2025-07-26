@@ -1,7 +1,7 @@
 import Enemy from './enemy.js';
 import { Boss, BossTemplates } from './boss.js';
 import { AbilityRegistry } from './dealerabilities.js';
-import { calculateKillXp, effectiveLevel } from './utils/xp.js';
+import { calculateKillXp, effectiveLevel } from '../utils/xp.js';
 
 export function calculateEnemyHp(stage, world, isBoss = false) {
   const baseHp = 10 + stage;

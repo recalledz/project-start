@@ -1,4 +1,4 @@
-import { Boss } from './boss.js';
+import { Boss } from './game/boss.js';
 import { unlockConstruct, skipToNextNight } from './game/sect.js';
 import {
   spawnBossEvent,

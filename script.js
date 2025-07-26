@@ -1,18 +1,18 @@
 /* eslint-disable no-unused-vars, no-undef */
 // Core modules that power combat systems
 import Disciple from "./game/disciple.js";
-import addLog from "./log.js"; // helper for appending to the event log
-import Enemy from "./enemy.js"; // base enemy class
+import addLog from "./game/log.js"; // helper for appending to the event log
+import Enemy from "./game/enemy.js"; // base enemy class
 import {
   Boss,
   BossTemplates
-} from "./boss.js"; // boss definitions
+} from "./game/boss.js"; // boss definitions
 import {
   AbilityRegistry
-} from "./dealerabilities.js"; // boss ability registry
+} from "./game/dealerabilities.js"; // boss ability registry
 import {
   initStarChart
-} from "./starChart.js"; // optional star chart tab
+} from "./game/starChart.js"; // optional star chart tab
 import {
   initSect,
   tickSectSystem,
@@ -70,7 +70,7 @@ import {
   spawnDealer,
   spawnBoss,
   spawnEnemy
-} from "./enemySpawning.js";
+} from "./game/enemySpawning.js";
 import {
   renderCard,
   renderDiscipleCard,

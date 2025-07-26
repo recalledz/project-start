@@ -1,5 +1,5 @@
 /* global updateSectDisplay */
-import addLog from '../log.js';
+import addLog from './log.js';
 import { refreshMetamorphosis, tickMetamorphosis } from './metamorphosis.js';
 import { sectState, currentEnemy, FRUIT_GROWTH_RATES } from './state.js';
 import { generateDiscipleAttributes } from './discipleAttributes.js';
