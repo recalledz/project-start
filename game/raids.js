@@ -14,7 +14,8 @@ import {
   spawnBlob,
   clearBlobs,
   damageClosestBlob,
-  hasBlobs
+  hasBlobs,
+  canSpawn
 } from './blobRaids.js';
 
 export const raidState = {
@@ -49,7 +50,22 @@ export function startRaid() {
     }
   });
   clearBlobs();
-  spawnBlob();
+  if (
+    typeof window !== 'undefined' &&
+    window.requestAnimationFrame &&
+    !canSpawn()
+  ) {
+    const check = () => {
+      if (canSpawn()) {
+        spawnBlob();
+      } else {
+        window.requestAnimationFrame(check);
+      }
+    };
+    window.requestAnimationFrame(check);
+  } else {
+    spawnBlob();
+  }
   raidState.enemy = {
     maxHp: 20,
     currentHp: 20,
@@ -57,6 +73,7 @@ export function startRaid() {
       damageClosestBlob(dmg);
     },
     isDefeated() {
+      if (!canSpawn()) return false;
       return !hasBlobs();
     },
     tick(dt) {
