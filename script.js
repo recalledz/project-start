@@ -779,7 +779,7 @@ function applyNightFilters(brightness) {
   document.querySelectorAll('#sectOrbs .sect-orb.water').forEach(o => {
     if (!o.dataset.baseFilter) o.dataset.baseFilter = o.style.filter || '';
     if (brightness < 1) {
-      o.style.filter = `${o.dataset.baseFilter} brightness(${inv * 1.5}) saturate(1.2)`;
+      o.style.filter = `${o.dataset.baseFilter} brightness(${inv * 2}) saturate(1.2)`;
     } else {
       o.style.filter = o.dataset.baseFilter;
     }

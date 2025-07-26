@@ -56,8 +56,8 @@ export function attachOrbGlow(element) {
   }
   glowFilter = new PIXI.filters.GlowFilter({
     distance: 30,
-    outerStrength: 2.5,
-    innerStrength: 0.5,
+    outerStrength: 4,
+    innerStrength: 1,
     color: 0x7fd9ff
   });
   orbSprite.filters = [];
