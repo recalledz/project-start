@@ -48,10 +48,11 @@ This is not a standard Wuxia knockoff — **Taino and Caribbean mysticism** blen
 
 ## Dev Tools
 
-Run the game with the `?dev` query parameter to enable a debug panel.
-It offers helpers like spawning bosses, toggling fast mode, and skipping
-directly to the next night. A new button lets you toggle the sect map's
-zone overlays on or off for layout testing. You can also grant yourself
+The game includes a built-in debug panel with helpers like spawning
+bosses, toggling fast mode, and skipping directly to the next night.
+The panel loads its logic the first time you click any debug button, so
+no special query parameter is required. A button also lets you toggle
+sect map zone overlays for layout testing, and you can grant yourself
 extra fruit by entering an amount and clicking **Give**.
 
 ### Building
