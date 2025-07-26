@@ -1,6 +1,7 @@
 import { sectSystem } from './sect.js';
 import { sectState } from './state.js';
 import { runAnimation } from '../utils/animation.js';
+import addLog from '../log.js';
 
 // Blobs emerge in waves during raids. One spawns every 10 seconds
 // for a total of four attackers.
@@ -74,12 +75,21 @@ function createBlob() {
   }
   blob.style.left = `${x}px`;
   blob.style.top = `${y}px`;
+  const lifeBar = document.createElement('div');
+  lifeBar.className = 'blob-life-bar';
+  const lifeFill = document.createElement('div');
+  lifeFill.className = 'blob-life-fill';
+  lifeFill.style.width = '100%';
+  lifeBar.appendChild(lifeFill);
+  blob.appendChild(lifeBar);
   map.appendChild(blob);
   return {
     el: blob,
+    lifeFill,
     x,
     y,
     hp: 20,
+    maxHp: 20,
     nextAttack: performance.now() + 1000,
     size,
     update(dt) {
@@ -101,11 +111,16 @@ function createBlob() {
           sectSystem.orbs.water.current - 5
         );
         runAnimation(orb, 'orb-hit');
+        addLog('SlowBlob hits the Water Orb for 5 damage.', 'damage');
         this.nextAttack = performance.now() + 1000;
       }
     },
     takeDamage(dmg) {
       this.hp = Math.max(0, this.hp - dmg);
+      if (this.lifeFill) {
+        const pct = (this.hp / this.maxHp) * 100;
+        this.lifeFill.style.width = `${pct}%`;
+      }
       if (this.hp === 0) {
         this.el.remove();
         const idx = blobs.indexOf(this);
@@ -135,6 +150,7 @@ function orbAttack() {
   if (target) {
     target.takeDamage(5);
     runAnimation(target.el, 'hit-animate');
+    addLog('Water Orb hits a SlowBlob for 5 damage.', 'damage');
   }
 }
 

@@ -23,6 +23,7 @@ Disciples may be called upon to defend the sect from occasional raids.
 
 * The Water orb lashes out every second at blobs within 75&nbsp;px, striking the closest target for 5 damage.
 * Blobs show a small health meter as they crawl across the map.
+* Damage dealt to and by the Water orb is logged during raids.
 
 * The Water orb periodically lashes out with a **Water Burst** every 10&nbsp;s, dealing 5 damage.
   The burst now appears as a bright blue projectile traveling from the orb to the dealer card and the orb pulses when firing.
