@@ -8,8 +8,8 @@
 - Disciples can direct % of personal Water to orb.
 - The orb is now larger and displays its regeneration rate centered within.
 - The orb fill displays the current Water against its maximum capacity.
-- At night the orb glows with a bright blue hue, illuminating nearby terrain using a Pixi.js GlowFilter (radius ~30, outer strength ~2.5, inner strength ~0.5).
-- The glow color is `#7fd9ff` and brightness is boosted 50% at night to help the orb stand out against the dimmed map.
+- At night the orb glows with a bright blue hue, illuminating nearby terrain using a Pixi.js GlowFilter (radius ~30, outer strength ~4, inner strength ~1).
+- The glow color is `#7fd9ff` and brightness is doubled at night to help the orb stand out against the dimmed map.
 - Soft light particles swirl around the orb at night, further brightening the surrounding darkness.
 - A radial light mask darkens the map at night while leaving a bright gradient around the orb.
 - The orb now holds up to 20 Water and regenerates at a flat 0.1 Water per second.
