@@ -1,12 +1,14 @@
 import { sectSystem } from './sect.js';
 import { sectState } from './state.js';
 import { runAnimation } from '../utils/animation.js';
+import { BASE_MOVE_SPEED } from './constants.js';
 
 // Blobs emerge in waves during raids. One spawns every 10 seconds
 // for a total of four attackers.
 const SPAWN_INTERVAL = 10000; // ms
 const MAX_BLOBS = 4;
-const BLOB_SPEED = 10; // px per second
+// Blobs move at the base unit speed
+const BLOB_SPEED = BASE_MOVE_SPEED;
 const ORB_ATTACK_INTERVAL = 1000; // ms
 const ORB_ATTACK_RANGE = 75; // px
 const DISCIPLE_ATTACK_INTERVAL = 10000; // ms
