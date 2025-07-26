@@ -679,9 +679,12 @@ function updateSectDisplay() {
     const mm = String(Math.floor(remaining / 60)).padStart(2, '0');
     const ss = String(Math.floor(remaining % 60)).padStart(2, '0');
     const upkeep = FRUIT_CONSUMPTION_RATE * sectSystem.disciples.length * DAY_LENGTH_SECONDS;
-       const formatRate = v => `${v >= 0 ? '+' : ''}${v.toFixed(2)}`;
-    const fruitRate = formatRate(sectSystem.gains.fruits);
-    const woodRate = formatRate(sectSystem.gains.softwood);
+       const formatRate = v => {
+         const num = typeof v === 'number' ? v : 0;
+         return `${num >= 0 ? '+' : ''}${num.toFixed(2)}`;
+       };
+    const fruitRate = formatRate(sectSystem.gains?.fruits);
+    const woodRate = formatRate(sectSystem.gains?.softwood);
     sectSummaryDisplay.innerHTML = `
       <span>👥 ${total}/${sectState.maxDisciples} (Idle: ${idle})</span>
       <span>${sectState.fruits.toFixed(2)} (${fruitRate}/s)</span>
@@ -2324,6 +2327,14 @@ Object.assign(playerStats, state.playerStats || {});
       if (sectSystem.weather && sectSystem.weather.days !== undefined) {
         sectSystem.weather.duration = sectSystem.weather.days;
         delete sectSystem.weather.days;
+      }
+
+      if (!sectSystem.gains) {
+        sectSystem.gains = { water: 0, fruits: 0, softwood: 0 };
+      } else {
+        if (typeof sectSystem.gains.water !== 'number') sectSystem.gains.water = 0;
+        if (typeof sectSystem.gains.fruits !== 'number') sectSystem.gains.fruits = 0;
+        if (typeof sectSystem.gains.softwood !== 'number') sectSystem.gains.softwood = 0;
       }
 
     if (!Array.isArray(sectSystem.savedConstructs)) {
