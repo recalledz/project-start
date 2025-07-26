@@ -3,10 +3,10 @@ import { dealerLifeDisplay } from './ui.js';
 import { renderDealerLifeBarFill, removeBloodSplat, updateBloodSplat, animateDiscipleHit, showDamageFloat, animateDiscipleDeath } from './rendering.js';
 import { formatNumber } from '../utils/numberFormat.js';
 import { activeDisciples } from './disciples.js';
-import { calculateEnemyBasicDamage } from '../enemySpawning.js';
+import { calculateEnemyBasicDamage } from './enemySpawning.js';
 import { sectSystem } from './sect.js';
 import { showRestartScreen } from '../ui/restartOverlay.js';
-import addLog from '../log.js';
+import addLog from './log.js';
 import { raidState } from './raids.js';
 
 export function init() {}
