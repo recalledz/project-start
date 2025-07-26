@@ -3,6 +3,7 @@ import { sectState } from './state.js';
 import { runAnimation } from '../utils/animation.js';
 import addLog from '../log.js';
 import { BASE_MOVE_SPEED } from './constants.js';
+import { raidState } from './raids.js';
 
 
 // Blobs emerge in waves during raids. One spawns every 10 seconds
@@ -119,6 +120,7 @@ function createBlob() {
           0,
           sectSystem.orbs.water.current - 5
         );
+        raidState.damageReceived += 5;
         runAnimation(orb, 'orb-hit');
         addLog('SlowBlob hits the Water Orb for 5 damage.', 'damage');
         this.nextAttack = performance.now() + 1000;
@@ -158,6 +160,7 @@ function orbAttack() {
   });
   if (target) {
     target.takeDamage(5);
+    raidState.damageDealt += 5;
     runAnimation(target.el, 'hit-animate');
     addLog('Water Orb hits a SlowBlob for 5 damage.', 'damage');
   }
@@ -187,6 +190,7 @@ function discipleAttack() {
       });
       if (target) {
         target.takeDamage(DISCIPLE_DAMAGE);
+        raidState.damageDealt += DISCIPLE_DAMAGE;
         d._attackTimer = now + DISCIPLE_ATTACK_INTERVAL;
       }
     }
@@ -223,6 +227,7 @@ export function damageClosestBlob(dmg) {
     if (b.hp < target.hp) target = b;
   });
   target.takeDamage(dmg);
+  raidState.damageDealt += dmg;
 }
 
 export function hasBlobs() {

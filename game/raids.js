@@ -72,6 +72,7 @@ export function startRaid() {
     currentHp: 20,
     takeDamage(dmg) {
       damageClosestBlob(dmg);
+      raidState.damageDealt += dmg;
     },
     isDefeated() {
       if (!canSpawn()) return false;

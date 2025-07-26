@@ -26,6 +26,7 @@ import {
   HUNT_CYCLE_SECONDS,
   EXPLORATION_CYCLE_SECONDS
 } from './constants.js';
+import { applyDiscipleAttacks } from './combat.js';
 import { startRaid, tickRaid, raidState, endRaid } from './raids.js';
 import { updateRaidLifeBar } from './ui.js';
 import { tickOrbSpells } from './orbSpells.js';
@@ -1482,15 +1483,14 @@ export function tickSect(delta) {
       progress = (progress + dt) % EXPLORATION_CYCLE_SECONDS;
     } else if (task === 'Fight') {
       if (raidState.active && raidState.enemy) {
-        if (!raidState.attackTimers[d.id]) raidState.attackTimers[d.id] = 0;
-        raidState.attackTimers[d.id] += delta;
-        const atkTime = d.attackSpeed / sectSystem.attackSpeedMult;
-        if (raidState.attackTimers[d.id] >= atkTime) {
-          raidState.enemy.takeDamage(d.damage);
-          updateRaidLifeBar(raidState.enemy);
-          raidState.attackTimers[d.id] = 0;
-          if (raidState.enemy.isDefeated()) endRaid(true);
-        }
+        applyDiscipleAttacks(
+          raidState.enemy,
+          [d],
+          raidState.attackTimers,
+          delta
+        );
+        updateRaidLifeBar(raidState.enemy);
+        if (raidState.enemy.isDefeated()) endRaid(true);
       }
       xpRate = COMBAT_XP_RATE;
     }
