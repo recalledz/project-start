@@ -21,7 +21,12 @@ const RING_RADIUS = 80;
 const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
 const STAGE_NAMES = ['Egg', 'Tadpole', 'Young Coquí', 'Elder Frog', 'Divine Coquí'];
 
+function handleBreakthroughClick() {
+  if (selectedDiscipleId) breakthrough(selectedDiscipleId);
+}
+
 export function initMetamorphosis() {
+  destroyMetamorphosis();
   container = document.getElementById('metamorphosisTabContent');
   listContainer = document.getElementById('metamorphosisDiscipleList');
   statsContainer = document.getElementById('metamorphosisStats');
@@ -73,9 +78,7 @@ const bodyPath = `M200 150
   ringWrapper = container.querySelector('.metamorphosis-progress');
   breakthroughBtn = container.querySelector('#breakthroughBtn');
   if (breakthroughBtn) {
-    breakthroughBtn.addEventListener('click', () => {
-      if (selectedDiscipleId) breakthrough(selectedDiscipleId);
-    });
+    breakthroughBtn.addEventListener('click', handleBreakthroughClick);
   }
   selectedDiscipleId = sectSystem.disciples[0]?.id || null;
   window.addEventListener('orbs-changed', renderMetamorphosis);
@@ -254,5 +257,13 @@ function updateStats() {
     });
     el.addEventListener('mouseleave', window.hideTooltip);
   });
+}
+
+export function destroyMetamorphosis() {
+  window.removeEventListener('orbs-changed', renderMetamorphosis);
+  document.removeEventListener('disciple-gained', refreshMetamorphosis);
+  if (breakthroughBtn) {
+    breakthroughBtn.removeEventListener('click', handleBreakthroughClick);
+  }
 }
 
