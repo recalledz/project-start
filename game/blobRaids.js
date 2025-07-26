@@ -56,6 +56,12 @@ function createBlob() {
   blob.style.position = 'absolute';
   blob.style.borderRadius = '50%';
   blob.style.background = 'purple';
+  const leftEye = document.createElement('div');
+  leftEye.className = 'blob-eye left';
+  const rightEye = document.createElement('div');
+  rightEye.className = 'blob-eye right';
+  blob.appendChild(leftEye);
+  blob.appendChild(rightEye);
   let x = 0;
   let y = 0;
   const edge = Math.floor(Math.random() * 4);
