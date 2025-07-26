@@ -7,7 +7,7 @@ import {
 import { updateDealerLifeDisplay } from './ui.js';
 import { showRaidSummaryOverlay } from '../ui/raidSummaryOverlay.js';
 
-import addLog from '../log.js';
+import addLog from './log.js';
 import { showRaidAlert } from './alerts.js';
 import { ensureDiscipleSkills, getTaskSkillProgress } from '../utils/skills.js';
 import {

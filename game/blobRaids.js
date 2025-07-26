@@ -1,7 +1,7 @@
 import { sectSystem } from './sect.js';
 import { sectState } from './state.js';
 import { runAnimation } from '../utils/animation.js';
-import addLog from '../log.js';
+import addLog from './log.js';
 import { BASE_MOVE_SPEED } from './constants.js';
 import { raidState } from './raids.js';
 

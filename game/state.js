@@ -1,5 +1,5 @@
 import RateTracker from '../utils/rateTracker.js';
-import { BossTemplates } from '../boss.js';
+import { BossTemplates } from './boss.js';
 
 export let isDarkenshift = false;
 export function setIsDarkenshift(val) {
@@ -90,11 +90,15 @@ export const systems = {
 // Fruit gathering and growth configuration
 export const FRUIT_MAX_CAP = 120;
 export const FRUIT_GROWTH_RATES = [60, 40, 30, 20, 0];
+export const SOFTWOOD_CAP_BASE = 150;
+export const FRUIT_CAP_BASE = 250;
 
 export const sectState = {
   fruits: 0,
   softwood: 0,
   undeadNectar: 0,
+  softwoodCap: SOFTWOOD_CAP_BASE,
+  fruitCap: FRUIT_CAP_BASE,
   availableFruits: FRUIT_MAX_CAP,
   animals: { Chicken: 3, Boar: 1, Deer: 0 },
   discipleTasks: {},
@@ -131,4 +135,12 @@ export const FAST_MODE_SCALE = 10;
 export let timeScale = 1;
 export function setTimeScale(value) {
   timeScale = value;
+}
+
+export function updateResourceCaps() {
+  const lvl = sectState.buildings.bohio || 0;
+  sectState.softwoodCap = SOFTWOOD_CAP_BASE + lvl * 50;
+  sectState.fruitCap = FRUIT_CAP_BASE + lvl * 200;
+  sectState.fruits = Math.min(sectState.fruitCap, sectState.fruits);
+  sectState.softwood = Math.min(sectState.softwoodCap, sectState.softwood);
 }

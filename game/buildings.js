@@ -1,5 +1,5 @@
 // Building-related logic extracted from script.js
-import { sectState, systems } from './state.js';
+import { sectState, systems, updateResourceCaps } from './state.js';
 import { sectSystem } from './sect.js';
 import { addSkillXp, ensureDiscipleSkills, getTaskSkillProgress } from '../utils/skills.js';
 import { intelligenceXpMultiplier } from './attributes.js';
@@ -91,6 +91,7 @@ export function tickBuilding(dt) {
     if (builtKey === 'bohio') {
       sectState.maxDisciples = 3 + sectState.buildings.bohio;
       sectState.housingBonus = 0.05 * Math.floor(sectState.buildings.bohio / 10);
+      updateResourceCaps();
     }
   if (sectState.buildings.bohio >= 1) {
       const shack = document.getElementById('sectBohio');
