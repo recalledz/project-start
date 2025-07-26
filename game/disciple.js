@@ -2,8 +2,8 @@
 // class are created by systems across the game and store combat and
 // attribute information for a single coquí.
 import { generateDiscipleAttributes } from './discipleAttributes.js';
-import { xpRequirement } from './utils/xp.js';
-import { runAnimation } from './utils/animation.js';
+import { xpRequirement } from '../utils/xp.js';
+import { runAnimation } from '../utils/animation.js';
 
 export default class Disciple {
   constructor({ id = 0, name = `Disciple ${id}`, maxHp = 10, combatLevel = 1, attributes = generateDiscipleAttributes() } = {}) {

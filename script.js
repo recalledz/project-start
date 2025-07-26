@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars, no-undef */
 // Core modules that power combat systems
-import Disciple from "./disciple.js";
+import Disciple from "./game/disciple.js";
 import addLog from "./log.js"; // helper for appending to the event log
 import Enemy from "./enemy.js"; // base enemy class
 import {
@@ -41,7 +41,7 @@ import {
 import { formatNumber } from "./utils/numberFormat.js";
 import { runAnimation } from "./utils/animation.js";
 import { initMetamorphosis, refreshMetamorphosis } from './game/metamorphosis.js';
-import { intelligenceXpMultiplier } from './attributes.js';
+import { intelligenceXpMultiplier } from './game/attributes.js';
 import { createOverlay } from './ui/overlay.js';
 import { showLoadErrorOverlay } from './ui/loadErrorOverlay.js';
 import { openExplorationOverlay, closeExplorationOverlay, openWorkOverlay, openScheduleOverlay, openPlaceholderOverlay, openResourceOverlay, openBuildOverlay, openResearchOverlay, openOrbOverlay, closeDungeonOverlay, locationListContainer, explorationListContainer } from "./ui/colonyOverlays.js";

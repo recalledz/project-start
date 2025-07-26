@@ -2,7 +2,7 @@
 import { sectState, systems } from './state.js';
 import { sectSystem } from './sect.js';
 import { addSkillXp, ensureDiscipleSkills, getTaskSkillProgress } from '../utils/skills.js';
-import { intelligenceXpMultiplier } from '../attributes.js';
+import { intelligenceXpMultiplier } from './attributes.js';
 import { BUILD_XP_RATE } from './constants.js';
 
 export const BUILDINGS = {
