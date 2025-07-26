@@ -16,6 +16,8 @@ let ringWrapper;
 let listContainer;
 let breakthroughBtn;
 let statsContainer;
+let statsPanel;
+let statsToggle;
 let selectedDiscipleId = null;
 let breakthroughHandler;
 const RING_RADIUS = 80;
@@ -28,6 +30,8 @@ export function initMetamorphosis() {
   container = document.getElementById('metamorphosisTabContent');
   listContainer = document.getElementById('metamorphosisDiscipleList');
   statsContainer = document.getElementById('metamorphosisStats');
+  statsPanel = document.querySelector('.metamorphosis-stats-panel');
+  statsToggle = document.getElementById('metaStatsToggle');
   if (!container) return;
 const bodyPath = `M200 150
                m -25 0
@@ -87,6 +91,13 @@ const bodyPath = `M200 150
   document.addEventListener('disciple-gained', refreshMetamorphosis);
   renderDiscipleList();
   renderMetamorphosis();
+  if (statsToggle) {
+    statsToggle.addEventListener('click', toggleStatsPanel);
+    statsToggle.addEventListener('mouseenter', e => {
+      window.showTooltip('Toggle stats panel', e.pageX + 10, e.pageY + 10);
+    });
+    statsToggle.addEventListener('mouseleave', window.hideTooltip);
+  }
 }
 
 function ensureMeta(id) {
@@ -276,5 +287,16 @@ function updateStats() {
     });
     el.addEventListener('mouseleave', window.hideTooltip);
   });
+}
+
+function toggleStatsPanel() {
+  if (!statsPanel) return;
+  const open = statsPanel.classList.contains('open');
+  if (open) {
+    statsPanel.classList.remove('open');
+  } else {
+    statsPanel.classList.add('open');
+  }
+  if (statsToggle) statsToggle.textContent = open ? '❮' : '❯';
 }
 
