@@ -1489,7 +1489,7 @@ export function tickSect(delta) {
           raidState.enemy.takeDamage(d.damage);
           updateRaidLifeBar(raidState.enemy);
           raidState.attackTimers[d.id] = 0;
-          if (raidState.enemy.isDefeated()) endRaid();
+          if (raidState.enemy.isDefeated()) endRaid(true);
         }
       }
       xpRate = COMBAT_XP_RATE;

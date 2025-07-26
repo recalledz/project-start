@@ -16,15 +16,22 @@ let ringWrapper;
 let listContainer;
 let breakthroughBtn;
 let statsContainer;
+let statsPanel;
+let statsToggle;
 let selectedDiscipleId = null;
+let breakthroughHandler;
 const RING_RADIUS = 80;
 const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
 const STAGE_NAMES = ['Egg', 'Tadpole', 'Young Coquí', 'Elder Frog', 'Divine Coquí'];
 
 export function initMetamorphosis() {
+  // Clean up any existing listeners before reinitializing
+  destroyMetamorphosis();
   container = document.getElementById('metamorphosisTabContent');
   listContainer = document.getElementById('metamorphosisDiscipleList');
   statsContainer = document.getElementById('metamorphosisStats');
+  statsPanel = document.querySelector('.metamorphosis-stats-panel');
+  statsToggle = document.getElementById('metaStatsToggle');
   if (!container) return;
 const bodyPath = `M200 150
                m -25 0
@@ -73,9 +80,10 @@ const bodyPath = `M200 150
   ringWrapper = container.querySelector('.metamorphosis-progress');
   breakthroughBtn = container.querySelector('#breakthroughBtn');
   if (breakthroughBtn) {
-    breakthroughBtn.addEventListener('click', () => {
+    breakthroughHandler = () => {
       if (selectedDiscipleId) breakthrough(selectedDiscipleId);
-    });
+    };
+    breakthroughBtn.addEventListener('click', breakthroughHandler);
   }
   selectedDiscipleId = sectSystem.disciples[0]?.id || null;
   window.addEventListener('orbs-changed', renderMetamorphosis);
@@ -83,6 +91,13 @@ const bodyPath = `M200 150
   document.addEventListener('disciple-gained', refreshMetamorphosis);
   renderDiscipleList();
   renderMetamorphosis();
+  if (statsToggle) {
+    statsToggle.addEventListener('click', toggleStatsPanel);
+    statsToggle.addEventListener('mouseenter', e => {
+      window.showTooltip('Toggle stats panel', e.pageX + 10, e.pageY + 10);
+    });
+    statsToggle.addEventListener('mouseleave', window.hideTooltip);
+  }
 }
 
 function ensureMeta(id) {
@@ -179,6 +194,24 @@ export function refreshMetamorphosis() {
   renderMetamorphosis();
 }
 
+export function destroyMetamorphosis() {
+  if (breakthroughBtn && breakthroughHandler) {
+    breakthroughBtn.removeEventListener('click', breakthroughHandler);
+  }
+  window.removeEventListener('orbs-changed', renderMetamorphosis);
+  document.removeEventListener('disciple-gained', refreshMetamorphosis);
+  breakthroughHandler = null;
+  container = null;
+  progressFill = null;
+  progressText = null;
+  ringFill = null;
+  ringWrapper = null;
+  listContainer = null;
+  breakthroughBtn = null;
+  statsContainer = null;
+  selectedDiscipleId = null;
+}
+
 export function tickMetamorphosis(dt) {
   sectSystem.disciples.forEach(d => {
     ensureMeta(d.id);
@@ -254,5 +287,16 @@ function updateStats() {
     });
     el.addEventListener('mouseleave', window.hideTooltip);
   });
+}
+
+function toggleStatsPanel() {
+  if (!statsPanel) return;
+  const open = statsPanel.classList.contains('open');
+  if (open) {
+    statsPanel.classList.remove('open');
+  } else {
+    statsPanel.classList.add('open');
+  }
+  if (statsToggle) statsToggle.textContent = open ? '❮' : '❯';
 }
 

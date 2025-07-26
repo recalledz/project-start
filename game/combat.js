@@ -73,6 +73,7 @@ export function cDealerDamage(damageAmount = null, source = 'dealer') {
     damageAmount ?? Math.floor(Math.random() * (maxDamage - minDamage + 1)) + minDamage;
 
   let finalDamage = dDamage;
+  if (raidState.active) raidState.damageReceived += finalDamage;
 
   const idx = Math.floor(Math.random() * targets.length);
   const card = targets[idx];
