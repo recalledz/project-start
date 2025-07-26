@@ -129,6 +129,19 @@ export function endRaid(victory = false) {
       rewards: { undeadNectar: 1 },
       fighters
     });
+  } else if (!victory) {
+    const lost = {
+      fruits: Math.floor(sectState.fruits / 2),
+      softwood: Math.floor(sectState.softwood / 2)
+    };
+    sectState.fruits -= lost.fruits;
+    sectState.softwood -= lost.softwood;
+    showRaidSummaryOverlay({
+      victory: false,
+      damageDealt: raidState.damageDealt,
+      damageReceived: raidState.damageReceived,
+      lost
+    });
   }
   document.dispatchEvent(new CustomEvent('raid-end', { detail: { victory } }));
   if (typeof updateSectDisplay === 'function') updateSectDisplay();
@@ -137,5 +150,9 @@ export function endRaid(victory = false) {
 export function tickRaid(delta) {
   if (!raidState.active || !raidState.enemy) return;
   raidState.enemy.tick(delta);
+  if (sectSystem.orbs.water.current <= 0) {
+    endRaid(false);
+    return;
+  }
   if (raidState.enemy.isDefeated()) endRaid(true);
 }

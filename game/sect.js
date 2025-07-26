@@ -85,7 +85,7 @@ export function setSeasonBackdrop(season) {
 
 export const sectSystem = {
   orbs: {
-    water: { current: 0, max: 20, regen: ORB_REGEN_PER_SEC }
+    water: { current: 0, max: 20, regen: ORB_REGEN_PER_SEC, cracked: false }
   },
   resources: {
     thought: { current: 0, max: 10, regen: 0, unlocked: false },
@@ -1009,6 +1009,9 @@ function renderOrbs() {
   const orb = document.querySelector('#sectOrbs .sect-orb.water');
   const fill = orb?.querySelector('.orb-fill');
   const value = orb?.querySelector('.orb-value');
+  if (orb) {
+    orb.classList.toggle('cracked', !!sectSystem.orbs.water.cracked);
+  }
   if (fill) {
     const pct = Math.max(0, Math.min(1, sectSystem.orbs.water.current / sectSystem.orbs.water.max)) * 100;
     fill.style.height = `${pct}%`;
@@ -1238,7 +1241,13 @@ export function tickSectSystem(delta) {
     if (sectSystem.weather.duration <= 0) sectSystem.weather = null;
   }
   const ins = sectSystem.resources.water;
-  const regen = ORB_REGEN_PER_SEC;
+  if (ins.current <= 0 && !ins.cracked) {
+    ins.cracked = true;
+    ins.max = Math.floor(ins.max / 2);
+    if (ins.current > ins.max) ins.current = ins.max;
+    if (hasUI) renderOrbs();
+  }
+  const regen = ORB_REGEN_PER_SEC * (ins.cracked ? 0.5 : 1);
   sectSystem.waterRegenBase = regen;
   ins.current = Math.min(ins.max, ins.current + regen * dt);
   const echo = recipes.find(r => r.name === 'Echo of Mind');

@@ -1,17 +1,19 @@
 import { createOverlay } from './overlay.js';
 
 export function showRaidSummaryOverlay({
+  victory = true,
   damageDealt = 0,
   damageReceived = 0,
   rewards = {},
-  fighters = []
+  fighters = [],
+  lost = {}
 } = {}) {
   const overlay = createOverlay({ className: 'raid-summary-overlay', boxClass: 'parchment-box' });
   overlay.box.classList.add('parchment-box');
   const { box, close } = overlay;
 
   const title = document.createElement('h2');
-  title.textContent = 'Raid Defeated';
+  title.textContent = victory ? 'Raid Defeated' : 'Raid Failed';
   box.appendChild(title);
 
   const stats = document.createElement('div');
@@ -54,6 +56,16 @@ export function showRaidSummaryOverlay({
     rewardSection.className = 'raid-summary-rewards';
     rewardSection.innerHTML = '<p>Rewards:</p><ul>' + rewardLines.map(r => `<li>${r}</li>`).join('') + '</ul>';
     box.appendChild(rewardSection);
+  }
+
+  const lostLines = [];
+  if (lost.fruits) lostLines.push(`Fruit -${lost.fruits}`);
+  if (lost.softwood) lostLines.push(`Softwood -${lost.softwood}`);
+  if (lostLines.length > 0) {
+    const lostSection = document.createElement('div');
+    lostSection.className = 'raid-summary-loss';
+    lostSection.innerHTML = '<p>Resources Lost:</p><ul>' + lostLines.map(r => `<li>${r}</li>`).join('') + '</ul>';
+    box.appendChild(lostSection);
   }
 
   overlay.appendButton('Close', close);

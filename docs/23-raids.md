@@ -40,3 +40,5 @@ Disciples may be called upon to defend the sect from occasional raids.
   rewards and how much combat XP each participating disciple earned. Each
   fighter now displays a small progress bar indicating their level and progress
   toward the next. Level ups are noted next to the fighter's name.
+* If defeated, a raid end overlay displays the resources lost when the orb was
+  drained.

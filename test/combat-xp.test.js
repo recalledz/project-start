@@ -16,7 +16,13 @@ function setupDom() {
   globalThis.document = {
     getElementById: () => null,
     getElementsByClassName: () => [{ textContent: '', style: {}, appendChild() {} }],
-    createElement: () => ({ appendChild() {}, style: {}, addEventListener() {}, remove() {} }),
+    createElement: () => ({
+      appendChild() {},
+      style: {},
+      addEventListener() {},
+      remove() {},
+      classList: { add() {}, toggle() {} }
+    }),
     querySelector: () => null,
     addEventListener: () => {},
     removeEventListener: () => {},

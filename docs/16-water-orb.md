@@ -14,6 +14,9 @@
 - Soft light particles swirl around the orb at night, further brightening the surrounding darkness.
 - A radial light mask darkens the map at night while leaving a bright gradient around the orb.
 - The orb now holds up to 20 Water and regenerates at a flat 0.1 Water per second.
+- If the orb is ever drained to 0 Water it cracks, halving its maximum capacity
+  and regeneration rate until restored. A cracked orb displays visible cracks on
+  the orb graphic.
 - Orb Revival research grants access to an Orb Management panel showing spells like Water Burst.
 - Word of Haste orb spell speeds up work tasks for one minute at the cost of 15 Water.
 - Orb Spell Strength buildings raise Water Burst damage by 20% per level.

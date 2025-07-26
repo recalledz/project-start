@@ -3226,6 +3226,16 @@ body.darkenshift-mode .tabsContainer button.active {
     border: 1px solid #7fd9ff;
     color: #7fd9ff;
 }
+.sect-orb.water.cracked::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+      linear-gradient(45deg, transparent 47%, #7fd9ff 48%, #7fd9ff 52%, transparent 53%),
+      linear-gradient(-45deg, transparent 47%, #7fd9ff 48%, #7fd9ff 52%, transparent 53%);
+    opacity: 0.5;
+}
 .sect-orb.water .orb-fill {
     background: linear-gradient(to top, rgba(40,110,180,0.9), rgba(80,160,220,0.7));
 }
@@ -4020,6 +4030,12 @@ body.darkenshift-mode .tabsContainer button.active {
   width: 100px;
   height: 8px;
   margin-top: 2px;
+}
+.raid-summary-rewards ul,
+.raid-summary-loss ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
 
 
