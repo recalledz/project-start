@@ -37,6 +37,8 @@ export const discoveredLocations = [];
 // previous implementation remain intact.
 // Water regeneration constant
 export const ORB_REGEN_PER_SEC = 0.1;
+// Time for one disciple assigned to Building to fully repair a cracked orb
+export const ORB_REPAIR_SECONDS = 150;
 
 // Seasonal cycle configuration
 // A full in-game day lasts 5 real minutes (300 seconds). Each season spans

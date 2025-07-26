@@ -1,6 +1,6 @@
 // Building-related logic extracted from script.js
 import { sectState, systems, updateResourceCaps } from './state.js';
-import { sectSystem } from './sect.js';
+import { sectSystem, ORB_REPAIR_SECONDS } from './sect.js';
 import { addSkillXp, ensureDiscipleSkills, getTaskSkillProgress } from '../utils/skills.js';
 import { intelligenceXpMultiplier } from './attributes.js';
 import { BUILD_XP_RATE } from './constants.js';
@@ -66,11 +66,9 @@ export function startBuilding(key) {
 }
 
 export function tickBuilding(dt) {
-  if (!sectState.currentBuild) return;
   let speed = 0;
   sectSystem.disciples.forEach(d => {
-    const t = sectState.discipleTasks[d.id];
-    if (!t || t === 'Idle' || t === 'Building') {
+    if (sectState.discipleTasks[d.id] === 'Building') {
       ensureDiscipleSkills(d.id);
       ensureDiscipleConstructXp(d.id);
       const xp = sectState.discipleSkills[d.id]['Building'];
@@ -81,6 +79,25 @@ export function tickBuilding(dt) {
   });
   if (speed === 0) return;
   if (sectSystem.wordOfHasteTimer > 0) speed *= 1.5;
+
+  const orb = sectSystem.orbs.water;
+  if (orb.cracked) {
+    sectState.orbRepairProgress += (dt * speed) / ORB_REPAIR_SECONDS;
+    if (sectState.orbRepairProgress >= 1) {
+      orb.cracked = false;
+      orb.max *= 2;
+      sectState.orbRepairProgress = 0;
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('orbs-changed'));
+      }
+    }
+    if (typeof globalThis.updateBuildOverlay === 'function') {
+      globalThis.updateBuildOverlay();
+    }
+    return;
+  }
+
+  if (!sectState.currentBuild) return;
   const b = BUILDINGS[sectState.currentBuild];
   sectState.buildProgress += (dt * speed) / b.time;
   if (sectState.buildProgress >= 1) {

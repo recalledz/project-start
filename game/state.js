@@ -117,7 +117,8 @@ export const sectState = {
   researchProgress: 0,
   completedResearch: [],
   currentBuild: null,
-  buildProgress: 0
+  buildProgress: 0,
+  orbRepairProgress: 0
 };
 
 export let stageData = {

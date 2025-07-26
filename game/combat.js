@@ -16,7 +16,6 @@ import { sectSystem } from './sect.js';
 import { showRestartScreen } from '../ui/restartOverlay.js';
 
 import addLog from './log.js';
-import { raidState } from './raids.js';
 
 export function init() {}
 
