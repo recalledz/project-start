@@ -155,7 +155,8 @@ import {
   worldProgressTimer,
   setWorldProgressTimer,
   worldProgressRateTracker,
-  setNightMode
+  setNightMode,
+  updateResourceCaps
 } from "./game/state.js";
 import {
   BASE_STATS,
@@ -693,8 +694,8 @@ function updateSectDisplay() {
     const woodRate = formatRate(sectSystem.gains?.softwood);
     sectSummaryDisplay.innerHTML = `
       <span>👥 ${total}/${sectState.maxDisciples} (Idle: ${idle})</span>
-      <span>${sectState.fruits.toFixed(2)} (${fruitRate}/s)</span>
-      <span>🪵 ${sectState.softwood.toFixed(2)} (${woodRate}/s)</span>`;
+      <span>${sectState.fruits.toFixed(2)}/${sectState.fruitCap} (${fruitRate}/s)</span>
+      <span>🪵 ${sectState.softwood.toFixed(2)}/${sectState.softwoodCap} (${woodRate}/s)</span>`;
     const timer = document.getElementById('resourceTimer');
     if (timer) {
       timer.textContent = `${mm}:${ss}`;
@@ -1315,6 +1316,7 @@ function init() {
   initDebug();
   window.addEventListener('location-discovered', e => addDiscoveredLocation(e.detail.name, locationListContainer, LOCATION_DEFS));
   loadGame();
+  updateResourceCaps();
   // Apply current brightness settings immediately after loading saved data
   updateMapBrightness(getCurrentSchedule().phase);
   if (sectSystem.disciples.length === 0) {
@@ -2370,6 +2372,7 @@ Object.assign(playerStats, state.playerStats || {});
       res.current = sectState.undeadNectar || 0;
       res.unlocked = res.current > 0;
     }
+    updateResourceCaps();
   }
 
   // synchronize disciple global levels with saved skill data

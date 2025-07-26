@@ -80,4 +80,24 @@ describe('resource gathering', () => {
   it('collects softwood each second', () => {
     runGatherTest('Gather Softwood');
   });
+
+  it('respects fruit cap', () => {
+    const d = new Disciple({ id: 2, attributes: { strength: 1, dexterity: 1, endurance: 1, intelligence: 1, charisma: 1, potential: 1 } });
+    initializeDisciple(d);
+    sectSystem.disciples.push(d);
+    sectState.discipleTasks[d.id] = 'Gather Fruit';
+    sectState.fruits = sectState.fruitCap - 0.05;
+    tickSect(1000);
+    expect(sectState.fruits).to.be.closeTo(sectState.fruitCap, 1e-6);
+  });
+
+  it('respects softwood cap', () => {
+    const d = new Disciple({ id: 3, attributes: { strength: 1, dexterity: 1, endurance: 1, intelligence: 1, charisma: 1, potential: 1 } });
+    initializeDisciple(d);
+    sectSystem.disciples.push(d);
+    sectState.discipleTasks[d.id] = 'Gather Softwood';
+    sectState.softwood = sectState.softwoodCap - 0.05;
+    tickSect(1000);
+    expect(sectState.softwood).to.be.closeTo(sectState.softwoodCap, 1e-6);
+  });
 });

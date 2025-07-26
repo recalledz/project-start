@@ -1463,8 +1463,17 @@ export function tickSect(delta) {
       const yieldMult = 1 + 0.05 * (d[groupAttr] || 0) + 0.02 * lvl;
       const gatherRate = spot.baseYield * yieldMult;
 
-      if (task === 'Gather Fruit') sectState.fruits += gatherRate * dt;
-      else sectState.softwood += gatherRate * dt;
+      if (task === 'Gather Fruit') {
+        sectState.fruits = Math.min(
+          sectState.fruitCap,
+          sectState.fruits + gatherRate * dt
+        );
+      } else {
+        sectState.softwood = Math.min(
+          sectState.softwoodCap,
+          sectState.softwood + gatherRate * dt
+        );
+      }
       if (typeof updateSectDisplay === 'function') updateSectDisplay();
     } else if (task === 'Research') {
       sectState.researchProgress += 4 * dt;

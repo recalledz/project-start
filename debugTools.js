@@ -72,7 +72,10 @@ export const devTools = {
   giveCash: () => {
     const amount = parseFloat(document.getElementById('debugCash').value);
     if (isNaN(amount)) return;
-    sectState.fruits += amount;
+    sectState.fruits = Math.min(
+      sectState.fruitCap,
+      sectState.fruits + amount
+    );
   },
   toggleZones,
   save: saveGame,
