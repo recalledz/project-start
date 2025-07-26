@@ -17,11 +17,14 @@ let listContainer;
 let breakthroughBtn;
 let statsContainer;
 let selectedDiscipleId = null;
+let breakthroughHandler;
 const RING_RADIUS = 80;
 const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
 const STAGE_NAMES = ['Egg', 'Tadpole', 'Young Coquí', 'Elder Frog', 'Divine Coquí'];
 
 export function initMetamorphosis() {
+  // Clean up any existing listeners before reinitializing
+  destroyMetamorphosis();
   container = document.getElementById('metamorphosisTabContent');
   listContainer = document.getElementById('metamorphosisDiscipleList');
   statsContainer = document.getElementById('metamorphosisStats');
@@ -73,9 +76,10 @@ const bodyPath = `M200 150
   ringWrapper = container.querySelector('.metamorphosis-progress');
   breakthroughBtn = container.querySelector('#breakthroughBtn');
   if (breakthroughBtn) {
-    breakthroughBtn.addEventListener('click', () => {
+    breakthroughHandler = () => {
       if (selectedDiscipleId) breakthrough(selectedDiscipleId);
-    });
+    };
+    breakthroughBtn.addEventListener('click', breakthroughHandler);
   }
   selectedDiscipleId = sectSystem.disciples[0]?.id || null;
   window.addEventListener('orbs-changed', renderMetamorphosis);
@@ -177,6 +181,24 @@ function renderMetamorphosis() {
 
 export function refreshMetamorphosis() {
   renderMetamorphosis();
+}
+
+export function destroyMetamorphosis() {
+  if (breakthroughBtn && breakthroughHandler) {
+    breakthroughBtn.removeEventListener('click', breakthroughHandler);
+  }
+  window.removeEventListener('orbs-changed', renderMetamorphosis);
+  document.removeEventListener('disciple-gained', refreshMetamorphosis);
+  breakthroughHandler = null;
+  container = null;
+  progressFill = null;
+  progressText = null;
+  ringFill = null;
+  ringWrapper = null;
+  listContainer = null;
+  breakthroughBtn = null;
+  statsContainer = null;
+  selectedDiscipleId = null;
 }
 
 export function tickMetamorphosis(dt) {
