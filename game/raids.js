@@ -5,6 +5,7 @@ import {
   setCurrentEnemy
 } from './state.js';
 import { updateDealerLifeDisplay } from './ui.js';
+import { showRaidSummaryOverlay } from '../ui/raidSummaryOverlay.js';
 
 import addLog from '../log.js';
 import { showRaidAlert } from './alerts.js';
@@ -93,23 +94,48 @@ export function startRaid() {
   if (typeof updateSectDisplay === 'function') updateSectDisplay();
 }
 
-export function endRaid() {
+export function endRaid(victory = false) {
   if (!raidState.active) return;
+  const enemy = raidState.enemy;
   raidState.active = false;
   setCurrentEnemy(null);
   raidState.enemy = null;
   raidState.attackTimers = {};
   raidState.orbTimer = 0;
+  const xpStart = raidState.xpStart;
   raidState.xpStart = {};
   clearBlobs();
   addLog('The raid has ended.', 'info');
   updateDealerLifeDisplay(null);
-  document.dispatchEvent(new CustomEvent('raid-end'));
+  if (victory && enemy) {
+    const fighters = Object.keys(xpStart).map(id => {
+      const start = xpStart[id];
+      const xp =
+        sectState.discipleSkills[id]?.Combat || 0;
+      const diff = xp - start.xp;
+      const prog = getTaskSkillProgress(xp);
+      return {
+        name: start.name,
+        xp: diff,
+        level: prog.level,
+        progress: prog.progress,
+        leveled: prog.level > start.level
+      };
+    });
+    sectState.undeadNectar = (sectState.undeadNectar || 0) + 1;
+    showRaidSummaryOverlay({
+      damageDealt: raidState.damageDealt,
+      damageReceived: raidState.damageReceived,
+      rewards: { undeadNectar: 1 },
+      fighters
+    });
+  }
+  document.dispatchEvent(new CustomEvent('raid-end', { detail: { victory } }));
   if (typeof updateSectDisplay === 'function') updateSectDisplay();
 }
 
 export function tickRaid(delta) {
   if (!raidState.active || !raidState.enemy) return;
   raidState.enemy.tick(delta);
-  if (raidState.enemy.isDefeated()) endRaid();
+  if (raidState.enemy.isDefeated()) endRaid(true);
 }
