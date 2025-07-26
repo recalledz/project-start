@@ -1,43 +1,74 @@
+// Handles exploration battles between the player's party and a single enemy.
 import { currentEnemy, stageData, sectState, playerStats } from './state.js';
 import { dealerLifeDisplay } from './ui.js';
-import { renderDealerLifeBarFill, removeBloodSplat, updateBloodSplat, animateDiscipleHit, showDamageFloat, animateDiscipleDeath } from './rendering.js';
+import {
+  renderDealerLifeBarFill,
+  removeBloodSplat,
+  updateBloodSplat,
+  animateDiscipleHit,
+  showDamageFloat,
+  animateDiscipleDeath
+} from './rendering.js';
 import { formatNumber } from '../utils/numberFormat.js';
 import { activeDisciples } from './disciples.js';
-import { calculateEnemyBasicDamage } from '../enemySpawning.js';
+import { calculateEnemyBasicDamage } from './enemySpawning.js';
 import { sectSystem } from './sect.js';
 import { showRestartScreen } from '../ui/restartOverlay.js';
-import addLog from '../log.js';
+
+import addLog from './log.js';
 import { raidState } from './raids.js';
 
 export function init() {}
 
+// Map of disciple id to their current attack timer used during exploration
 export let discipleAttackTimers = {};
 export let enemyAttackProgress = 0;
 export function setEnemyAttackProgress(val) {
   enemyAttackProgress = val;
 }
 
+// Generic helper used by both exploration and raid battles. Iterates over the
+// provided disciples, advancing their attack timers and applying damage when
+// ready. Optional callbacks allow customization for different combat modes.
+export function applyDiscipleAttacks(
+  enemy,
+  disciples,
+  timers,
+  deltaTime,
+  onHit,
+  updateFill
+) {
+  disciples.forEach(d => {
+    if (!timers[d.id]) timers[d.id] = 0;
+    timers[d.id] += deltaTime;
+    const atkTime = d.attackSpeed / sectSystem.attackSpeedMult;
+    if (updateFill) {
+      const ratio = Math.min(1, timers[d.id] / atkTime);
+      updateFill(d, ratio);
+    }
+    if (timers[d.id] >= atkTime && !enemy.isDefeated()) {
+      enemy.takeDamage(d.damage);
+      onHit?.(d.damage, d);
+      timers[d.id] = 0;
+      if (updateFill) updateFill(d, 0);
+    }
+  });
+}
+
 export function attack(deltaTime = 0) {
   const enemy = currentEnemy;
   if (!enemy) return;
 
-  activeDisciples.forEach(d => {
-    if (!discipleAttackTimers[d.id]) discipleAttackTimers[d.id] = 0;
-    discipleAttackTimers[d.id] += deltaTime;
-
-    const atkTime = d.attackSpeed / sectSystem.attackSpeedMult;
-    if (d.attackFill) {
-      const pratio = Math.min(1, discipleAttackTimers[d.id] / atkTime);
-      d.attackFill.style.width = `${pratio * 100}%`;
+  applyDiscipleAttacks(
+    enemy,
+    activeDisciples,
+    discipleAttackTimers,
+    deltaTime,
+    null,
+    (disc, ratio) => {
+      if (disc.attackFill) disc.attackFill.style.width = `${ratio * 100}%`;
     }
-
-    if (discipleAttackTimers[d.id] >= atkTime && !enemy.isDefeated()) {
-      enemy.takeDamage(d.damage);
-      if (raidState.active) raidState.damageDealt += d.damage;
-      discipleAttackTimers[d.id] = 0;
-      if (d.attackFill) d.attackFill.style.width = '0%';
-    }
-  });
+  );
 
   stageData.dealerLifeCurrent = enemy.currentHp;
 
@@ -73,7 +104,6 @@ export function cDealerDamage(damageAmount = null, source = 'dealer') {
     damageAmount ?? Math.floor(Math.random() * (maxDamage - minDamage + 1)) + minDamage;
 
   let finalDamage = dDamage;
-  if (raidState.active) raidState.damageReceived += finalDamage;
 
   const idx = Math.floor(Math.random() * targets.length);
   const card = targets[idx];

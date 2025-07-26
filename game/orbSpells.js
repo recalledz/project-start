@@ -1,6 +1,6 @@
 import { sectSystem } from './sect.js';
 import { sectState } from './state.js';
-import addLog from '../log.js';
+import addLog from './log.js';
 
 export function orbDamageMultiplier() {
   return 1 + 0.2 * (sectState.buildings.orbSpellStrength || 0);

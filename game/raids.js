@@ -7,7 +7,7 @@ import {
 import { updateDealerLifeDisplay } from './ui.js';
 import { showRaidSummaryOverlay } from '../ui/raidSummaryOverlay.js';
 
-import addLog from '../log.js';
+import addLog from './log.js';
 import { showRaidAlert } from './alerts.js';
 import { ensureDiscipleSkills, getTaskSkillProgress } from '../utils/skills.js';
 import {
@@ -74,6 +74,7 @@ export function startRaid() {
     currentHp: 20,
     takeDamage(dmg) {
       damageClosestBlob(dmg);
+      raidState.damageDealt += dmg;
     },
     isDefeated() {
       if (!canSpawn()) return false;

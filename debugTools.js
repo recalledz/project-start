@@ -1,4 +1,4 @@
-import { Boss } from './boss.js';
+import { Boss } from './game/boss.js';
 import { unlockConstruct, skipToNextNight } from './game/sect.js';
 import {
   spawnBossEvent,
@@ -72,7 +72,10 @@ export const devTools = {
   giveCash: () => {
     const amount = parseFloat(document.getElementById('debugCash').value);
     if (isNaN(amount)) return;
-    sectState.fruits += amount;
+    sectState.fruits = Math.min(
+      sectState.fruitCap,
+      sectState.fruits + amount
+    );
   },
   toggleZones,
   save: saveGame,
