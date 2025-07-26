@@ -1,12 +1,12 @@
 13 – metamorphosis Stages & methods
 
-Each disciple has tab when viewing metmorphosis tab showing:
+Each disciple has tab when viewing metamorphosis tab showing:
 
 # 🐸 coqui metamorphosis: Stages & Growth Methods
 
 Each disciple evolves through frog-like spiritual metamorphosis. Accessible via the metamorphosis tab.
 
-## 🐚 metmorphosis Overview (Per Disciple)
+## 🐚 metamorphosis Overview (Per Disciple)
 
 - **Current Metamorphosis Stage** label above the tadpole diagram
 - **Tadpole silhouette** with animated fill toward next breakthrough
