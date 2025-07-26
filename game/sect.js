@@ -1,5 +1,5 @@
 /* global updateSectDisplay */
-import addLog from '../log.js';
+import addLog from './log.js';
 import { refreshMetamorphosis, tickMetamorphosis } from './metamorphosis.js';
 import { sectState, currentEnemy, FRUIT_GROWTH_RATES } from './state.js';
 import { generateDiscipleAttributes } from './discipleAttributes.js';
@@ -26,6 +26,7 @@ import {
   HUNT_CYCLE_SECONDS,
   EXPLORATION_CYCLE_SECONDS
 } from './constants.js';
+import { applyDiscipleAttacks } from './combat.js';
 import { startRaid, tickRaid, raidState, endRaid } from './raids.js';
 import { updateRaidLifeBar } from './ui.js';
 import { tickOrbSpells } from './orbSpells.js';
@@ -1472,8 +1473,17 @@ export function tickSect(delta) {
       const yieldMult = 1 + 0.05 * (d[groupAttr] || 0) + 0.02 * lvl;
       const gatherRate = spot.baseYield * yieldMult;
 
-      if (task === 'Gather Fruit') sectState.fruits += gatherRate * dt;
-      else sectState.softwood += gatherRate * dt;
+      if (task === 'Gather Fruit') {
+        sectState.fruits = Math.min(
+          sectState.fruitCap,
+          sectState.fruits + gatherRate * dt
+        );
+      } else {
+        sectState.softwood = Math.min(
+          sectState.softwoodCap,
+          sectState.softwood + gatherRate * dt
+        );
+      }
       if (typeof updateSectDisplay === 'function') updateSectDisplay();
     } else if (task === 'Research') {
       sectState.researchProgress += 4 * dt;
@@ -1491,15 +1501,14 @@ export function tickSect(delta) {
       progress = (progress + dt) % EXPLORATION_CYCLE_SECONDS;
     } else if (task === 'Fight') {
       if (raidState.active && raidState.enemy) {
-        if (!raidState.attackTimers[d.id]) raidState.attackTimers[d.id] = 0;
-        raidState.attackTimers[d.id] += delta;
-        const atkTime = d.attackSpeed / sectSystem.attackSpeedMult;
-        if (raidState.attackTimers[d.id] >= atkTime) {
-          raidState.enemy.takeDamage(d.damage);
-          updateRaidLifeBar(raidState.enemy);
-          raidState.attackTimers[d.id] = 0;
-          if (raidState.enemy.isDefeated()) endRaid(true);
-        }
+        applyDiscipleAttacks(
+          raidState.enemy,
+          [d],
+          raidState.attackTimers,
+          delta
+        );
+        updateRaidLifeBar(raidState.enemy);
+        if (raidState.enemy.isDefeated()) endRaid(true);
       }
       xpRate = COMBAT_XP_RATE;
     }

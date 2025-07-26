@@ -13,6 +13,7 @@ progressing through different levels improves the housing building as follows an
 each level provides +1 max disciple. every 10 levels 5% additive to other bonuses.
 levels 1-10: 
 Bohio	20 × (2^lvl)	+1 disciple	each level Start/ allows building research desk
+        +50 softwood cap and +200 fruit cap per level
 Outer Quarters Lv11-20
 Meditation Hall Lv 21-30
 Inner Hall Lv31- 40

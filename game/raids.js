@@ -7,7 +7,7 @@ import {
 import { updateDealerLifeDisplay } from './ui.js';
 import { showRaidSummaryOverlay } from '../ui/raidSummaryOverlay.js';
 
-import addLog from '../log.js';
+import addLog from './log.js';
 import { showRaidAlert } from './alerts.js';
 import { ensureDiscipleSkills, getTaskSkillProgress } from '../utils/skills.js';
 import {
@@ -16,7 +16,9 @@ import {
   clearBlobs,
   damageClosestBlob,
   canSpawn,
-  raidFinished
+  raidFinished,
+  showOrbAttackBar,
+  hideOrbAttackBar
 } from './blobRaids.js';
 
 export const raidState = {
@@ -72,6 +74,7 @@ export function startRaid() {
     currentHp: 20,
     takeDamage(dmg) {
       damageClosestBlob(dmg);
+      raidState.damageDealt += dmg;
     },
     isDefeated() {
       if (!canSpawn()) return false;
@@ -82,6 +85,7 @@ export function startRaid() {
     }
   };
   setCurrentEnemy(raidState.enemy);
+  showOrbAttackBar();
 
   raidState.active = true;
   raidState.attackTimers = {};
@@ -105,6 +109,7 @@ export function endRaid(victory = false) {
   const xpStart = raidState.xpStart;
   raidState.xpStart = {};
   clearBlobs();
+  hideOrbAttackBar();
   addLog('The raid has ended.', 'info');
   updateDealerLifeDisplay(null);
   if (victory && enemy) {

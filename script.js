@@ -1,18 +1,18 @@
 /* eslint-disable no-unused-vars, no-undef */
 // Core modules that power combat systems
 import Disciple from "./game/disciple.js";
-import addLog from "./log.js"; // helper for appending to the event log
-import Enemy from "./enemy.js"; // base enemy class
+import addLog from "./game/log.js"; // helper for appending to the event log
+import Enemy from "./game/enemy.js"; // base enemy class
 import {
   Boss,
   BossTemplates
-} from "./boss.js"; // boss definitions
+} from "./game/boss.js"; // boss definitions
 import {
   AbilityRegistry
-} from "./dealerabilities.js"; // boss ability registry
+} from "./game/dealerabilities.js"; // boss ability registry
 import {
   initStarChart
-} from "./starChart.js"; // optional star chart tab
+} from "./game/starChart.js"; // optional star chart tab
 import {
   initSect,
   tickSectSystem,
@@ -70,7 +70,7 @@ import {
   spawnDealer,
   spawnBoss,
   spawnEnemy
-} from "./enemySpawning.js";
+} from "./game/enemySpawning.js";
 import {
   renderCard,
   renderDiscipleCard,
@@ -122,7 +122,8 @@ import {
 import { raidState } from './game/raids.js';
 // developer debug tools
 import { init as initDebug } from "./game/debug.js";
-import { attachOrbGlow, enableOrbGlow, disableOrbGlow, updateOrbGlow } from './game/orbGlow.js';
+import { attachOrbGlow, enableOrbGlow, disableOrbGlow, updateOrbGlow, flashOrbGlow } from './game/orbGlow.js';
+import { showOrbAttackBar } from './game/blobRaids.js';
 import { initOrbMask, showOrbMask, hideOrbMask, updateOrbMaskPosition } from './game/orbMask.js';
 // Shared game state and configuration
 import {
@@ -155,7 +156,8 @@ import {
   worldProgressTimer,
   setWorldProgressTimer,
   worldProgressRateTracker,
-  setNightMode
+  setNightMode,
+  updateResourceCaps
 } from "./game/state.js";
 import {
   BASE_STATS,
@@ -693,8 +695,8 @@ function updateSectDisplay() {
     const woodRate = formatRate(sectSystem.gains?.softwood);
     sectSummaryDisplay.innerHTML = `
       <span>👥 ${total}/${sectState.maxDisciples} (Idle: ${idle})</span>
-      <span>${sectState.fruits.toFixed(2)} (${fruitRate}/s)</span>
-      <span>🪵 ${sectState.softwood.toFixed(2)} (${woodRate}/s)</span>`;
+      <span>${sectState.fruits.toFixed(2)}/${sectState.fruitCap} (${fruitRate}/s)</span>
+      <span>🪵 ${sectState.softwood.toFixed(2)}/${sectState.softwoodCap} (${woodRate}/s)</span>`;
     const timer = document.getElementById('resourceTimer');
     if (timer) {
       timer.textContent = `${mm}:${ss}`;
@@ -750,6 +752,7 @@ function updateSectDisplay() {
     });
     initQiRibbons();
     window.dispatchEvent(new CustomEvent('orbs-changed'));
+    if (raidState.active) showOrbAttackBar();
   }
 
   if (sectDisciplesContainer) {
@@ -1315,6 +1318,7 @@ function init() {
   initDebug();
   window.addEventListener('location-discovered', e => addDiscoveredLocation(e.detail.name, locationListContainer, LOCATION_DEFS));
   loadGame();
+  updateResourceCaps();
   // Apply current brightness settings immediately after loading saved data
   updateMapBrightness(getCurrentSchedule().phase);
   if (sectSystem.disciples.length === 0) {
@@ -2370,6 +2374,7 @@ Object.assign(playerStats, state.playerStats || {});
       res.current = sectState.undeadNectar || 0;
       res.unlocked = res.current > 0;
     }
+    updateResourceCaps();
   }
 
   // synchronize disciple global levels with saved skill data

@@ -17,7 +17,7 @@
 - If the orb is ever drained to 0 Water it cracks, halving its maximum capacity
   and regeneration rate until restored. A cracked orb displays visible cracks on
   the orb graphic.
-- Orb Revival research grants access to an Orb Management panel showing spells like Water Burst.
+- Orb Revival research grants access to an Orb Management panel for the Water Orb.
 - Word of Haste orb spell speeds up work tasks for one minute at the cost of 15 Water.
-- Orb Spell Strength buildings raise Water Burst damage by 20% per level.
+- Orb Spell Strength buildings raise the Water Orb's attack damage by 20% per level.
 - Orb Reverberation grants a toggled effect that increases disciple attack speed by 30% while draining 1 Water each second.

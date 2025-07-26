@@ -21,16 +21,13 @@ Disciples may be called upon to defend the sect from occasional raids.
 * If the orb is depleted the sect loses **half** of its stored fruit and softwood.
 * Early raids send four SlowBlob raiders, one every 10&nbsp;s for 40&nbsp;s.
 
-* The Water orb lashes out every second at blobs within 75&nbsp;px, striking the closest target for 5 damage.
+* The Water orb lashes out every 5&nbsp;s at blobs within 75&nbsp;px, striking the closest target for 5 damage.
 * Blobs show a small health meter as they crawl across the 
 * 
 * Damage dealt to and by the Water orb is logged during raids.
 * All units traverse the map at a base rate of 10&nbsp;px per second.
 * SlowBlob raiders now sport two glowing red eyes that move with them.
 
-* The Water orb periodically lashes out with a **Water Burst** every 10&nbsp;s, dealing 5 damage.
-  The burst now appears as a bright blue projectile traveling from the orb to the dealer card and the orb pulses when firing.
-  The projectile is larger and moves more slowly so it can be clearly seen.
 
 
 * Defeating a raid yields **Undead Nectar** in addition to experience. The nectar
