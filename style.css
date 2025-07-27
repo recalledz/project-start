@@ -3687,6 +3687,13 @@ body.darkenshift-mode .tabsContainer button.active {
     border: 1px solid #333;
     border-radius: 4px;
 }
+.research-entry.completed {
+    opacity: 0.6;
+}
+.research-status {
+    font-size: 0.8rem;
+    font-style: italic;
+}
 
 .research-entry button {
     align-self: flex-start;
