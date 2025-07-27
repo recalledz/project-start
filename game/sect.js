@@ -33,6 +33,7 @@ import { applyDiscipleAttacks } from './combat.js';
 import { startRaid, tickRaid, raidState, endRaid } from './raids.js';
 import { updateRaidLifeBar } from './ui.js';
 import { tickOrbSpells } from './orbSpells.js';
+import { applyStarvationHit, tickInjuries } from './injury.js';
 
 export { addDiscoveredLocation } from "./ui.js";
 export const discoveredLocations = [];
@@ -1539,6 +1540,18 @@ export function tickSect(delta) {
       const mult = intelligenceXpMultiplier() * getAffinityMultiplier(d, group);
       addSkillXp(d, group, xpRate * dt * mult);
     }
+
+    if (!d.starveTimer) d.starveTimer = 0;
+    if (d.water <= 0) {
+      d.starveTimer += dt;
+      while (d.starveTimer >= 1) {
+        applyStarvationHit(d);
+        d.starveTimer -= 1;
+      }
+    } else {
+      d.starveTimer = 0;
+    }
+    tickInjuries(d, dt, d.resilience, task);
   });
 
 }

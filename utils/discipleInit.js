@@ -26,6 +26,7 @@ export function initializeDisciple(d) {
   if (d.baseIntelligence === undefined) d.baseIntelligence = d.intelligence;
   if (d.baseCharisma === undefined) d.baseCharisma = d.charisma;
   if (d.basePotential === undefined) d.basePotential = d.potential;
+  if (d.resilience === undefined) d.resilience = 1;
   if (d.incapacitated === undefined) d.incapacitated = false;
   if (!d.name) d.name = `Disciple ${d.id}`;
   if (d.inventorySlots === undefined) d.inventorySlots = 10;
