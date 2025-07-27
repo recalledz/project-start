@@ -1034,6 +1034,14 @@ function buildDiscipleGeneralView(d) {
   waterRate.textContent = ` (+${calculateWaterRegen(waterLvl).toFixed(2)}/s)`;
   waterRow.appendChild(waterRate);
   vit.appendChild(waterRow);
+  const resRow = makeStatRow(
+    'Resilience',
+    d.resilience.toFixed(2),
+    5,
+    'linear-gradient(90deg,#9bf,#bdf)'
+  );
+  resRow.querySelector('.stat-value').textContent = `${d.resilience.toFixed(2)}%/s`;
+  vit.appendChild(resRow);
   body.appendChild(vit);
 
   const task = document.createElement('div');

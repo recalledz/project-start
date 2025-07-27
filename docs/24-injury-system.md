@@ -2,6 +2,22 @@
 
 This module introduces a granular injury system for disciples. Each body part contributes a portion of the disciple's maximum health. Injuries progress from **Bruise** → **Wound** → **Destroyed** and reduce available HP.
 
+When a disciple's Water reaches 0 they start taking damage each second. Every hit randomly targets a body part using the following chances:
+
+| Body Part | Chance |
+|-----------|-------|
+| Head | 5% |
+| Left Eye | 2% |
+| Right Eye | 2% |
+| Vocal Sac | 10% |
+| Belly | 15% |
+| Left Hand | 5% |
+| Right Hand | 5% |
+| Left Leg | 10% |
+| Right Leg | 10% |
+| Inner Meridians | 10% |
+| General | 26% |
+
 ## Body Part Contributions
 
 | Body Part     | HP % | Vital |
@@ -20,11 +36,11 @@ The sum of healthy parts determines current maximum HP.
 
 | Tier      | Effect                          | Progress Speed |
 |-----------|---------------------------------|----------------|
-| Bruise    | Minor penalty                   | 0.5%/s |
-| Wound     | HP drain and severe penalty     | 1.0%/s |
+| Bruise    | Minor penalty                   | 0.25–0.5%/s |
+| Wound     | HP drain and severe penalty     | 0.5–1%/s |
 | Destroyed | Part nonfunctional              | — |
 
-Resting reduces progress speed by 2. Positive resilience heals injuries over time. Destroyed parts cannot be healed.
+Resting halves the injury rate. Each disciple has a **Resilience** stat (starting at 1%/s) that reduces progress and also restores lost HP at the same rate. Destroyed parts cannot be healed.
 
 ## Stacking and Death
 
