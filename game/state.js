@@ -84,7 +84,9 @@ export const systems = {
   chantingHallUnlocked: false,
   explorationUnlocked: false,
   orbManagementUnlocked: false,
-  spellStrengthUnlocked: false
+  spellStrengthUnlocked: false,
+  areitoBuildingAvailable: false,
+  transmutationUnlocked: false
 };
 
 // Fruit gathering and growth configuration
@@ -92,13 +94,16 @@ export const FRUIT_MAX_CAP = 120;
 export const FRUIT_GROWTH_RATES = [60, 40, 30, 20, 0];
 export const SOFTWOOD_CAP_BASE = 150;
 export const FRUIT_CAP_BASE = 250;
+export const PLANK_CAP_BASE = 100;
 
 export const sectState = {
   fruits: 0,
   softwood: 0,
   undeadNectar: 0,
+  planks: 0,
   softwoodCap: SOFTWOOD_CAP_BASE,
   fruitCap: FRUIT_CAP_BASE,
+  plankCap: PLANK_CAP_BASE,
   availableFruits: FRUIT_MAX_CAP,
   animals: { Chicken: 3, Boar: 1, Deer: 0 },
   discipleTasks: {},
@@ -112,7 +117,13 @@ export const sectState = {
   discipleRest: {},
   maxDisciples: 3,
   housingBonus: 0,
-  buildings: { bohio: 0, researchDesk: 0, chantingHall: 0, orbSpellStrength: 0 },
+  buildings: {
+    bohio: 0,
+    researchDesk: 0,
+    chantingHall: 0,
+    orbSpellStrength: 0,
+    areitoCircle: 0
+  },
   researchPoints: 0,
   researchProgress: 0,
   completedResearch: [],
@@ -142,6 +153,8 @@ export function updateResourceCaps() {
   const lvl = sectState.buildings.bohio || 0;
   sectState.softwoodCap = SOFTWOOD_CAP_BASE + lvl * 50;
   sectState.fruitCap = FRUIT_CAP_BASE + lvl * 200;
+  sectState.plankCap = PLANK_CAP_BASE + lvl * 20;
   sectState.fruits = Math.min(sectState.fruitCap, sectState.fruits);
   sectState.softwood = Math.min(sectState.softwoodCap, sectState.softwood);
+  sectState.planks = Math.min(sectState.plankCap, sectState.planks);
 }

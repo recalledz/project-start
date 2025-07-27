@@ -21,6 +21,7 @@ export const SOFTWOOD_CYCLE_SECONDS = 215;
 export const SOFTWOOD_CYCLE_AMOUNT = 10;
 export const SOFTWOOD_CAP_BASE = 150;
 export const FRUIT_CAP_BASE = 250;
+export const PLANK_CAP_BASE = 100;
 // Fruits consumed per disciple each second
 export const FRUIT_CONSUMPTION_RATE = 0.01;
 export const TRAINING_NECTAR_RATE = 0.01;

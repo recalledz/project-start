@@ -20,6 +20,13 @@ export const BUILDINGS = {
     costFunc: lvl => Math.round(100 * Math.pow(1.3, lvl)),
     max: 10,
     requires: 'researchDesk'
+  },
+  areitoCircle: {
+    name: 'Circle of Areito',
+    time: 600,
+    costFunc: lvl => Math.round(150 * Math.pow(1.5, lvl - 1)),
+    costWaterFunc: lvl => Math.round(10 * Math.pow(1.5, lvl - 1)),
+    max: 10
   }
 };
 
@@ -44,6 +51,9 @@ export function checkBuildingUnlock() {
   if (!systems.buildingUnlocked && sectState.softwood >= 20) {
     systems.buildingUnlocked = true;
   }
+  if (!systems.areitoBuildingAvailable && sectState.softwood >= 100) {
+    systems.areitoBuildingAvailable = true;
+  }
 }
 
 export function startBuilding(key) {
@@ -51,13 +61,16 @@ export function startBuilding(key) {
   if (!b) return;
   const built = sectState.buildings[key] || 0;
   const cost = b.costFunc ? b.costFunc(built + 1) : b.cost;
+  const waterCost = b.costWaterFunc ? b.costWaterFunc(built + 1) : 0;
   if (sectState.softwood < cost) return;
+  if (sectSystem.orbs.water.current < waterCost) return;
   if (built >= b.max) return;
   if (sectState.currentBuild) return;
   if (b.requires && sectState.buildings[b.requires] < b.max) return;
   if (key === 'chantingHall' && !systems.chantingHallUnlocked) return;
   if (key === 'orbSpellStrength' && !systems.spellStrengthUnlocked) return;
   sectState.softwood -= cost;
+  if (waterCost) sectSystem.orbs.water.current -= waterCost;
   sectState.currentBuild = key;
   sectState.buildProgress = 0;
   if (typeof globalThis.updateBuildOverlay === 'function') {
@@ -116,6 +129,9 @@ export function tickBuilding(dt) {
   }
     if (builtKey === 'researchDesk' && !systems.researchUnlocked) {
       systems.researchUnlocked = true;
+    }
+    if (builtKey === 'areitoCircle') {
+      if (!systems.transmutationUnlocked) systems.transmutationUnlocked = true;
     }
     if (typeof globalThis.updateBuildOverlay === 'function') {
       globalThis.updateBuildOverlay();
