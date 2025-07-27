@@ -1,6 +1,6 @@
 import { makeBar } from './ui.js';
 import { sectState } from './state.js';
-import { calculateMaxWater } from '../utils/water.js';
+import { getMaxWater } from './metamorphosisBonuses.js';
 import { DISCIPLE_MAX_HEALTH } from './constants.js';
 
 export function createDiscipleBadge(d) {
@@ -26,7 +26,7 @@ export function createDiscipleBadge(d) {
   content.appendChild(lifeBar);
 
   const waterLvl = sectState.discipleSkills[d.id]?.WaterSense || 0;
-  const waterBar = makeBar(d.water, calculateMaxWater(waterLvl), '#7fd9ff');
+  const waterBar = makeBar(d.water, getMaxWater(d, waterLvl), '#7fd9ff');
   waterBar.classList.add('water-bar');
   content.appendChild(waterBar);
 

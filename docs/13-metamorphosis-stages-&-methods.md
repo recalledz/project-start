@@ -23,6 +23,17 @@ As a disciple progresses, their sprite on the sect map gains a brighter aura.
 Early stages feature a subtle glow while higher stages emit pulsing colors to
 reflect growing power.
 
+### Universal Stage Bonuses
+
+Every breakthrough grants the disciple cumulative stat increases regardless of their chosen Path:
+
+- **Max Water** +100
+- **Water Regeneration** +2 per second
+- **Resilience** +0.2% per second
+- **Spell Potency** +20%
+- **Base Attack Damage** +3
+- **Movement Speed** +10%
+
 ### 1. 🥚 Egg Stage
 
 - **Requirement**: 25,000 metamorphosis XP
