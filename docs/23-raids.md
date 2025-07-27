@@ -15,9 +15,8 @@ Disciples may be called upon to defend the sect from occasional raids.
 * Raids begin automatically during the Night phase.
 * A red alert briefly appears on screen when a raid starts.
 * Raiders attack the Water orb, reducing its stored energy.
-* Disciples assigned to **Fight** line up south of the Water Orb at night, blocking raiders and striking back each attack.
-* Fighters absorb damage with their personal Water first. When empty they lose HP.
-* Raiders randomly target a fighter when multiple disciples are on guard.
+* All disciples rush to intercept raiders as soon as they appear.
+* Each disciple seeks the nearest enemy and engages in melee when in range.
 * If the orb is depleted the sect loses **half** of its stored fruit and softwood.
 * Early raids send four SlowBlob raiders, one every 10&nbsp;s for 40&nbsp;s.
 
@@ -35,7 +34,7 @@ Disciples may be called upon to defend the sect from occasional raids.
 * The raid ends when the enemy is defeated or the orb is drained.
 * A summary overlay appears after victory showing damage dealt, damage received,
   rewards and how much combat XP each participating disciple earned. Each
-  fighter now displays a small progress bar indicating their level and progress
-  toward the next. Level ups are noted next to the fighter's name.
+  disciple now displays a small progress bar indicating their level and progress
+  toward the next. Level ups are noted next to the disciple's name.
 * If defeated, a raid end overlay displays the resources lost when the orb was
   drained.

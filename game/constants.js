@@ -56,8 +56,7 @@ export const TASK_ICONS = {
   Resting: '🛌',
   Training: '🥋',
   Eat: '🍽️',
-  Sleep: '💤',
-  Fight: '⚔️'
+  Sleep: '💤'
 };
 
 export const TASK_GROUPS = {
@@ -69,8 +68,7 @@ export const TASK_GROUPS = {
   'Chant': 'Chanting',
   'Exploration': 'Exploration',
   Idle: 'Idle',
-  Resting: 'Idle',
-  Fight: 'Combat'
+  Resting: 'Idle'
 };
 
 export const ATTRIBUTE_FOR_GROUP = {
