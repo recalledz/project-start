@@ -12,8 +12,8 @@ import { damageDisciple } from './combat.js';
 // for a total of four attackers.
 const SPAWN_INTERVAL = 10000; // ms
 const MAX_BLOBS = 4;
-// Blobs move at the base unit speed
-const BLOB_SPEED = BASE_MOVE_SPEED;
+// Blobs move at half the base unit speed
+const BLOB_SPEED = BASE_MOVE_SPEED / 2;
 // Blobs attack every 10 seconds
 const BLOB_ATTACK_INTERVAL = 10000; // ms
 const ORB_ATTACK_INTERVAL = 5000; // ms
