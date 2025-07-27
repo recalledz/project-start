@@ -134,6 +134,7 @@ function createBlob() {
     size,
     update(dt) {
       let target = null;
+      let targetPos = null;
       let min = Infinity;
       const now = performance.now();
       sectSystem.disciples.forEach(d => {
@@ -147,11 +148,22 @@ function createBlob() {
         if (dd <= DISCIPLE_RANGE && dd < min) {
           min = dd;
           target = d;
+          targetPos = { x: px, y: py, dist: dd };
         }
       });
 
-      if (target) {
-        if (now >= this.nextAttack) {
+      if (target && targetPos) {
+        const dx = targetPos.x - this.x;
+        const dy = targetPos.y - this.y;
+        const dist = targetPos.dist;
+        if (dist > 1) {
+          const move = Math.min((BLOB_SPEED * dt) / 1000, dist);
+          this.x += (dx / dist) * move;
+          this.y += (dy / dist) * move;
+          this.el.style.left = `${this.x}px`;
+          this.el.style.top = `${this.y}px`;
+        }
+        if (dist <= this.size && now >= this.nextAttack) {
           damageDisciple(target, 5, 'SlowBlob');
           this.nextAttack = now + BLOB_ATTACK_INTERVAL;
         }
