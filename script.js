@@ -804,6 +804,7 @@ function updateSectDisplay() {
       if (!sectDiscipleEls[d.id]) {
         const el = document.createElement('div');
         el.className = 'sect-disciple';
+        el.dataset.discipleId = d.id;
         sectDiscipleEls[d.id] = el;
         sectDisciplesContainer.appendChild(el);
         moveDisciple(el);
