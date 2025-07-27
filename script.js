@@ -1368,6 +1368,9 @@ function init() {
       enableOrbGlow();
       showOrbMask();
       updateOrbMaskPosition();
+      sectSystem.disciples.forEach(d => {
+        if (!d.incapacitated) sectState.discipleTasks[d.id] = 'Idle';
+      });
     } else {
       disableOrbGlow();
       hideOrbMask();
