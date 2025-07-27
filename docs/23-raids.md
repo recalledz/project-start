@@ -18,6 +18,7 @@ Disciples may be called upon to defend the sect from occasional raids.
 * All disciples rush to intercept raiders as soon as they appear.
 * Raiders stop when intercepted and direct their attacks at the nearby disciples.
 * All disciples immediately pause their current task to join the defense.
+* After the raid ends, disciples automatically resume their previous work assignments.
 * Each disciple seeks the nearest enemy and engages in melee when in range.
 * If the orb is depleted the sect loses **half** of its stored fruit and softwood.
 * Early raids send four SlowBlob raiders, one every 10&nbsp;s for 40&nbsp;s.
