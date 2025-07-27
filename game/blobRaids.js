@@ -4,6 +4,7 @@ import addLog from './log.js';
 import { BASE_MOVE_SPEED } from './constants.js';
 import { flashOrbGlow } from './orbGlow.js';
 import { raidState, endRaid } from './raids.js';
+import { damageDisciple } from './combat.js';
 
 
 
@@ -132,31 +133,55 @@ function createBlob() {
     nextAttack: performance.now() + BLOB_ATTACK_INTERVAL,
     size,
     update(dt) {
-      const ox = orbRect.left + orbRect.width / 2 - mapRect.left;
-      const oy = orbRect.top + orbRect.height / 2 - mapRect.top;
-      const dx = ox - this.x;
-      const dy = oy - this.y;
-      const dist = Math.hypot(dx, dy);
-      if (dist > 1) {
-        const move = Math.min((BLOB_SPEED * dt) / 1000, dist);
-        this.x += (dx / dist) * move;
-        this.y += (dy / dist) * move;
-        this.el.style.left = `${this.x}px`;
-        this.el.style.top = `${this.y}px`;
-      }
-      if (dist <= this.size && performance.now() >= this.nextAttack) {
-        sectSystem.orbs.water.current = Math.max(
-          0,
-          sectSystem.orbs.water.current - 5
-        );
-        raidState.damageReceived += 5;
-        const orbEl = getOrb();
-        runAnimation(orbEl, 'orb-hit');
-        addLog('SlowBlob hits the Water Orb for 5 damage.', 'damage');
-        this.nextAttack = performance.now() + BLOB_ATTACK_INTERVAL;
-        if (sectSystem.orbs.water.current <= 0 && raidState.active) {
-          endRaid(false);
-          return;
+      let target = null;
+      let min = Infinity;
+      const now = performance.now();
+      sectSystem.disciples.forEach((d, idx) => {
+        if (d.incapacitated) return;
+        const el = document.querySelector(`.sect-disciple:nth-child(${idx + 1})`);
+        if (!el) return;
+        const rect = el.getBoundingClientRect();
+        const px = rect.left + rect.width / 2 - mapRect.left;
+        const py = rect.top + rect.height / 2 - mapRect.top;
+        const dd = Math.hypot(px - this.x, py - this.y);
+        if (dd <= DISCIPLE_RANGE && dd < min) {
+          min = dd;
+          target = d;
+        }
+      });
+
+      if (target) {
+        if (now >= this.nextAttack) {
+          damageDisciple(target, 5, 'SlowBlob');
+          this.nextAttack = now + BLOB_ATTACK_INTERVAL;
+        }
+      } else {
+        const ox = orbRect.left + orbRect.width / 2 - mapRect.left;
+        const oy = orbRect.top + orbRect.height / 2 - mapRect.top;
+        const dx = ox - this.x;
+        const dy = oy - this.y;
+        const dist = Math.hypot(dx, dy);
+        if (dist > 1) {
+          const move = Math.min((BLOB_SPEED * dt) / 1000, dist);
+          this.x += (dx / dist) * move;
+          this.y += (dy / dist) * move;
+          this.el.style.left = `${this.x}px`;
+          this.el.style.top = `${this.y}px`;
+        }
+        if (dist <= this.size && now >= this.nextAttack) {
+          sectSystem.orbs.water.current = Math.max(
+            0,
+            sectSystem.orbs.water.current - 5
+          );
+          raidState.damageReceived += 5;
+          const orbEl = getOrb();
+          runAnimation(orbEl, 'orb-hit');
+          addLog('SlowBlob hits the Water Orb for 5 damage.', 'damage');
+          this.nextAttack = now + BLOB_ATTACK_INTERVAL;
+          if (sectSystem.orbs.water.current <= 0 && raidState.active) {
+            endRaid(false);
+            return;
+          }
         }
       }
     },
