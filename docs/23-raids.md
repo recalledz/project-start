@@ -23,6 +23,7 @@ Disciples may be called upon to defend the sect from occasional raids.
 
 * The Water orb lashes out every 5&nbsp;s at blobs within 75&nbsp;px, striking the closest target for 5 damage.
 * Blobs show a small health meter as they crawl across the map.
+* When killed, blobs burst in a brief animation.
 * 
 * Damage dealt to and by the Water orb is logged during raids.
 * All units traverse the map at a base rate of 10&nbsp;px per second.

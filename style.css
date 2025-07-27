@@ -4083,3 +4083,10 @@ body.darkenshift-mode .tabsContainer button.active {
 .slow-blob .blob-eye.left{left:4px;}
 .slow-blob .blob-eye.right{right:4px;}
 
+@keyframes blob-burst {
+  0% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(2); opacity: 0; }
+}
+.blob-burst {
+  animation: blob-burst 0.4s ease-out forwards;
+}
