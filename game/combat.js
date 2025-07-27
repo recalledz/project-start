@@ -139,4 +139,41 @@ export function cDealerDamage(damageAmount = null, source = 'dealer') {
   }
 }
 
+export function damageDisciple(target, damageAmount, source = 'enemy') {
+  if (!target || target.incapacitated) return;
+
+  const amount = Math.round(damageAmount);
+  target.currentHp = Math.max(0, target.currentHp - amount);
+  const targetName = target.name ? target.name : `${target.value}${target.symbol}`;
+  addLog(`${source} hit ${targetName} for ${amount} damage!`, 'damage');
+
+  if (target.hpDisplay) {
+    target.hpDisplay.textContent = `HP: ${formatNumber(Math.round(target.currentHp))}/${formatNumber(
+      Math.round(target.maxHp)
+    )}`;
+  }
+  if (target.wrapperElement) {
+    animateDiscipleHit(target);
+    showDamageFloat(target, amount);
+  }
+  updateBloodSplat(target);
+
+  if (target.currentHp === 0) {
+    const idx = activeDisciples.indexOf(target);
+    if (idx >= 0) activeDisciples.splice(idx, 1);
+    target.incapacitated = true;
+    target.health = 0;
+    target.stamina = 0;
+    sectState.discipleTasks[target.id] = 'Idle';
+    animateDiscipleDeath(target, () => {
+      removeBloodSplat(target);
+      target.wrapperElement?.remove();
+      if (activeDisciples.length === 0) {
+        playerStats.hasDied = true;
+        showRestartScreen(partyDefeatHandler);
+      }
+    });
+  }
+}
+
 globalThis.cDealerDamage = cDealerDamage;
