@@ -503,6 +503,16 @@ export function openResearchOverlay() {
   researchList.className = 'research-list';
   box.appendChild(researchList);
 
+  let showCompleted = false;
+  const toggleBtn = document.createElement('button');
+  toggleBtn.textContent = 'Show Purchased';
+  toggleBtn.addEventListener('click', () => {
+    showCompleted = !showCompleted;
+    toggleBtn.textContent = showCompleted ? 'Hide Purchased' : 'Show Purchased';
+    renderResearch();
+  });
+  box.appendChild(toggleBtn);
+
   const topics = [
     {
       key: 'orbRevival',
@@ -541,29 +551,38 @@ export function openResearchOverlay() {
   function renderResearch() {
     researchList.innerHTML = '';
     topics.forEach(t => {
-      if (sectState.completedResearch.includes(t.key)) return;
+      const completed = sectState.completedResearch.includes(t.key);
+      if (completed && !showCompleted) return;
       const row = document.createElement('div');
       row.className = 'research-entry';
+      if (completed) row.classList.add('completed');
       const name = document.createElement('div');
       name.className = 'research-name';
       name.textContent = t.label;
       const desc = document.createElement('div');
       desc.className = 'research-desc';
       desc.textContent = t.desc;
-      const btn = document.createElement('button');
-      btn.textContent = `Unlock (${t.cost})`;
-      btn.disabled = sectState.researchPoints < t.cost;
-      btn.addEventListener('click', () => {
-        if (sectState.researchPoints < t.cost) return;
-        sectState.researchPoints -= t.cost;
-        sectState.completedResearch.push(t.key);
-        t.unlock();
-        if (typeof window.updateSectDisplay === 'function') window.updateSectDisplay();
-        renderResearch();
-      });
       row.appendChild(name);
       row.appendChild(desc);
-      row.appendChild(btn);
+      if (completed) {
+        const status = document.createElement('div');
+        status.className = 'research-status';
+        status.textContent = 'Purchased';
+        row.appendChild(status);
+      } else {
+        const btn = document.createElement('button');
+        btn.textContent = `Unlock (${t.cost})`;
+        btn.disabled = sectState.researchPoints < t.cost;
+        btn.addEventListener('click', () => {
+          if (sectState.researchPoints < t.cost) return;
+          sectState.researchPoints -= t.cost;
+          sectState.completedResearch.push(t.key);
+          t.unlock();
+          if (typeof window.updateSectDisplay === 'function') window.updateSectDisplay();
+          renderResearch();
+        });
+        row.appendChild(btn);
+      }
       researchList.appendChild(row);
     });
   }
