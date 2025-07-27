@@ -192,7 +192,7 @@ function createBlob() {
         this.lifeFill.style.width = `${pct}%`;
       }
       if (this.hp === 0) {
-        this.el.remove();
+        runAnimation(this.el, 'blob-burst', 400).then(() => this.el.remove());
         const idx = blobs.indexOf(this);
         if (idx >= 0) blobs.splice(idx, 1);
       }
