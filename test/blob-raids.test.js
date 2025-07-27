@@ -11,7 +11,14 @@ function setupDom() {
   globalThis.document = {
     getElementById: id => (id === 'colonyMap' ? map : null),
     querySelector: sel => (sel === '#sectOrbs .sect-orb.water' ? orb : null),
-    createElement: () => ({ appendChild() {}, style: {}, className: '', remove() {} })
+    createElement: tag => ({
+      tagName: tag,
+      childNodes: [],
+      appendChild(el) { this.childNodes.push(el); },
+      style: {},
+      className: '',
+      remove() {}
+    })
   };
   globalThis.window = {};
 }
@@ -35,5 +42,15 @@ describe('blob raids', () => {
     expect(success).to.be.true;
     expect(blobs[0].lifeFill).to.exist;
     expect(blobs[0].lifeFill.style.width).to.equal('100%');
+  });
+
+  it('creates map splatter when damaged', () => {
+    spawnBlob();
+    const map = document.getElementById('colonyMap');
+    const before = map.childNodes.length;
+    blobs[0].takeDamage(1);
+    expect(map.childNodes.length).to.be.above(before);
+    const last = map.childNodes[map.childNodes.length - 1];
+    expect(last.className).to.equal('map-splatter');
   });
 });

@@ -1,5 +1,34 @@
 import { runAnimation } from '../utils/animation.js';
 
+export function drawBloodSplat(canvas) {
+  const ctx = canvas.getContext && canvas.getContext('2d');
+  if (!ctx) return;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  for (let i = 0; i < 6; i++) {
+    const r = Math.random() * 10 + 5;
+    const x = Math.random() * canvas.width;
+    const y = Math.random() * canvas.height;
+    ctx.beginPath();
+    ctx.fillStyle = `rgba(150,0,0,${0.5 + Math.random() * 0.5})`;
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+export function createMapSplatter(x, y) {
+  const map = document.getElementById('colonyMap');
+  if (!map) return;
+  const size = 20 + Math.random() * 20;
+  const canvas = document.createElement('canvas');
+  canvas.className = 'map-splatter';
+  canvas.width = size;
+  canvas.height = size;
+  canvas.style.left = `${x - size / 2}px`;
+  canvas.style.top = `${y - size / 2}px`;
+  drawBloodSplat(canvas);
+  map.appendChild(canvas);
+}
+
 export function renderDealerLifeBar(dealerLifeDisplay, currentEnemy) {
   if (document.querySelector('.dealerLifeContainer')) return;
   const container = document.createElement('div');
@@ -91,19 +120,6 @@ export function renderDiscipleCard(disciple, handContainer) {
 }
 
 
-function drawBloodSplat(canvas) {
-  const ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  for (let i = 0; i < 6; i++) {
-    const r = Math.random() * 10 + 5;
-    const x = Math.random() * canvas.width;
-    const y = Math.random() * canvas.height;
-    ctx.beginPath();
-    ctx.fillStyle = `rgba(150,0,0,${0.5 + Math.random() * 0.5})`;
-    ctx.arc(x, y, r, 0, Math.PI * 2);
-    ctx.fill();
-  }
-}
 
 export function applyBloodSplat(card) {
   if (!card.cardElement) return;

@@ -4129,3 +4129,9 @@ body.darkenshift-mode .tabsContainer button.active {
 .blob-burst {
   animation: blob-burst 0.4s ease-out forwards;
 }
+
+.map-splatter {
+  position: absolute;
+  pointer-events: none;
+  z-index: 0;
+}
