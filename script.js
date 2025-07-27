@@ -668,6 +668,38 @@ function updateTaskProgressDisplay() {
   });
 }
 
+function updateDiscipleWaterDisplay() {
+  sectSystem.disciples.forEach(d => {
+    const waterLvl = getTaskSkillProgress(
+      sectState.discipleSkills[d.id]?.WaterSense || 0
+    ).level;
+    const max = calculateMaxWater(waterLvl);
+    document
+      .querySelectorAll(`.disciple-badge[data-disciple-id="${d.id}"] .water-bar .bar-fill`)
+      .forEach(fill => {
+        fill.style.width = `${Math.min(100, (d.water / max) * 100)}%`;
+      });
+  });
+  if (discipleOverlay && discipleOverlayActiveTab === 'general') {
+    const d = discipleOverlayData.disciple;
+    if (d) {
+      const waterLvl = getTaskSkillProgress(
+        sectState.discipleSkills[d.id]?.WaterSense || 0
+      ).level;
+      const max = calculateMaxWater(waterLvl);
+      const row = discipleOverlay.box.querySelector(
+        '.disciple-general .stat-row[data-stat="water"]'
+      );
+      if (row) {
+        const fill = row.querySelector('.bar-fill');
+        if (fill) fill.style.width = `${Math.min(100, (d.water / max) * 100)}%`;
+        const val = row.querySelector('.stat-value');
+        if (val) val.textContent = `${Math.round(d.water)}/${max}`;
+      }
+    }
+  }
+}
+
 function updateSectDisplay() {
   checkBuildingUnlock();
   if (sectNavBuildBtn) {
@@ -1012,11 +1044,13 @@ function buildDiscipleGeneralView(d) {
 function makeStatRow(label, value, max, color) {
   const row = document.createElement('div');
   row.className = 'stat-row';
+  row.dataset.stat = label.toLowerCase();
   const lbl = document.createElement('div');
   lbl.textContent = label;
   const bar = makeBar(value, max, color);
   bar.classList.add('vital-bar');
   const val = document.createElement('div');
+  val.className = 'stat-value';
   val.textContent = `${value}/${max}`;
   row.appendChild(lbl);
   row.appendChild(bar);
@@ -2489,6 +2523,7 @@ function gameLoop(currentTime) {
   // refresh sect resource UI every tick for real-time updates
   if (typeof updateSectDisplay === 'function') updateSectDisplay();
   updateTaskProgressDisplay();
+  updateDiscipleWaterDisplay();
   updateOrbGlow(deltaTime);
   requestAnimationFrame(gameLoop);
 }
