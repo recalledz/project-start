@@ -9,6 +9,7 @@ Transmutation is performed at the Jadefire Pavilion and is a core progression sc
 
 Spell	Requirement	Cost	Creates
 
+Plank Transmute   Circle of Areito   100 Softwood   1 Plank
 Assemble Wood	Jadefire Pavilion unlocked	175 Softwood	1 Plank
 Assemble Stone	Jadefire Pavilion unlocked	250 Stone	1 Brick
 Burn Wood	Coal Transmute researched	1 Softwood	0.003 Coal

@@ -837,6 +837,24 @@ body.darkenshift-mode .tabsContainer button.active {
     transition: width 0.3s ease;
 }
 
+.transmute-overlay .overlay-box {
+    max-width: 300px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.transmute-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.transmute-entry {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 4px;
+}
+
 .work-disciples .sect-disciple-card.selected {
     background: #fbf6e0;
     color: #000;

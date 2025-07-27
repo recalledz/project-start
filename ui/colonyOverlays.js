@@ -9,6 +9,7 @@ import { systems, sectState, worldProgress } from '../game/state.js';
 import { createSectDiscipleCard, renderExplorationTab, startExploration, startWorldCombat, discipleGatherPhase } from '../script.js';
 import { BUILDINGS, startBuilding } from '../game/buildings.js';
 import { castWordOfHaste, toggleReverberation } from '../game/orbSpells.js';
+import { TRANSMUTES, performTransmute, canTransmute, getTransmutePower } from '../game/transmutation.js';
 import { TASK_GROUPS } from '../game/constants.js';
 import { getTaskSkillProgress } from '../utils/skills.js';
 
@@ -354,6 +355,55 @@ export function openOrbOverlay() {
   render();
 }
 
+let transmuteOverlay = null;
+export function openTransmuteOverlay() {
+  if (transmuteOverlay) return;
+  transmuteOverlay = createOverlay({ className: 'transmute-overlay', boxClass: 'parchment-box' });
+  transmuteOverlay.box.classList.add('parchment-box');
+  transmuteOverlay.onClose(() => { transmuteOverlay = null; globalThis.updateTransmuteOverlay = null; });
+  const { box } = transmuteOverlay;
+
+  const header = document.createElement('div');
+  header.className = 'panel-heading';
+  header.textContent = 'Transmutation';
+  box.appendChild(header);
+
+  const powerEl = document.createElement('div');
+  box.appendChild(powerEl);
+
+  const list = document.createElement('div');
+  list.className = 'transmute-list';
+  box.appendChild(list);
+
+  function formatCost(cost) {
+    return Object.entries(cost)
+      .map(([res, amt]) => `${amt}${res === 'softwood' ? '\u{1FAB5}' : ''}`)
+      .join(', ');
+  }
+
+  function render() {
+    powerEl.textContent = `Power: ${((getTransmutePower() - 1) * 100).toFixed(0)}%`;
+    list.innerHTML = '';
+    Object.entries(TRANSMUTES).forEach(([key, def]) => {
+      if (!def.unlocked) return;
+      const row = document.createElement('div');
+      row.className = 'transmute-entry';
+      const label = document.createElement('div');
+      label.textContent = def.name;
+      row.appendChild(label);
+      const btn = document.createElement('button');
+      btn.textContent = `Transmute (${formatCost(def.input)})`;
+      btn.disabled = !canTransmute(key);
+      btn.addEventListener('click', () => { performTransmute(key); render(); });
+      row.appendChild(btn);
+      list.appendChild(row);
+    });
+  }
+
+  globalThis.updateTransmuteOverlay = render;
+  render();
+}
+
 let buildOverlay = null;
 export function openBuildOverlay() {
   if (buildOverlay) return;
@@ -379,6 +429,7 @@ export function openBuildOverlay() {
     Object.entries(BUILDINGS).forEach(([key, def]) => {
       if (def.requires && !(sectState.buildings[def.requires] > 0)) return;
       if (key === 'orbSpellStrength' && !systems.spellStrengthUnlocked) return;
+      if (key === 'areitoCircle' && !systems.areitoBuildingAvailable) return;
       const built = sectState.buildings[key] || 0;
       const row = document.createElement('div');
       row.className = 'build-entry';
@@ -395,9 +446,16 @@ export function openBuildOverlay() {
         row.appendChild(progress);
       } else {
         const cost = def.costFunc ? def.costFunc(built + 1) : def.cost;
+        const waterCost = def.costWaterFunc ? def.costWaterFunc(built + 1) : 0;
         const btn = document.createElement('button');
-        btn.textContent = `Build (${cost}\u{1FAB5})`;
-        btn.disabled = sectState.softwood < cost || built >= def.max || sectState.currentBuild;
+        const costParts = [`${cost}\u{1FAB5}`];
+        if (waterCost) costParts.push(`${waterCost}\u{1F4A7}`);
+        btn.textContent = `Build (${costParts.join(', ')})`;
+        btn.disabled =
+          sectState.softwood < cost ||
+          sectSystem.orbs.water.current < waterCost ||
+          built >= def.max ||
+          sectState.currentBuild;
         btn.addEventListener('click', () => {
           startBuilding(key);
           render();
