@@ -19,9 +19,10 @@ Disciples may be called upon to defend the sect from occasional raids.
 * Each disciple seeks the nearest enemy and engages in melee when in range.
 * If the orb is depleted the sect loses **half** of its stored fruit and softwood.
 * Early raids send four SlowBlob raiders, one every 10&nbsp;s for 40&nbsp;s.
+* SlowBlob attacks now occur every 10&nbsp;s.
 
 * The Water orb lashes out every 5&nbsp;s at blobs within 75&nbsp;px, striking the closest target for 5 damage.
-* Blobs show a small health meter as they crawl across the 
+* Blobs show a small health meter as they crawl across the map.
 * 
 * Damage dealt to and by the Water orb is logged during raids.
 * All units traverse the map at a base rate of 10&nbsp;px per second.
@@ -31,7 +32,7 @@ Disciples may be called upon to defend the sect from occasional raids.
 
 * Defeating a raid yields **Undead Nectar** in addition to experience. The nectar
   is added to your resources side panel for later use.
-* The raid ends when the enemy is defeated or the orb is drained.
+* The raid ends immediately when the enemy is defeated or the Water orb is drained.
 * A summary overlay appears after victory showing damage dealt, damage received,
   rewards and how much combat XP each participating disciple earned. Each
   disciple now displays a small progress bar indicating their level and progress

@@ -3,7 +3,7 @@ import { runAnimation } from '../utils/animation.js';
 import addLog from './log.js';
 import { BASE_MOVE_SPEED } from './constants.js';
 import { flashOrbGlow } from './orbGlow.js';
-import { raidState } from './raids.js';
+import { raidState, endRaid } from './raids.js';
 
 
 
@@ -13,6 +13,8 @@ const SPAWN_INTERVAL = 10000; // ms
 const MAX_BLOBS = 4;
 // Blobs move at the base unit speed
 const BLOB_SPEED = BASE_MOVE_SPEED;
+// Blobs attack every 10 seconds
+const BLOB_ATTACK_INTERVAL = 10000; // ms
 const ORB_ATTACK_INTERVAL = 5000; // ms
 const ORB_ATTACK_RANGE = 75; // px
 const DISCIPLE_ATTACK_INTERVAL = 10000; // ms
@@ -127,7 +129,7 @@ function createBlob() {
     y,
     hp: 20,
     maxHp: 20,
-    nextAttack: performance.now() + 1000,
+    nextAttack: performance.now() + BLOB_ATTACK_INTERVAL,
     size,
     update(dt) {
       const ox = orbRect.left + orbRect.width / 2 - mapRect.left;
@@ -148,9 +150,14 @@ function createBlob() {
           sectSystem.orbs.water.current - 5
         );
         raidState.damageReceived += 5;
-        runAnimation(orb, 'orb-hit');
+        const orbEl = getOrb();
+        runAnimation(orbEl, 'orb-hit');
         addLog('SlowBlob hits the Water Orb for 5 damage.', 'damage');
-        this.nextAttack = performance.now() + 1000;
+        this.nextAttack = performance.now() + BLOB_ATTACK_INTERVAL;
+        if (sectSystem.orbs.water.current <= 0 && raidState.active) {
+          endRaid(false);
+          return;
+        }
       }
     },
     takeDamage(dmg) {
