@@ -29,6 +29,7 @@ Disciples may be called upon to defend the sect from occasional raids.
 * 
 * Damage dealt to and by the Water orb is logged during raids.
 * All units traverse the map at a base rate of 10&nbsp;px per second.
+* SlowBlob raiders crawl at half this speed, moving only 5&nbsp;px per second.
 * SlowBlob raiders now sport two glowing red eyes that move with them.
 
 
