@@ -1,6 +1,7 @@
 import Disciple from '../game/disciple.js';
 import { calculateMaxWater } from './water.js';
 import { sectState } from '../game/state.js';
+import { ensureInjuryState } from '../game/injury.js';
 
 export function initializeDisciple(d) {
   if (!d) return d;
@@ -33,6 +34,7 @@ export function initializeDisciple(d) {
   if (d.currentHp === undefined) d.currentHp = d.maxHp;
   if (d.foundationXp === undefined) d.foundationXp = 0;
   if (d.lastTab === undefined) d.lastTab = 'general';
+  ensureInjuryState(d);
   if (!sectState.discipleMetamorphosis[d.id]) {
     sectState.discipleMetamorphosis[d.id] = {
       xp: 0,

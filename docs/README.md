@@ -68,4 +68,5 @@ Table of Contents
 21. [Metamorphosis UI Expansion](21-metamorphosis-ui.md)
 22. [Affinities](22-affinities.md)
 23. [Raids](23-raids.md)
+24. [Injury System & Health Tab](24-injury-system.md)
 
