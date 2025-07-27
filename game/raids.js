@@ -41,6 +41,9 @@ export function startRaid() {
   raidState.damageReceived = 0;
   raidState.xpStart = {};
   sectSystem.disciples.forEach(d => {
+    if (!d.incapacitated) sectState.discipleTasks[d.id] = 'Idle';
+  });
+  sectSystem.disciples.forEach(d => {
     if (!d.incapacitated) {
       ensureDiscipleSkills(d.id);
       raidState.xpStart[d.id] = {
