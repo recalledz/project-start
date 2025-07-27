@@ -11,7 +11,10 @@ import {
   GATHER_WORK_SECONDS,
   GATHER_SPOTS,
   TASK_GROUPS,
-  ATTRIBUTE_FOR_GROUP
+  ATTRIBUTE_FOR_GROUP,
+  INCAPACITATED_FOOD_MULT,
+  DISCIPLE_MAX_HEALTH,
+  REST_TIME_SECONDS
 } from './constants.js';
 import { intelligenceXpMultiplier } from './attributes.js';
 import { addSkillXp, ensureDiscipleSkills, getTaskSkillProgress } from '../utils/skills.js';
@@ -1442,7 +1445,11 @@ export function getDailyResourceDelta() {
 
 export function tickSect(delta) {
   const dt = delta / 1000;
-  const foodNeed = FRUIT_CONSUMPTION_RATE * sectSystem.disciples.length * dt;
+  let foodNeed = 0;
+  sectSystem.disciples.forEach(d => {
+    const mult = d.incapacitated ? INCAPACITATED_FOOD_MULT : 1;
+    foodNeed += FRUIT_CONSUMPTION_RATE * mult * dt;
+  });
   if (sectState.fruits >= foodNeed) {
     sectState.fruits -= foodNeed;
   } else {
@@ -1454,7 +1461,18 @@ export function tickSect(delta) {
     );
   }
   sectSystem.disciples.forEach(d => {
-    if (d.incapacitated) return;
+    if (d.incapacitated) {
+      d.health = Math.min(
+        DISCIPLE_MAX_HEALTH,
+        d.health + (DISCIPLE_MAX_HEALTH / REST_TIME_SECONDS) * dt
+      );
+      d.currentHp = d.health;
+      if (d.health >= DISCIPLE_MAX_HEALTH / 2) {
+        d.incapacitated = false;
+      } else {
+        return;
+      }
+    }
     const task = sectState.discipleTasks[d.id];
     if (!task || task === 'Idle' || task === 'Resting') {
       if (!(raidState.active && raidState.enemy)) return;

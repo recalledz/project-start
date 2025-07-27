@@ -35,6 +35,7 @@ export const EXPLORATION_CYCLE_SECONDS = 150;
 export const STAMINA_DRAIN_PER_EXPLORATION = 1;
 export const DISCIPLE_MAX_HEALTH = 10;
 export const REST_TIME_SECONDS = 300; // health fully restored over 5 minutes
+export const INCAPACITATED_FOOD_MULT = 3; // times normal consumption
 
 export const GATHER_WORK_SECONDS = 120; // WorkDuration per slot
 export const MIN_TRAVEL_SECONDS = 1; // minimum travel/haul time
