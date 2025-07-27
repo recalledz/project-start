@@ -29,6 +29,7 @@ Disciples may be called upon to defend the sect from occasional raids.
 * When killed, blobs burst in a brief animation.
 * The Water orb displays a short attack timer bar above it and flashes each time it fires.
 * Disciples briefly grow in size when landing an attack.
+* When raiders are struck a red splatter appears on the ground and remains on the sect map.
 *
 * Damage dealt to and by the Water orb is logged during raids.
 * All units traverse the map at a base rate of 10&nbsp;px per second.

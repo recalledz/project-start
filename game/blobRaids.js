@@ -5,6 +5,7 @@ import { BASE_MOVE_SPEED } from './constants.js';
 import { flashOrbGlow } from './orbGlow.js';
 import { raidState, endRaid } from './raids.js';
 import { damageDisciple } from './combat.js';
+import { createMapSplatter } from './rendering.js';
 
 
 
@@ -203,6 +204,7 @@ function createBlob() {
         const pct = (this.hp / this.maxHp) * 100;
         this.lifeFill.style.width = `${pct}%`;
       }
+      createMapSplatter(this.x, this.y);
       if (this.hp === 0) {
         runAnimation(this.el, 'blob-burst', 400).then(() => this.el.remove());
         const idx = blobs.indexOf(this);
