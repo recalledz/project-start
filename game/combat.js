@@ -14,6 +14,7 @@ import { activeDisciples } from './disciples.js';
 import { calculateEnemyBasicDamage } from './enemySpawning.js';
 import { sectSystem } from './sect.js';
 import { showRestartScreen } from '../ui/restartOverlay.js';
+import { raidState } from './raids.js';
 
 import addLog from './log.js';
 
@@ -90,8 +91,10 @@ export function setPartyDefeatHandler(fn) {
 export function cDealerDamage(damageAmount = null, source = 'dealer') {
   const targets = activeDisciples;
   if (targets.length === 0) {
-    playerStats.hasDied = true;
-    showRestartScreen(partyDefeatHandler);
+    if (!raidState.active) {
+      playerStats.hasDied = true;
+      showRestartScreen(partyDefeatHandler);
+    }
     return;
   }
 
@@ -131,7 +134,7 @@ export function cDealerDamage(damageAmount = null, source = 'dealer') {
     animateDiscipleDeath(card, () => {
       removeBloodSplat(card);
       card.wrapperElement?.remove();
-      if (activeDisciples.length === 0) {
+      if (activeDisciples.length === 0 && !raidState.active) {
         playerStats.hasDied = true;
         showRestartScreen(partyDefeatHandler);
       }
@@ -168,7 +171,7 @@ export function damageDisciple(target, damageAmount, source = 'enemy') {
     animateDiscipleDeath(target, () => {
       removeBloodSplat(target);
       target.wrapperElement?.remove();
-      if (activeDisciples.length === 0) {
+      if (activeDisciples.length === 0 && !raidState.active) {
         playerStats.hasDied = true;
         showRestartScreen(partyDefeatHandler);
       }
