@@ -136,9 +136,9 @@ function createBlob() {
       let target = null;
       let min = Infinity;
       const now = performance.now();
-      sectSystem.disciples.forEach((d, idx) => {
+      sectSystem.disciples.forEach(d => {
         if (d.incapacitated) return;
-        const el = document.querySelector(`.sect-disciple:nth-child(${idx + 1})`);
+        const el = document.querySelector(`[data-disciple-id="${d.id}"]`);
         if (!el) return;
         const rect = el.getBoundingClientRect();
         const px = rect.left + rect.width / 2 - mapRect.left;
@@ -236,7 +236,7 @@ function discipleAttack() {
   fighters.forEach(d => {
     if (!d._attackTimer) d._attackTimer = now + DISCIPLE_ATTACK_INTERVAL;
     if (now >= d._attackTimer) {
-      const el = document.querySelector(`.sect-disciple:nth-child(${sectSystem.disciples.indexOf(d)+1})`);
+      const el = document.querySelector(`[data-disciple-id="${d.id}"]`);
       if (!el) return;
       const rect = el.getBoundingClientRect();
       const map = getMap();
