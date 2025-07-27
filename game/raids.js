@@ -28,7 +28,8 @@ export const raidState = {
   orbTimer: 0,
   damageDealt: 0,
   damageReceived: 0,
-  xpStart: {}
+  xpStart: {},
+  prevTasks: {}
 };
 
 
@@ -40,8 +41,12 @@ export function startRaid() {
   raidState.damageDealt = 0;
   raidState.damageReceived = 0;
   raidState.xpStart = {};
+  raidState.prevTasks = {};
   sectSystem.disciples.forEach(d => {
-    if (!d.incapacitated) sectState.discipleTasks[d.id] = 'Idle';
+    if (!d.incapacitated) {
+      raidState.prevTasks[d.id] = sectState.discipleTasks[d.id];
+      sectState.discipleTasks[d.id] = 'Idle';
+    }
   });
   sectSystem.disciples.forEach(d => {
     if (!d.incapacitated) {
@@ -111,6 +116,10 @@ export function endRaid(victory = false) {
   raidState.orbTimer = 0;
   const xpStart = raidState.xpStart;
   raidState.xpStart = {};
+  Object.keys(raidState.prevTasks).forEach(id => {
+    sectState.discipleTasks[id] = raidState.prevTasks[id] || 'Idle';
+  });
+  raidState.prevTasks = {};
   clearBlobs();
   hideOrbAttackBar();
   addLog('The raid has ended.', 'info');
