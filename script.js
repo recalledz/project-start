@@ -58,6 +58,7 @@ import {
   calculateMaxStamina,
   calculateStaminaRegen
 } from './utils/stamina.js';
+import { BODY_PARTS } from './game/injury.js';
 import {
   calculateMaxWater,
   calculateWaterRegen
@@ -804,6 +805,7 @@ function updateSectDisplay() {
       if (!sectDiscipleEls[d.id]) {
         const el = document.createElement('div');
         el.className = 'sect-disciple';
+        el.dataset.discipleId = d.id;
         sectDiscipleEls[d.id] = el;
         sectDisciplesContainer.appendChild(el);
         moveDisciple(el);
@@ -1183,6 +1185,32 @@ function buildDiscipleMoodletsView() {
   return container;
 }
 
+function buildDiscipleHealthView(d) {
+  const container = document.createElement('div');
+  container.className = 'disciple-health-view';
+  BODY_PARTS.forEach(p => {
+    const row = document.createElement('div');
+    row.className = 'body-part-row';
+    const label = document.createElement('span');
+    label.className = 'body-part-label';
+    label.textContent = p.label;
+    const bar = document.createElement('div');
+    bar.className = 'injury-bar';
+    const fill = document.createElement('div');
+    fill.className = 'injury-bar-fill';
+    const state = d.injuries?.[p.key];
+    if (state) {
+      fill.style.width = `${Math.min(100, state.progress)}%`;
+      if (state.tier) fill.classList.add(state.tier);
+    }
+    bar.appendChild(fill);
+    row.append(label);
+    row.appendChild(bar);
+    container.appendChild(row);
+  });
+  return container;
+}
+
 function renderSectDiscipleList() {
   if (!sectDiscipleListContainer) return;
   sectDiscipleListContainer.innerHTML = '';
@@ -1222,6 +1250,7 @@ function openDiscipleOverlay(d) {
 
   const defs = [
     { key: 'general', label: 'General' },
+    { key: 'health', label: 'Health' },
     { key: 'proficiency', label: 'Proficiency' },
     { key: 'moodlets', label: 'Moodlets' },
     { key: 'stats', label: 'Stats' }
@@ -1232,6 +1261,8 @@ function openDiscipleOverlay(d) {
     if (active === 'general') {
       const view = buildDiscipleGeneralView(d);
       content.appendChild(view);
+    } else if (active === 'health') {
+      content.appendChild(buildDiscipleHealthView(d));
     } else if (active === 'proficiency') {
       content.appendChild(buildDiscipleProficiencyView(d));
     } else if (active === 'moodlets') {

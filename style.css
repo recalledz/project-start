@@ -4130,8 +4130,37 @@ body.darkenshift-mode .tabsContainer button.active {
   animation: blob-burst 0.4s ease-out forwards;
 }
 
+
 .map-splatter {
   position: absolute;
   pointer-events: none;
   z-index: 0;
+}
+.injury-bar {
+  width: 100%;
+  height: 6px;
+  background: #444;
+  border: 1px solid #222;
+  position: relative;
+  margin-top: 2px;
+}
+
+.injury-bar-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 0%;
+}
+
+.injury-bar-fill.bruise {
+  background: #b86;
+}
+
+.injury-bar-fill.wound {
+  background: #e33;
+}
+
+.injury-bar-fill.destroyed {
+  background: #111;
 }

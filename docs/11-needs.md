@@ -12,6 +12,12 @@
 - Max 100; regenerates in 1 day.
 - < 4 → incapacitated; –25% happiness.
 
+### Health
+- Depleted by combat damage; at 0 the disciple is incapacitated.
+- Incapacitated disciples eat 3× food while recovering.
+- Health regenerates to full over 5 minutes.
+- They may resume tasks once reaching 50% health.
+
 ### Sleep
 - Requires 60 s rest per day.
 
