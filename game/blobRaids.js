@@ -265,6 +265,7 @@ function discipleAttack() {
       if (target) {
         target.takeDamage(DISCIPLE_DAMAGE);
         raidState.damageDealt += DISCIPLE_DAMAGE;
+        runAnimation(el, 'disciple-strike');
         d._attackTimer = now + DISCIPLE_ATTACK_INTERVAL;
       }
     }

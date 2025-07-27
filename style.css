@@ -2549,6 +2549,16 @@ body.darkenshift-mode .tabsContainer button.active {
     100% { transform: scale(1); }
 }
 
+@keyframes disciple-strike {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+.disciple-strike {
+    animation: disciple-strike 0.3s ease;
+}
+
 .construct-orb .orb-fill {
     position: absolute;
     bottom: 0;
@@ -3274,6 +3284,8 @@ body.darkenshift-mode .tabsContainer button.active {
     border-radius: 4px;
     overflow: hidden;
     margin-bottom: 2px;
+    pointer-events: none;
+    z-index: 1;
 }
 
 .orb-attack-fill {
@@ -4097,6 +4109,8 @@ body.darkenshift-mode .tabsContainer button.active {
   border:1px solid #7fd9ff;
   border-radius:4px;
   overflow:hidden;
+  pointer-events:none;
+  z-index:1;
 }
 .blob-life-fill{
   height:100%;
