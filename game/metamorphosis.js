@@ -3,6 +3,7 @@ import { sectState } from './state.js';
 import { createDiscipleBadge } from './badges.js';
 import { METAMORPHOSIS_STAGE_REQ, TRAINING_NECTAR_RATE } from './constants.js';
 import { showPathOverlay } from './pathOverlay.js';
+import { applyStageBonuses } from './metamorphosisBonuses.js';
 
 export const metamorphosisState = {
   requirement: METAMORPHOSIS_STAGE_REQ
@@ -132,6 +133,11 @@ function breakthrough(id) {
   if (!meta) return;
   meta.xp = 0;
   meta.stage += 1;
+  const d = sectSystem.disciples.find(x => x.id === id);
+  if (d) {
+    applyStageBonuses(d);
+    d.updateCombatStats?.();
+  }
   sectSystem.orbs.water.current = 0;
   if (meta.stage === 1) {
     showPathOverlay({ onSelect: path => { sectState.disciplePaths[id] = path; } });

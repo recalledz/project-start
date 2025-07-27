@@ -63,6 +63,7 @@ import {
   calculateMaxWater,
   calculateWaterRegen
 } from './utils/water.js';
+import { getMaxWater, getWaterRegen } from './game/metamorphosisBonuses.js';
 import { initializeDisciple } from './utils/discipleInit.js';
 import { initializeSect } from './utils/sectInit.js';
 import {
@@ -682,7 +683,7 @@ function updateDiscipleWaterDisplay() {
     const waterLvl = getTaskSkillProgress(
       sectState.discipleSkills[d.id]?.WaterSense || 0
     ).level;
-    const max = calculateMaxWater(waterLvl);
+    const max = getMaxWater(d, waterLvl);
     document
       .querySelectorAll(`.disciple-badge[data-disciple-id="${d.id}"] .water-bar .bar-fill`)
       .forEach(fill => {
@@ -695,7 +696,7 @@ function updateDiscipleWaterDisplay() {
       const waterLvl = getTaskSkillProgress(
         sectState.discipleSkills[d.id]?.WaterSense || 0
       ).level;
-      const max = calculateMaxWater(waterLvl);
+      const max = getMaxWater(d, waterLvl);
       const row = discipleOverlay.box.querySelector(
         '.disciple-general .stat-row[data-stat="water"]'
       );
@@ -808,7 +809,7 @@ function updateSectDisplay() {
         el.dataset.discipleId = d.id;
         sectDiscipleEls[d.id] = el;
         sectDisciplesContainer.appendChild(el);
-        moveDisciple(el);
+        moveDisciple(d, el);
         initDiscipleVisual(d, el);
       }
     });
@@ -872,14 +873,14 @@ function updateMapBrightness(phase) {
 
 function feedDisciples() {}
 
-function moveDisciple(el) {
+function moveDisciple(d, el) {
   const cont = el.parentElement;
   if (!cont) return;
   const maxX = Math.max(cont.clientWidth - 20, 0);
   const maxY = Math.max(cont.clientHeight - 20, 0);
   const x = Math.random() * maxX;
   const y = Math.random() * maxY;
-  moveElement(el, x, y);
+  moveElement(el, x, y, d.moveSpeed);
 }
 
 function updateDiscipleGather(id, el) {
@@ -888,7 +889,8 @@ function updateDiscipleGather(id, el) {
   const px = patch.offsetLeft + patch.offsetWidth / 2 - 8;
   const py = patch.offsetTop + patch.offsetHeight / 2 - 8;
   el.style.opacity = '1';
-  moveElement(el, px, py);
+  const d = sectSystem.disciples.find(x => x.id === id);
+  moveElement(el, px, py, d?.moveSpeed);
 }
 
 function startDiscipleMovement() {
@@ -903,7 +905,7 @@ function startDiscipleMovement() {
         if (orb) {
           const bx = orb.offsetLeft + orb.offsetWidth / 2 - 2;
           const by = orb.offsetTop + orb.offsetHeight / 2 - 2;
-          moveElement(el, bx, by);
+          moveElement(el, bx, by, d.moveSpeed);
         }
         el.classList.add('incapacitated');
         taskName = 'Resting';
@@ -916,7 +918,7 @@ function startDiscipleMovement() {
           if (orb) {
             const bx = orb.offsetLeft + orb.offsetWidth / 2 - 2;
             const by = orb.offsetTop + orb.offsetHeight / 2 - 2;
-            moveElement(el, bx, by);
+            moveElement(el, bx, by, d.moveSpeed);
           }
                     taskName = task;
         } else if (phase !== 'Work') {
@@ -942,12 +944,12 @@ function startDiscipleMovement() {
                 }
               });
               if (target) {
-                moveElement(el, target.x, target.y, BASE_MOVE_SPEED);
+                moveElement(el, target.x, target.y, d.moveSpeed);
               } else {
-                moveDisciple(el);
+                moveDisciple(d, el);
               }
             }
-          } else moveDisciple(el);
+          } else moveDisciple(d, el);
         }
       }
       updateDiscipleVisual(d, el, taskName);
@@ -1028,11 +1030,11 @@ function buildDiscipleGeneralView(d) {
   const waterRow = makeStatRow(
     'Water',
     d.water,
-    calculateMaxWater(waterLvl),
+    getMaxWater(d, waterLvl),
     'linear-gradient(90deg,#39f,#6cf)'
   );
   const waterRate = document.createElement('span');
-  waterRate.textContent = ` (+${calculateWaterRegen(waterLvl).toFixed(2)}/s)`;
+  waterRate.textContent = ` (+${getWaterRegen(d, waterLvl).toFixed(2)}/s)`;
   waterRow.appendChild(waterRate);
   vit.appendChild(waterRow);
   body.appendChild(vit);

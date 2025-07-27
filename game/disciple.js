@@ -4,6 +4,8 @@
 import { generateDiscipleAttributes } from './discipleAttributes.js';
 import { xpRequirement } from '../utils/xp.js';
 import { runAnimation } from '../utils/animation.js';
+import { sectState } from './state.js';
+import { STAGE_BONUS } from './metamorphosisBonuses.js';
 
 export default class Disciple {
   constructor({ id = 0, name = `Disciple ${id}`, maxHp = 10, combatLevel = 1, attributes = generateDiscipleAttributes() } = {}) {
@@ -44,8 +46,10 @@ export default class Disciple {
 
   updateCombatStats() {
     // Combat stats no longer scale with attributes.
-    // Damage and defense grow purely with combat level as documented.
-    this.damage = this.combatLevel * 3;
+    // Damage and defense grow purely with combat level and metamorphosis bonuses.
+    const stage = sectState.discipleMetamorphosis[this.id]?.stage || 0;
+    const stageBonus = stage * STAGE_BONUS.attack;
+    this.damage = this.combatLevel * 3 + stageBonus;
     this.attackSpeed = 10000;
     this.defense = this.combatLevel;
   }

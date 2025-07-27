@@ -2,6 +2,7 @@ import Disciple from '../game/disciple.js';
 import { calculateMaxWater } from './water.js';
 import { sectState } from '../game/state.js';
 import { ensureInjuryState } from '../game/injury.js';
+import { applyStageBonuses } from '../game/metamorphosisBonuses.js';
 
 export function initializeDisciple(d) {
   if (!d) return d;
@@ -47,5 +48,6 @@ export function initializeDisciple(d) {
   }
   Object.setPrototypeOf(d, Disciple.prototype);
   if (typeof d.updateCombatStats === 'function') d.updateCombatStats();
+  applyStageBonuses(d);
   return d;
 }
