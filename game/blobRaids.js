@@ -21,6 +21,7 @@ const ORB_ATTACK_INTERVAL = 5000; // ms
 const ORB_ATTACK_RANGE = 75; // px
 const DISCIPLE_ATTACK_INTERVAL = 10000; // ms
 const DISCIPLE_RANGE = 50; // px
+const BLOB_ATTACK_RANGE = 50; // px distance to stop and attack disciples
 const DISCIPLE_DAMAGE = 3;
 
 export const blobs = [];
@@ -158,14 +159,14 @@ function createBlob() {
         const dx = targetPos.x - this.x;
         const dy = targetPos.y - this.y;
         const dist = targetPos.dist;
-        if (dist > 1) {
-          const move = Math.min((BLOB_SPEED * dt) / 1000, dist);
+        if (dist > BLOB_ATTACK_RANGE) {
+          const move = Math.min((BLOB_SPEED * dt) / 1000, dist - BLOB_ATTACK_RANGE);
           this.x += (dx / dist) * move;
           this.y += (dy / dist) * move;
           this.el.style.left = `${this.x}px`;
           this.el.style.top = `${this.y}px`;
         }
-        if (dist <= this.size && now >= this.nextAttack) {
+        if (dist <= BLOB_ATTACK_RANGE && now >= this.nextAttack) {
           damageDisciple(target, 5, 'SlowBlob');
           this.nextAttack = now + BLOB_ATTACK_INTERVAL;
         }
