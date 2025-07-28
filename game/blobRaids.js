@@ -173,17 +173,23 @@ function createBlob() {
       } else {
         const ox = orbRect.left + orbRect.width / 2 - mapRect.left;
         const oy = orbRect.top + orbRect.height / 2 - mapRect.top;
+        const orbRadius = orbRect.width / 2;
+        const blobRadius = this.size / 2;
         const dx = ox - this.x;
         const dy = oy - this.y;
         const dist = Math.hypot(dx, dy);
-        if (dist > 1) {
-          const move = Math.min((BLOB_SPEED * dt) / 1000, dist);
+        const targetDist = orbRadius + blobRadius;
+        if (dist > targetDist) {
+          const move = Math.min(
+            (BLOB_SPEED * dt) / 1000,
+            dist - targetDist
+          );
           this.x += (dx / dist) * move;
           this.y += (dy / dist) * move;
           this.el.style.left = `${this.x}px`;
           this.el.style.top = `${this.y}px`;
         }
-        if (dist <= this.size && now >= this.nextAttack) {
+        if (dist <= targetDist && now >= this.nextAttack) {
           sectSystem.orbs.water.current = Math.max(
             0,
             sectSystem.orbs.water.current - 5
