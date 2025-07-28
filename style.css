@@ -3216,7 +3216,9 @@ body.darkenshift-mode .tabsContainer button.active {
     margin-bottom: 4px;
 }
 .sect-orbs {
-    position: relative;
+    position: absolute;
+    inset: 0;
+    width: 100%;
     height: 100%;
 }
 .disciple-orb {
