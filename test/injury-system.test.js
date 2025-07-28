@@ -9,7 +9,6 @@ let sectSystem;
 let tickSect;
 let tickInjuries;
 let applyInjury;
-let BODY_PARTS;
 
 before(async () => {
   globalThis.document = {
@@ -20,7 +19,7 @@ before(async () => {
   };
   sectModule = await import('../game/sect.js');
   ({ sectSystem, tickSect } = sectModule);
-  ({ tickInjuries, applyInjury, BODY_PARTS } = await import('../game/injury.js'));
+  ({ tickInjuries, applyInjury } = await import('../game/injury.js'));
 });
 
 after(() => {

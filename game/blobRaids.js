@@ -83,7 +83,6 @@ function createBlob() {
   const orb = getOrb();
   if (!map || !orb) return null;
   const mapRect = map.getBoundingClientRect();
-  const orbRect = orb.getBoundingClientRect();
   const size = 16;
   const blob = document.createElement('div');
   blob.className = 'slow-blob';
@@ -134,6 +133,8 @@ function createBlob() {
     nextAttack: performance.now() + BLOB_ATTACK_INTERVAL,
     size,
     update(dt) {
+      const mapRect = map.getBoundingClientRect();
+      const orbRect = orb.getBoundingClientRect();
       let target = null;
       let targetPos = null;
       let min = Infinity;
