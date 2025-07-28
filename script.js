@@ -855,11 +855,8 @@ function applyNightFilters(brightness) {
   });
   document.querySelectorAll('.disciple-badge, .disciple-orb').forEach(el => {
     if (!el.dataset.baseFilter) el.dataset.baseFilter = el.style.filter || '';
-    if (brightness < 1) {
-      el.style.filter = `${el.dataset.baseFilter} brightness(${inv})`;
-    } else {
-      el.style.filter = el.dataset.baseFilter;
-    }
+    // Keep badges and orbs unaffected by the night filter
+    el.style.filter = el.dataset.baseFilter;
   });
 }
 
