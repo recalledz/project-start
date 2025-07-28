@@ -158,7 +158,7 @@ function createBlob() {
       if (target && targetPos) {
         const dist = targetPos.dist;
         if (dist <= BLOB_ATTACK_RANGE && now >= this.nextAttack) {
-          damageDisciple(target, 5, 'SlowBlob');
+          damageDisciple(target, 2, 'SlowBlob');
           this.nextAttack = now + BLOB_ATTACK_INTERVAL;
         }
         // Blob stops moving while engaging a disciple
@@ -184,12 +184,12 @@ function createBlob() {
         if (dist <= targetDist && now >= this.nextAttack) {
           sectSystem.orbs.water.current = Math.max(
             0,
-            sectSystem.orbs.water.current - 5
+            sectSystem.orbs.water.current - 2
           );
-          raidState.damageReceived += 5;
+          raidState.damageReceived += 2;
           const orbEl = getOrb();
           runAnimation(orbEl, 'orb-hit');
-          addLog('SlowBlob hits the Water Orb for 5 damage.', 'damage');
+          addLog('SlowBlob hits the Water Orb for 2 damage.', 'damage');
           this.nextAttack = now + BLOB_ATTACK_INTERVAL;
           if (sectSystem.orbs.water.current <= 0 && raidState.active) {
             endRaid(false);
@@ -232,13 +232,13 @@ function orbAttack() {
     }
   });
   if (target) {
-    target.takeDamage(5);
-    raidState.damageDealt += 5;
+    target.takeDamage(2);
+    raidState.damageDealt += 2;
     runAnimation(target.el, 'hit-animate');
     runAnimation(orb, 'orb-burst');
     flashOrbGlow();
     if (orbAttackFill) orbAttackFill.style.width = '0%';
-    addLog('Water Orb hits a SlowBlob for 5 damage.', 'damage');
+    addLog('Water Orb hits a SlowBlob for 2 damage.', 'damage');
   }
 }
 
