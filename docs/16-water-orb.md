@@ -11,6 +11,7 @@
 - SlowBlob raiders display a small life bar above them as they approach.
 - At night the orb glows with a bright blue hue, illuminating nearby terrain using a Pixi.js GlowFilter (radius ~30, outer strength ~4, inner strength ~1).
 - The glow color is `#7fd9ff` and brightness is doubled at night to help the orb stand out against the dimmed map.
+- Disciple badges remain fully illuminated at night so players can easily locate their followers.
 - Soft light particles swirl around the orb at night, further brightening the surrounding darkness.
 - A radial light mask darkens the map at night while leaving a bright gradient around the orb.
 - The orb now holds up to 20 Water and regenerates at a flat 0.1 Water per second.

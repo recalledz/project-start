@@ -43,8 +43,8 @@ export function startRaid() {
   raidState.xpStart = {};
   raidState.prevTasks = {};
   sectSystem.disciples.forEach(d => {
+    raidState.prevTasks[d.id] = sectState.discipleTasks[d.id];
     if (!d.incapacitated) {
-      raidState.prevTasks[d.id] = sectState.discipleTasks[d.id];
       sectState.discipleTasks[d.id] = 'Idle';
     }
   });
