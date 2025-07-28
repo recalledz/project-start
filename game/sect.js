@@ -13,8 +13,7 @@ import {
   TASK_GROUPS,
   ATTRIBUTE_FOR_GROUP,
   INCAPACITATED_FOOD_MULT,
-  DISCIPLE_MAX_HEALTH,
-  REST_TIME_SECONDS
+  DISCIPLE_MAX_HEALTH
 } from './constants.js';
 import { intelligenceXpMultiplier } from './attributes.js';
 import { addSkillXp, ensureDiscipleSkills, getTaskSkillProgress } from '../utils/skills.js';
@@ -1463,16 +1462,22 @@ export function tickSect(delta) {
   }
   sectSystem.disciples.forEach(d => {
     if (d.incapacitated) {
-      d.health = Math.min(
-        DISCIPLE_MAX_HEALTH,
-        d.health + (DISCIPLE_MAX_HEALTH / REST_TIME_SECONDS) * dt
-      );
+      tickInjuries(d, dt, d.resilience, 'Resting');
       d.currentHp = d.health;
       if (d.health >= DISCIPLE_MAX_HEALTH / 2) {
         d.incapacitated = false;
-      } else {
-        return;
       }
+      if (!d.starveTimer) d.starveTimer = 0;
+      if (d.water <= 0) {
+        d.starveTimer += dt;
+        while (d.starveTimer >= 1) {
+          applyStarvationHit(d);
+          d.starveTimer -= 1;
+        }
+      } else {
+        d.starveTimer = 0;
+      }
+      return;
     }
     const task = sectState.discipleTasks[d.id];
     if (!task || task === 'Idle' || task === 'Resting') {
