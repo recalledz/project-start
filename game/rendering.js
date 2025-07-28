@@ -7,8 +7,8 @@ export function drawBloodSplat(canvas) {
   const count = 3 + Math.floor(Math.random() * 2);
   for (let i = 0; i < count; i++) {
     const r = 2 + Math.random() * 2;
-    const x = Math.random() * canvas.width;
-    const y = Math.random() * canvas.height;
+    const x = r + Math.random() * (canvas.width - 2 * r);
+    const y = r + Math.random() * (canvas.height - 2 * r);
     ctx.beginPath();
     ctx.fillStyle = '#a00';
     ctx.arc(x, y, r, 0, Math.PI * 2);
