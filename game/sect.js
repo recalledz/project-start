@@ -1208,20 +1208,22 @@ export function tickSectSystem(delta) {
       SECT_SCHEDULE[sectSystem.scheduleIndex].duration;
     sectSystem.scheduleIndex =
       (sectSystem.scheduleIndex + 1) % SECT_SCHEDULE.length;
+    const schedule = getCurrentSchedule();
+    if (schedule.phase === 'Night') startRaid();
     document.dispatchEvent(
-      new CustomEvent('schedule-phase', { detail: getCurrentSchedule() })
+      new CustomEvent('schedule-phase', { detail: schedule })
     );
-    if (getCurrentSchedule().phase === 'Night') startRaid();
   }
   sectSystem.seasonTimer += dt;
   if (sectSystem.seasonTimer >= DAY_LENGTH_SECONDS) {
     sectSystem.seasonTimer -= DAY_LENGTH_SECONDS;
     sectSystem.scheduleIndex = 0;
     sectSystem.scheduleTimer = 0;
+    const scheduleDayStart = getCurrentSchedule();
+    if (scheduleDayStart.phase === 'Night') startRaid();
     document.dispatchEvent(
-      new CustomEvent('schedule-phase', { detail: getCurrentSchedule() })
+      new CustomEvent('schedule-phase', { detail: scheduleDayStart })
     );
-    if (getCurrentSchedule().phase === 'Night') startRaid();
     sectSystem.seasonDay += 1;
     document.dispatchEvent(new CustomEvent('day-passed', {
       detail: { day: sectSystem.seasonDay, season: sectSystem.seasonIndex }
@@ -1581,8 +1583,9 @@ export function skipToNextNight() {
   sectSystem.seasonTimer = nightStart;
   sectSystem.scheduleIndex = nightIndex;
   sectSystem.scheduleTimer = 0;
-  document.dispatchEvent(
-    new CustomEvent('schedule-phase', { detail: getCurrentSchedule() })
-  );
+  const scheduleNight = getCurrentSchedule();
   startRaid();
+  document.dispatchEvent(
+    new CustomEvent('schedule-phase', { detail: scheduleNight })
+  );
 }
