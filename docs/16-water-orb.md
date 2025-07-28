@@ -20,6 +20,8 @@
   the orb graphic.
 - Disciples assigned to **Building** will automatically repair a cracked orb,
   requiring 2.5 minutes at base speed.
+- While repairing, each builder's badge shows an "Orb Repair" progress bar with
+  the remaining time.
 - Orb Revival research grants access to an Orb Management panel for the Water Orb.
 - Word of Haste orb spell speeds up work tasks for one minute at the cost of 15 Water.
 - Orb Spell Strength buildings raise the Water Orb's attack damage by 20% per level.

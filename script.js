@@ -31,7 +31,8 @@ import {
   tickSect,
   renderColonyResources,
   addDiscoveredLocation,
-  discoveredLocations
+  discoveredLocations,
+  ORB_REPAIR_SECONDS
 } from "./game/sect.js";
 import {
   BUILDINGS,
@@ -648,10 +649,21 @@ function updateTaskProgressDisplay() {
         rateEl.textContent = `+${rate.toFixed(0)}/m`;
       }
     } else if (taskName === 'Building') {
-      if (fill) fill.style.width = `${buildPct}%`;
-      if (label && buildData)
-        label.textContent = `${buildData.name} ${builderCount > 0 ? buildTime.toFixed(1) : '∞'}s`;
-      else if (label) label.textContent = '';
+      if (sectSystem.orbs.water.cracked && !buildData) {
+        const pct = sectState.orbRepairProgress * 100;
+        if (fill) fill.style.width = `${pct}%`;
+        const time =
+          builderCount > 0
+            ? ((1 - sectState.orbRepairProgress) * ORB_REPAIR_SECONDS) / builderCount
+            : Infinity;
+        if (label)
+          label.textContent = `Repair Orb ${builderCount > 0 ? time.toFixed(1) : '∞'}s`;
+      } else {
+        if (fill) fill.style.width = `${buildPct}%`;
+        if (label && buildData)
+          label.textContent = `${buildData.name} ${builderCount > 0 ? buildTime.toFixed(1) : '∞'}s`;
+        else if (label) label.textContent = '';
+      }
       if (rateEl) rateEl.textContent = '';
     } else if (taskName === 'Hunt') {
       const progress = sectState.discipleProgress[d.id] || 0;
