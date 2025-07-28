@@ -21,7 +21,7 @@ const ORB_ATTACK_INTERVAL = 5000; // ms
 const ORB_ATTACK_RANGE = 75; // px
 const DISCIPLE_ATTACK_INTERVAL = 10000; // ms
 const DISCIPLE_RANGE = 50; // px
-const BLOB_ATTACK_RANGE = 50; // px distance to stop and attack disciples
+const BLOB_ATTACK_RANGE = 40; // px distance to stop and attack disciples
 const DISCIPLE_DAMAGE = 3;
 const IN_MAP_BORDER = 8; // px blob must cross into view before interactions
 
@@ -151,7 +151,6 @@ function createBlob() {
         }
       }
       let target = null;
-      let targetPos = null;
       let min = Infinity;
       const now = performance.now();
       if (this.inMap) {
@@ -163,21 +162,18 @@ function createBlob() {
           const px = rect.left + rect.width / 2 - mapRect.left;
           const py = rect.top + rect.height / 2 - mapRect.top;
           const dd = Math.hypot(px - cx, py - cy);
-          if (dd <= DISCIPLE_RANGE && dd < min) {
+          if (dd <= BLOB_ATTACK_RANGE && dd < min) {
             min = dd;
             target = d;
-            targetPos = { x: px, y: py, dist: dd };
           }
         });
       }
 
-      if (target && targetPos) {
-        const dist = targetPos.dist;
-        if (dist <= BLOB_ATTACK_RANGE && now >= this.nextAttack && this.inMap) {
+      if (target) {
+        if (now >= this.nextAttack && this.inMap) {
           damageDisciple(target, 2, 'SlowBlob');
           this.nextAttack = now + BLOB_ATTACK_INTERVAL;
         }
-        // Blob stops moving while engaging a disciple
       } else {
         const ox = orbRect.left + orbRect.width / 2 - mapRect.left;
         const oy = orbRect.top + orbRect.height / 2 - mapRect.top;
