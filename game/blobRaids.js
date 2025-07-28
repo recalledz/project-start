@@ -23,6 +23,7 @@ const DISCIPLE_ATTACK_INTERVAL = 10000; // ms
 const DISCIPLE_RANGE = 50; // px
 const BLOB_ATTACK_RANGE = 50; // px distance to stop and attack disciples
 const DISCIPLE_DAMAGE = 3;
+const IN_MAP_BORDER = 8; // px blob must cross into view before interactions
 
 export const blobs = [];
 let spawnTimer = 0;
@@ -129,6 +130,7 @@ function createBlob() {
     lifeFill,
     x,
     y,
+    inMap: false,
     hp: 20,
     maxHp: 20,
     nextAttack: performance.now() + BLOB_ATTACK_INTERVAL,
@@ -136,28 +138,42 @@ function createBlob() {
     update(dt) {
       const mapRect = map.getBoundingClientRect();
       const orbRect = orb.getBoundingClientRect();
+      const cx = this.x + this.size / 2;
+      const cy = this.y + this.size / 2;
+      if (!this.inMap) {
+        if (
+          cx >= IN_MAP_BORDER &&
+          cy >= IN_MAP_BORDER &&
+          cx <= mapRect.width - IN_MAP_BORDER &&
+          cy <= mapRect.height - IN_MAP_BORDER
+        ) {
+          this.inMap = true;
+        }
+      }
       let target = null;
       let targetPos = null;
       let min = Infinity;
       const now = performance.now();
-      sectSystem.disciples.forEach(d => {
-        if (d.incapacitated) return;
-        const el = document.querySelector(`[data-disciple-id="${d.id}"]`);
-        if (!el) return;
-        const rect = el.getBoundingClientRect();
-        const px = rect.left + rect.width / 2 - mapRect.left;
-        const py = rect.top + rect.height / 2 - mapRect.top;
-        const dd = Math.hypot(px - this.x, py - this.y);
-        if (dd <= DISCIPLE_RANGE && dd < min) {
-          min = dd;
-          target = d;
-          targetPos = { x: px, y: py, dist: dd };
-        }
-      });
+      if (this.inMap) {
+        sectSystem.disciples.forEach(d => {
+          if (d.incapacitated) return;
+          const el = document.querySelector(`[data-disciple-id="${d.id}"]`);
+          if (!el) return;
+          const rect = el.getBoundingClientRect();
+          const px = rect.left + rect.width / 2 - mapRect.left;
+          const py = rect.top + rect.height / 2 - mapRect.top;
+          const dd = Math.hypot(px - cx, py - cy);
+          if (dd <= DISCIPLE_RANGE && dd < min) {
+            min = dd;
+            target = d;
+            targetPos = { x: px, y: py, dist: dd };
+          }
+        });
+      }
 
       if (target && targetPos) {
         const dist = targetPos.dist;
-        if (dist <= BLOB_ATTACK_RANGE && now >= this.nextAttack) {
+        if (dist <= BLOB_ATTACK_RANGE && now >= this.nextAttack && this.inMap) {
           damageDisciple(target, 2, 'SlowBlob');
           this.nextAttack = now + BLOB_ATTACK_INTERVAL;
         }
@@ -167,8 +183,8 @@ function createBlob() {
         const oy = orbRect.top + orbRect.height / 2 - mapRect.top;
         const orbRadius = orbRect.width / 2;
         const blobRadius = this.size / 2;
-        const dx = ox - this.x;
-        const dy = oy - this.y;
+        const dx = ox - cx;
+        const dy = oy - cy;
         const dist = Math.hypot(dx, dy);
         const targetDist = orbRadius + blobRadius;
         if (dist > targetDist) {
@@ -181,7 +197,7 @@ function createBlob() {
           this.el.style.left = `${this.x}px`;
           this.el.style.top = `${this.y}px`;
         }
-        if (dist <= targetDist && now >= this.nextAttack) {
+        if (dist <= targetDist && now >= this.nextAttack && this.inMap) {
           sectSystem.orbs.water.current = Math.max(
             0,
             sectSystem.orbs.water.current - 2
@@ -225,7 +241,10 @@ function orbAttack() {
   let target = null;
   let minDist = Infinity;
   blobs.forEach(b => {
-    const dist = Math.hypot(b.x - ox, b.y - oy);
+    if (!b.inMap) return;
+    const cx = b.x + b.size / 2;
+    const cy = b.y + b.size / 2;
+    const dist = Math.hypot(cx - ox, cy - oy);
     if (dist <= ORB_ATTACK_RANGE && dist < minDist) {
       target = b;
       minDist = dist;
@@ -259,7 +278,10 @@ function discipleAttack() {
       const py = rect.top + rect.height / 2 - mapRect.top;
       let target = null;
       blobs.forEach(b => {
-        const dist = Math.hypot(b.x - px, b.y - py);
+        if (!b.inMap) return;
+        const cx = b.x + b.size / 2;
+        const cy = b.y + b.size / 2;
+        const dist = Math.hypot(cx - px, cy - py);
         if (dist <= DISCIPLE_RANGE && (!target || b.hp < target.hp)) {
           target = b;
         }

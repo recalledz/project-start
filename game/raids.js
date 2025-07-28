@@ -140,6 +140,11 @@ export function endRaid(victory = false) {
       };
     });
     sectState.undeadNectar = (sectState.undeadNectar || 0) + 1;
+    if (sectSystem.resources.undeadNectar) {
+      const res = sectSystem.resources.undeadNectar;
+      res.current = Math.min(res.max, (res.current || 0) + 1);
+      res.unlocked = true;
+    }
     showRaidSummaryOverlay({
       damageDealt: raidState.damageDealt,
       damageReceived: raidState.damageReceived,
