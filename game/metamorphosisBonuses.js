@@ -19,7 +19,8 @@ export function applyStageBonuses(d) {
   const stage = getStage(d);
   d.maxWaterBonus = stage * STAGE_BONUS.maxWater;
   d.waterRegenBonus = stage * STAGE_BONUS.waterRegen;
-  d.resilience = stage * STAGE_BONUS.resilience;
+  const base = d.baseResilience ?? 1;
+  d.resilience = base + stage * STAGE_BONUS.resilience;
   d.spellPotency = 1 + stage * STAGE_BONUS.potency;
   d.damageBonus = stage * STAGE_BONUS.attack;
   d.moveSpeed = BASE_MOVE_SPEED * (1 + stage * STAGE_BONUS.moveSpeed);

@@ -23,7 +23,8 @@ export default class Disciple {
     this.charisma = attributes.charisma || 0;
     this.potential = attributes.potential || 0;
     // base resilience percentage per second for healing injuries and HP
-    this.resilience = 1;
+    this.baseResilience = 1;
+    this.resilience = this.baseResilience;
     this.defense = 1;
     this.lastTab = 'general';
     this.updateCombatStats();

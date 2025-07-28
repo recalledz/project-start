@@ -58,4 +58,16 @@ describe('injury system', () => {
     tickInjuries(d, 1, 0.4, 'Idle');
     expect(d.injuries.head.progress).to.be.closeTo(0.1, 1e-6);
   });
+
+  it('base resilience persists with stage bonuses', async () => {
+    const d = new Disciple({ id: 1 });
+    initializeDisciple(d);
+    const { applyStageBonuses } = await import('../game/metamorphosisBonuses.js');
+    sectState.discipleMetamorphosis[d.id] = { stage: 0 };
+    applyStageBonuses(d);
+    expect(d.resilience).to.equal(1);
+    sectState.discipleMetamorphosis[d.id].stage = 2;
+    applyStageBonuses(d);
+    expect(d.resilience).to.be.closeTo(1 + 2 * 0.002, 1e-6);
+  });
 });
