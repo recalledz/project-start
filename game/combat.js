@@ -18,6 +18,17 @@ import { raidState } from './raids.js';
 
 import addLog from './log.js';
 
+export function applyDamage(target, amount) {
+  let remaining = Math.round(amount);
+  if (target.water > 0) {
+    const absorbed = Math.min(target.water, remaining);
+    target.water -= absorbed;
+    remaining -= absorbed;
+  }
+  target.currentHp = Math.max(0, target.currentHp - remaining);
+  return remaining;
+}
+
 export function init() {}
 
 // Map of disciple id to their current attack timer used during exploration
@@ -110,7 +121,7 @@ export function cDealerDamage(damageAmount = null, source = 'dealer') {
   const idx = Math.floor(Math.random() * targets.length);
   const card = targets[idx];
 
-  card.currentHp = Math.round(Math.max(0, card.currentHp - finalDamage));
+  applyDamage(card, finalDamage);
   const targetName = card.name ? card.name : `${card.value}${card.symbol}`;
   addLog(`${source} hit ${targetName} for ${finalDamage} damage!`, 'damage');
 
@@ -146,7 +157,7 @@ export function damageDisciple(target, damageAmount, source = 'enemy') {
   if (!target || target.incapacitated) return;
 
   const amount = Math.round(damageAmount);
-  target.currentHp = Math.max(0, target.currentHp - amount);
+  applyDamage(target, amount);
   const targetName = target.name ? target.name : `${target.value}${target.symbol}`;
   addLog(`${source} hit ${targetName} for ${amount} damage!`, 'damage');
 

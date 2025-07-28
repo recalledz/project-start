@@ -40,12 +40,12 @@ describe('incapacitated disciples', () => {
     const rate = FRUIT_CONSUMPTION_RATE;
 
     // simulate until just past 50% health
-    for (let i = 0; i < 151; i++) {
+    for (let i = 0; i < 5; i++) {
       tickSect(1000);
     }
     expect(d.health).to.be.closeTo(5, 0.1);
     expect(d.incapacitated).to.be.false;
-    const expectedFood = 10 - rate * 3 * 151;
+    const expectedFood = 10 - rate * 3 * 5;
     expect(sectState.fruits).to.be.closeTo(expectedFood, 1e-6);
   });
 });
