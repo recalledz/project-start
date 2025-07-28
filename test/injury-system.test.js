@@ -3,7 +3,8 @@ import { expect } from 'chai';
 import Disciple from '../game/disciple.js';
 import { initializeDisciple } from '../utils/discipleInit.js';
 import { sectState } from '../game/state.js';
-import { BODY_PARTS } from "../game/injury.js";
+import { BODY_PARTS } from '../game/injury.js';
+
 
 let sectModule;
 let sectSystem;
