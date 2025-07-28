@@ -24,7 +24,6 @@ before(async () => {
     addEventListener() {},
     removeEventListener() {}
   };
-  global.document = globalThis.document;
   globalThis.window = { dispatchEvent() {} };
   combatModule = await import('../game/combat.js');
   ({ applyDamage } = combatModule);

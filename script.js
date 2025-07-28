@@ -722,6 +722,36 @@ function updateDiscipleWaterDisplay() {
   }
 }
 
+function updateDiscipleHealthDisplay() {
+  sectSystem.disciples.forEach(d => {
+    document
+      .querySelectorAll(
+        `.disciple-badge[data-disciple-id="${d.id}"] .life-bar .bar-fill`
+      )
+      .forEach(fill => {
+        fill.style.width = `${Math.min(100, (d.health / DISCIPLE_MAX_HEALTH) * 100)}%`;
+      });
+  });
+  if (discipleOverlay && discipleOverlayActiveTab === 'general') {
+    const d = discipleOverlayData.disciple;
+    if (d) {
+      const row = discipleOverlay.box.querySelector(
+        '.disciple-general .stat-row[data-stat="health"]'
+      );
+      if (row) {
+        const fill = row.querySelector('.bar-fill');
+        if (fill)
+          fill.style.width = `${Math.min(
+            100,
+            (d.health / DISCIPLE_MAX_HEALTH) * 100
+          )}%`;
+        const val = row.querySelector('.stat-value');
+        if (val) val.textContent = `${Math.round(d.health)}/${DISCIPLE_MAX_HEALTH}`;
+      }
+    }
+  }
+}
+
 function updateSectDisplay() {
   checkBuildingUnlock();
   if (sectNavBuildBtn) {
@@ -2605,6 +2635,7 @@ function gameLoop(currentTime) {
   // refresh sect resource UI every tick for real-time updates
   if (typeof updateSectDisplay === 'function') updateSectDisplay();
   updateTaskProgressDisplay();
+  updateDiscipleHealthDisplay();
   updateDiscipleWaterDisplay();
   updateOrbGlow(deltaTime);
   requestAnimationFrame(gameLoop);
