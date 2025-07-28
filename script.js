@@ -1026,20 +1026,21 @@ function buildDiscipleGeneralView(d) {
 
   const vit = document.createElement('div');
   vit.className = 'vital-stats';
-  vit.appendChild(
-    makeStatRow(
-      'Health',
-      d.health,
-      DISCIPLE_MAX_HEALTH,
-      'linear-gradient(90deg,#b33,#e66)'
-    )
+  const healthRow = makeStatRow(
+    'Health',
+    d.health,
+    DISCIPLE_MAX_HEALTH,
+    'linear-gradient(90deg,#b33,#e66)'
   );
+  healthRow.querySelector('.stat-value').textContent = `${d.health.toFixed(2)}/${DISCIPLE_MAX_HEALTH.toFixed(2)}`;
+  vit.appendChild(healthRow);
   const staminaRow = makeStatRow(
     'Stamina',
     d.stamina,
     calculateMaxStamina(),
     'linear-gradient(90deg,#3b3,#7f7)'
   );
+  staminaRow.querySelector('.stat-value').textContent = `${d.stamina.toFixed(2)}/${calculateMaxStamina().toFixed(2)}`;
   const stamRate = document.createElement('span');
   stamRate.textContent = ` (+${calculateStaminaRegen().toFixed(2)}/s)`;
   staminaRow.appendChild(stamRate);
