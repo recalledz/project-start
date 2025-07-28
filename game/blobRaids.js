@@ -156,20 +156,12 @@ function createBlob() {
       });
 
       if (target && targetPos) {
-        const dx = targetPos.x - this.x;
-        const dy = targetPos.y - this.y;
         const dist = targetPos.dist;
-        if (dist > BLOB_ATTACK_RANGE) {
-          const move = Math.min((BLOB_SPEED * dt) / 1000, dist - BLOB_ATTACK_RANGE);
-          this.x += (dx / dist) * move;
-          this.y += (dy / dist) * move;
-          this.el.style.left = `${this.x}px`;
-          this.el.style.top = `${this.y}px`;
-        }
         if (dist <= BLOB_ATTACK_RANGE && now >= this.nextAttack) {
           damageDisciple(target, 5, 'SlowBlob');
           this.nextAttack = now + BLOB_ATTACK_INTERVAL;
         }
+        // Blob stops moving while engaging a disciple
       } else {
         const ox = orbRect.left + orbRect.width / 2 - mapRect.left;
         const oy = orbRect.top + orbRect.height / 2 - mapRect.top;
