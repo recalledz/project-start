@@ -4,12 +4,13 @@ export function drawBloodSplat(canvas) {
   const ctx = canvas.getContext && canvas.getContext('2d');
   if (!ctx) return;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  for (let i = 0; i < 6; i++) {
-    const r = Math.random() * 10 + 5;
+  const count = 3 + Math.floor(Math.random() * 2);
+  for (let i = 0; i < count; i++) {
+    const r = 2 + Math.random() * 2;
     const x = Math.random() * canvas.width;
     const y = Math.random() * canvas.height;
     ctx.beginPath();
-    ctx.fillStyle = `rgba(150,0,0,${0.5 + Math.random() * 0.5})`;
+    ctx.fillStyle = '#a00';
     ctx.arc(x, y, r, 0, Math.PI * 2);
     ctx.fill();
   }
@@ -18,7 +19,7 @@ export function drawBloodSplat(canvas) {
 export function createMapSplatter(x, y) {
   const map = document.getElementById('colonyMap');
   if (!map) return;
-  const size = 20 + Math.random() * 20;
+  const size = 12;
   const canvas = document.createElement('canvas');
   canvas.className = 'map-splatter';
   canvas.width = size;

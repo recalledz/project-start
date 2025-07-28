@@ -31,6 +31,10 @@ beforeEach(() => {
   sectSystem.disciples.length = 0;
 });
 
+it('exposes BODY_PARTS constant', () => {
+  expect(Array.isArray(BODY_PARTS)).to.be.true;
+});
+
 describe('injury system', () => {
   it('applies starvation damage and injuries', () => {
     const d = new Disciple({ id: 1 });

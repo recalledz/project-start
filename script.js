@@ -903,8 +903,14 @@ function startDiscipleMovement() {
       if (d.incapacitated) {
         const orb = document.querySelector('#sectOrbs .water');
         if (orb) {
-          const bx = orb.offsetLeft + orb.offsetWidth / 2 - 2;
-          const by = orb.offsetTop + orb.offsetHeight / 2 - 2;
+          const contRect = el.parentElement.getBoundingClientRect();
+          const orbRect = orb.getBoundingClientRect();
+          const centerX = orbRect.left - contRect.left + orbRect.width / 2;
+          const centerY = orbRect.top - contRect.top + orbRect.height / 2;
+          const radius = orbRect.width / 2 + el.offsetWidth / 2;
+          const ang = Math.random() * Math.PI * 2;
+          const bx = centerX + Math.cos(ang) * radius - el.offsetWidth / 2;
+          const by = centerY + Math.sin(ang) * radius - el.offsetHeight / 2;
           moveElement(el, bx, by, d.moveSpeed);
         }
         el.classList.add('incapacitated');
@@ -916,8 +922,14 @@ function startDiscipleMovement() {
         if (task === 'Training') {
           const orb = document.querySelector('#sectOrbs .water');
           if (orb) {
-            const bx = orb.offsetLeft + orb.offsetWidth / 2 - 2;
-            const by = orb.offsetTop + orb.offsetHeight / 2 - 2;
+            const contRect = el.parentElement.getBoundingClientRect();
+            const orbRect = orb.getBoundingClientRect();
+            const centerX = orbRect.left - contRect.left + orbRect.width / 2;
+            const centerY = orbRect.top - contRect.top + orbRect.height / 2;
+            const radius = orbRect.width / 2 + el.offsetWidth / 2;
+            const ang = Math.random() * Math.PI * 2;
+            const bx = centerX + Math.cos(ang) * radius - el.offsetWidth / 2;
+            const by = centerY + Math.sin(ang) * radius - el.offsetHeight / 2;
             moveElement(el, bx, by, d.moveSpeed);
           }
                     taskName = task;
