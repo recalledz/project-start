@@ -729,6 +729,11 @@ body.darkenshift-mode .tabsContainer button.active {
     align-items: center;
     gap: 4px;
 }
+.disciple-train-entry {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
 .work-task {
     min-width: 80px;
     font-size: 0.7rem;
@@ -3039,6 +3044,11 @@ body.darkenshift-mode .tabsContainer button.active {
     left: calc(78% - var(--zone-size) / 2);
     top: calc(76% - var(--zone-size) / 2);
     background: radial-gradient(circle, rgba(180,160,220,0.15), transparent 80%);
+}
+.zone.cultivation {
+    left: calc(50% - var(--zone-size) / 2);
+    top: calc(55% - var(--zone-size) / 2);
+    background: radial-gradient(circle, rgba(160,180,240,0.15), transparent 80%);
 }
 
 .zone-path { display: none; }

@@ -27,6 +27,13 @@ export const BUILDINGS = {
     costFunc: lvl => Math.round(150 * Math.pow(1.5, lvl - 1)),
     costWaterFunc: lvl => Math.round(10 * Math.pow(1.5, lvl - 1)),
     max: 10
+  },
+  metamorphRoom: {
+    name: 'Metamorph Room',
+    time: 600,
+    costFunc: lvl => (lvl === 1 ? 100 : Math.round(300 * Math.pow(1.7, lvl - 1))),
+    costNectarFunc: lvl => (lvl === 1 ? 1 : Math.round(5 * Math.pow(1.5, lvl - 1))),
+    max: 10
   }
 };
 
@@ -54,6 +61,9 @@ export function checkBuildingUnlock() {
   if (!systems.areitoBuildingAvailable && sectState.softwood >= 100) {
     systems.areitoBuildingAvailable = true;
   }
+  if (!systems.metamorphBuildingAvailable && sectState.undeadNectar > 0) {
+    systems.metamorphBuildingAvailable = true;
+  }
 }
 
 export function startBuilding(key) {
@@ -62,14 +72,18 @@ export function startBuilding(key) {
   const built = sectState.buildings[key] || 0;
   const cost = b.costFunc ? b.costFunc(built + 1) : b.cost;
   const waterCost = b.costWaterFunc ? b.costWaterFunc(built + 1) : 0;
+  const nectarCost = b.costNectarFunc ? b.costNectarFunc(built + 1) : 0;
   if (sectState.softwood < cost) return;
   if (sectSystem.orbs.water.current < waterCost) return;
+  if (sectState.undeadNectar < nectarCost) return;
   if (built >= b.max) return;
   if (sectState.currentBuild) return;
   if (b.requires && sectState.buildings[b.requires] < b.max) return;
   if (key === 'chantingHall' && !systems.chantingHallUnlocked) return;
   if (key === 'orbSpellStrength' && !systems.spellStrengthUnlocked) return;
+  if (key === 'metamorphRoom' && !systems.metamorphBuildingAvailable) return;
   sectState.softwood -= cost;
+  if (nectarCost) sectState.undeadNectar -= nectarCost;
   if (waterCost) sectSystem.orbs.water.current -= waterCost;
   sectState.currentBuild = key;
   sectState.buildProgress = 0;
@@ -132,6 +146,9 @@ export function tickBuilding(dt) {
     }
     if (builtKey === 'areitoCircle') {
       if (!systems.transmutationUnlocked) systems.transmutationUnlocked = true;
+    }
+    if (builtKey === 'metamorphRoom') {
+      sectState.metamorphRooms = sectState.buildings.metamorphRoom;
     }
     if (typeof globalThis.updateBuildOverlay === 'function') {
       globalThis.updateBuildOverlay();

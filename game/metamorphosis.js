@@ -122,7 +122,32 @@ function renderDiscipleList() {
       renderDiscipleList();
       renderMetamorphosis();
     });
-    list.appendChild(card);
+    const btn = document.createElement('button');
+    const assigned = !!sectState.metamorphAssignments[d.id];
+    btn.textContent = assigned ? 'Stop' : 'Train';
+    btn.disabled =
+      !assigned &&
+      Object.keys(sectState.metamorphAssignments).length >=
+        sectState.metamorphRooms;
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      if (sectState.metamorphAssignments[d.id]) {
+        delete sectState.metamorphAssignments[d.id];
+        sectState.discipleTasks[d.id] = 'Idle';
+      } else if (
+        Object.keys(sectState.metamorphAssignments).length <
+        sectState.metamorphRooms
+      ) {
+        sectState.metamorphAssignments[d.id] = true;
+        sectState.discipleTasks[d.id] = 'Training';
+      }
+      renderDiscipleList();
+    });
+    const wrapper = document.createElement('div');
+    wrapper.className = 'disciple-train-entry';
+    wrapper.appendChild(card);
+    wrapper.appendChild(btn);
+    list.appendChild(wrapper);
   });
   listContainer.appendChild(list);
 }
@@ -222,7 +247,9 @@ export function tickMetamorphosis(dt) {
   sectSystem.disciples.forEach(d => {
     ensureMeta(d.id);
     const meta = sectState.discipleMetamorphosis[d.id];
-    const training = sectState.discipleTasks[d.id] === 'Training';
+    const training =
+      sectState.discipleTasks[d.id] === 'Training' &&
+      sectState.metamorphAssignments[d.id];
     if (training && meta.xp < metamorphosisState.requirement) {
       const cost = TRAINING_NECTAR_RATE * dt;
       if (sectState.undeadNectar >= cost) {
@@ -252,7 +279,9 @@ export function tickMetamorphosis(dt) {
 }
 
 function getMethodMultiplier() { return 1; }
-function getBuildingMultiplier() { return 1; }
+function getBuildingMultiplier() {
+  return 1 + 0.04 * (sectState.buildings.metamorphRoom || 0);
+}
 function getRoomMultiplier() { return 1; }
 function getPathMatchMultiplier() { return 1; }
 function getStabilityFactor() { return 1; }

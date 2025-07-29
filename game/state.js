@@ -86,7 +86,8 @@ export const systems = {
   orbManagementUnlocked: false,
   spellStrengthUnlocked: false,
   areitoBuildingAvailable: false,
-  transmutationUnlocked: false
+  transmutationUnlocked: false,
+  metamorphBuildingAvailable: false
 };
 
 // Fruit gathering and growth configuration
@@ -114,6 +115,7 @@ export const sectState = {
   discipleMetamorphosis: {},
   disciplePaths: {},
   chantAssignments: {},
+  metamorphAssignments: {},
   discipleRest: {},
   maxDisciples: 3,
   housingBonus: 0,
@@ -122,8 +124,10 @@ export const sectState = {
     researchDesk: 0,
     chantingHall: 0,
     orbSpellStrength: 0,
-    areitoCircle: 0
+    areitoCircle: 0,
+    metamorphRoom: 0
   },
+  metamorphRooms: 0,
   researchPoints: 0,
   researchProgress: 0,
   completedResearch: [],
