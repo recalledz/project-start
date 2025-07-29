@@ -22,6 +22,7 @@ const ORB_ATTACK_RANGE = 75; // px
 const DISCIPLE_ATTACK_INTERVAL = 10000; // ms
 const DISCIPLE_RANGE = 50; // px
 const BLOB_ATTACK_RANGE = 50; // px distance to stop and attack disciples
+const BLOB_DETECT_RANGE = 150; // how far blobs spot disciples
 const DISCIPLE_DAMAGE = 3;
 const IN_MAP_BORDER = 8; // px blob must cross into view before interactions
 
@@ -151,7 +152,8 @@ function createBlob() {
         }
       }
       let target = null;
-      let targetPos = null;
+      let targetX = 0;
+      let targetY = 0;
       let min = Infinity;
       const now = performance.now();
       if (this.inMap) {
@@ -163,21 +165,29 @@ function createBlob() {
           const px = rect.left + rect.width / 2 - mapRect.left;
           const py = rect.top + rect.height / 2 - mapRect.top;
           const dd = Math.hypot(px - cx, py - cy);
-          if (dd <= DISCIPLE_RANGE && dd < min) {
+          if (dd < min) {
             min = dd;
             target = d;
-            targetPos = { x: px, y: py, dist: dd };
+            targetX = px;
+            targetY = py;
           }
         });
       }
 
-      if (target && targetPos) {
-        const dist = targetPos.dist;
-        if (dist <= BLOB_ATTACK_RANGE && now >= this.nextAttack && this.inMap) {
+      if (target && min <= BLOB_DETECT_RANGE) {
+        if (min > BLOB_ATTACK_RANGE) {
+          const move = Math.min((BLOB_SPEED * dt) / 1000, min - BLOB_ATTACK_RANGE);
+          const dx = (targetX - cx) / min;
+          const dy = (targetY - cy) / min;
+          this.x += dx * move;
+          this.y += dy * move;
+          this.el.style.left = `${this.x}px`;
+          this.el.style.top = `${this.y}px`;
+        } else if (now >= this.nextAttack) {
           damageDisciple(target, 2, 'SlowBlob');
           this.nextAttack = now + BLOB_ATTACK_INTERVAL;
         }
-        // Blob stops moving while engaging a disciple
+        return;
       } else {
         const ox = orbRect.left + orbRect.width / 2 - mapRect.left;
         const oy = orbRect.top + orbRect.height / 2 - mapRect.top;
