@@ -47,3 +47,4 @@ Integrate a Taino‑inspired frog glyph around the icon for ambient feedback.
 - The metamorphosis panel now uses a parchment texture background at 30% opacity.
 - Progress rings feature a lilac to teal gradient with a subtle glow.
 - Progress numbers appear on semi-transparent parchment panels.
+- Training rooms unlock after obtaining Undead Nectar, letting disciples be assigned from this panel.

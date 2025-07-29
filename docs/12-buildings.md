@@ -41,6 +41,7 @@ Jadefire Pavilion	Softwood & Stone: 20 × (1.1^lvl) each	Enables Transmutation; 
 Circle of Areito   Softwood: 150 × (1.5^lvl); Water: 10 × (1.5^lvl)   Unlocks Transmutation nav; +4% transmute power per level  Gather 100 Softwood
 Chanting Halls	Wood: 300 × (1.15^lvl)	–4% chant cooldown per level; +1 chanter per 3 levels	Library Lv2
 Orb Spell Strength  Softwood: 100 × (1.3^lvl)  +20% orb spell damage per level   Research: Orb Spell Strength
+Metamorph Room  Softwood: 100 & 1 Undead Nectar first level; upgrades 300 × (1.7^lvl) Softwood and 5 × (1.5^lvl) Nectar  Enables metamorphosis training rooms; +4% metamorphosis XP per level  First Undead Nectar
 
 
 Ornaments / Cultivation Enhancers

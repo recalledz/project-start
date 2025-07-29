@@ -766,6 +766,9 @@ function updateSectDisplay() {
   if (sectNavTransmuteBtn) {
     sectNavTransmuteBtn.style.display = systems.transmutationUnlocked ? '' : 'none';
   }
+  if (sectNavCultivationBtn) {
+    sectNavCultivationBtn.style.display = systems.metamorphBuildingAvailable ? '' : 'none';
+  }
   if (!sectTabUnlocked || !playerSectPanel) return;
   const total = sectSystem.disciples.length;
   const assigned = Object.values(sectState.discipleTasks).filter(t => t && t !== 'Idle').length;
