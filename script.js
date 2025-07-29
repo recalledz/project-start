@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars, no-undef */
 // Core modules that power combat systems
 import Disciple from "./game/disciple.js";
+import bus from './game/canBus.js';
 import addLog from "./game/log.js"; // helper for appending to the event log
 import Enemy from "./game/enemy.js"; // base enemy class
 import {
@@ -2592,6 +2593,7 @@ function gameLoop(currentTime) {
   const rawDelta = currentTime - lastFrameTime;
   lastFrameTime = currentTime;
   const deltaTime = rawDelta * timeScale;
+  bus.publish('TICK', { delta: deltaTime });
   const startWater = sectSystem.resources.water.current;
   const startFruit = sectState.fruits;
   const startSoftwood = sectState.softwood;

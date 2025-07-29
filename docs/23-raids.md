@@ -4,6 +4,8 @@
 **Sunday, July 20, 2025 • 8:15 PM**
 
 Night raids escalate the longer your sect survives. Each evening hostile frogs or spirits attack from the edge of the sect map and attempt to reach the Water Orb.
+All raid interactions are coordinated through a small event bus so the combat,
+raid and rendering modules remain loosely coupled.
 
 - **Enemy scaling** – raid size and enemy stats grow with the current stage and world. Early attacks feature sluggish "SlowBlob" spirits that spawn every few seconds and crawl toward the orb.
 - **Orb damage** – the Water Orb pulses damage in a small radius, harming nearby attackers. Buildings can boost this effect.

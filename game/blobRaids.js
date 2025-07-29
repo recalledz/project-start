@@ -3,8 +3,8 @@ import { runAnimation } from '../utils/animation.js';
 import addLog from './log.js';
 import { BASE_MOVE_SPEED } from './constants.js';
 import { flashOrbGlow } from './orbGlow.js';
-import { raidState, endRaid } from './raids.js';
-import { damageDisciple } from './combat.js';
+import bus from './canBus.js';
+import { raidState } from './raids.js';
 import { createMapSplatter } from './rendering.js';
 
 
@@ -174,7 +174,7 @@ function createBlob() {
       if (target && targetPos) {
         const dist = targetPos.dist;
         if (dist <= BLOB_ATTACK_RANGE && now >= this.nextAttack && this.inMap) {
-          damageDisciple(target, 2, 'SlowBlob');
+          bus.publish('BLOB_ATTACK_DISCIPLE', { id: target.id, damage: 2 });
           this.nextAttack = now + BLOB_ATTACK_INTERVAL;
         }
         // Blob stops moving while engaging a disciple
@@ -198,19 +198,8 @@ function createBlob() {
           this.el.style.top = `${this.y}px`;
         }
         if (dist <= targetDist && now >= this.nextAttack && this.inMap) {
-          sectSystem.orbs.water.current = Math.max(
-            0,
-            sectSystem.orbs.water.current - 2
-          );
-          raidState.damageReceived += 2;
-          const orbEl = getOrb();
-          runAnimation(orbEl, 'orb-hit');
-          addLog('SlowBlob hits the Water Orb for 2 damage.', 'damage');
+          bus.publish('BLOB_ATTACK_ORB', { damage: 2 });
           this.nextAttack = now + BLOB_ATTACK_INTERVAL;
-          if (sectSystem.orbs.water.current <= 0 && raidState.active) {
-            endRaid(false);
-            return;
-          }
         }
       }
     },
@@ -342,3 +331,16 @@ export function hasBlobs() {
 export function raidFinished() {
   return spawnCount >= MAX_BLOBS && blobs.length === 0;
 }
+
+// Event bus wiring
+bus.subscribe('BLOB_SPAWN', () => {
+  spawnBlob();
+});
+
+bus.subscribe('DISCIPLE_ATTACK', ({ damage }) => {
+  damageClosestBlob(damage);
+});
+
+bus.subscribe('TICK', ({ delta }) => {
+  tickBlobRaid(delta);
+});

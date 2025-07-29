@@ -9,6 +9,8 @@ The project organizes game logic under the `game/` directory.
 - **game/combat.js** – handles exploration battles and disciple hit animations.
 - **game/raids.js** and **game/blobRaids.js** – implement raid encounters and the
   defensive combat loop.
+- **game/canBus.js** – lightweight event bus used for in-game modules to
+  communicate without direct imports.
 - **game/debug.js** – wiring for optional debug controls.
 - **debugTools.js** – development helpers lazily loaded when a debug
   button is clicked.
