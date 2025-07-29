@@ -1334,7 +1334,7 @@ export function tickSectSystem(delta) {
   tickActiveConstructs(dt);
   tickOrbSpells(dt);
   tickMetamorphosis(dt);
-  tickRaid(delta);
+  tickRaid();
   ins.current = Math.min(ins.max, Math.max(0, ins.current));
   if (hasUI) {
     updateCooldownOverlays();
