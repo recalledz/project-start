@@ -16,7 +16,7 @@ Disciples may be called upon to defend the sect from occasional raids.
 * A red alert briefly appears on screen when a raid starts.
 * Raiders attack the Water orb, reducing its stored energy.
 * All disciples rush to intercept raiders as soon as they appear.
-* Raiders continue heading toward the Water orb but halt if a disciple enters a 50&nbsp;px radius, attacking while in range.
+* Raiders march directly toward the Water orb and halt to attack once the orb or a disciple comes within a 40&nbsp;px radius.
 * All disciples immediately pause their current task to join the defense.
 * After the raid ends, disciples automatically resume their previous work assignments, even if they were incapacitated at the start of the raid.
 * Each disciple seeks the nearest enemy and engages in melee when in range.

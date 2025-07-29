@@ -21,7 +21,8 @@ const ORB_ATTACK_INTERVAL = 5000; // ms
 const ORB_ATTACK_RANGE = 75; // px
 const DISCIPLE_ATTACK_INTERVAL = 10000; // ms
 const DISCIPLE_RANGE = 50; // px
-const BLOB_ATTACK_RANGE = 50; // px distance to stop and attack disciples
+const BLOB_ATTACK_RANGE = 40; // px distance to stop and attack disciples
+const BLOB_ORB_RANGE = 40; // px distance to stop and attack the orb
 const DISCIPLE_DAMAGE = 3;
 const IN_MAP_BORDER = 8; // px blob must cross into view before interactions
 
@@ -150,11 +151,15 @@ function createBlob() {
           this.inMap = true;
         }
       }
+      const ox = orbRect.left + orbRect.width / 2 - mapRect.left;
+      const oy = orbRect.top + orbRect.height / 2 - mapRect.top;
+      const dx = ox - cx;
+      const dy = oy - cy;
+      const distToOrb = Math.hypot(dx, dy);
+
       let target = null;
-      let targetPos = null;
-      let min = Infinity;
-      const now = performance.now();
       if (this.inMap) {
+        let min = Infinity;
         sectSystem.disciples.forEach(d => {
           if (d.incapacitated) return;
           const el = document.querySelector(`[data-disciple-id="${d.id}"]`);
@@ -163,45 +168,29 @@ function createBlob() {
           const px = rect.left + rect.width / 2 - mapRect.left;
           const py = rect.top + rect.height / 2 - mapRect.top;
           const dd = Math.hypot(px - cx, py - cy);
-          if (dd <= DISCIPLE_RANGE && dd < min) {
+          if (dd <= BLOB_ATTACK_RANGE && dd < min) {
             min = dd;
             target = d;
-            targetPos = { x: px, y: py, dist: dd };
           }
         });
       }
 
-      if (target && targetPos) {
-        const dist = targetPos.dist;
-        if (dist <= BLOB_ATTACK_RANGE && now >= this.nextAttack && this.inMap) {
+      const now = performance.now();
+      if (target) {
+        if (now >= this.nextAttack) {
           damageDisciple(target, 2, 'SlowBlob');
           this.nextAttack = now + BLOB_ATTACK_INTERVAL;
         }
-        // Blob stops moving while engaging a disciple
       } else {
-        const ox = orbRect.left + orbRect.width / 2 - mapRect.left;
-        const oy = orbRect.top + orbRect.height / 2 - mapRect.top;
-        const orbRadius = orbRect.width / 2;
-        const blobRadius = this.size / 2;
-        const dx = ox - cx;
-        const dy = oy - cy;
-        const dist = Math.hypot(dx, dy);
-        const targetDist = orbRadius + blobRadius;
-        if (dist > targetDist) {
-          const move = Math.min(
-            (BLOB_SPEED * dt) / 1000,
-            dist - targetDist
-          );
-          this.x += (dx / dist) * move;
-          this.y += (dy / dist) * move;
+        if (distToOrb > BLOB_ORB_RANGE) {
+          const move = Math.min((BLOB_SPEED * dt) / 1000, distToOrb - BLOB_ORB_RANGE);
+          this.x += (dx / distToOrb) * move;
+          this.y += (dy / distToOrb) * move;
           this.el.style.left = `${this.x}px`;
           this.el.style.top = `${this.y}px`;
         }
-        if (dist <= targetDist && now >= this.nextAttack && this.inMap) {
-          sectSystem.orbs.water.current = Math.max(
-            0,
-            sectSystem.orbs.water.current - 2
-          );
+        if (distToOrb <= BLOB_ORB_RANGE && now >= this.nextAttack && this.inMap) {
+          sectSystem.orbs.water.current = Math.max(0, sectSystem.orbs.water.current - 2);
           raidState.damageReceived += 2;
           const orbEl = getOrb();
           runAnimation(orbEl, 'orb-hit');
