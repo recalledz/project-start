@@ -3,8 +3,7 @@ import { runAnimation } from '../utils/animation.js';
 import addLog from './log.js';
 import { BASE_MOVE_SPEED } from './constants.js';
 import { flashOrbGlow } from './orbGlow.js';
-import { raidState, endRaid } from './raids.js';
-import { damageDisciple } from './combat.js';
+import bus from './canBus.js';
 import { createMapSplatter } from './rendering.js';
 
 
@@ -20,8 +19,9 @@ const BLOB_ATTACK_INTERVAL = 10000; // ms
 const ORB_ATTACK_INTERVAL = 5000; // ms
 const ORB_ATTACK_RANGE = 75; // px
 const DISCIPLE_ATTACK_INTERVAL = 10000; // ms
-const DISCIPLE_RANGE = 50; // px
-const BLOB_ATTACK_RANGE = 50; // px distance to stop and attack disciples
+const DISCIPLE_RANGE = 100; // px
+const BLOB_ATTACK_RANGE = 100; // px distance to stop and attack disciples
+const BLOB_ORB_ATTACK_RANGE = 100; // px distance to stop and attack the orb
 const DISCIPLE_DAMAGE = 3;
 const IN_MAP_BORDER = 8; // px blob must cross into view before interactions
 
@@ -174,19 +174,17 @@ function createBlob() {
       if (target && targetPos) {
         const dist = targetPos.dist;
         if (dist <= BLOB_ATTACK_RANGE && now >= this.nextAttack && this.inMap) {
-          damageDisciple(target, 2, 'SlowBlob');
+          bus.publish('BLOB_ATTACK_DISCIPLE', { id: target.id, damage: 2 });
           this.nextAttack = now + BLOB_ATTACK_INTERVAL;
         }
         // Blob stops moving while engaging a disciple
       } else {
         const ox = orbRect.left + orbRect.width / 2 - mapRect.left;
         const oy = orbRect.top + orbRect.height / 2 - mapRect.top;
-        const orbRadius = orbRect.width / 2;
-        const blobRadius = this.size / 2;
         const dx = ox - cx;
         const dy = oy - cy;
         const dist = Math.hypot(dx, dy);
-        const targetDist = orbRadius + blobRadius;
+        const targetDist = BLOB_ORB_ATTACK_RANGE;
         if (dist > targetDist) {
           const move = Math.min(
             (BLOB_SPEED * dt) / 1000,
@@ -198,19 +196,8 @@ function createBlob() {
           this.el.style.top = `${this.y}px`;
         }
         if (dist <= targetDist && now >= this.nextAttack && this.inMap) {
-          sectSystem.orbs.water.current = Math.max(
-            0,
-            sectSystem.orbs.water.current - 2
-          );
-          raidState.damageReceived += 2;
-          const orbEl = getOrb();
-          runAnimation(orbEl, 'orb-hit');
-          addLog('SlowBlob hits the Water Orb for 2 damage.', 'damage');
+          bus.publish('BLOB_ATTACK_ORB', { damage: 2 });
           this.nextAttack = now + BLOB_ATTACK_INTERVAL;
-          if (sectSystem.orbs.water.current <= 0 && raidState.active) {
-            endRaid(false);
-            return;
-          }
         }
       }
     },
@@ -252,7 +239,7 @@ function orbAttack() {
   });
   if (target) {
     target.takeDamage(2);
-    raidState.damageDealt += 2;
+    bus.publish('RAID_DAMAGE_DEALT', { amount: 2 });
     runAnimation(target.el, 'hit-animate');
     runAnimation(orb, 'orb-burst');
     flashOrbGlow();
@@ -288,7 +275,7 @@ function discipleAttack() {
       });
       if (target) {
         target.takeDamage(DISCIPLE_DAMAGE);
-        raidState.damageDealt += DISCIPLE_DAMAGE;
+        bus.publish('RAID_DAMAGE_DEALT', { amount: DISCIPLE_DAMAGE });
         runAnimation(el, 'disciple-strike');
         d._attackTimer = now + DISCIPLE_ATTACK_INTERVAL;
       }
@@ -332,7 +319,7 @@ export function damageClosestBlob(dmg) {
     if (b.hp < target.hp) target = b;
   });
   target.takeDamage(dmg);
-  raidState.damageDealt += dmg;
+  bus.publish('RAID_DAMAGE_DEALT', { amount: dmg });
 }
 
 export function hasBlobs() {
@@ -342,3 +329,16 @@ export function hasBlobs() {
 export function raidFinished() {
   return spawnCount >= MAX_BLOBS && blobs.length === 0;
 }
+
+// Event bus wiring
+bus.subscribe('BLOB_SPAWN', () => {
+  spawnBlob();
+});
+
+bus.subscribe('DISCIPLE_ATTACK', ({ damage }) => {
+  damageClosestBlob(damage);
+});
+
+bus.subscribe('TICK', ({ delta }) => {
+  tickBlobRaid(delta);
+});

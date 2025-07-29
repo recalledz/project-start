@@ -17,6 +17,7 @@ import { showRestartScreen } from '../ui/restartOverlay.js';
 import { raidState } from './raids.js';
 
 import addLog from './log.js';
+import bus from './canBus.js';
 
 export function applyDamage(target, amount) {
   let remaining = Math.round(amount);
@@ -189,5 +190,11 @@ export function damageDisciple(target, damageAmount, source = 'enemy') {
     });
   }
 }
+
+// Event bus wiring
+bus.subscribe('BLOB_ATTACK_DISCIPLE', ({ id, damage }) => {
+  const disc = sectSystem.disciples.find(d => d.id === id);
+  if (disc) damageDisciple(disc, damage, 'SlowBlob');
+});
 
 globalThis.cDealerDamage = cDealerDamage;
