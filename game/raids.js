@@ -6,20 +6,19 @@ import {
 } from './state.js';
 import { updateDealerLifeDisplay } from './ui.js';
 import { showRaidSummaryOverlay } from '../ui/raidSummaryOverlay.js';
+import { runAnimation } from '../utils/animation.js';
 
 import addLog from './log.js';
 import { showRaidAlert } from './alerts.js';
 import { ensureDiscipleSkills, getTaskSkillProgress } from '../utils/skills.js';
 import {
-  tickBlobRaid,
-  spawnBlob,
   clearBlobs,
-  damageClosestBlob,
   canSpawn,
   raidFinished,
   showOrbAttackBar,
   hideOrbAttackBar
 } from './blobRaids.js';
+import bus from './canBus.js';
 
 export const raidState = {
   active: false,
@@ -68,29 +67,27 @@ export function startRaid() {
   ) {
     const check = () => {
       if (canSpawn()) {
-        spawnBlob();
+        bus.publish('BLOB_SPAWN');
       } else {
         window.requestAnimationFrame(check);
       }
     };
     window.requestAnimationFrame(check);
   } else {
-    spawnBlob();
+    bus.publish('BLOB_SPAWN');
   }
   raidState.enemy = {
     maxHp: 20,
     currentHp: 20,
     takeDamage(dmg) {
-      damageClosestBlob(dmg);
+      bus.publish('DISCIPLE_ATTACK', { damage: dmg });
       raidState.damageDealt += dmg;
     },
     isDefeated() {
       if (!canSpawn()) return false;
       return raidFinished();
     },
-    tick(dt) {
-      tickBlobRaid(dt);
-    }
+    tick() {}
   };
   setCurrentEnemy(raidState.enemy);
   showOrbAttackBar();
@@ -169,12 +166,27 @@ export function endRaid(victory = false) {
   if (typeof updateSectDisplay === 'function') updateSectDisplay();
 }
 
-export function tickRaid(delta) {
+export function tickRaid() {
   if (!raidState.active || !raidState.enemy) return;
-  raidState.enemy.tick(delta);
   if (sectSystem.orbs.water.current <= 0) {
     endRaid(false);
     return;
   }
   if (raidState.enemy.isDefeated()) endRaid(true);
 }
+
+// Event bus wiring
+bus.subscribe('BLOB_ATTACK_ORB', ({ damage }) => {
+  sectSystem.orbs.water.current = Math.max(0, sectSystem.orbs.water.current - damage);
+  raidState.damageReceived += damage;
+  const orbEl = document.querySelector('#sectOrbs .sect-orb.water');
+  if (orbEl) runAnimation(orbEl, 'orb-hit');
+  addLog('SlowBlob hits the Water Orb for ' + damage + ' damage.', 'damage');
+  if (sectSystem.orbs.water.current <= 0 && raidState.active) {
+    endRaid(false);
+  }
+});
+
+bus.subscribe('RAID_DAMAGE_DEALT', ({ amount }) => {
+  raidState.damageDealt += amount;
+});
