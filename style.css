@@ -541,6 +541,34 @@ body.darkenshift-mode .tabsContainer button.active {
     transition: width 0.3s;
 }
 
+.raid-container {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 40px;
+    height: 60px;
+    pointer-events: none;
+}
+
+.raid-container .fight-line {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: rgba(255,255,255,0.2);
+}
+
+.raider-unit {
+    position: absolute;
+    bottom: 0;
+    width: 16px;
+    height: 16px;
+    background: purple;
+    border-radius: 4px;
+    pointer-events: none;
+}
+
 .water-burst {
     position: absolute;
     width: 12px;
