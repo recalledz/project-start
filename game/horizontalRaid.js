@@ -2,7 +2,7 @@ import { createDiscipleBadge } from './badges.js';
 import { showRaidDamageFloat } from './rendering.js';
 
 // Multiply raider movement speed by this factor
-const RAIDER_SPEED_MULTIPLIER = 3;
+const RAIDER_SPEED_MULTIPLIER = 1.5;
 
 
 export function createHorizontalRaid({ orb, disciples = [], waves = [], onWaveStart = () => {}, onWaveEnd = () => {}, onSuccess = () => {}, onFailure = () => {}, onDamage = () => {}, container = document.body } = {}) {
