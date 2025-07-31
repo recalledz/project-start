@@ -87,7 +87,7 @@ export function spawnBoss(stageData, enemyAttackProgress, onAttack, onDefeat) {
   const stage = stageData.stage;
   const world = stageData.world;
   const template = BossTemplates[world];
-  const abilities = template.abilityKeys.map(key => {
+  const abilities = (template.abilityKeys || []).map(key => {
     const [group, fn] = key.split('.');
     return AbilityRegistry[group][fn]();
   });
