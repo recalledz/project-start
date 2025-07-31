@@ -18,6 +18,7 @@ import { raidState } from './raids.js';
 
 import addLog from './log.js';
 import bus from './canBus.js';
+import { randomBodyPart, applyInjury } from './injury.js';
 
 export function applyDamage(target, amount) {
   let remaining = Math.round(amount);
@@ -25,6 +26,13 @@ export function applyDamage(target, amount) {
     const absorbed = Math.min(target.water, remaining);
     target.water -= absorbed;
     remaining -= absorbed;
+  }
+  if (remaining > 0 && target.water <= 0 && Object.hasOwn(target, 'injuries')) {
+    const part = randomBodyPart();
+    if (part !== 'general') {
+      const tier = Math.random() < 0.5 ? 'bruise' : 'wound';
+      applyInjury(target, part, tier);
+    }
   }
   target.currentHp = Math.max(0, target.currentHp - remaining);
   if (Object.hasOwn(target, 'health')) {

@@ -2,7 +2,7 @@
 
 This module introduces a granular injury system for disciples. Each body part contributes a portion of the disciple's maximum health. Injuries progress from **Bruise** → **Wound** → **Destroyed** and reduce available HP.
 
-When a disciple's Water reaches 0 they start taking damage each second. Every hit randomly targets a body part using the following chances:
+When a disciple's Water reaches 0 they start taking damage each second. Any damage suffered while Water is depleted also targets a random body part. Every hit randomly chooses among the following chances:
 
 | Body Part | Chance |
 |-----------|-------|
