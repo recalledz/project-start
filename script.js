@@ -1301,7 +1301,7 @@ function renderSectDiscipleList() {
 let discipleOverlay = null;
 let discipleOverlayData = { disciple: null };
 let discipleOverlayActiveTab = 'general';
-function openDiscipleOverlay(d) {
+export function openDiscipleOverlay(d) {
   if (discipleOverlay) {
     discipleOverlay.close();
   } else {
@@ -1381,7 +1381,12 @@ function openDiscipleOverlay(d) {
     }
     discipleOverlayData.disciple = null;
   });
+  return discipleOverlay;
 }
+
+window.addEventListener('open-disciple-overlay', e =>
+  openDiscipleOverlay(e.detail)
+);
 
  export function renderExplorationTab() {
   if (!explorationListContainer) return;
