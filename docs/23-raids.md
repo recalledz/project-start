@@ -20,3 +20,5 @@ The raid ends when all waves are cleared or the orb is destroyed. Callbacks are 
 
 The overlay fills the entire screen. Disciple badges line the top while their sprites stand near the Water Orb at the bottom left. Raiders advance from the right toward a fight line in the center where battles take place. Damage numbers briefly float above disciples, raiders and the orb whenever they are hit.
 Damage floats use red text when disciples take damage and white when raiders are struck. Raiders are drawn with a thin black border so each unit is clearly visible.
+
+A bar at the top of the overlay shows the remaining life of the current wave in red. The label displays the exact HP left along with the current wave number so players can track their progress.
