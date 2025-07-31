@@ -14,7 +14,7 @@ and there is a five‑second pause before the next wave begins.
 
 The module handles spawning raiders, advancing them toward the fight line and resolving combat. Raiders that reach the orb once will damage it and then vanish. If the orb's water reaches zero the raid fails immediately.
 
-When a raider crosses the fight line it pairs with the first available disciple. Neither combatant moves while engaged. They attack based on their `attackSpeed` until one is defeated. Victorious disciples may re‑enter the line while surviving raiders continue toward the orb.
+When a raider reaches the fight line it stops and targets the rightmost living disciple. Disciples remain in place and always attack the leftmost raider. Several disciples may assault the same target at once, each dealing damage whenever their personal attack timer completes. Attacking disciples grow slightly larger and a dark overlay shrinks to indicate progress toward their next strike.
 
 The raid ends when all waves are cleared or the orb is destroyed. Callbacks are fired at the start and end of each wave along with a final success or failure signal. When night falls the game automatically opens a dedicated raid overlay and begins a raid. Disciples temporarily switch to the "Idle" task so their badges remain visible in the interface.
 
