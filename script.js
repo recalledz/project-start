@@ -1547,7 +1547,8 @@ function init() {
     setInCombat(true);
     removeDealerLifeBar();
     const detail = e.detail || {};
-    const enemy = detail.enemy ?? detail;
+    const enemy =
+      typeof detail.enemy !== 'undefined' ? detail.enemy : detail;
     const useCard = detail.useCard !== false;
     setCurrentEnemy(enemy);
     if (useCard) {
