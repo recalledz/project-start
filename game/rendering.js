@@ -176,6 +176,22 @@ export function showDamageFloat(card, amount) {
   setTimeout(() => dmg.remove(), 3000);
 }
 
+export function showRaidDamageFloat(el, amount) {
+  if (!el) return;
+  const dmg = document.createElement('div');
+  dmg.classList.add('damage-float');
+  dmg.textContent = `-${amount}`;
+  el.appendChild(dmg);
+  dmg.addEventListener(
+    'animationend',
+    () => dmg.remove(),
+    {
+      once: true
+    }
+  );
+  setTimeout(() => dmg.remove(), 3000);
+}
+
 export function animateDiscipleDeath(card, callback) {
   const w = card.wrapperElement;
   if (!w) {

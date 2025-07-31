@@ -1,4 +1,5 @@
 import { createDiscipleBadge } from './badges.js';
+import { showRaidDamageFloat } from './rendering.js';
 
 export function createHorizontalRaid({ orb, disciples = [], waves = [], onWaveStart = () => {}, onWaveEnd = () => {}, onSuccess = () => {}, onFailure = () => {}, onDamage = () => {}, container = document.body } = {}) {
   const state = {
@@ -17,7 +18,8 @@ export function createHorizontalRaid({ orb, disciples = [], waves = [], onWaveSt
     spawnTimer: 0,
     active: false,
     onDamage,
-    orbFill: null
+    orbFill: null,
+    orbEl: null
   };
 
   function buildUI() {
@@ -35,6 +37,7 @@ export function createHorizontalRaid({ orb, disciples = [], waves = [], onWaveSt
     orbEl.appendChild(fill);
     root.appendChild(orbEl);
     state.orbFill = fill;
+    state.orbEl = orbEl;
 
     state.disciples.forEach((slot, i) => {
       const badge = createDiscipleBadge(slot.d);
@@ -92,6 +95,7 @@ export function createHorizontalRaid({ orb, disciples = [], waves = [], onWaveSt
           r.timer -= r.attackSpeed;
           d.d.currentHp = Math.max(0, d.d.currentHp - r.damage);
           state.onDamage({ amount: r.damage, source: 'raider' });
+          showRaidDamageFloat(d.sprite, r.damage);
           if (d.d.currentHp === 0) {
             d.engaged = null;
             r.engaged = null;
@@ -102,6 +106,7 @@ export function createHorizontalRaid({ orb, disciples = [], waves = [], onWaveSt
           d.timer -= d.d.attackSpeed;
           r.hp = Math.max(0, r.hp - d.d.damage);
           state.onDamage({ amount: d.d.damage, source: 'disciple' });
+          showRaidDamageFloat(r.el, d.d.damage);
           if (r.hp === 0) {
             r.el.remove();
             const idx = state.raiders.indexOf(r);
@@ -123,6 +128,7 @@ export function createHorizontalRaid({ orb, disciples = [], waves = [], onWaveSt
             state.orbFill.style.height = `${(state.orb.current / state.orb.max) * 100}%`;
           }
           state.onDamage({ amount: r.damage, source: 'raider' });
+          showRaidDamageFloat(state.orbEl, r.damage);
           r.el.remove();
           const idx = state.raiders.indexOf(r);
           if (idx >= 0) state.raiders.splice(idx, 1);
