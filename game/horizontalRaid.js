@@ -27,7 +27,8 @@ export function createHorizontalRaid({ orb, disciples = [], waves = [], onWaveSt
     active: false,
     onDamage,
     orbFill: null,
-    orbEl: null
+    orbEl: null,
+    selectedBadge: null
   };
 
   function buildUI() {
@@ -52,6 +53,14 @@ export function createHorizontalRaid({ orb, disciples = [], waves = [], onWaveSt
       badge.style.position = 'absolute';
       badge.style.left = `${10 + i * 80}px`;
       badge.style.top = '4px';
+      badge.addEventListener('click', () => {
+        if (state.selectedBadge) state.selectedBadge.classList.remove('selected');
+        state.selectedBadge = badge;
+        badge.classList.add('selected');
+        window.dispatchEvent(
+          new CustomEvent('open-disciple-overlay', { detail: slot.d })
+        );
+      });
       root.appendChild(badge);
       const sprite = document.createElement('div');
       sprite.className = 'raid-disciple';
@@ -206,6 +215,10 @@ export function createHorizontalRaid({ orb, disciples = [], waves = [], onWaveSt
     if (!state.active) return;
     state.active = false;
     state.root?.remove();
+    if (state.selectedBadge) {
+      state.selectedBadge.classList.remove('selected');
+      state.selectedBadge = null;
+    }
     state.raiders.length = 0;
     state.disciples.forEach(slot => {
       slot.target = null;
