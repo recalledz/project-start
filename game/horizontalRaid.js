@@ -98,6 +98,9 @@ export function createHorizontalRaid({ orb, disciples = [], waves = [], onWaveSt
         if (r.timer >= r.attackSpeed) {
           r.timer -= r.attackSpeed;
           d.d.currentHp = Math.max(0, d.d.currentHp - r.damage);
+          if (Object.hasOwn(d.d, 'health')) {
+            d.d.health = d.d.currentHp;
+          }
           state.onDamage({ amount: r.damage, source: 'raider' });
           showRaidDamageFloat(d.sprite, r.damage);
           if (d.d.currentHp === 0) {
