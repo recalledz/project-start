@@ -13,15 +13,18 @@ before(async () => {
   globalThis.document = {
     getElementsByClassName: () => [null],
     getElementById: () => null,
+    querySelector: () => null,
     addEventListener: () => {},
     removeEventListener: () => {}
   };
+  globalThis.window = { addEventListener() {} };
   sectModule = await import('../game/sect.js');
   ({ sectSystem, tickSect } = sectModule);
 });
 
 after(() => {
   delete globalThis.document;
+  delete globalThis.window;
 });
 
 beforeEach(() => {

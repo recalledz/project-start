@@ -1,6 +1,7 @@
 import { createDiscipleBadge } from './badges.js';
 import { showRaidDamageFloat } from './rendering.js';
 import { applyDamage } from './combat.js';
+import { runAnimation } from '../utils/animation.js';
 
 // Delay between waves in milliseconds
 const WAVE_DELAY = 5000;
@@ -26,7 +27,8 @@ export function createHorizontalRaid({ orb, disciples = [], waves = [], onWaveSt
     active: false,
     onDamage,
     orbFill: null,
-    orbEl: null
+    orbEl: null,
+    selectedBadge: null
   };
 
   function buildUI() {
@@ -51,6 +53,14 @@ export function createHorizontalRaid({ orb, disciples = [], waves = [], onWaveSt
       badge.style.position = 'absolute';
       badge.style.left = `${10 + i * 80}px`;
       badge.style.top = '4px';
+      badge.addEventListener('click', () => {
+        if (state.selectedBadge) state.selectedBadge.classList.remove('selected');
+        state.selectedBadge = badge;
+        badge.classList.add('selected');
+        window.dispatchEvent(
+          new CustomEvent('open-disciple-overlay', { detail: slot.d })
+        );
+      });
       root.appendChild(badge);
       const sprite = document.createElement('div');
       sprite.className = 'raid-disciple';
@@ -103,6 +113,7 @@ export function createHorizontalRaid({ orb, disciples = [], waves = [], onWaveSt
             state.orbFill.style.height = `${(state.orb.current / state.orb.max) * 100}%`;
           }
           showRaidDamageFloat(state.orbEl, r.damage);
+          runAnimation(r.el, 'attack-flash');
           r.el.remove();
           const idx = state.raiders.indexOf(r);
           if (idx >= 0) state.raiders.splice(idx, 1);
@@ -120,6 +131,7 @@ export function createHorizontalRaid({ orb, disciples = [], waves = [], onWaveSt
         applyDamage(target.d, r.damage);
         state.onDamage({ amount: r.damage, source: 'raider' });
         showRaidDamageFloat(target.sprite, r.damage);
+        runAnimation(r.el, 'attack-flash');
       }
     });
   }
@@ -152,6 +164,7 @@ export function createHorizontalRaid({ orb, disciples = [], waves = [], onWaveSt
         r.hp = Math.max(0, r.hp - slot.d.damage);
         state.onDamage({ amount: slot.d.damage, source: 'disciple' });
         showRaidDamageFloat(r.el, slot.d.damage, true);
+        runAnimation(slot.sprite, 'attack-flash');
         if (slot.overlay) slot.overlay.style.height = '100%';
         if (r.hp === 0) {
           r.el.remove();
@@ -202,6 +215,10 @@ export function createHorizontalRaid({ orb, disciples = [], waves = [], onWaveSt
     if (!state.active) return;
     state.active = false;
     state.root?.remove();
+    if (state.selectedBadge) {
+      state.selectedBadge.classList.remove('selected');
+      state.selectedBadge = null;
+    }
     state.raiders.length = 0;
     state.disciples.forEach(slot => {
       slot.target = null;
