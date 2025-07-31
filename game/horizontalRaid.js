@@ -6,7 +6,17 @@ import { applyDamage } from './combat.js';
 const WAVE_DELAY = 5000;
 
 
-export function createHorizontalRaid({ orb, disciples = [], waves = [], onWaveStart = () => {}, onWaveEnd = () => {}, onSuccess = () => {}, onFailure = () => {}, onDamage = () => {}, container = document.body } = {}) {
+export function createHorizontalRaid({
+  orb,
+  disciples = [],
+  waves = [],
+  onWaveStart = () => {},
+  onWaveEnd = () => {},
+  onSuccess = () => {},
+  onFailure = () => {},
+  onDamage = () => {},
+  container = document.body
+} = {}) {
   const state = {
     orb,
     disciples: disciples.map(d => ({ d, timer: 0, badge: null, sprite: null, startLeft: 0, target: null, overlay: null })),
@@ -26,7 +36,12 @@ export function createHorizontalRaid({ orb, disciples = [], waves = [], onWaveSt
     active: false,
     onDamage,
     orbFill: null,
-    orbEl: null
+    orbEl: null,
+    waveTotal: 0,
+    waveHp: 0,
+    waveLifeFill: null,
+    waveLifeLabel: null,
+    waveLabel: null
   };
 
   function buildUI() {
@@ -35,6 +50,25 @@ export function createHorizontalRaid({ orb, disciples = [], waves = [], onWaveSt
     const line = document.createElement('div');
     line.className = 'fight-line';
     root.appendChild(line);
+
+    const info = document.createElement('div');
+    info.className = 'wave-info';
+    const waveLabel = document.createElement('div');
+    waveLabel.className = 'wave-count';
+    info.appendChild(waveLabel);
+    const lifeBar = document.createElement('div');
+    lifeBar.className = 'wave-life-bar';
+    const lifeFill = document.createElement('div');
+    lifeFill.className = 'wave-life-fill';
+    const lifeLabel = document.createElement('div');
+    lifeLabel.className = 'wave-life-label';
+    lifeBar.appendChild(lifeFill);
+    lifeBar.appendChild(lifeLabel);
+    info.appendChild(lifeBar);
+    root.appendChild(info);
+    state.waveLifeFill = lifeFill;
+    state.waveLifeLabel = lifeLabel;
+    state.waveLabel = waveLabel;
 
     const orbEl = document.createElement('div');
     orbEl.className = 'raid-orb sect-orb water';
@@ -66,6 +100,28 @@ export function createHorizontalRaid({ orb, disciples = [], waves = [], onWaveSt
     });
     state.container.appendChild(root);
     state.root = root;
+  }
+
+  function updateWaveLife() {
+    if (!state.waveLifeFill) return;
+    const pct = state.waveTotal > 0 ? (state.waveHp / state.waveTotal) * 100 : 0;
+    state.waveLifeFill.style.width = `${pct}%`;
+    if (state.waveLifeLabel) {
+      state.waveLifeLabel.textContent = `${Math.round(state.waveHp)}/${Math.round(state.waveTotal)}`;
+    }
+  }
+
+  function beginWave(index) {
+    state.waveIndex = index;
+    const wave = state.waves[index];
+    if (!wave) return;
+    state.waveTotal = wave.stats.hp * wave.count;
+    state.waveHp = state.waveTotal;
+    if (state.waveLabel) {
+      state.waveLabel.textContent = `Wave ${index + 1}/${state.waves.length}`;
+    }
+    updateWaveLife();
+    state.onWaveStart(index);
   }
 
   function spawnRaider(stats) {
@@ -103,9 +159,11 @@ export function createHorizontalRaid({ orb, disciples = [], waves = [], onWaveSt
             state.orbFill.style.height = `${(state.orb.current / state.orb.max) * 100}%`;
           }
           showRaidDamageFloat(state.orbEl, r.damage);
+          state.waveHp = Math.max(0, state.waveHp - r.hp);
           r.el.remove();
           const idx = state.raiders.indexOf(r);
           if (idx >= 0) state.raiders.splice(idx, 1);
+          updateWaveLife();
           if (state.orb.current <= 0) end(false);
           return;
         }
@@ -149,7 +207,10 @@ export function createHorizontalRaid({ orb, disciples = [], waves = [], onWaveSt
       if (slot.timer >= slot.d.attackSpeed) {
         slot.timer -= slot.d.attackSpeed;
         const r = slot.target;
+        const before = r.hp;
         r.hp = Math.max(0, r.hp - slot.d.damage);
+        const dealt = before - r.hp;
+        state.waveHp = Math.max(0, state.waveHp - dealt);
         state.onDamage({ amount: slot.d.damage, source: 'disciple' });
         showRaidDamageFloat(r.el, slot.d.damage, true);
         if (slot.overlay) slot.overlay.style.height = '100%';
@@ -161,6 +222,7 @@ export function createHorizontalRaid({ orb, disciples = [], waves = [], onWaveSt
             if (s.target === r) s.target = null;
           });
         }
+        updateWaveLife();
       }
     });
   }
@@ -173,7 +235,7 @@ export function createHorizontalRaid({ orb, disciples = [], waves = [], onWaveSt
       if (state.waveTimer >= WAVE_DELAY) {
         state.waiting = false;
         state.waveTimer = 0;
-        state.onWaveStart(state.waveIndex);
+        beginWave(state.waveIndex);
       }
       return;
     }
@@ -187,12 +249,13 @@ export function createHorizontalRaid({ orb, disciples = [], waves = [], onWaveSt
     }
     if (state.spawnIndex >= wave.count && state.raiders.length === 0) {
       state.onWaveEnd(state.waveIndex);
-      state.waveIndex += 1;
+      const next = state.waveIndex + 1;
       state.spawnIndex = 0;
       state.spawnTimer = 0;
-      if (state.waveIndex >= state.waves.length) {
+      if (next >= state.waves.length) {
         end(true);
       } else {
+        state.waveIndex = next;
         state.waiting = true;
       }
     }
@@ -227,7 +290,7 @@ export function createHorizontalRaid({ orb, disciples = [], waves = [], onWaveSt
       state.active = true;
       state.waiting = false;
       state.waveTimer = 0;
-      state.onWaveStart(0);
+      beginWave(0);
     },
     tick,
     end

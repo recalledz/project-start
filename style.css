@@ -559,6 +559,56 @@ body.darkenshift-mode .tabsContainer button.active {
     background: rgba(255,255,255,0.2);
 }
 
+.wave-info {
+    position: absolute;
+    /* Leave room for disciple badges */
+    top: 56px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    pointer-events: none;
+    color: #fff;
+    font-size: 0.8rem;
+    text-shadow: 0 0 2px #000;
+}
+
+.wave-count {
+    font-weight: bold;
+}
+
+.wave-life-bar {
+    position: relative;
+    width: 160px;
+    height: 10px;
+    background: #333;
+    border: 1px solid #e74c3c;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.wave-life-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    background: #e74c3c;
+    transition: width 0.3s;
+}
+
+.wave-life-label {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    transform: translateY(-50%);
+    text-align: center;
+    font-size: 0.7rem;
+    pointer-events: none;
+}
+
 .raider-unit {
     position: absolute;
     bottom: 8px;
