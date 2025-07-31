@@ -27,6 +27,9 @@ export function applyDamage(target, amount) {
     remaining -= absorbed;
   }
   target.currentHp = Math.max(0, target.currentHp - remaining);
+  if (Object.hasOwn(target, 'health')) {
+    target.health = target.currentHp;
+  }
   return remaining;
 }
 

@@ -1,5 +1,6 @@
 import { createDiscipleBadge } from './badges.js';
 import { showRaidDamageFloat } from './rendering.js';
+import { applyDamage } from './combat.js';
 
 // Multiply raider movement speed by this factor
 const RAIDER_SPEED_MULTIPLIER = 1.5;
@@ -97,7 +98,7 @@ export function createHorizontalRaid({ orb, disciples = [], waves = [], onWaveSt
         d.timer += dt;
         if (r.timer >= r.attackSpeed) {
           r.timer -= r.attackSpeed;
-          d.d.currentHp = Math.max(0, d.d.currentHp - r.damage);
+          applyDamage(d.d, r.damage);
           state.onDamage({ amount: r.damage, source: 'raider' });
           showRaidDamageFloat(d.sprite, r.damage);
           if (d.d.currentHp === 0) {

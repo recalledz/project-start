@@ -59,6 +59,9 @@ export default class Disciple {
 
   takeDamage(amount) {
     this.currentHp = Math.round(Math.max(0, this.currentHp - amount));
+    if (Object.hasOwn(this, 'health')) {
+      this.health = this.currentHp;
+    }
   }
 
   isDefeated() {
