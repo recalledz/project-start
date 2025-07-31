@@ -1518,6 +1518,8 @@ function init() {
       enableOrbGlow();
       showOrbMask();
       updateOrbMaskPosition();
+      showTab(sectTab);
+      setActiveTabButton(playerSectTabButton);
       sectSystem.disciples.forEach(d => {
         if (!d.incapacitated) sectState.discipleTasks[d.id] = 'Idle';
       });

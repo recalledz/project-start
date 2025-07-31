@@ -1,54 +1,16 @@
-
 # 23 – Raids
 
-**Sunday, July 20, 2025 • 8:15 PM**
+Night raids play out as a horizontal autobattler. Raiders march in waves from the right edge of the screen toward the Water Orb on the left. Disciples line up to meet them at the fight line in the center.
 
-Night raids escalate the longer your sect survives. Each evening hostile frogs or spirits attack from the edge of the sect map and attempt to reach the Water Orb.
-All raid interactions are coordinated through a small event bus so the combat,
-raid and rendering modules remain loosely coupled.
-Damage totals are broadcast via `RAID_DAMAGE_DEALT` and `BLOB_ATTACK_ORB` events
-which update the raid summary.
+Raid behaviour is entirely data‑driven. A raid is started by calling `startRaid(config)` where `config` provides:
 
-- **Enemy scaling** – raid size and enemy stats grow with the current stage and world. Early attacks feature sluggish "SlowBlob" spirits that spawn every few seconds and crawl toward the orb.
-- **Orb damage** – the Water Orb pulses damage in a small radius, harming nearby attackers. Buildings can boost this effect.
-- **Resource theft** – if any enemy touches the orb they steal a portion of stored resources (fruit, timber and ore) before escaping.
-- **Rewards** – defeating a raid grants small loot drops and experience for participating disciples.
+- `orb` – object with `current` and `max` water values
+- `disciples` – array of defender objects
+- `waves` – list describing each wave `{ count, rate, stats }`
+- Optional callbacks `onWaveStart`, `onWaveEnd`, `onSuccess`, and `onFailure`
 
-Disciples may be called upon to defend the sect from occasional raids.
+The module handles spawning raiders, advancing them toward the fight line and resolving combat. Raiders that reach the orb once will damage it and then vanish. If the orb's water reaches zero the raid fails immediately.
 
-* Raids begin automatically during the Night phase.
-* A red alert briefly appears on screen when a raid starts.
-* Raiders attack the Water orb, reducing its stored energy.
-* All disciples rush to intercept raiders as soon as they appear.
-* Raiders continue heading toward the Water orb but halt if a disciple enters a 100&nbsp;px radius, attacking while in range.
-* Blobs stop when within **100&nbsp;px** of the Water orb (`BLOB_ORB_ATTACK_RANGE`) before striking.
-* All disciples immediately pause their current task to join the defense.
-* After the raid ends, disciples automatically resume their previous work assignments, even if they were incapacitated at the start of the raid.
-* Each disciple seeks the nearest enemy and engages in melee when in range.
-* If the orb is depleted the sect loses **half** of its stored fruit and softwood.
-* Early raids send four SlowBlob raiders, one every 10&nbsp;s for 40&nbsp;s.
-* SlowBlob attacks now occur every 10&nbsp;s.
+When a raider crosses the fight line it pairs with the first available disciple. Neither combatant moves while engaged. They attack based on their `attackSpeed` until one is defeated. Victorious disciples may re‑enter the line while surviving raiders continue toward the orb.
 
-* The Water orb lashes out every 5&nbsp;s at blobs within 75&nbsp;px, striking the closest target for 2 damage.
-* Blobs show a small health meter as they crawl across the map.
-* When killed, blobs burst in a brief animation.
-* The Water orb displays a short attack timer bar above it and flashes each time it fires.
-* Disciples briefly grow in size when landing an attack.
-* When raiders are struck several small red circles mark the ground and remain on the sect map.
-*
-* Damage dealt to and by the Water orb is logged during raids.
-* All units traverse the map at a base rate of 10&nbsp;px per second.
-* SlowBlob raiders crawl at half this speed, moving only 5&nbsp;px per second.
-* SlowBlob raiders now sport two glowing red eyes that move with them.
-
-
-
-* Defeating a raid yields **Undead Nectar** in addition to experience. The nectar
-  is added to your resources side panel for later use.
-* The raid ends immediately when the enemy is defeated or the Water orb is drained.
-* A summary overlay appears after victory showing damage dealt, damage received,
-  rewards and how much combat XP each participating disciple earned. Each
-  disciple now displays a small progress bar indicating their level and progress
-  toward the next. Level ups are noted next to the disciple's name.
-* If defeated, a raid end overlay displays the resources lost when the orb was
-  drained.
+The raid ends when all waves are cleared or the orb is destroyed. Callbacks are fired at the start and end of each wave along with a final success or failure signal. When night falls the game automatically switches to the sect view and begins a raid. Disciples temporarily switch to the "Idle" task so their badges remain visible in the interface.
