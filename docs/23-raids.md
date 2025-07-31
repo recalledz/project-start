@@ -15,4 +15,4 @@ When a raider crosses the fight line it pairs with the first available disciple.
 
 The raid ends when all waves are cleared or the orb is destroyed. Callbacks are fired at the start and end of each wave along with a final success or failure signal. When night falls the game automatically opens a dedicated raid overlay and begins a raid. Disciples temporarily switch to the "Idle" task so their badges remain visible in the interface.
 
-The overlay fills the entire screen. Disciple badges line the top while their sprites stand near the Water Orb at the bottom left. Raiders advance from the right toward a fight line in the center where battles take place.
+The overlay fills the entire screen. Disciple badges line the top while their sprites stand near the Water Orb at the bottom left. Raiders advance from the right toward a fight line in the center where battles take place. Damage numbers briefly float above disciples, raiders and the orb whenever they are hit.
