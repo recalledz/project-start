@@ -4,6 +4,9 @@ import { showRaidDamageFloat } from './rendering.js';
 // Multiply raider movement speed by this factor
 const RAIDER_SPEED_MULTIPLIER = 3;
 
+// Multiply raider movement speed by this factor
+const RAIDER_SPEED_MULTIPLIER = 3;
+
 export function createHorizontalRaid({ orb, disciples = [], waves = [], onWaveStart = () => {}, onWaveEnd = () => {}, onSuccess = () => {}, onFailure = () => {}, onDamage = () => {}, container = document.body } = {}) {
   const state = {
     orb,
