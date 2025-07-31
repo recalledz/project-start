@@ -23,7 +23,7 @@ function buildDefaultConfig() {
       {
         count: 4,
         rate: 1000,
-        stats: { hp: 10, damage: 1, attackSpeed: 1000, moveSpeed: 0.002 }
+        stats: { hp: 10, damage: 1, attackSpeed: 1000, moveSpeed: 0.004 }
       }
     ]
   };
