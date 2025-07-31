@@ -2,8 +2,8 @@ import { createDiscipleBadge } from './badges.js';
 import { showRaidDamageFloat } from './rendering.js';
 import { applyDamage } from './combat.js';
 
-// Multiply raider movement speed by this factor
-const RAIDER_SPEED_MULTIPLIER = 1.5;
+// Delay between waves in milliseconds
+const WAVE_DELAY = 5000;
 
 
 export function createHorizontalRaid({ orb, disciples = [], waves = [], onWaveStart = () => {}, onWaveEnd = () => {}, onSuccess = () => {}, onFailure = () => {}, onDamage = () => {}, container = document.body } = {}) {
@@ -21,6 +21,8 @@ export function createHorizontalRaid({ orb, disciples = [], waves = [], onWaveSt
     waveIndex: 0,
     spawnIndex: 0,
     spawnTimer: 0,
+    waveTimer: 0,
+    waiting: false,
     active: false,
     onDamage,
     orbFill: null,
@@ -71,7 +73,7 @@ export function createHorizontalRaid({ orb, disciples = [], waves = [], onWaveSt
       hp: stats.hp,
       damage: stats.damage,
       attackSpeed: stats.attackSpeed,
-      moveSpeed: stats.moveSpeed * RAIDER_SPEED_MULTIPLIER,
+      moveSpeed: stats.moveSpeed,
       progress: 1,
       timer: 0,
       el,
@@ -147,6 +149,15 @@ export function createHorizontalRaid({ orb, disciples = [], waves = [], onWaveSt
   function spawnLoop(dt) {
     const wave = state.waves[state.waveIndex];
     if (!wave) return;
+    if (state.waiting) {
+      state.waveTimer += dt;
+      if (state.waveTimer >= WAVE_DELAY) {
+        state.waiting = false;
+        state.waveTimer = 0;
+        state.onWaveStart(state.waveIndex);
+      }
+      return;
+    }
     if (state.spawnIndex < wave.count) {
       state.spawnTimer += dt;
       if (state.spawnTimer >= wave.rate) {
@@ -163,7 +174,7 @@ export function createHorizontalRaid({ orb, disciples = [], waves = [], onWaveSt
       if (state.waveIndex >= state.waves.length) {
         end(true);
       } else {
-        state.onWaveStart(state.waveIndex);
+        state.waiting = true;
       }
     }
   }
@@ -190,5 +201,14 @@ export function createHorizontalRaid({ orb, disciples = [], waves = [], onWaveSt
 
   buildUI();
 
-  return { start: () => { state.active = true; state.onWaveStart(0); }, tick, end };
+  return {
+    start: () => {
+      state.active = true;
+      state.waiting = false;
+      state.waveTimer = 0;
+      state.onWaveStart(0);
+    },
+    tick,
+    end
+  };
 }

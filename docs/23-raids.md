@@ -9,6 +9,9 @@ Raid behaviour is entirely data‑driven. A raid is started by calling `startRai
 - `waves` – list describing each wave `{ count, rate, stats }`
 - Optional callbacks `onWaveStart`, `onWaveEnd`, `onSuccess`, and `onFailure`
 
+A typical raid now consists of **five** waves. Each wave spawns a single raider
+and there is a five‑second pause before the next wave begins.
+
 The module handles spawning raiders, advancing them toward the fight line and resolving combat. Raiders that reach the orb once will damage it and then vanish. If the orb's water reaches zero the raid fails immediately.
 
 When a raider crosses the fight line it pairs with the first available disciple. Neither combatant moves while engaged. They attack based on their `attackSpeed` until one is defeated. Victorious disciples may re‑enter the line while surviving raiders continue toward the orb.

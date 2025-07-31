@@ -19,13 +19,11 @@ function buildDefaultConfig() {
   return {
     orb: sectSystem.orbs.water,
     disciples: sectSystem.disciples.filter(d => !d.incapacitated),
-    waves: [
-      {
-        count: 4,
-        rate: 1000,
-        stats: { hp: 10, damage: 1, attackSpeed: 1000, moveSpeed: 0.004 }
-      }
-    ]
+    waves: Array.from({ length: 5 }, () => ({
+      count: 1,
+      rate: 1000,
+      stats: { hp: 10, damage: 1, attackSpeed: 1000, moveSpeed: 0.004 }
+    }))
   };
 }
 
