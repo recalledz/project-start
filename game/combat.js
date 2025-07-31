@@ -18,6 +18,7 @@ import { raidState } from './raids.js';
 
 import addLog from './log.js';
 import bus from './canBus.js';
+import { runAnimation } from '../utils/animation.js';
 
 export function applyDamage(target, amount) {
   let remaining = Math.round(amount);
@@ -66,6 +67,7 @@ export function applyDiscipleAttacks(
       onHit?.(d.damage, d);
       timers[d.id] = 0;
       if (updateFill) updateFill(d, 0);
+      if (d.cardElement) runAnimation(d.cardElement, 'attack-flash');
     }
   });
 }
@@ -81,7 +83,7 @@ export function attack(deltaTime = 0) {
     deltaTime,
     null,
     (disc, ratio) => {
-      if (disc.attackFill) disc.attackFill.style.width = `${ratio * 100}%`;
+      if (disc.attackOverlay) disc.attackOverlay.style.height = `${(1 - ratio) * 100}%`;
     }
   );
 

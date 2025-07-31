@@ -1,6 +1,7 @@
 import { createDiscipleBadge } from './badges.js';
 import { showRaidDamageFloat } from './rendering.js';
 import { applyDamage } from './combat.js';
+import { runAnimation } from '../utils/animation.js';
 
 // Delay between waves in milliseconds
 const WAVE_DELAY = 5000;
@@ -103,6 +104,7 @@ export function createHorizontalRaid({ orb, disciples = [], waves = [], onWaveSt
             state.orbFill.style.height = `${(state.orb.current / state.orb.max) * 100}%`;
           }
           showRaidDamageFloat(state.orbEl, r.damage);
+          runAnimation(r.el, 'attack-flash');
           r.el.remove();
           const idx = state.raiders.indexOf(r);
           if (idx >= 0) state.raiders.splice(idx, 1);
@@ -120,6 +122,7 @@ export function createHorizontalRaid({ orb, disciples = [], waves = [], onWaveSt
         applyDamage(target.d, r.damage);
         state.onDamage({ amount: r.damage, source: 'raider' });
         showRaidDamageFloat(target.sprite, r.damage);
+        runAnimation(r.el, 'attack-flash');
       }
     });
   }
@@ -152,6 +155,7 @@ export function createHorizontalRaid({ orb, disciples = [], waves = [], onWaveSt
         r.hp = Math.max(0, r.hp - slot.d.damage);
         state.onDamage({ amount: slot.d.damage, source: 'disciple' });
         showRaidDamageFloat(r.el, slot.d.damage, true);
+        runAnimation(slot.sprite, 'attack-flash');
         if (slot.overlay) slot.overlay.style.height = '100%';
         if (r.hp === 0) {
           r.el.remove();
