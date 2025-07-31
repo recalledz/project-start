@@ -176,10 +176,11 @@ export function showDamageFloat(card, amount) {
   setTimeout(() => dmg.remove(), 3000);
 }
 
-export function showRaidDamageFloat(el, amount) {
+export function showRaidDamageFloat(el, amount, isRaider = false) {
   if (!el) return;
   const dmg = document.createElement('div');
   dmg.classList.add('damage-float');
+  if (isRaider) dmg.classList.add('raider-damage');
   dmg.textContent = `-${amount}`;
   el.appendChild(dmg);
   dmg.addEventListener(
