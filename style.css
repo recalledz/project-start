@@ -541,6 +541,54 @@ body.darkenshift-mode .tabsContainer button.active {
     transition: width 0.3s;
 }
 
+.raid-container {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: 0;
+    pointer-events: none;
+}
+
+.raid-container .fight-line {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: rgba(255,255,255,0.2);
+}
+
+.raider-unit {
+    position: absolute;
+    bottom: 8px;
+    width: 16px;
+    height: 16px;
+    background: purple;
+    border-radius: 4px;
+    pointer-events: none;
+}
+
+.raid-disciple {
+    position: absolute;
+    bottom: 8px;
+    width: 24px;
+    height: 24px;
+    background-image: url('img/coqui.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    pointer-events: none;
+    filter: drop-shadow(0 0 2px rgba(0,0,0,0.8));
+}
+
+.raid-orb {
+    position: absolute;
+    bottom: 8px;
+    left: 8px;
+    width: 48px;
+    height: 48px;
+}
+
 .water-burst {
     position: absolute;
     width: 12px;
@@ -709,6 +757,24 @@ body.darkenshift-mode .tabsContainer button.active {
     display: flex;
     flex-direction: column;
     gap: 8px;
+}
+
+.raid-overlay .overlay-box {
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    max-height: none;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    background: none;
+    border: none;
+}
+
+.raid-battle-area {
+    position: relative;
+    width: 100%;
+    height: 100%;
 }
 
 .work-content {

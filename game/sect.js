@@ -24,13 +24,10 @@ import {
   LOG_XP_PER_CYCLE,
   RESEARCH_XP_PER_CYCLE,
   CHANT_XP_PER_CYCLE,
-  COMBAT_XP_RATE,
   HUNT_CYCLE_SECONDS,
   EXPLORATION_CYCLE_SECONDS
 } from './constants.js';
-import { applyDiscipleAttacks } from './combat.js';
-import { startRaid, tickRaid, raidState, endRaid } from './raids.js';
-import { updateRaidLifeBar } from './ui.js';
+import { startRaid, tickRaid, raidState } from './raids.js';
 import { tickOrbSpells } from './orbSpells.js';
 import { applyStarvationHit, tickInjuries } from './injury.js';
 
@@ -1334,7 +1331,7 @@ export function tickSectSystem(delta) {
   tickActiveConstructs(dt);
   tickOrbSpells(dt);
   tickMetamorphosis(dt);
-  tickRaid();
+  tickRaid(delta);
   ins.current = Math.min(ins.max, Math.max(0, ins.current));
   if (hasUI) {
     updateCooldownOverlays();
@@ -1483,24 +1480,15 @@ export function tickSect(delta) {
     }
     const task = sectState.discipleTasks[d.id];
     if (!task || task === 'Idle' || task === 'Resting') {
-      if (!(raidState.active && raidState.enemy)) return;
+      if (!raidState.active) return;
     }
     ensureDiscipleSkills(d.id);
     let group = TASK_GROUPS[task];
     let xpRate = 0;
     let progress = sectState.discipleProgress[d.id] || 0;
 
-    if (raidState.active && raidState.enemy) {
-      applyDiscipleAttacks(
-        raidState.enemy,
-        [d],
-        raidState.attackTimers,
-        delta
-      );
-      updateRaidLifeBar(raidState.enemy);
-      if (raidState.enemy.isDefeated()) endRaid(true);
-      xpRate = COMBAT_XP_RATE;
-      group = 'Combat';
+    if (raidState.active) {
+      return;
     } else if (task === 'Gather Fruit' || task === 'Gather Softwood') {
       const spot = GATHER_SPOTS[task];
       const rate =
