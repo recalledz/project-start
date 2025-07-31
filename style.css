@@ -549,6 +549,9 @@ body.darkenshift-mode .tabsContainer button.active {
     top: 0;
     pointer-events: none;
 }
+.raid-container .disciple-badge {
+    pointer-events: auto;
+}
 
 .raid-container .fight-line {
     position: absolute;
