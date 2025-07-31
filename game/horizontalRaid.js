@@ -1,6 +1,9 @@
 import { createDiscipleBadge } from './badges.js';
 import { showRaidDamageFloat } from './rendering.js';
 
+// Multiply raider movement speed by this factor
+const RAIDER_SPEED_MULTIPLIER = 3;
+
 export function createHorizontalRaid({ orb, disciples = [], waves = [], onWaveStart = () => {}, onWaveEnd = () => {}, onSuccess = () => {}, onFailure = () => {}, onDamage = () => {}, container = document.body } = {}) {
   const state = {
     orb,
@@ -66,7 +69,7 @@ export function createHorizontalRaid({ orb, disciples = [], waves = [], onWaveSt
       hp: stats.hp,
       damage: stats.damage,
       attackSpeed: stats.attackSpeed,
-      moveSpeed: stats.moveSpeed,
+      moveSpeed: stats.moveSpeed * RAIDER_SPEED_MULTIPLIER,
       progress: 1,
       timer: 0,
       el,
