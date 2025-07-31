@@ -566,6 +566,7 @@ body.darkenshift-mode .tabsContainer button.active {
     height: 16px;
     background: purple;
     border-radius: 4px;
+    border: 1px solid #000;
     pointer-events: none;
 }
 
@@ -1723,6 +1724,9 @@ body.darkenshift-mode .tabsContainer button.active {
     text-shadow: 0 0 2px #000;
     font-size: 1.4em;
     animation: damage-float 3s ease-out forwards;
+}
+.raider-damage {
+    color: white;
 }
 
 @keyframes damage-float {

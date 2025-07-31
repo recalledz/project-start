@@ -112,7 +112,7 @@ export function createHorizontalRaid({ orb, disciples = [], waves = [], onWaveSt
           d.timer -= d.d.attackSpeed;
           r.hp = Math.max(0, r.hp - d.d.damage);
           state.onDamage({ amount: d.d.damage, source: 'disciple' });
-          showRaidDamageFloat(r.el, d.d.damage);
+          showRaidDamageFloat(r.el, d.d.damage, true);
           if (r.hp === 0) {
             r.el.remove();
             const idx = state.raiders.indexOf(r);
@@ -185,7 +185,8 @@ export function createHorizontalRaid({ orb, disciples = [], waves = [], onWaveSt
   function tick(dt) {
     if (!state.active) return;
     spawnLoop(dt);
-    updateRaiders(dt / 1000);
+    // dt is in milliseconds; use same unit for attack timers
+    updateRaiders(dt);
   }
 
   buildUI();
