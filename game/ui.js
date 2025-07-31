@@ -86,13 +86,10 @@ export function renderCombatDisciples() {
   handContainer.innerHTML = '';
   activeDisciples.forEach(d => {
     renderDiscipleCard(d, handContainer);
-    const bar = document.createElement('div');
-    bar.className = 'disciple-attack-bar';
-    const fill = document.createElement('div');
-    fill.className = 'disciple-attack-fill';
-    bar.appendChild(fill);
-    d.wrapperElement.insertBefore(bar, d.xpBar);
-    d.attackFill = fill;
+    const overlay = document.createElement('div');
+    overlay.className = 'disciple-attack-shadow';
+    d.cardElement.appendChild(overlay);
+    d.attackOverlay = overlay;
     updateDiscipleStatsDisplay(d);
   });
 }
