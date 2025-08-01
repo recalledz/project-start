@@ -121,6 +121,13 @@ export function createHorizontalRaid({
     }
   }
 
+  function removeDisciple(slot) {
+    slot.sprite?.remove();
+    slot.badge?.remove();
+    const idx = state.disciples.indexOf(slot);
+    if (idx >= 0) state.disciples.splice(idx, 1);
+  }
+
   function beginWave(index) {
     state.waveIndex = index;
     const wave = state.waves[index];
@@ -159,7 +166,9 @@ export function createHorizontalRaid({
         return;
       }
 
-      const living = state.disciples.filter(s => !s.d.incapacitated);
+      const living = state.disciples.filter(
+        s => !s.d.incapacitated && s.d.currentHp > 0
+      );
       if (living.length === 0) {
         r.progress -= r.moveSpeed * dt;
         if (r.progress <= 0) {
@@ -190,14 +199,20 @@ export function createHorizontalRaid({
         state.onDamage({ amount: r.damage, source: 'raider' });
         showRaidDamageFloat(target.sprite, r.damage);
         runAnimation(r.el, 'attack-flash');
+        if (target.d.currentHp <= 0 || target.d.incapacitated) {
+          removeDisciple(target);
+        }
       }
     });
   }
 
   function updateDisciples(dt) {
     const livingRaiders = state.raiders;
-    state.disciples.forEach(slot => {
-      if (slot.d.incapacitated) return;
+    state.disciples.slice().forEach(slot => {
+      if (slot.d.currentHp <= 0 || slot.d.incapacitated) {
+        removeDisciple(slot);
+        return;
+      }
 
       if (!slot.target || slot.target.hp <= 0 || !livingRaiders.includes(slot.target)) {
         slot.target = null;

@@ -24,4 +24,6 @@ Damage floats use red text when disciples take damage and white when raiders are
 A bar just below the disciple badges shows the remaining life of the current wave in red. The label displays the exact HP left along with the current wave number so players can track their progress.
 
 During raids you can click a disciple's badge to open their detailed overlay.
+Any disciple reduced to **0 HP** or incapacitated by destroyed body parts is
+immediately removed from the lineup and no longer fights in that raid.
 
