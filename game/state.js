@@ -144,7 +144,7 @@ export let stageData = {
   stageDamageMultiplier: 1.05,
   kills: 0,
   playerXp: 1,
-  attackspeed: 10000
+  attackspeed: 5000
 };
 
 export const FAST_MODE_SCALE = 10;
