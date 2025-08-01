@@ -88,7 +88,9 @@ export function renderCombatDisciples() {
     renderDiscipleCard(d, handContainer);
     const overlay = document.createElement('div');
     overlay.className = 'disciple-attack-shadow';
-    d.cardElement.appendChild(overlay);
+    const suit = d.cardElement.querySelector('.card-suit');
+    if (suit) suit.appendChild(overlay);
+    else d.cardElement.appendChild(overlay);
     d.attackOverlay = overlay;
     updateDiscipleStatsDisplay(d);
   });

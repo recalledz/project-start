@@ -1580,6 +1580,8 @@ body.darkenshift-mode .tabsContainer button.active {
     align-items: center;
     font-size: 3em; /* adjust as needed */
     line-height: 1;
+    position: relative;
+    overflow: hidden;
 }
 
 .card-hp {
