@@ -123,7 +123,7 @@ import {
   deselectDisciple,
   clearActiveDisciples
 } from "./game/disciples.js";
-import { raidState } from './game/raids.js';
+import { raidState, tickRaid } from './game/raids.js';
 // developer debug tools
 import { init as initDebug } from "./game/debug.js";
 import { attachOrbGlow, enableOrbGlow, disableOrbGlow, updateOrbGlow, flashOrbGlow } from './game/orbGlow.js';
@@ -2593,6 +2593,8 @@ addLog("Game loaded!",
 
 
 let lastFrameTime = performance.now();
+let pendingSectTime = 0;
+let lastRaidState = false;
 
 // Main animation loop; handles ticking the enemy and player actions
 function gameLoop(currentTime) {
@@ -2628,10 +2630,22 @@ function gameLoop(currentTime) {
 
 
 
-  tickSectSystem(deltaTime);
-  tickSect(deltaTime);
-  tickBuilding(deltaTime / 1000);
-  const dtSeconds = deltaTime / 1000;
+  let processedDelta = deltaTime;
+  if (raidState.active) {
+    pendingSectTime += deltaTime;
+    processedDelta = 0;
+    tickRaid(deltaTime);
+  } else {
+    if (lastRaidState && pendingSectTime > 0) {
+      processedDelta += pendingSectTime;
+      pendingSectTime = 0;
+    }
+    tickSectSystem(processedDelta);
+    tickSect(processedDelta);
+    tickBuilding(processedDelta / 1000);
+  }
+  lastRaidState = raidState.active;
+  const dtSeconds = processedDelta / 1000;
   if (dtSeconds > 0) {
     sectSystem.gains.water =
       (sectSystem.resources.water.current - startWater) / dtSeconds;
