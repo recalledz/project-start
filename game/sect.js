@@ -1479,7 +1479,21 @@ export function tickSect(delta) {
     }
     const task = sectState.discipleTasks[d.id];
     if (!task || task === 'Idle' || task === 'Resting') {
-      if (!raidState.active) return;
+      if (!raidState.active) {
+        if (!d.starveTimer) d.starveTimer = 0;
+        if (d.water <= 0) {
+          d.starveTimer += dt;
+          while (d.starveTimer >= 1) {
+            applyStarvationHit(d);
+            d.starveTimer -= 1;
+          }
+        } else {
+          d.starveTimer = 0;
+        }
+        tickInjuries(d, dt, d.resilience, task);
+        d.currentHp = d.health;
+        return;
+      }
     }
     ensureDiscipleSkills(d.id);
     let group = TASK_GROUPS[task];
@@ -1546,6 +1560,7 @@ export function tickSect(delta) {
       d.starveTimer = 0;
     }
     tickInjuries(d, dt, d.resilience, task);
+    d.currentHp = d.health;
   });
 
 }
