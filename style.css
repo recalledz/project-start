@@ -547,6 +547,7 @@ body.darkenshift-mode .tabsContainer button.active {
     right: 0;
     bottom: 0;
     top: 0;
+    z-index: 4;
     pointer-events: none;
 }
 .raid-container .disciple-badge {
@@ -857,6 +858,43 @@ body.darkenshift-mode .tabsContainer button.active {
     position: relative;
     width: 100%;
     height: 100%;
+}
+
+#battle-container {
+    position: relative;
+    overflow: hidden;
+    --reeds-offset: 0;
+    --water-offset: 0;
+    --lily-offset: 0;
+}
+#battle-container::before,
+#battle-container::after,
+#battle-container .mid {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-repeat: repeat-x;
+    background-position: 0 0;
+    will-change: transform;
+    pointer-events: none;
+}
+#battle-container::before {
+    background-image: url('/assets/backgrounds/reeds-back.png');
+    z-index: 1;
+    transform: translateX(var(--reeds-offset));
+}
+#battle-container .mid {
+    background-image: url('/assets/backgrounds/water-mid.png');
+    z-index: 2;
+    transform: translateX(var(--water-offset));
+}
+#battle-container::after {
+    background-image: url('/assets/backgrounds/lily-pads.png');
+    z-index: 3;
+    transform: translateX(var(--lily-offset));
 }
 
 .work-content {
