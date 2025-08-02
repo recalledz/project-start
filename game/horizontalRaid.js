@@ -99,6 +99,7 @@ export function createHorizontalRaid({
       const sprite = document.createElement('div');
       sprite.className = 'raid-disciple';
       sprite.style.left = `${50 + i * 30}px`;
+      sprite.style.overflow = 'hidden';
       const overlay = document.createElement('div');
       overlay.className = 'raid-attack-shadow';
       sprite.appendChild(overlay);
