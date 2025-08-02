@@ -866,6 +866,10 @@ body.darkenshift-mode .tabsContainer button.active {
     --reeds-offset: 0;
     --water-offset: 0;
     --lily-offset: 0;
+    /* default background image URLs for parallax layers */
+    --reeds-bg: url('/img/reeds-back.png');
+    --water-bg: url('/img/water-mid.png');
+    --lily-bg: url('/img/lily-pads.png');
 }
 #battle-container::before,
 #battle-container::after,
@@ -882,17 +886,17 @@ body.darkenshift-mode .tabsContainer button.active {
     pointer-events: none;
 }
 #battle-container::before {
-    background-image: url('img/reeds-back.png');
+    background-image: var(--reeds-bg);
     z-index: 1;
     transform: translateX(var(--reeds-offset));
 }
 #battle-container .mid {
-    background-image: url('img/water-mid.png');
+    background-image: var(--water-bg);
     z-index: 2;
     transform: translateX(var(--water-offset));
 }
 #battle-container::after {
-    background-image: url('img/lily-pads.png');
+    background-image: var(--lily-bg);
     z-index: 3;
     transform: translateX(var(--lily-offset));
 }
