@@ -27,7 +27,7 @@ import {
   HUNT_CYCLE_SECONDS,
   EXPLORATION_CYCLE_SECONDS
 } from './constants.js';
-import { startRaid, tickRaid, raidState } from './raids.js';
+import { startRaid, raidState } from './raids.js';
 import { tickOrbSpells } from './orbSpells.js';
 import { applyStarvationHit, tickInjuries } from './injury.js';
 
@@ -1331,7 +1331,6 @@ export function tickSectSystem(delta) {
   tickActiveConstructs(dt);
   tickOrbSpells(dt);
   tickMetamorphosis(dt);
-  tickRaid(delta);
   ins.current = Math.min(ins.max, Math.max(0, ins.current));
   if (hasUI) {
     updateCooldownOverlays();
