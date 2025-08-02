@@ -2425,12 +2425,7 @@ if (typeof localStorage === "undefined") return;
     sectSystem,
     sectState,
     sectTabUnlocked,
-    systems: {
-      buildingUnlocked: systems.buildingUnlocked,
-      researchUnlocked: systems.researchUnlocked,
-      chantingHallUnlocked: systems.chantingHallUnlocked,
-      explorationUnlocked: systems.explorationUnlocked
-    }
+    systems: { ...systems }
   };
 
 try {

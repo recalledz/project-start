@@ -9,6 +9,7 @@ let sectModule;
 let raidModule;
 let sectSystem;
 let startRaid;
+let endRaid;
 
 function setupDom() {
   globalThis.document = {
@@ -36,7 +37,7 @@ describe('combat xp gain', () => {
     sectModule = await import(`../game/sect.js?test=${Date.now()}`);
     raidModule = await import(`../game/raids.js?test=${Date.now()}`);
     ({ sectSystem } = sectModule);
-    ({ startRaid } = raidModule);
+    ({ startRaid, endRaid } = raidModule);
   });
 
   after(() => {});
@@ -58,5 +59,6 @@ describe('combat xp gain', () => {
     addSkillXp(d, 'Combat', 1);
     const endXp = sectState.discipleSkills[d.id].Combat || 0;
     expect(endXp).to.be.greaterThan(0);
+    endRaid(true);
   });
 });
