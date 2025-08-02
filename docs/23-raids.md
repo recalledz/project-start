@@ -27,3 +27,8 @@ During raids you can click a disciple's badge to open their detailed overlay.
 Any disciple reduced to **0 HP** or incapacitated by destroyed body parts is
 immediately removed from the lineup and no longer fights in that raid.
 
+### Rewards
+
+Successfully clearing all waves awards the sect **1 Undead Nectar** and each
+participating disciple gains **30 Combat XP**.
+

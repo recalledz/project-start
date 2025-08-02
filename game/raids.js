@@ -1,9 +1,14 @@
 import { sectSystem } from './sect.js';
 import { sectState } from './state.js';
-import { ensureDiscipleSkills, getTaskSkillProgress } from '../utils/skills.js';
+import {
+  ensureDiscipleSkills,
+  getTaskSkillProgress,
+  addSkillXp
+} from '../utils/skills.js';
 import { showRaidAlert } from './alerts.js';
 import { showRaidSummaryOverlay } from '../ui/raidSummaryOverlay.js';
 import { openRaidBattleOverlay } from '../ui/raidBattleOverlay.js';
+import { RAID_NECTAR_REWARD, RAID_COMBAT_XP_REWARD } from './constants.js';
 
 export const raidState = {
   active: false,
@@ -30,6 +35,19 @@ function buildDefaultConfig() {
 function finalize(victory) {
   const xpStart = raidState.xpStart;
   raidState.xpStart = {};
+
+  if (victory) {
+    Object.keys(xpStart).forEach(id => {
+      const disc = sectSystem.disciples.find(d => d.id === Number(id));
+      if (disc) addSkillXp(disc, 'Combat', RAID_COMBAT_XP_REWARD);
+    });
+    sectState.undeadNectar += RAID_NECTAR_REWARD;
+    if (sectSystem.resources.undeadNectar) {
+      const res = sectSystem.resources.undeadNectar;
+      res.current = Math.min(res.max, res.current + RAID_NECTAR_REWARD);
+    }
+  }
+
   Object.keys(raidState.prevTasks).forEach(id => {
     sectState.discipleTasks[id] = raidState.prevTasks[id] || 'Idle';
   });
@@ -52,11 +70,14 @@ function finalize(victory) {
     };
   });
 
+  const rewards = victory ? { undeadNectar: RAID_NECTAR_REWARD } : {};
+
   showRaidSummaryOverlay({
     victory,
     damageDealt: raidState.damageDealt,
     damageReceived: raidState.damageReceived,
-    fighters
+    fighters,
+    rewards
   });
 }
 
