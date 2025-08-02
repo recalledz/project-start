@@ -61,6 +61,14 @@ export const TASK_ICONS = {
   Sleep: '💤'
 };
 
+export const SCAR_ICONS = {
+  default: '✖'
+};
+
+export const MARK_ICONS = {
+  shellwarden: '🐚'
+};
+
 export const TASK_GROUPS = {
   'Gather Fruit': 'Gathering',
   'Gather Softwood': 'Logging',
