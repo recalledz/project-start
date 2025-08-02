@@ -1029,6 +1029,15 @@ function buildDiscipleCombatStatsView(d) {
     `Defense ${defense}`;
   body.appendChild(stats);
 
+  // store references for later updates
+  d.statsElement = body;
+  d.combatStatElems = {
+    level: levelRow,
+    xpFill: fill,
+    xpLabel: label,
+    stats
+  };
+
   return body;
 }
 

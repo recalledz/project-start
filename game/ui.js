@@ -66,8 +66,20 @@ export function updateRaidLifeBar(enemy) {
 }
 
 export function updateDiscipleStatsDisplay(d) {
-  if (!d.statsElement) return;
-  d.statsElement.innerHTML = '';
+  const elems = d.combatStatElems;
+  if (!elems) return;
+
+  elems.level.textContent = `Level ${d.combatLevel}`;
+  const pct = Math.min(1, d.combatXp / d.xpForNextLevel());
+  elems.xpFill.style.width = `${Math.floor(pct * 100)}%`;
+  elems.xpLabel.textContent = `${Math.floor(d.combatXp)}/${d.xpForNextLevel()}`;
+
+  const atkPerSec = (1000 / d.attackSpeed).toFixed(2);
+  const defense = Math.round(d.defense ?? 0);
+  elems.stats.innerHTML =
+    `Damage ${Math.round(d.damage)}<br>` +
+    `Attack/s ${atkPerSec}<br>` +
+    `Defense ${defense}`;
 }
 
 export function renderCombatDisciples() {}
