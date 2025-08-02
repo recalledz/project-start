@@ -125,7 +125,6 @@ import { raidState, tickRaid } from './game/raids.js';
 // developer debug tools
 import { init as initDebug } from "./game/debug.js";
 import { attachOrbGlow, enableOrbGlow, disableOrbGlow, updateOrbGlow, flashOrbGlow } from './game/orbGlow.js';
-import { showOrbAttackBar, blobs } from './game/blobRaids.js';
 import { BASE_MOVE_SPEED } from './game/constants.js';
 import { initOrbMask, showOrbMask, hideOrbMask, updateOrbMaskPosition } from './game/orbMask.js';
 // Shared game state and configuration
@@ -842,7 +841,6 @@ function updateSectDisplay() {
     });
     initQiRibbons();
     window.dispatchEvent(new CustomEvent('orbs-changed'));
-    if (raidState.active) showOrbAttackBar();
   }
 
   if (sectDisciplesContainer) {
@@ -945,6 +943,7 @@ function updateDiscipleGather(id, el) {
 function startDiscipleMovement() {
   if (discipleMoveInterval) return;
   discipleMoveInterval = setInterval(() => {
+    if (raidState.active) return;
     sectSystem.disciples.forEach(d => {
       const el = sectDiscipleEls[d.id];
       if (!el) return;
@@ -988,29 +987,9 @@ function startDiscipleMovement() {
           taskName = task || 'Idle';
           if (task === 'Gather Fruit' || task === 'Gather Softwood') {
             updateDiscipleGather(d.id, el);
-          } else if (raidState.active && blobs.length > 0) {
-            const map = document.getElementById('colonyMap');
-            if (map) {
-              const mapRect = map.getBoundingClientRect();
-              const rect = el.getBoundingClientRect();
-              const px = rect.left + rect.width / 2 - mapRect.left;
-              const py = rect.top + rect.height / 2 - mapRect.top;
-              let target = null;
-              let minDist = Infinity;
-              blobs.forEach(b => {
-                const dist = Math.hypot(b.x - px, b.y - py);
-                if (dist < minDist) {
-                  minDist = dist;
-                  target = b;
-                }
-              });
-              if (target) {
-                moveElement(el, target.x, target.y, d.moveSpeed);
-              } else {
-                moveDisciple(d, el);
-              }
-            }
-          } else moveDisciple(d, el);
+          } else {
+            moveDisciple(d, el);
+          }
         }
       }
       updateDiscipleVisual(d, el, taskName);

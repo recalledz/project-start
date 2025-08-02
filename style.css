@@ -3493,30 +3493,6 @@ body.darkenshift-mode .tabsContainer button.active {
 .sect-orb.orb-burst {
     animation: orb-pulse 0.3s ease;
 }
-.orb-attack-bar {
-    position: absolute;
-    bottom: 100%;
-    left: 0;
-    width: 100%;
-    height: 4px;
-    background: #333;
-    border: 1px solid #7fd9ff;
-    border-radius: 4px;
-    overflow: hidden;
-    margin-bottom: 2px;
-    pointer-events: none;
-    z-index: 1;
-}
-
-.orb-attack-fill {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-    width: 0%;
-    background: #7fd9ff;
-    transition: width 0.3s ease;
-}
 .colony-map.night .sect-orb.water {
     box-shadow: 0 0 30px rgba(80,180,255,0.9), 0 0 80px rgba(80,180,255,0.7);
     filter: brightness(1.2) saturate(1.2);
@@ -4318,44 +4294,6 @@ body.darkenshift-mode .tabsContainer button.active {
 }
 
 
-.slow-blob{position:absolute;background:purple;border-radius:50%;width:16px;height:16px;}
-.blob-life-bar{
-  position:absolute;
-  left:-4px;
-  right:-4px;
-  top:-6px;
-  height:4px;
-  background:#333;
-  border:1px solid #7fd9ff;
-  border-radius:4px;
-  overflow:hidden;
-  pointer-events:none;
-  z-index:1;
-}
-.blob-life-fill{
-  height:100%;
-  width:100%;
-  background:#7fd9ff;
-  transition:width 0.3s ease;
-}
-.slow-blob .blob-eye{position:absolute;width:4px;height:4px;background:red;border-radius:50%;box-shadow:0 0 4px red;top:2px;}
-.slow-blob .blob-eye.left{left:4px;}
-.slow-blob .blob-eye.right{right:4px;}
-
-@keyframes blob-burst {
-  0% { transform: scale(1); opacity: 1; }
-  100% { transform: scale(2); opacity: 0; }
-}
-.blob-burst {
-  animation: blob-burst 0.4s ease-out forwards;
-}
-
-
-.map-splatter {
-  position: absolute;
-  pointer-events: none;
-  z-index: 0;
-}
 .injury-bar {
   width: 100%;
   height: 6px;
@@ -4383,4 +4321,8 @@ body.darkenshift-mode .tabsContainer button.active {
 
 .injury-bar-fill.destroyed {
   background: #111;
+}
+
+body.raid-active .player-sect-panel {
+  display: none;
 }
