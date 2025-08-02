@@ -1,6 +1,4 @@
-import { renderDealerLifeBar, renderDealerLifeBarFill, renderDiscipleCard } from './rendering.js';
-import { activeDisciples } from './disciples.js';
-import { formatNumber } from '../utils/numberFormat.js';
+// Rendering helpers are now minimal; dealer life UI removed.
 let mainTab;
 let starChartTab;
 let playerStatsTab;
@@ -59,16 +57,7 @@ export function removeDealerLifeBar() {
   if (dealerLifeDisplay) dealerLifeDisplay.textContent = '';
 }
 
-export function updateDealerLifeDisplay(currentEnemy) {
-  if (!currentEnemy) {
-    removeDealerLifeBar();
-    return;
-  }
-  if (!dealerLifeDisplay) return;
-  dealerLifeDisplay.textContent = `Life: ${formatNumber(currentEnemy.currentHp)}/${formatNumber(currentEnemy.maxHp)}`;
-  renderDealerLifeBar(dealerLifeDisplay, currentEnemy);
-  renderDealerLifeBarFill(currentEnemy);
-}
+export function updateDealerLifeDisplay() {}
 
 export function updateRaidLifeBar(enemy) {
   if (!enemy || !enemy.raidLifeFill) return;
@@ -81,18 +70,7 @@ export function updateDiscipleStatsDisplay(d) {
   d.statsElement.innerHTML = '';
 }
 
-export function renderCombatDisciples() {
-  if (!handContainer) return;
-  handContainer.innerHTML = '';
-  activeDisciples.forEach(d => {
-    renderDiscipleCard(d, handContainer);
-    const overlay = document.createElement('div');
-    overlay.className = 'disciple-attack-shadow';
-    d.cardElement.appendChild(overlay);
-    d.attackOverlay = overlay;
-    updateDiscipleStatsDisplay(d);
-  });
-}
+export function renderCombatDisciples() {}
 
 export function makeBar(value, max, color) {
   const bar = document.createElement('div');

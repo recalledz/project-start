@@ -6,7 +6,8 @@ The project organizes game logic under the `game/` directory.
 - **game/disciple.js** – defines the `Disciple` class representing a single frog disciple.
 - **game/disciples.js** – manages which disciples are active in combat.
 - **game/ui.js** – renders combat UI elements such as bars and disciple cards.
-- **game/combat.js** – handles exploration battles and disciple hit animations.
+- **game/rendering.js** – raid rendering helpers such as `showRaidDamageFloat`.
+- **game/combat.js** – provides generic damage helpers used by raid modules.
 - **game/raids.js** and **game/blobRaids.js** – implement raid encounters and the
   defensive combat loop.
 - **game/canBus.js** – lightweight event bus used for in-game modules to
