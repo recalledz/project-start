@@ -882,17 +882,17 @@ body.darkenshift-mode .tabsContainer button.active {
     pointer-events: none;
 }
 #battle-container::before {
-    background-image: url('/assets/backgrounds/reeds-back.png');
+    background-image: url('img/reeds-back.png');
     z-index: 1;
     transform: translateX(var(--reeds-offset));
 }
 #battle-container .mid {
-    background-image: url('/assets/backgrounds/water-mid.png');
+    background-image: url('img/water-mid.png');
     z-index: 2;
     transform: translateX(var(--water-offset));
 }
 #battle-container::after {
-    background-image: url('/assets/backgrounds/lily-pads.png');
+    background-image: url('img/lily-pads.png');
     z-index: 3;
     transform: translateX(var(--lily-offset));
 }
