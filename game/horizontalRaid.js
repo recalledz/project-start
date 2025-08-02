@@ -143,6 +143,25 @@ export function createHorizontalRaid({
     if (idx >= 0) state.disciples.splice(idx, 1);
   }
 
+  function waterBurst(damage) {
+    state.raiders.slice().forEach(r => {
+      const before = r.hp;
+      r.hp = Math.max(0, r.hp - damage);
+      const dealt = before - r.hp;
+      state.waveHp = Math.max(0, state.waveHp - dealt);
+      showRaidDamageFloat(r.el, dealt, true);
+      if (r.hp === 0) {
+        r.el.remove();
+        const idx = state.raiders.indexOf(r);
+        if (idx >= 0) state.raiders.splice(idx, 1);
+        state.disciples.forEach(s => {
+          if (s.target === r) s.target = null;
+        });
+      }
+    });
+    updateWaveLife();
+  }
+
   function beginWave(index) {
     state.waveIndex = index;
     const wave = state.waves[index];
@@ -341,6 +360,7 @@ export function createHorizontalRaid({
       beginWave(0);
     },
     tick,
-    end
+    end,
+    castWaterBurst: waterBurst
   };
 }

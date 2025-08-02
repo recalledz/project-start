@@ -1,5 +1,8 @@
 import { createOverlay } from './overlay.js';
 import { createHorizontalRaid } from '../game/horizontalRaid.js';
+import { castWordOfHaste, toggleReverberation, castWaterBurst } from '../game/orbSpells.js';
+import { sectState } from '../game/state.js';
+import { sectSystem } from '../game/sect.js';
 
 export function openRaidBattleOverlay({ config, onSuccess = () => {}, onFailure = () => {}, onDamage = () => {} } = {}) {
   const overlay = createOverlay({ className: 'raid-overlay', boxClass: 'parchment-box', closable: false });
@@ -11,6 +14,9 @@ export function openRaidBattleOverlay({ config, onSuccess = () => {}, onFailure 
   mid.className = 'mid';
   area.appendChild(mid);
   overlay.append(area);
+  const spells = document.createElement('div');
+  spells.className = 'raid-spell-bar';
+  overlay.append(spells);
 
   const raid = createHorizontalRaid({
     ...config,
@@ -25,6 +31,44 @@ export function openRaidBattleOverlay({ config, onSuccess = () => {}, onFailure 
     },
     onDamage
   });
+
+  function renderSpells() {
+    spells.innerHTML = '';
+    if (sectState.completedResearch.includes('wordOfHaste')) {
+      const btn = document.createElement('button');
+      btn.textContent = 'Word of Haste';
+      btn.disabled = sectSystem.wordOfHasteCd > 0 || sectSystem.orbs.water.current < 15;
+      btn.addEventListener('click', () => {
+        castWordOfHaste();
+        renderSpells();
+      });
+      spells.appendChild(btn);
+    }
+    if (sectState.completedResearch.includes('waterBurst')) {
+      const btn = document.createElement('button');
+      btn.textContent = 'Water Burst';
+      btn.disabled = sectSystem.orbs.water.current < 30;
+      btn.addEventListener('click', () => {
+        castWaterBurst();
+        renderSpells();
+      });
+      spells.appendChild(btn);
+    }
+    if (sectState.completedResearch.includes('orbReverb')) {
+      const btn = document.createElement('button');
+      btn.textContent = sectSystem.orbReverbActive ? 'Stop Reverberation' : 'Start Reverberation';
+      btn.disabled = !sectSystem.orbReverbActive && sectSystem.orbs.water.current < 1;
+      btn.addEventListener('click', () => {
+        toggleReverberation();
+        renderSpells();
+      });
+      spells.appendChild(btn);
+    }
+  }
+
+  renderSpells();
+  const interval = setInterval(renderSpells, 1000);
+  overlay.onClose(() => clearInterval(interval));
 
   raid.start();
   return { overlay, raid };

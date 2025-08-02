@@ -24,5 +24,6 @@
   the remaining time.
 - Orb Revival research grants access to an Orb Management panel for the Water Orb.
 - Word of Haste orb spell speeds up work tasks for one minute at the cost of 15 Water.
+- Water Burst raid spell unleashes splash damage against raiders for 30 Water.
 - Orb Spell Strength buildings raise the Water Orb's attack damage by 20% per level.
 - Orb Reverberation grants a toggled effect that increases disciple attack speed by 30% while draining 1 Water each second.

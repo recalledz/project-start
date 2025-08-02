@@ -8,7 +8,8 @@ import { sectSystem, SECT_SCHEDULE, getCurrentSchedule, renderConstructCards, ge
 import { systems, sectState, worldProgress } from '../game/state.js';
 import { createSectDiscipleCard, renderExplorationTab, startExploration, startWorldCombat, discipleGatherPhase } from '../script.js';
 import { BUILDINGS, startBuilding } from '../game/buildings.js';
-import { castWordOfHaste, toggleReverberation } from '../game/orbSpells.js';
+import { castWordOfHaste, toggleReverberation, castWaterBurst } from '../game/orbSpells.js';
+import { raidState } from '../game/raids.js';
 import { TRANSMUTES, performTransmute, canTransmute, getTransmutePower } from '../game/transmutation.js';
 import { TASK_GROUPS } from '../game/constants.js';
 import { getTaskSkillProgress } from '../utils/skills.js';
@@ -339,6 +340,17 @@ export function openOrbOverlay() {
       li.appendChild(document.createTextNode(' - Boost work speed for 1m'));
       list.appendChild(li);
     }
+    if (sectState.completedResearch.includes('waterBurst')) {
+      const li = document.createElement('li');
+      li.className = 'orb-spell dynamic-spell';
+      const btn = document.createElement('button');
+      btn.textContent = 'Cast Water Burst';
+      btn.disabled = sectSystem.orbs.water.current < 30 || !raidState.active;
+      btn.addEventListener('click', () => { castWaterBurst(); render(); });
+      li.appendChild(btn);
+      li.appendChild(document.createTextNode(' - Damages raiders (30 Water)'));
+      list.appendChild(li);
+    }
     if (sectState.completedResearch.includes('orbReverb')) {
       const li = document.createElement('li');
       li.className = 'orb-spell dynamic-spell';
@@ -589,6 +601,13 @@ export function openResearchOverlay() {
       label: 'Word of Haste',
       cost: 2,
       desc: 'Orb spell granting 1m work speed boost (15 Water)',
+      unlock() {}
+    },
+    {
+      key: 'waterBurst',
+      label: 'Water Burst',
+      cost: 2,
+      desc: 'Raid spell dealing splash damage (30 Water)',
       unlock() {}
     },
     {

@@ -1,5 +1,6 @@
 import { sectSystem } from './sect.js';
 import { sectState } from './state.js';
+import { raidState } from './raids.js';
 import addLog from './log.js';
 
 export function orbDamageMultiplier() {
@@ -25,6 +26,16 @@ export function toggleReverberation() {
   sectSystem.orbReverbActive = true;
   sectSystem.attackSpeedMult = 1.3;
   addLog('Orb Reverberation active', 'info');
+}
+
+export function castWaterBurst() {
+  if (!raidState.active || !raidState.raid) return;
+  const cost = 30;
+  if (sectSystem.orbs.water.current < cost) return;
+  sectSystem.orbs.water.current -= cost;
+  const damage = 20 * orbDamageMultiplier();
+  raidState.raid.castWaterBurst(damage);
+  addLog('Water Burst unleashed!', 'info');
 }
 
 export function tickOrbSpells(dt) {
