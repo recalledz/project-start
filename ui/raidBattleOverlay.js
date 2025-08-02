@@ -6,6 +6,10 @@ export function openRaidBattleOverlay({ config, onSuccess = () => {}, onFailure 
   overlay.box.classList.add('parchment-box');
   const area = document.createElement('div');
   area.className = 'raid-battle-area';
+  area.id = 'battle-container';
+  const mid = document.createElement('div');
+  mid.className = 'mid';
+  area.appendChild(mid);
   overlay.append(area);
 
   const raid = createHorizontalRaid({
