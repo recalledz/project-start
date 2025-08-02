@@ -37,6 +37,7 @@ export function initializeDisciple(d) {
   if (d.currentHp === undefined) d.currentHp = d.maxHp;
   if (d.foundationXp === undefined) d.foundationXp = 0;
   if (d.lastTab === undefined) d.lastTab = 'general';
+  if (d.mark === undefined) d.mark = null;
   ensureInjuryState(d);
   if (!sectState.discipleMetamorphosis[d.id]) {
     sectState.discipleMetamorphosis[d.id] = {

@@ -7,6 +7,7 @@ export function initializeSect() {
   const disciples = [1, 2, 3].map(id => {
     const d = new Disciple({ id });
     initializeDisciple(d);
+    if (id === 1) d.mark = 'shellwarden';
     d.affinities = generateSkillAffinities();
     initializeStartingSkills(d);
     return d;

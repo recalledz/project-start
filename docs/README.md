@@ -70,3 +70,5 @@ Table of Contents
 23. [Raids](23-raids.md)
 24. [Injury System & Health Tab](24-injury-system.md)
 
+
+25. [Disciple Visual Customization](25-disciple-visual-customization.md)

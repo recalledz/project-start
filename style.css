@@ -3536,8 +3536,19 @@ body.darkenshift-mode .tabsContainer button.active {
     right: -7.2px;
     font-size: 0.55rem;
 }
+.sect-disciple::before {
+    content: attr(data-scar);
+    position: absolute;
+    top: -7.2px;
+    left: -7.2px;
+    font-size: 0.55rem;
+}
 .sect-disciple.incapacitated {
     filter: grayscale(1) drop-shadow(0 0 2px rgba(255,0,0,0.8));
+}
+
+.sect-disciple[data-mark="shellwarden"] {
+    box-shadow: 0 0 3px 2px rgba(255,215,0,0.6);
 }
 
 /* metamorphosis stage glow effects */
