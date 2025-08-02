@@ -6,6 +6,7 @@ These notes outline the planned interface for visualizing a disciple's frog-like
 
 - **Segment-based frog icon** – an SVG divided into segments representing Egg, Tail, Limbs, Body and Crown. Each segment lights up as its threshold is met.
 - **Circular XP progress ring** – surrounds the frog icon showing % toward breakthrough.
+- **Inner mastery ring** – sits between the progress ring and frog icon, filling as disciples gain metamorph, combat and other experience.
 - **Ambient aura/pond layer** – subtle ripples or glow in the background.
 - **Floating stat overlays** – displays XP, assigned disciple and cultivation method.
 
@@ -48,3 +49,4 @@ Integrate a Taino‑inspired frog glyph around the icon for ambient feedback.
 - Progress rings feature a lilac to teal gradient with a subtle glow.
 - Progress numbers appear on semi-transparent parchment panels.
 - Training rooms unlock after obtaining Undead Nectar, letting disciples be assigned from this panel.
+- When mastery levels are ready, a Level Up button appears beneath the rings to choose from three placeholder upgrades.

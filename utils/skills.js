@@ -1,5 +1,6 @@
 import { sectState } from '../game/state.js';
 import { runAnimation } from './animation.js';
+import { addMasteryXp } from '../game/metamorphMastery.js';
 
 export function ensureDiscipleSkills(id) {
   if (!sectState.discipleSkills[id]) {
@@ -51,6 +52,8 @@ export function addSkillXp(d, group, amount) {
   const newXp = prevXp + amount;
   sectState.discipleSkills[d.id][group] = newXp;
   const newLevel = getTaskSkillProgress(newXp).level;
+  if (group === 'Combat') addMasteryXp(d.id, amount);
+  else addMasteryXp(d.id, amount / 4);
   if (newLevel > oldLevel) {
     if (newLevel > d.globalLevel) {
       d.globalLevel = newLevel;
