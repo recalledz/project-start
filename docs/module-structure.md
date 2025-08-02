@@ -8,7 +8,7 @@ The project organizes game logic under the `game/` directory.
 - **game/ui.js** – renders combat UI elements such as bars and disciple cards.
 - **game/rendering.js** – raid rendering helpers such as `showRaidDamageFloat`.
 - **game/combat.js** – provides generic damage helpers used by raid modules.
-- **game/raids.js** and **game/blobRaids.js** – implement raid encounters and the
+- **game/raids.js** and **game/horizontalRaid.js** – implement raid encounters and the
   defensive combat loop.
 - **game/canBus.js** – lightweight event bus used for in-game modules to
   communicate without direct imports.

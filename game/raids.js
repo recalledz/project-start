@@ -55,6 +55,9 @@ function finalize(victory) {
   raidState.active = false;
   raidState.raid = null;
   raidState.overlay = null;
+  if (typeof document !== 'undefined' && document.body?.classList) {
+    document.body.classList.remove('raid-active');
+  }
 
   const fighters = Object.keys(xpStart).map(id => {
     const start = xpStart[id];
@@ -119,6 +122,9 @@ export function startRaid(config = buildDefaultConfig()) {
   raidState.raid = raid;
   raidState.overlay = overlay;
   raidState.active = true;
+  if (typeof document !== 'undefined' && document.body?.classList) {
+    document.body.classList.add('raid-active');
+  }
   showRaidAlert('Raiders incoming!');
   document.dispatchEvent(
     new CustomEvent('raid-start', { detail: { enemy: null, useCard: false } })
