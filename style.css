@@ -3116,7 +3116,7 @@ body.darkenshift-mode .tabsContainer button.active {
 .sect-resource-display {
     position: absolute;
     left: 4px;
-    top: 40px;
+    top: 90px;
     width: fit-content;
     display: flex;
     flex-direction: column;
@@ -3136,7 +3136,7 @@ body.darkenshift-mode .tabsContainer button.active {
 .sect-nav-panel {
     position: absolute;
     right: 4px;
-    top: 40px;
+    top: 90px;
     display: flex;
     flex-direction: column;
     gap: 6px;
