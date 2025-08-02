@@ -21,7 +21,7 @@ let statsPanel;
 let statsToggle;
 let selectedDiscipleId = null;
 let breakthroughHandler;
-const RING_RADIUS = 80;
+const RING_RADIUS = 70;
 const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
 const STAGE_NAMES = ['Egg', 'Tadpole', 'Young Coquí', 'Elder Frog', 'Divine Coquí'];
 
@@ -34,14 +34,6 @@ export function initMetamorphosis() {
   statsPanel = document.querySelector('.metamorphosis-stats-panel');
   statsToggle = document.getElementById('metaStatsToggle');
   if (!container) return;
-const bodyPath = `M200 150
-               m -25 0
-               a25 25 0 1 0 50 0
-               a25 25 0 1 0 -50 0
-               m25 20
-               c60 20 90 60 50 110
-               c-30 -40 -70 -70 -100 -80
-               Z`;
   container.innerHTML = `
     <div class="metamorphosis-room">
           <div id="metamorphosisStageLabel" class="metamorphosis-stage"></div>
@@ -59,11 +51,11 @@ const bodyPath = `M200 150
         <div class="metamorphosis-figure">
           <svg id="metamorphosisDiagram" viewBox="0 0 400 400" width="100%" height="100%">
             <defs>
-              <clipPath id="bodyShapeClip"><path d="${bodyPath}" /></clipPath>
+              <clipPath id="bodyShapeClip"><circle cx="200" cy="180" r="60" /></clipPath>
             </defs>
-            <path d="${bodyPath}" fill="rgba(0,0,0,0.3)" stroke="#888" stroke-width="2" />
+            <circle cx="200" cy="180" r="60" fill="rgba(0,0,0,0.3)" stroke="#888" stroke-width="2" />
             <circle id="metamorphosisHalo" cx="200" cy="180" r="70" fill="none" stroke="gold" stroke-width="4" opacity="0" />
-            <rect id="bodyFill" x="170" y="240" width="60" height="0" fill="rgba(255,255,255,0.4)" clip-path="url(#bodyShapeClip)" />
+            <rect id="bodyFill" x="140" y="240" width="120" height="0" fill="rgba(255,255,255,0.4)" clip-path="url(#bodyShapeClip)" />
           </svg>
         </div>
       </div>
