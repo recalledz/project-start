@@ -2479,6 +2479,10 @@ body.darkenshift-mode .tabsContainer button.active {
     filter: drop-shadow(0 0 8px rgba(188,164,255,0.7));
     stroke: url(#metaRingGradient);
 }
+#metamorphMasteryRing {
+    filter: drop-shadow(0 0 4px rgba(255,215,0,0.6));
+    stroke: url(#metaMasteryGradient);
+}
 .metamorphosis-figure {
     width: 100%;
     height: 100%;
@@ -2489,6 +2493,13 @@ body.darkenshift-mode .tabsContainer button.active {
 .metamorphosis-progress:hover .progress-ring-fill,
 .metamorphosis-progress.near-complete .progress-ring-fill {
     filter: drop-shadow(0 0 6px gold) drop-shadow(0 0 4px cyan);
+}
+.levelup-btn {
+    padding: 6px 12px;
+    border: 2px solid var(--core-accent);
+    background: rgba(0,0,0,0.2);
+    border-radius: 4px;
+    margin-top: 6px;
 }
 .breakthrough-btn {
     padding: 6px 12px;

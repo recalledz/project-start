@@ -4,6 +4,7 @@ import { createDiscipleBadge } from './badges.js';
 import { METAMORPHOSIS_STAGE_REQ, TRAINING_NECTAR_RATE } from './constants.js';
 import { showPathOverlay } from './pathOverlay.js';
 import { applyStageBonuses } from './metamorphosisBonuses.js';
+import { ensureMeta, addMasteryXp, getMasteryProgress } from './metamorphMastery.js';
 
 export const metamorphosisState = {
   requirement: METAMORPHOSIS_STAGE_REQ
@@ -13,16 +14,21 @@ let container;
 let progressFill;
 let progressText;
 let ringFill;
+let masteryRing;
 let ringWrapper;
 let listContainer;
 let breakthroughBtn;
+let masteryBtn;
 let statsContainer;
 let statsPanel;
 let statsToggle;
 let selectedDiscipleId = null;
 let breakthroughHandler;
+let masteryBtnHandler;
 const RING_RADIUS = 70;
 const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
+const MASTERY_RING_RADIUS = RING_RADIUS - 5;
+const MASTERY_RING_CIRCUMFERENCE = 2 * Math.PI * MASTERY_RING_RADIUS;
 const STAGE_NAMES = ['Egg', 'Tadpole', 'Young Coquí', 'Elder Frog', 'Divine Coquí'];
 
 export function initMetamorphosis() {
@@ -44,9 +50,15 @@ export function initMetamorphosis() {
               <stop offset="0%" stop-color="#c8a2ff" />
               <stop offset="100%" stop-color="#50e3c2" />
             </linearGradient>
+            <linearGradient id="metaMasteryGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#ffe29f" />
+              <stop offset="100%" stop-color="#ff6e7f" />
+            </linearGradient>
           </defs>
           <circle class="progress-ring-bg" cx="${RING_RADIUS + 10}" cy="${RING_RADIUS + 10}" r="${RING_RADIUS}" />
+          <circle class="progress-ring-bg" cx="${RING_RADIUS + 10}" cy="${RING_RADIUS + 10}" r="${MASTERY_RING_RADIUS}" />
           <circle id="metamorphosisRing" class="progress-ring-fill" cx="${RING_RADIUS + 10}" cy="${RING_RADIUS + 10}" r="${RING_RADIUS}" />
+          <circle id="metamorphMasteryRing" class="progress-ring-fill" cx="${RING_RADIUS + 10}" cy="${RING_RADIUS + 10}" r="${MASTERY_RING_RADIUS}" />
         </svg>
         <div class="metamorphosis-figure">
           <svg id="metamorphosisDiagram" viewBox="0 0 400 400" width="100%" height="100%">
@@ -63,6 +75,7 @@ export function initMetamorphosis() {
         <div id="metamorphosisProgressText" class="progress-text"></div>
         <div class="progress-bar"><div id="metamorphosisBarFill" class="progress-fill"></div></div>
       </div>
+      <button id="masteryLevelUpBtn" class="levelup-btn" style="display:none;">Level Up</button>
       <button id="breakthroughBtn" class="breakthrough-btn" style="display:none;">Breakthrough</button>
       <div class="assigned-disciple">Assigned to <span id="assignedDisciple">disciple 1</span></div>
     </div>
@@ -70,13 +83,21 @@ export function initMetamorphosis() {
   progressFill = container.querySelector('#metamorphosisBarFill');
   progressText = container.querySelector('#metamorphosisProgressText');
   ringFill = container.querySelector('#metamorphosisRing');
+  masteryRing = container.querySelector('#metamorphMasteryRing');
   ringWrapper = container.querySelector('.metamorphosis-progress');
   breakthroughBtn = container.querySelector('#breakthroughBtn');
+  masteryBtn = container.querySelector('#masteryLevelUpBtn');
   if (breakthroughBtn) {
     breakthroughHandler = () => {
       if (selectedDiscipleId) breakthrough(selectedDiscipleId);
     };
     breakthroughBtn.addEventListener('click', breakthroughHandler);
+  }
+  if (masteryBtn) {
+    masteryBtnHandler = () => {
+      if (selectedDiscipleId) handleMasteryLevelUp(selectedDiscipleId);
+    };
+    masteryBtn.addEventListener('click', masteryBtnHandler);
   }
   selectedDiscipleId = sectSystem.disciples[0]?.id || null;
   window.addEventListener('orbs-changed', renderMetamorphosis);
@@ -90,12 +111,6 @@ export function initMetamorphosis() {
       window.showTooltip('Toggle stats panel', e.pageX + 10, e.pageY + 10);
     });
     statsToggle.addEventListener('mouseleave', window.hideTooltip);
-  }
-}
-
-function ensureMeta(id) {
-  if (!sectState.discipleMetamorphosis[id]) {
-        sectState.discipleMetamorphosis[id] = { xp: 0, stage: 0 };
   }
 }
 
@@ -190,6 +205,12 @@ function renderMetamorphosis() {
     ringFill.style.strokeDasharray = RING_CIRCUMFERENCE;
     ringFill.style.strokeDashoffset = RING_CIRCUMFERENCE * (1 - coreFill);
   }
+  const masteryProg = getMasteryProgress(meta.masteryXp || 0);
+  if (masteryRing) {
+    masteryRing.style.strokeDasharray = MASTERY_RING_CIRCUMFERENCE;
+    masteryRing.style.strokeDashoffset =
+      MASTERY_RING_CIRCUMFERENCE * (1 - masteryProg.progress);
+  }
   if (ringWrapper) {
     if (coreFill >= 0.9) ringWrapper.classList.add('near-complete');
     else ringWrapper.classList.remove('near-complete');
@@ -206,6 +227,9 @@ function renderMetamorphosis() {
   if (breakthroughBtn) {
     breakthroughBtn.style.display = meta.xp >= metamorphosisState.requirement ? 'block' : 'none';
   }
+  if (masteryBtn) {
+    masteryBtn.style.display = meta.masteryPending ? 'block' : 'none';
+  }
 
   const label = container.querySelector('#assignedDisciple');
   if (label && d) label.textContent = d.name || `Disciple ${d.id}`;
@@ -221,16 +245,22 @@ export function destroyMetamorphosis() {
   if (breakthroughBtn && breakthroughHandler) {
     breakthroughBtn.removeEventListener('click', breakthroughHandler);
   }
+  if (masteryBtn && masteryBtnHandler) {
+    masteryBtn.removeEventListener('click', masteryBtnHandler);
+  }
   window.removeEventListener('orbs-changed', renderMetamorphosis);
   document.removeEventListener('disciple-gained', refreshMetamorphosis);
   breakthroughHandler = null;
+  masteryBtnHandler = null;
   container = null;
   progressFill = null;
   progressText = null;
   ringFill = null;
+  masteryRing = null;
   ringWrapper = null;
   listContainer = null;
   breakthroughBtn = null;
+  masteryBtn = null;
   statsContainer = null;
   selectedDiscipleId = null;
 }
@@ -259,15 +289,28 @@ export function tickMetamorphosis(dt) {
           getStabilityFactor(d) *
           getCultivationSpeed(d) *
           getSeasonMultiplier();
+        const before = meta.xp;
         meta.xp = Math.min(
           metamorphosisState.requirement,
           meta.xp + rate * dt
         );
+        const gained = meta.xp - before;
+        if (gained > 0) addMasteryXp(d.id, gained);
       }
     }
   });
   renderMetamorphosis();
   updateStats();
+}
+
+function handleMasteryLevelUp(id) {
+  window.prompt(
+    'Choose upgrade:\n1) Placeholder Upgrade 1\n2) Placeholder Upgrade 2\n3) Placeholder Upgrade 3',
+    '1'
+  );
+  const meta = sectState.discipleMetamorphosis[id];
+  if (meta) meta.masteryPending = false;
+  renderMetamorphosis();
 }
 
 function getMethodMultiplier() { return 1; }
