@@ -6,8 +6,23 @@ import { runAnimation } from '../utils/animation.js';
 // Delay between waves in milliseconds
 const WAVE_DELAY = 5000;
 
-// Parallax speeds in pixels per second
-const PARALLAX_SPEEDS = { reeds: 10, water: 30, lily: 60 };
+// Parallax layer configuration
+const PARALLAX_LAYERS = {
+  reeds: { speed: 10, cssVar: '--reeds-offset', img: 'img/reeds-back.png', width: 0 },
+  water: { speed: 30, cssVar: '--water-offset', img: 'img/water-mid.png', width: 0 },
+  lily: { speed: 60, cssVar: '--lily-offset', img: 'img/lily-pads.png', width: 0 }
+};
+
+// populate image widths without hard-coding values
+if (typeof Image !== 'undefined') {
+  Object.values(PARALLAX_LAYERS).forEach(layer => {
+    const img = new Image();
+    img.src = layer.img;
+    img.onload = () => {
+      layer.width = img.width;
+    };
+  });
+}
 
 export function createHorizontalRaid({
   orb,
@@ -46,7 +61,7 @@ export function createHorizontalRaid({
     waveLifeLabel: null,
     waveLabel: null,
     selectedBadge: null,
-    bgOffsets: { reeds: 0, water: 0, lily: 0 }
+    bgOffsets: Object.fromEntries(Object.keys(PARALLAX_LAYERS).map(k => [k, 0]))
   };
 
   function buildUI() {
@@ -115,15 +130,14 @@ export function createHorizontalRaid({
     state.root = root;
   }
 
-   function updateBackground(dt) {
+  function updateBackground(dt) {
     const offs = state.bgOffsets;
-    offs.reeds -= (dt * PARALLAX_SPEEDS.reeds) / 1000;
-    offs.water -= (dt * PARALLAX_SPEEDS.water) / 1000;
-    offs.lily -= (dt * PARALLAX_SPEEDS.lily) / 1000;
-    if (state.container) {
-      state.container.style.setProperty('--reeds-offset', `${offs.reeds}px`);
-      state.container.style.setProperty('--water-offset', `${offs.water}px`);
-      state.container.style.setProperty('--lily-offset', `${offs.lily}px`);
+    for (const [name, cfg] of Object.entries(PARALLAX_LAYERS)) {
+      offs[name] -= (dt * cfg.speed) / 1000;
+      if (cfg.width) offs[name] %= cfg.width;
+      if (state.container) {
+        state.container.style.setProperty(cfg.cssVar, `${offs[name]}px`);
+      }
     }
   }
   

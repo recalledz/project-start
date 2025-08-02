@@ -885,23 +885,23 @@ body.darkenshift-mode .tabsContainer button.active {
     bottom: 0;
     background-repeat: repeat-x;
     background-position: 0 0;
-    will-change: transform;
+    will-change: background-position;
     pointer-events: none;
 }
 #battle-container::before {
     background-image: url('img/reeds-back.png');
     z-index: 1;
-    transform: translateX(var(--reeds-offset));
+    background-position: var(--reeds-offset) 0;
 }
 #battle-container .mid {
     background-image: url('img/water-mid.png');
     z-index: 2;
-    transform: translateX(var(--water-offset));
+    background-position: var(--water-offset) 0;
 }
 #battle-container::after {
     background-image: url('img/lily-pads.png');
     z-index: 3;
-    transform: translateX(var(--lily-offset));
+    background-position: var(--lily-offset) 0;
 }
 
 .work-content {
