@@ -6,6 +6,8 @@ import { runAnimation } from '../utils/animation.js';
 // Delay between waves in milliseconds
 const WAVE_DELAY = 5000;
 
+// Parallax speeds in pixels per second
+const PARALLAX_SPEEDS = { reeds: 10, water: 30, lily: 60 };
 
 export function createHorizontalRaid({
   orb,
