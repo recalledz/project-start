@@ -84,6 +84,10 @@ Word of Haste
 
 Costs 2 points. Grants an orb spell that spends 15 Water to boost sect work speed for 1 minute. Shares a 1 minute cooldown.
 
+Water Burst
+
+Costs 2 points. Unlocks a raid spell that deals splash damage to raiders for 30 Water.
+
 Orb Spell Strength
 
 Costs 3 points. Unlocks the Orb Spell Strength building. Each level increases orb damage spells by 20%.

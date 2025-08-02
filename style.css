@@ -860,6 +860,13 @@ body.darkenshift-mode .tabsContainer button.active {
     height: 100%;
 }
 
+.raid-spell-bar {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 8px;
+}
+
 #battle-container {
     position: relative;
     overflow: hidden;
