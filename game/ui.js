@@ -184,3 +184,14 @@ export function addDiscoveredLocation(name, locationListContainer, LOCATION_DEFS
     explorationTabButton.style.display = '';
   }
 }
+
+// Hide existing tabs during raids so the sect map isn't visible beneath the battle
+if (typeof document !== 'undefined' && typeof document.addEventListener === 'function') {
+  document.addEventListener('raid-start', () => {
+    hideTab();
+  });
+
+  document.addEventListener('raid-end', () => {
+    showTab(sectTab);
+  });
+}

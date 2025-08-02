@@ -352,10 +352,13 @@ bus.subscribe('TICK', ({ delta }) => {
 // Track raid activity
 if (typeof document !== 'undefined' && typeof document.addEventListener === 'function') {
   document.addEventListener('raid-start', () => {
-    activeRaid = true;
+    clearBlobs();
+    const map = document.getElementById('colonyMap');
+    activeRaid = !!(map && map.offsetParent !== null);
   });
 
   document.addEventListener('raid-end', () => {
     activeRaid = false;
+    clearBlobs();
   });
 }
