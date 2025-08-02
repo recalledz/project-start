@@ -45,7 +45,8 @@ export function createHorizontalRaid({
     waveLifeFill: null,
     waveLifeLabel: null,
     waveLabel: null,
-    selectedBadge: null
+    selectedBadge: null,
+    bgOffsets: { reeds: 0, water: 0, lily: 0 }
   };
 
   function buildUI() {
@@ -114,6 +115,18 @@ export function createHorizontalRaid({
     state.root = root;
   }
 
+   function updateBackground(dt) {
+    const offs = state.bgOffsets;
+    offs.reeds -= (dt * PARALLAX_SPEEDS.reeds) / 1000;
+    offs.water -= (dt * PARALLAX_SPEEDS.water) / 1000;
+    offs.lily -= (dt * PARALLAX_SPEEDS.lily) / 1000;
+    if (state.container) {
+      state.container.style.setProperty('--reeds-offset', `${offs.reeds}px`);
+      state.container.style.setProperty('--water-offset', `${offs.water}px`);
+      state.container.style.setProperty('--lily-offset', `${offs.lily}px`);
+    }
+  }
+  
   function updateWaveLife() {
     if (!state.waveLifeFill) return;
     const pct = state.waveTotal > 0 ? (state.waveHp / state.waveTotal) * 100 : 0;
@@ -311,6 +324,7 @@ export function createHorizontalRaid({
 
   function tick(dt) {
     if (!state.active) return;
+    updateBackground(dt);
     spawnLoop(dt);
     // dt is in milliseconds; use same unit for attack timers
     updateRaiders(dt);
