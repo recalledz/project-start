@@ -275,9 +275,9 @@ You can adjust button labels, add icons, or tweak layout widths to fit your fina
 │ [Room 1]   [Room 2]   [Room 3]        Room 1 Selected                        │
 │                                                                              │
 │ ┌───────────────────────┐   ┌─────────────────────────┐   ┌─────────────────┐ │
-│ │     Tadpole Figure    │   │     Progress:          │   │ Assigned to     │ │
-│ │   (tadpole silhouette │   │   25 000 / 25 000      │   │   Li Xuan       │ │
-│ │    with fill overlay) │   │   (fill bar here)      │   │                 │ │
+│ │   Metamorphosis Orb   │   │     Progress:          │   │ Assigned to     │ │
+│ │   (orb with fill      │   │   25 000 / 25 000      │   │   Li Xuan       │ │
+│ │    overlay)           │   │   (fill bar here)      │   │                 │ │
 │ └───────────────────────┘   └─────────────────────────┘   └─────────────────┘ │
 │                                                                              │
 │ ┌─────────────────────────────────────────────────────────────────────────┐  │
@@ -293,7 +293,7 @@ You can adjust button labels, add icons, or tweak layout widths to fit your fina
 
 Top: room‐selector tabs & currently selected label.
 
-Center‐left: disciple “tadpole” silhouette with fill overlay showing metamorphosis progress.
+Center‐left: disciple's metamorphosis orb with fill overlay showing progress.
 
 Center‐middle: numeric & bar progress (current/target).
 

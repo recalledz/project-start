@@ -2471,8 +2471,8 @@ body.darkenshift-mode .tabsContainer button.active {
     margin-bottom: 8px;
 }
 .metamorphosis-progress {
-    width: 240px;
-    height: 240px;
+    width: 200px;
+    height: 200px;
     overflow: visible;
 }
 #metamorphosisRing {
