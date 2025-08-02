@@ -208,17 +208,37 @@ export function createHorizontalRaid({
 
   function updateRaiders(dt) {
     state.raiders.forEach(r => {
-      if (r.progress > 0.5) {
-        r.progress -= r.moveSpeed * dt;
-        if (r.el) r.el.style.left = `${r.progress * 100}%`;
-        return;
-      }
-
       const living = state.disciples.filter(
         s => !s.d.incapacitated && s.d.currentHp > 0
       );
-      if (living.length === 0) {
-        r.progress -= r.moveSpeed * dt;
+
+      // Determine the progress point the raider should move toward. If there
+      // are disciples alive we target the rightmost one; otherwise we head for
+      // the sect orb at progress 0.
+      const rootWidth = state.root?.offsetWidth || 1;
+      const target =
+        living.length > 0 ? living.sort((a, b) => b.startLeft - a.startLeft)[0] : null;
+      const targetProgress = target ? target.startLeft / rootWidth : 0;
+
+      if (r.progress > targetProgress) {
+        // Move toward the target and clamp so we don't pass through.
+        r.progress = Math.max(targetProgress, r.progress - r.moveSpeed * dt);
+        if (r.el) r.el.style.left = `${r.progress * 100}%`;
+      } else if (target) {
+        // At disciple – attack
+        r.timer += dt;
+        if (r.timer >= r.attackSpeed) {
+          r.timer -= r.attackSpeed;
+          applyDamage(target.d, r.damage);
+          state.onDamage({ amount: r.damage, source: 'raider' });
+          showRaidDamageFloat(target.sprite, r.damage);
+          runAnimation(r.el, 'attack-flash');
+          if (target.d.currentHp <= 0 || target.d.incapacitated) {
+            removeDisciple(target);
+          }
+        }
+      } else {
+        // No disciples remain; continue toward the orb
         if (r.progress <= 0) {
           state.orb.current = Math.max(0, state.orb.current - r.damage);
           state.onDamage({ amount: r.damage, source: 'raider' });
@@ -233,22 +253,9 @@ export function createHorizontalRaid({
           if (idx >= 0) state.raiders.splice(idx, 1);
           updateWaveLife();
           if (state.orb.current <= 0) end(false);
-          return;
-        }
-        if (r.el) r.el.style.left = `${r.progress * 100}%`;
-        return;
-      }
-
-      const target = living.sort((a, b) => b.startLeft - a.startLeft)[0];
-      r.timer += dt;
-      if (r.timer >= r.attackSpeed) {
-        r.timer -= r.attackSpeed;
-        applyDamage(target.d, r.damage);
-        state.onDamage({ amount: r.damage, source: 'raider' });
-        showRaidDamageFloat(target.sprite, r.damage);
-        runAnimation(r.el, 'attack-flash');
-        if (target.d.currentHp <= 0 || target.d.incapacitated) {
-          removeDisciple(target);
+        } else {
+          r.progress -= r.moveSpeed * dt;
+          if (r.el) r.el.style.left = `${r.progress * 100}%`;
         }
       }
     });
