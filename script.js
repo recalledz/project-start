@@ -76,8 +76,6 @@ import {
   spawnEnemy
 } from "./game/enemySpawning.js";
 import {
-  renderCard,
-  renderDiscipleCard,
   renderEnemyAttackBar,
   renderPlayerAttackBar,
   renderDealerLifeBarFill,
