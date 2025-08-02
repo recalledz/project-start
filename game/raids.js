@@ -22,7 +22,7 @@ function buildDefaultConfig() {
     waves: Array.from({ length: 5 }, () => ({
       count: 1,
       rate: 1000,
-      stats: { hp: 10, damage: 1, attackSpeed: 10000, moveSpeed: 0.004 }
+      stats: { hp: 10, damage: 1, attackSpeed: 5000, moveSpeed: 0.004 }
     }))
   };
 }
