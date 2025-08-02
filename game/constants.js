@@ -94,3 +94,7 @@ export const LOCATION_DEFS = [
 ];
 
 export const METAMORPHOSIS_STAGE_REQ = 25000;
+
+// Rewards granted on successful raid completion
+export const RAID_NECTAR_REWARD = 1;
+export const RAID_COMBAT_XP_REWARD = 30;
