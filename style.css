@@ -2377,7 +2377,7 @@ body.darkenshift-mode .tabsContainer button.active {
     position: absolute;
     top: 50%;
     right: 0;
-    transform: translate(100%, -50%);
+    transform: translateY(-50%);
     background: var(--core-accent);
     color: #000;
     padding: 4px 6px;
