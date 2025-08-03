@@ -55,7 +55,7 @@ CeremoniousMonasteryLevel: Each level adds +10 to the soft cap up to 95.
 
 21.4 Travel Speed
 
-Determines movement speed on the world map.
+Determines travel speed on the world map.
 
 Formula:
 

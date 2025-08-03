@@ -1,14 +1,12 @@
 import { sectState } from './state.js';
 import { calculateMaxWater, calculateWaterRegen } from '../utils/water.js';
-import { BASE_MOVE_SPEED } from './constants.js';
 
 export const STAGE_BONUS = {
   maxWater: 100,
   waterRegen: 2,
   resilience: 0.002,
   potency: 0.2,
-  attack: 3,
-  moveSpeed: 0.1
+  attack: 3
 };
 
 export function getStage(d) {
@@ -23,7 +21,6 @@ export function applyStageBonuses(d) {
   d.resilience = base + stage * STAGE_BONUS.resilience;
   d.spellPotency = 1 + stage * STAGE_BONUS.potency;
   d.damageBonus = stage * STAGE_BONUS.attack;
-  d.moveSpeed = BASE_MOVE_SPEED * (1 + stage * STAGE_BONUS.moveSpeed);
 }
 
 export function getMaxWater(d, waterSenseLevel = 0) {

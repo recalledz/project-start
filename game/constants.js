@@ -7,8 +7,6 @@ export const BASE_STATS = {
 
 };
 
-// Base movement speed for units on the sect map (pixels per second)
-export const BASE_MOVE_SPEED = 10;
 
 export const HUNT_CYCLE_SECONDS = 200;
 export const HUNT_XP_PER_SUCCESS = 30;

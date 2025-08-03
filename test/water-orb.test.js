@@ -16,9 +16,7 @@ before(async () => {
     removeEventListener: () => {},
     querySelector: () => null,
   };
-  global.document = globalThis.document;
   globalThis.window = { dispatchEvent() {} };
-  global.window = globalThis.window;
   sectModule = await import('../game/sect.js');
   ({ sectSystem, tickSectSystem, ORB_REGEN_PER_SEC } = sectModule);
 });
