@@ -119,7 +119,7 @@ Here’s the updated **Disciple Overlay UI wireframe** with the added `Cultivati
 │ Path:  🔥          Core Stage: egg  │
 ├────────────────────────────────────────────────────┤
 │ **Attributes**                                     │
-│ DEX: 8   – (affects movement, crit rate, evade)    │
+│ DEX: 8   – (affects crit rate, evade)              │
 │ END: 6   – (affects building and farming speed)    │
 │ STR: 5   – (physical damage, mining power)         │
 │ INT: 9   – (learning rate, spell potency)          │

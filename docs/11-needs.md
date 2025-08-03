@@ -6,7 +6,7 @@
 - Starts at 100; drains at 0.383/s.
 - < 30 → hungry; seeks food.
 - < 20 → –50% sect happiness.
-- < 10 → disables activities; moves to Water Orb.
+ - < 10 → disables activities; shown at Water Orb.
 
 ### Stamina
 - Max 100; regenerates in 1 day.

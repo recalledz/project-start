@@ -120,7 +120,6 @@ import { raidState, tickRaid } from './game/raids.js';
 // developer debug tools
 import { init as initDebug } from "./game/debug.js";
 import { attachOrbGlow, enableOrbGlow, disableOrbGlow, updateOrbGlow, flashOrbGlow } from './game/orbGlow.js';
-import { BASE_MOVE_SPEED } from './game/constants.js';
 import { initOrbMask, showOrbMask, hideOrbMask, updateOrbMaskPosition } from './game/orbMask.js';
 // Shared game state and configuration
 import {
@@ -179,7 +178,6 @@ import {
   ATTRIBUTE_FOR_GROUP,
   LOCATION_DEFS
 } from "./game/constants.js";
-import { moveElement } from './game/mapMovement.js';
 import {
   addSkillXp,
   computeGlobalSkillLevel,
@@ -841,8 +839,9 @@ function updateSectDisplay() {
         el.dataset.discipleId = d.id;
         sectDiscipleEls[d.id] = el;
         sectDisciplesContainer.appendChild(el);
-        moveDisciple(d, el);
+        const task = updateDisciplePosition(d, el);
         initDiscipleVisual(d, el);
+        updateDiscipleVisual(d, el, task);
       }
     });
     Object.keys(sectDiscipleEls).forEach(id => {
@@ -910,24 +909,29 @@ function updateMapBrightness(phase) {
 
 function feedDisciples() {}
 
-function moveDisciple(d, el) {
-  const cont = el.parentElement;
-  if (!cont) return;
-  const maxX = Math.max(cont.clientWidth - 20, 0);
-  const maxY = Math.max(cont.clientHeight - 20, 0);
-  const x = Math.random() * maxX;
-  const y = Math.random() * maxY;
-  moveElement(el, x, y, d.moveSpeed);
+function placeDisciple(el, selector) {
+  const target = document.querySelector(selector);
+  if (!target) return;
+  const contRect = el.parentElement.getBoundingClientRect();
+  const rect = target.getBoundingClientRect();
+  const x = rect.left - contRect.left + rect.width / 2 - el.offsetWidth / 2;
+  const y = rect.top - contRect.top + rect.height / 2 - el.offsetHeight / 2;
+  el.style.transitionDuration = '0s';
+  el.style.transform = `translate(${x}px, ${y}px)`;
+  el.style.opacity = '1';
 }
 
-function updateDiscipleGather(id, el) {
-  const patch = document.getElementById('fruitPatch');
-  if (!patch) return;
-  const px = patch.offsetLeft + patch.offsetWidth / 2 - 8;
-  const py = patch.offsetTop + patch.offsetHeight / 2 - 8;
-  el.style.opacity = '1';
-  const d = sectSystem.disciples.find(x => x.id === id);
-  moveElement(el, px, py, d?.moveSpeed);
+function updateDisciplePosition(d, el) {
+  const task = d.incapacitated ? 'Resting' : sectState.discipleTasks[d.id] || 'Idle';
+  let selector = '#sectOrbs .water';
+  if (task === 'Gather Fruit') selector = '#fruitPatch';
+  else if (task === 'Gather Softwood') selector = '.zone.lumberyard';
+  else if (task === 'Research') selector = '.zone.research';
+  else if (task === 'Chant') selector = '#sectBohio';
+  if (d.incapacitated) el.classList.add('incapacitated');
+  else el.classList.remove('incapacitated');
+  placeDisciple(el, selector);
+  return task;
 }
 
 function startDiscipleMovement() {
@@ -937,51 +941,7 @@ function startDiscipleMovement() {
     sectSystem.disciples.forEach(d => {
       const el = sectDiscipleEls[d.id];
       if (!el) return;
-      let taskName = 'Idle';
-      if (d.incapacitated) {
-        const orb = document.querySelector('#sectOrbs .water');
-        if (orb) {
-          const contRect = el.parentElement.getBoundingClientRect();
-          const orbRect = orb.getBoundingClientRect();
-          const centerX = orbRect.left - contRect.left + orbRect.width / 2;
-          const centerY = orbRect.top - contRect.top + orbRect.height / 2;
-          const radius = orbRect.width / 2 + el.offsetWidth / 2;
-          const ang = Math.random() * Math.PI * 2;
-          const bx = centerX + Math.cos(ang) * radius - el.offsetWidth / 2;
-          const by = centerY + Math.sin(ang) * radius - el.offsetHeight / 2;
-          moveElement(el, bx, by, d.moveSpeed);
-        }
-        el.classList.add('incapacitated');
-        taskName = 'Resting';
-      } else {
-        el.classList.remove('incapacitated');
-        const phase = getCurrentSchedule().action;
-        const task = sectState.discipleTasks[d.id];
-        if (task === 'Training') {
-          const orb = document.querySelector('#sectOrbs .water');
-          if (orb) {
-            const contRect = el.parentElement.getBoundingClientRect();
-            const orbRect = orb.getBoundingClientRect();
-            const centerX = orbRect.left - contRect.left + orbRect.width / 2;
-            const centerY = orbRect.top - contRect.top + orbRect.height / 2;
-            const radius = orbRect.width / 2 + el.offsetWidth / 2;
-            const ang = Math.random() * Math.PI * 2;
-            const bx = centerX + Math.cos(ang) * radius - el.offsetWidth / 2;
-            const by = centerY + Math.sin(ang) * radius - el.offsetHeight / 2;
-            moveElement(el, bx, by, d.moveSpeed);
-          }
-                    taskName = task;
-        } else if (phase !== 'Work') {
-          taskName = phase;
-        } else {
-          taskName = task || 'Idle';
-          if (task === 'Gather Fruit' || task === 'Gather Softwood') {
-            updateDiscipleGather(d.id, el);
-          } else {
-            moveDisciple(d, el);
-          }
-        }
-      }
+      const taskName = updateDisciplePosition(d, el);
       updateDiscipleVisual(d, el, taskName);
     });
   }, 3000);
