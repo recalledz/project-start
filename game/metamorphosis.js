@@ -357,6 +357,12 @@ function updateStats() {
       window.showTooltip(tip, e.pageX + 10, e.pageY + 10);
     });
     el.addEventListener('mouseleave', window.hideTooltip);
+    el.addEventListener('touchstart', e => {
+      const t = e.touches[0];
+      window.showTooltip(tip, t.pageX + 10, t.pageY + 10);
+      e.stopPropagation();
+    });
+    el.addEventListener('touchend', window.hideTooltip);
   });
 }
 
