@@ -8,9 +8,7 @@ Character basic attributes which are difficult to change. They determine many in
 - GatherYield = BaseYield × (1 + DEX × 0.05 + GatheringSkill × 0.02) × WorkDuration
 - HuntYield ≈ BaseRate × (1 + DEX × 0.20 + STR × 0.30) × ActivityTime
 ## Endurance 💪
-- Determines speed (and yield when applicable) for Building and Farming (to be implemented)
-- BuildTime = WorkUnits ÷ (1 + Endurance × 0.05 + BuildingSkill × 0.02)
-- WorkUnits: Derived from building material costs and complexity.
+- Determines speed for Farming (to be implemented)
 
 ## Strength ⚔️
 - Determines yield for Woodcutting, Hunting and Mining

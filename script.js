@@ -32,14 +32,9 @@ import {
   tickSect,
   renderColonyResources,
   addDiscoveredLocation,
-  discoveredLocations,
-  ORB_REPAIR_SECONDS
+  discoveredLocations
 } from "./game/sect.js";
-import {
-  BUILDINGS,
-  checkBuildingUnlock,
-  tickBuilding
-} from './game/buildings.js';
+import { checkBuildingUnlock } from './game/buildings.js';
 import { formatNumber } from "./utils/numberFormat.js";
 import { runAnimation } from "./utils/animation.js";
 import {
@@ -170,7 +165,6 @@ import {
   SOFTWOOD_CYCLE_AMOUNT,
   FRUIT_XP_PER_CYCLE,
   LOG_XP_PER_CYCLE,
-  BUILD_XP_RATE,
   RESEARCH_XP_PER_CYCLE,
   CHANT_XP_PER_CYCLE,
   EXPLORATION_CYCLE_SECONDS,
@@ -211,11 +205,6 @@ function getTaskEta(d) {
     const researchRate = researcherCount * 4;
     const researchProg = sectState.researchProgress % 500;
     return researchRate > 0 ? (500 - researchProg) / researchRate : Infinity;
-  } else if (task === 'Building') {
-    const buildKey = sectState.currentBuild;
-    const buildData = buildKey ? BUILDINGS[buildKey] : null;
-    const builderCount = sectSystem.disciples.filter(x => sectState.discipleTasks[x.id] === 'Building').length;
-    return buildData && builderCount > 0 ? ((1 - sectState.buildProgress) * buildData.time) / builderCount : Infinity;
   } else if (task === 'Exploration') {
     const progress = sectState.discipleProgress[d.id] || 0;
     return EXPLORATION_CYCLE_SECONDS - progress;
@@ -596,15 +585,6 @@ function updateTaskProgressDisplay() {
   const researchPct = (researchProg / 500) * 100;
   const researchTime = researchRate > 0 ? (500 - researchProg) / researchRate : 0;
 
-  const buildKey = sectState.currentBuild;
-  const buildData = buildKey ? BUILDINGS[buildKey] : null;
-  const builderCount = sectSystem.disciples.filter(
-    d => sectState.discipleTasks[d.id] === 'Building'
-  ).length;
-  const buildPct = buildData ? sectState.buildProgress * 100 : 0;
-  const buildTime = buildData && builderCount > 0
-    ? ((1 - sectState.buildProgress) * buildData.time) / builderCount
-    : 0;
   sectSystem.disciples.forEach(d => {
     const wrappers = document.querySelectorAll(`[data-disciple-id="${d.id}"]`);
     wrappers.forEach(wrapper => {
@@ -646,23 +626,6 @@ function updateTaskProgressDisplay() {
         const rate = 4 * 60;
         rateEl.textContent = `+${rate.toFixed(0)}/m`;
       }
-    } else if (taskName === 'Building') {
-      if (sectSystem.orbs.water.cracked && !buildData) {
-        const pct = sectState.orbRepairProgress * 100;
-        if (fill) fill.style.width = `${pct}%`;
-        const time =
-          builderCount > 0
-            ? ((1 - sectState.orbRepairProgress) * ORB_REPAIR_SECONDS) / builderCount
-            : Infinity;
-        if (label)
-          label.textContent = `Repair Orb ${builderCount > 0 ? time.toFixed(1) : '∞'}s`;
-      } else {
-        if (fill) fill.style.width = `${buildPct}%`;
-        if (label && buildData)
-          label.textContent = `${buildData.name} ${builderCount > 0 ? buildTime.toFixed(1) : '∞'}s`;
-        else if (label) label.textContent = '';
-      }
-      if (rateEl) rateEl.textContent = '';
     } else if (taskName === 'Hunt') {
       const progress = sectState.discipleProgress[d.id] || 0;
       const pct = (progress / HUNT_CYCLE_SECONDS) * 100;
@@ -1184,7 +1147,6 @@ function buildDiscipleProficiencyView(d) {
   const groups = {
     Gathering: ['Gather Fruit'],
     Logging: ['Gather Softwood'],
-    Building: ['Building'],
     Chanting: ['Chant'],
     Researching: ['Research'],
     WaterSense: []
@@ -1192,7 +1154,6 @@ function buildDiscipleProficiencyView(d) {
   const effects = {
     Gathering: 'yield',
     Logging: 'yield',
-    Building: 'speed',
     Chanting: 'potency',
     Researching: 'research pts',
     WaterSense: 'water'
@@ -2614,7 +2575,6 @@ function gameLoop(currentTime) {
     }
     tickSectSystem(processedDelta);
     tickSect(processedDelta);
-    tickBuilding(processedDelta / 1000);
   }
   lastRaidState = raidState.active;
   const dtSeconds = processedDelta / 1000;

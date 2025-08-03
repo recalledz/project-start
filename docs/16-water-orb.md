@@ -18,10 +18,7 @@
 - If the orb is ever drained to 0 Water it cracks, halving its maximum capacity
   and regeneration rate until restored. A cracked orb displays visible cracks on
   the orb graphic.
-- Disciples assigned to **Building** will automatically repair a cracked orb,
-  requiring 2.5 minutes at base speed.
-- While repairing, each builder's badge shows an "Orb Repair" progress bar with
-  the remaining time.
+- A cracked orb slowly repairs itself over roughly 2.5 minutes.
 - Orb Revival research grants access to an Orb Management panel for the Water Orb.
 - Word of Haste orb spell speeds up work tasks for one minute at the cost of 15 Water.
 - Water Burst raid spell unleashes splash damage against raiders for 30 Water.

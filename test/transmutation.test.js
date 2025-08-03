@@ -6,7 +6,6 @@ import { expect } from 'chai';
 import { sectState, systems } from '../game/state.js';
 
 let startBuilding;
-let tickBuilding;
 let performTransmute;
 let checkBuildingUnlock;
 let sectSystem;
@@ -20,7 +19,7 @@ describe('Circle of Areito', () => {
       removeEventListener: () => {}
     };
     return import('../game/buildings.js').then(mod => {
-      ({ startBuilding, tickBuilding, checkBuildingUnlock } = mod);
+      ({ startBuilding, checkBuildingUnlock } = mod);
     }).then(() => import('../game/transmutation.js')).then(mod => {
       ({ performTransmute } = mod);
     }).then(() => import('../game/sect.js')).then(mod => {
@@ -54,10 +53,6 @@ describe('Circle of Areito', () => {
     systems.areitoBuildingAvailable = true;
     sectState.softwood = 150;
     startBuilding('areitoCircle');
-    const d = { id: 1, endurance: 0 };
-    sectSystem.disciples.push(d);
-    sectState.discipleTasks[d.id] = 'Building';
-    tickBuilding(600);
     expect(sectState.buildings.areitoCircle).to.equal(1);
     expect(systems.transmutationUnlocked).to.be.true;
     sectState.softwood = 100;

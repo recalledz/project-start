@@ -9,7 +9,6 @@
 | Gather Softwood     | 0.0047     |
 | Research     | 0.008      |
 | Chant        | 0.333      |
-| Building     | 1.000      |
 
 ### Milestone Times (no bonuses)
 | Task        | To Lv 10   | To Lv 30    |
@@ -18,7 +17,6 @@
 | Gather Softwood    | ~3 days 5 h| ~146 days   |
 | Research    | ~1 day 21 h| ~85 days    |
 | Chant       | ~1 h       | ~2 days     |
-| Building    | ~21 min    | ~16 h       |
 
 ### Affinity & Intelligence Example
 - **Formula**: `XP = BaseXP × IntMultiplier × Affinity`

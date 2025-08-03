@@ -1,14 +1,11 @@
 /* global describe, it, before, after */
 import { expect } from 'chai';
-import Disciple from '../game/disciple.js';
-import { initializeDisciple } from '../utils/discipleInit.js';
 import { sectState } from '../game/state.js';
 
 let sectModule;
 let sectSystem;
 let tickSectSystem;
 let ORB_REGEN_PER_SEC;
-let tickBuilding;
 
 // Setup DOM stubs to satisfy module imports
 before(async () => {
@@ -19,10 +16,11 @@ before(async () => {
     removeEventListener: () => {},
     querySelector: () => null,
   };
+  global.document = globalThis.document;
   globalThis.window = { dispatchEvent() {} };
+  global.window = globalThis.window;
   sectModule = await import('../game/sect.js');
   ({ sectSystem, tickSectSystem, ORB_REGEN_PER_SEC } = sectModule);
-  ({ tickBuilding } = await import('../game/buildings.js'));
 });
 
 after(() => {
@@ -50,17 +48,12 @@ describe('water orb regeneration', () => {
     expect(sectSystem.orbs.water.current).to.be.closeTo(ORB_REGEN_PER_SEC * 0.5, 1e-6);
   });
 
-  it('repairs when builders work', () => {
+  it('repairs itself over time when cracked', () => {
     sectSystem.orbs.water.cracked = true;
     sectSystem.orbs.water.max = 10;
     sectState.orbRepairProgress = 0;
-    sectSystem.disciples.length = 0;
-    const d = new Disciple({ id: 1, endurance: 1 });
-    initializeDisciple(d);
-    sectSystem.disciples.push(d);
-    sectState.discipleTasks[d.id] = 'Building';
     for (let i = 0; i < sectModule.ORB_REPAIR_SECONDS; i++) {
-      tickBuilding(1);
+      tickSectSystem(1000);
     }
     expect(sectSystem.orbs.water.cracked).to.be.false;
     expect(sectSystem.orbs.water.max).to.equal(20);

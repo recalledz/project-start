@@ -21,23 +21,7 @@ Skill XP gained by cultivating
 
 ---
 
-09.2 Building
-
-Determines time to construct buildings.
-
-Formula:
-
-BuildTime = WorkUnits ÷ (1 + Endurance × 0.05 + BuildingSkill × 0.02)
-
-WorkUnits: Derived from building material costs and complexity.
-
-Affected by: Disciple Endurance and Building skill level.
-
-
-
----
-
-09.3 Chanting
+09.2 Chanting
 
 Unlocked after building Chanting Halls.
 
@@ -57,7 +41,7 @@ Generation Value: Builds additional Water/sec based on building level.
 
 ---
 
-09.4 Gathering
+09.3 Gathering
 
 Disciples collect food or herbs at gathering spots.
 
@@ -78,7 +62,7 @@ GatherYield/sec = BaseYield × (1 + DEX × 0.05 + GatheringSkill × 0.02)
 
 ---
 
-09.5 Woodcutting
+09.4 Woodcutting
 
 Chop timber at various spots.
 
@@ -98,7 +82,7 @@ WoodYield/sec = BaseYield × (1 + STR × 0.05 + WoodcuttingSkill × 0.02)
 
 ---
 
-09.6 Mining
+09.5 Mining
 
 Excavate ores from veins and outcrops.
 
@@ -114,7 +98,7 @@ Obsidian Rift	0.04	25	1.70	5	2	Obsidian
 
 ---
 
-09.7 Hunting
+09.6 Hunting
 
 Track and hunt wildlife; yields variable food and materials.
 
@@ -137,7 +121,7 @@ All formulas subject to balancing.
 
 ---
 
-09.8 Casting
+09.7 Casting
 
 spell power and cost reduction.
 

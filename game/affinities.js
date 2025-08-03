@@ -1,4 +1,4 @@
-export const SKILL_LIST = ['Idle','Gathering','Logging','Hunting','Building','Researching','Chanting','Exploration','WaterSense'];
+export const SKILL_LIST = ['Idle','Gathering','Logging','Hunting','Researching','Chanting','Exploration','WaterSense'];
 
 export function generateSkillAffinities() {
   const affinities = {};
