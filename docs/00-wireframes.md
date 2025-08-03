@@ -94,7 +94,7 @@ Footer
 
 #dicsiple overlay card on pressing disciple
 
-Here’s the updated **Disciple Overlay UI wireframe** with the added `Cultivation` tab and clean layout for all six tabs:
+Here’s the updated **Disciple Overlay UI wireframe** with the added `Cultivation` and `Combat` tabs and clean layout for all seven tabs:
 
 ---
 
@@ -102,7 +102,7 @@ Here’s the updated **Disciple Overlay UI wireframe** with the added `Cultivati
 
 ```plaintext
 ┌────────────────────────────────────────────────────────────────────────────┐
-│ ○ General  ○ Proficiency  ○ Constructs  ○ Moodlets  ○ Stats  ○ Cultivation │
+│ ○ General  ○ Proficiency  ○ Constructs  ○ Moodlets  ○ Stats  ○ Combat  ○ Cultivation │
 ├────────────────────────────────────────────────────────────────────────────┤
 
 [Content based on selected tab shown below]

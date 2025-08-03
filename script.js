@@ -713,6 +713,33 @@ function updateDiscipleHealthDisplay() {
   }
 }
 
+function updateDiscipleCombatStatsDisplay() {
+  if (discipleOverlay && discipleOverlayActiveTab === 'combat') {
+    const d = discipleOverlayData.disciple;
+    if (!d) return;
+    const section = discipleOverlay.box.querySelector('.disciple-stats-combat');
+    if (!section) return;
+    const levelRow = section.querySelector('.combat-level');
+    if (levelRow) levelRow.textContent = `Level ${d.combatLevel}`;
+    const fill = section.querySelector('.disciple-progress-fill');
+    if (fill) {
+      const pct = Math.min(1, d.combatXp / d.xpForNextLevel());
+      fill.style.width = `${Math.floor(pct * 100)}%`;
+    }
+    const label = section.querySelector('.disciple-progress-label');
+    if (label) label.textContent = `${Math.floor(d.combatXp)}/${d.xpForNextLevel()}`;
+    const stats = section.querySelector('.combat-stats');
+    if (stats) {
+      const atkInterval = (d.attackSpeed / 1000).toFixed(1);
+      const defense = Math.round(d.defense ?? 0);
+      stats.innerHTML =
+        `Damage ${Math.round(d.damage)}<br>` +
+        `Attack every ${atkInterval}s<br>` +
+        `Defense ${defense}`;
+    }
+  }
+}
+
 function updateSectDisplay() {
   checkBuildingUnlock();
   if (sectNavBuildBtn) {
@@ -966,10 +993,12 @@ function startDiscipleMovement() {
 
 function buildDiscipleCombatStatsView(d) {
   const body = document.createElement('div');
-  const atkPerSec = (1000 / d.attackSpeed).toFixed(2);
+  body.className = 'disciple-combat';
+  const atkInterval = (d.attackSpeed / 1000).toFixed(1);
   const defense = Math.round(d.defense ?? 0);
 
   const levelRow = document.createElement('div');
+  levelRow.className = 'combat-level';
   levelRow.textContent = `Level ${d.combatLevel}`;
   body.appendChild(levelRow);
 
@@ -986,9 +1015,10 @@ function buildDiscipleCombatStatsView(d) {
   body.appendChild(bar);
 
   const stats = document.createElement('div');
+  stats.className = 'combat-stats';
   stats.innerHTML =
     `Damage ${Math.round(d.damage)}<br>` +
-    `Attack/s ${atkPerSec}<br>` +
+    `Attack every ${atkInterval}s<br>` +
     `Defense ${defense}`;
   body.appendChild(stats);
 
@@ -1265,7 +1295,8 @@ export function openDiscipleOverlay(d) {
     { key: 'health', label: 'Health' },
     { key: 'proficiency', label: 'Proficiency' },
     { key: 'moodlets', label: 'Moodlets' },
-    { key: 'stats', label: 'Stats' }
+    { key: 'stats', label: 'Stats' },
+    { key: 'combat', label: 'Combat' }
   ];
   let active = discipleOverlayActiveTab;
   function render() {
@@ -1280,22 +1311,21 @@ export function openDiscipleOverlay(d) {
     } else if (active === 'moodlets') {
       content.appendChild(buildDiscipleMoodletsView(d));
     } else if (active === 'stats') {
-      const c = document.createElement('div');
-      const genSection = document.createElement('div');
-      genSection.className = 'disciple-stats-general';
-      const genTitle = document.createElement('h3');
-      genTitle.textContent = 'General Stats';
-      genSection.appendChild(genTitle);
-      genSection.appendChild(buildDiscipleStatsView(d));
-      const combatSection = document.createElement('div');
-      combatSection.className = 'disciple-stats-combat';
-      const comTitle = document.createElement('h3');
-      comTitle.textContent = 'Combat Stats';
-      combatSection.appendChild(comTitle);
-      combatSection.appendChild(buildDiscipleCombatStatsView(d));
-      c.appendChild(genSection);
-      c.appendChild(combatSection);
-      content.appendChild(c);
+      const section = document.createElement('div');
+      section.className = 'disciple-stats-general';
+      const title = document.createElement('h3');
+      title.textContent = 'General Stats';
+      section.appendChild(title);
+      section.appendChild(buildDiscipleStatsView(d));
+      content.appendChild(section);
+    } else if (active === 'combat') {
+      const section = document.createElement('div');
+      section.className = 'disciple-stats-combat';
+      const title = document.createElement('h3');
+      title.textContent = 'Combat Stats';
+      section.appendChild(title);
+      section.appendChild(buildDiscipleCombatStatsView(d));
+      content.appendChild(section);
     }
     if (window.lucide) lucide.createIcons({ icons: lucide.icons });
   }
@@ -2594,6 +2624,7 @@ function gameLoop(currentTime) {
   updateTaskProgressDisplay();
   updateDiscipleHealthDisplay();
   updateDiscipleWaterDisplay();
+  updateDiscipleCombatStatsDisplay();
   updateOrbGlow(deltaTime);
   requestAnimationFrame(gameLoop);
 }
