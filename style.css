@@ -3200,6 +3200,7 @@ body.darkenshift-mode .tabsContainer button.active {
     position: absolute;
     width: var(--zone-size);
     height: var(--zone-size);
+    display: none;
     pointer-events: none;
     border: 2px solid rgba(0,0,0,0.2);
     border-radius: 4px;

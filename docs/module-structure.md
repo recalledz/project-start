@@ -15,7 +15,7 @@ The project organizes game logic under the `game/` directory.
 - **game/debug.js** – wiring for optional debug controls.
 - **debugTools.js** – development helpers lazily loaded when a debug
   button is clicked.
-- **game/zones.js** – toggles visibility of sect map zone elements.
+- **game/zones.js** – toggles visibility of sect map zone elements; hidden by default on load.
 - **game/constants.js** – collection of shared gameplay constants used across systems.
 - **game/tooltip.js** – simple helpers for showing and hiding the UI tooltip.
 - **game/sect.js** – implements the sect management system including constructs and colony helpers.
