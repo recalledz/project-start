@@ -549,24 +549,38 @@ body.darkenshift-mode .tabsContainer button.active {
     top: 0;
     z-index: 4;
     pointer-events: none;
-}
-.raid-container .disciple-badge {
-    pointer-events: auto;
+    display: flex;
+    flex-direction: column;
 }
 
-.raid-container .fight-line {
+.fight-line {
     position: absolute;
-    left: 50%;
-    top: 0;
-    bottom: 0;
-    width: 2px;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 2px;
     background: rgba(255,255,255,0.2);
+}
+
+.raider-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 8px;
+}
+
+.disciple-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 16px;
 }
 
 .wave-info {
     position: absolute;
-    /* Leave room for disciple badges */
-    top: 56px;
+    top: 4px;
     left: 50%;
     transform: translateX(-50%);
     display: flex;
@@ -614,8 +628,6 @@ body.darkenshift-mode .tabsContainer button.active {
 }
 
 .raider-unit {
-    position: absolute;
-    bottom: 8px;
     width: 16px;
     height: 16px;
     background: purple;
@@ -626,8 +638,6 @@ body.darkenshift-mode .tabsContainer button.active {
 }
 
 .raid-disciple {
-    position: absolute;
-    bottom: 8px;
     width: 24px;
     height: 24px;
     background-image: url('img/coqui.png');
@@ -643,24 +653,26 @@ body.darkenshift-mode .tabsContainer button.active {
     z-index: 2;
 }
 
-.raid-attack-shadow {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 0%;
-    background: rgba(0,0,0,0.5);
-    pointer-events: none;
+.raid-attack-shadow,
+.disciple-attack-shadow {
+    display: none;
 }
 
-.disciple-attack-shadow {
-    position: absolute;
-    bottom: 0;
-    left: 0;
+.raid-disciple-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    pointer-events: auto;
+}
+
+.raid-disciple-bars {
+    width: 32px;
+}
+
+.raid-disciple-bars .bar {
     width: 100%;
-    height: 0%;
-    background: rgba(0,0,0,0.5);
-    pointer-events: none;
+    height: 4px;
+    margin-top: 2px;
 }
 
 .raid-orb {

@@ -1,5 +1,5 @@
 import { createOverlay } from './overlay.js';
-import { createHorizontalRaid } from '../game/horizontalRaid.js';
+import { createVerticalRaid } from '../game/verticalRaid.js';
 import { castWordOfHaste, toggleReverberation, castWaterBurst } from '../game/orbSpells.js';
 import { sectState } from '../game/state.js';
 import { sectSystem } from '../game/sect.js';
@@ -15,7 +15,7 @@ export function openRaidBattleOverlay({ config, onSuccess = () => {}, onFailure 
   spells.className = 'raid-spell-bar';
   overlay.append(spells);
 
-  const raid = createHorizontalRaid({
+  const raid = createVerticalRaid({
     ...config,
     container: area,
     onSuccess: () => {

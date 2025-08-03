@@ -1,9 +1,11 @@
-import { createDiscipleBadge } from './badges.js';
 import { showRaidDamageFloat } from './rendering.js';
 import { applyDamage } from './combat.js';
 import { runAnimation } from '../utils/animation.js';
+import { makeBar } from './ui.js';
+import { sectState } from './state.js';
+import { getMaxWater } from './metamorphosisBonuses.js';
 
-export function createHorizontalRaid({
+export function createVerticalRaid({
   orb,
   disciples = [],
   waves = [],
@@ -16,7 +18,16 @@ export function createHorizontalRaid({
 } = {}) {
   const state = {
     orb,
-    disciples: disciples.map(d => ({ d, timer: 0, badge: null, sprite: null, startLeft: 0, target: null, overlay: null })),
+    disciples: disciples.map(d => ({
+      d,
+      timer: 0,
+      sprite: null,
+      wrapper: null,
+      hpFill: null,
+      waterFill: null,
+      attackFill: null,
+      target: null
+    })),
     waves,
     onWaveStart,
     onWaveEnd,
@@ -25,6 +36,8 @@ export function createHorizontalRaid({
     container,
     root: null,
     raiders: [],
+    raiderBox: null,
+    discipleBox: null,
     waveIndex: 0,
     spawnIndex: 0,
     spawnTimer: 0,
@@ -36,13 +49,21 @@ export function createHorizontalRaid({
     waveHp: 0,
     waveLifeFill: null,
     waveLifeLabel: null,
-    waveLabel: null,
-    selectedBadge: null
+    waveLabel: null
   };
 
   function buildUI() {
     const root = document.createElement('div');
     root.className = 'raid-container';
+
+    const raiderBox = document.createElement('div');
+    raiderBox.className = 'raider-container';
+    root.appendChild(raiderBox);
+
+    const discipleBox = document.createElement('div');
+    discipleBox.className = 'disciple-container';
+    root.appendChild(discipleBox);
+
     const line = document.createElement('div');
     line.className = 'fight-line';
     root.appendChild(line);
@@ -61,7 +82,7 @@ export function createHorizontalRaid({
     lifeBar.appendChild(lifeFill);
     lifeBar.appendChild(lifeLabel);
     info.appendChild(lifeBar);
-    root.appendChild(info);
+    raiderBox.appendChild(info);
     state.waveLifeFill = lifeFill;
     state.waveLifeLabel = lifeLabel;
     state.waveLabel = waveLabel;
@@ -76,34 +97,52 @@ export function createHorizontalRaid({
     state.orbFill = fill;
     state.orbEl = orbEl;
 
-    state.disciples.forEach((slot, i) => {
-      const badge = createDiscipleBadge(slot.d);
-      badge.style.position = 'absolute';
-      badge.style.left = `${10 + i * 80}px`;
-      badge.style.top = '4px';
-      badge.addEventListener('click', () => {
-        if (state.selectedBadge) state.selectedBadge.classList.remove('selected');
-        state.selectedBadge = badge;
-        badge.classList.add('selected');
+    state.disciples.forEach(slot => {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'raid-disciple-wrapper';
+      wrapper.addEventListener('click', () => {
         window.dispatchEvent(
           new CustomEvent('open-disciple-overlay', { detail: slot.d })
         );
       });
-      root.appendChild(badge);
       const sprite = document.createElement('div');
       sprite.className = 'raid-disciple';
-      sprite.style.left = `${50 + i * 30}px`;
-      const overlay = document.createElement('div');
-      overlay.className = 'raid-attack-shadow';
-      sprite.appendChild(overlay);
-      root.appendChild(sprite);
-      slot.badge = badge;
+      wrapper.appendChild(sprite);
+
+      const bars = document.createElement('div');
+      bars.className = 'raid-disciple-bars';
+
+      const hpBar = makeBar(slot.d.currentHp, slot.d.maxHp, '#a33');
+      hpBar.classList.add('hp-bar');
+      bars.appendChild(hpBar);
+
+      const waterLvl = sectState.discipleSkills[slot.d.id]?.WaterSense || 0;
+      const waterBar = makeBar(
+        slot.d.water || 0,
+        getMaxWater(slot.d, waterLvl),
+        '#7fd9ff'
+      );
+      waterBar.classList.add('water-bar');
+      bars.appendChild(waterBar);
+
+      const attackBar = makeBar(0, slot.d.attackSpeed, '#ccc');
+      attackBar.classList.add('attack-bar');
+      bars.appendChild(attackBar);
+
+      wrapper.appendChild(bars);
+      discipleBox.appendChild(wrapper);
+
+      slot.wrapper = wrapper;
       slot.sprite = sprite;
-      slot.overlay = overlay;
-      slot.startLeft = 50 + i * 30;
+      slot.hpFill = hpBar.querySelector('.bar-fill');
+      slot.waterFill = waterBar.querySelector('.bar-fill');
+      slot.attackFill = attackBar.querySelector('.bar-fill');
     });
+
     state.container.appendChild(root);
     state.root = root;
+    state.raiderBox = raiderBox;
+    state.discipleBox = discipleBox;
   }
 
   function updateWaveLife() {
@@ -111,13 +150,14 @@ export function createHorizontalRaid({
     const pct = state.waveTotal > 0 ? (state.waveHp / state.waveTotal) * 100 : 0;
     state.waveLifeFill.style.width = `${pct}%`;
     if (state.waveLifeLabel) {
-      state.waveLifeLabel.textContent = `${Math.round(state.waveHp)}/${Math.round(state.waveTotal)}`;
+      state.waveLifeLabel.textContent = `${Math.round(state.waveHp)}/${Math.round(
+        state.waveTotal
+      )}`;
     }
   }
 
   function removeDisciple(slot) {
-    slot.sprite?.remove();
-    slot.badge?.remove();
+    slot.wrapper?.remove();
     const idx = state.disciples.indexOf(slot);
     if (idx >= 0) state.disciples.splice(idx, 1);
   }
@@ -157,8 +197,7 @@ export function createHorizontalRaid({
   function spawnRaider(stats) {
     const el = document.createElement('div');
     el.className = 'raider-unit';
-    el.style.left = '60%';
-    state.root.appendChild(el);
+    state.raiderBox.appendChild(el);
     state.raiders.push({
       hp: stats.hp,
       damage: stats.damage,
@@ -167,7 +206,6 @@ export function createHorizontalRaid({
       el
     });
   }
-
 
   function updateRaiders(dt) {
     state.raiders.forEach(r => {
@@ -183,6 +221,10 @@ export function createHorizontalRaid({
           applyDamage(target.d, r.damage);
           state.onDamage({ amount: r.damage, source: 'raider' });
           showRaidDamageFloat(target.sprite, r.damage);
+          if (target.hpFill) {
+            const ratio = target.d.currentHp / target.d.maxHp;
+            target.hpFill.style.width = `${Math.max(0, ratio) * 100}%`;
+          }
           runAnimation(r.el, 'attack-flash');
           if (target.d.currentHp <= 0 || target.d.incapacitated) {
             removeDisciple(target);
@@ -214,7 +256,7 @@ export function createHorizontalRaid({
         if (!slot.target) {
           slot.timer = 0;
           slot.sprite?.classList.remove('attacking');
-          if (slot.overlay) slot.overlay.style.height = '0%';
+          if (slot.attackFill) slot.attackFill.style.width = '0%';
           return;
         }
       }
@@ -222,7 +264,7 @@ export function createHorizontalRaid({
       slot.sprite?.classList.add('attacking');
       slot.timer += dt;
       const ratio = Math.min(1, slot.timer / slot.d.attackSpeed);
-      if (slot.overlay) slot.overlay.style.height = `${(1 - ratio) * 100}%`;
+      if (slot.attackFill) slot.attackFill.style.width = `${ratio * 100}%`;
       if (slot.timer >= slot.d.attackSpeed) {
         slot.timer -= slot.d.attackSpeed;
         const r = slot.target;
@@ -233,7 +275,7 @@ export function createHorizontalRaid({
         state.onDamage({ amount: slot.d.damage, source: 'disciple' });
         showRaidDamageFloat(r.el, slot.d.damage, true);
         runAnimation(slot.sprite, 'attack-flash');
-        if (slot.overlay) slot.overlay.style.height = '100%';
+        if (slot.attackFill) slot.attackFill.style.width = '0%';
         if (r.hp === 0) {
           r.el.remove();
           const idx = state.raiders.indexOf(r);
@@ -277,15 +319,11 @@ export function createHorizontalRaid({
     if (!state.active) return;
     state.active = false;
     state.root?.remove();
-    if (state.selectedBadge) {
-      state.selectedBadge.classList.remove('selected');
-      state.selectedBadge = null;
-    }
     state.raiders.length = 0;
     state.disciples.forEach(slot => {
       slot.target = null;
       if (slot.sprite) slot.sprite.classList.remove('attacking');
-      if (slot.overlay) slot.overlay.style.height = '0%';
+      if (slot.attackFill) slot.attackFill.style.width = '0%';
     });
     state.onWaveEnd(state.waveIndex);
     success ? state.onSuccess() : state.onFailure();
@@ -294,7 +332,6 @@ export function createHorizontalRaid({
   function tick(dt) {
     if (!state.active) return;
     spawnLoop(dt);
-    // dt is in milliseconds; use same unit for attack timers
     updateRaiders(dt);
     updateDisciples(dt);
   }
@@ -311,3 +348,4 @@ export function createHorizontalRaid({
     castWaterBurst: waterBurst
   };
 }
+
