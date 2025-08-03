@@ -1,4 +1,4 @@
-import { sectSystem } from './sect.js';
+import { sectSystem, sectIntegrity } from './sect.js';
 import { sectState } from './state.js';
 import { createDiscipleBadge } from './badges.js';
 import { METAMORPHOSIS_STAGE_REQ, TRAINING_NECTAR_RATE } from './constants.js';
@@ -288,7 +288,8 @@ export function tickMetamorphosis(dt) {
           getPathMatchMultiplier(d) *
           getStabilityFactor(d) *
           getCultivationSpeed(d) *
-          getSeasonMultiplier();
+          getSeasonMultiplier() *
+          sectIntegrity;
         const before = meta.xp;
         meta.xp = Math.min(
           metamorphosisState.requirement,
