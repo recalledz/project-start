@@ -31,7 +31,7 @@ export default class Disciple {
   }
 
   xpForNextLevel() {
-    return xpRequirement(5, this.combatLevel);
+    return xpRequirement(50, this.combatLevel);
   }
 
   gainCombatXp(amount) {
@@ -52,7 +52,7 @@ export default class Disciple {
     // Damage and defense grow purely with combat level and metamorphosis bonuses.
     const stage = sectState.discipleMetamorphosis[this.id]?.stage || 0;
     const stageBonus = stage * STAGE_BONUS.attack;
-    this.damage = this.combatLevel * 3 + stageBonus;
+    this.damage = this.combatLevel + stageBonus;
     this.attackSpeed = 5000;
     this.defense = this.combatLevel;
   }
