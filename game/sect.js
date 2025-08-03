@@ -1477,10 +1477,6 @@ export function tickSect(delta) {
   sectSystem.disciples.forEach(d => {
     if (d.incapacitated) {
       tickInjuries(d, dt, d.resilience, 'Resting');
-      d.currentHp = d.health;
-      if (d.health >= DISCIPLE_MAX_HEALTH / 2) {
-        d.incapacitated = false;
-      }
       if (!d.starveTimer) d.starveTimer = 0;
       if (d.water <= 0) {
         d.starveTimer += dt;
@@ -1490,6 +1486,10 @@ export function tickSect(delta) {
         }
       } else {
         d.starveTimer = 0;
+      }
+      d.currentHp = d.health;
+      if (d.health >= DISCIPLE_MAX_HEALTH / 2) {
+        d.incapacitated = false;
       }
       return;
     }
