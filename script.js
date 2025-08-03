@@ -56,6 +56,7 @@ import {
   calculateStaminaRegen
 } from './utils/stamina.js';
 import { BODY_PARTS } from './game/injury.js';
+import { QUIRKS } from './game/quirks.js';
 import {
   calculateMaxWater,
   calculateWaterRegen
@@ -1186,9 +1187,20 @@ function buildDiscipleProficiencyView(d) {
   return container;
 }
 
-function buildDiscipleMoodletsView() {
+function buildDiscipleMoodletsView(d) {
   const container = document.createElement('div');
-  container.textContent = 'No active moodlets';
+  if (!d.quirks || d.quirks.length === 0) {
+    container.textContent = 'No active moodlets';
+    return container;
+  }
+  const list = document.createElement('ul');
+  d.quirks.forEach(k => {
+    const item = document.createElement('li');
+    const info = QUIRKS[k];
+    item.textContent = info ? `${info.name} – ${info.description}` : k;
+    list.appendChild(item);
+  });
+  container.appendChild(list);
   return container;
 }
 

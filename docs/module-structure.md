@@ -5,6 +5,7 @@ The project organizes game logic under the `game/` directory.
 - **game/state.js** – central store for global state like `stats`, `systems`, `sectState`, and the current enemy. Also exposes time scaling helpers.
 - **game/disciple.js** – defines the `Disciple` class representing a single frog disciple.
 - **game/disciples.js** – manages which disciples are active in combat.
+- **game/quirks.js** – defines disciple quirk data and random generation helpers.
 - **game/ui.js** – renders combat UI elements such as bars and disciple cards.
 - **game/rendering.js** – raid rendering helpers such as `showRaidDamageFloat`.
 - **game/combat.js** – provides generic damage helpers used by raid modules.

@@ -39,7 +39,7 @@ it('exposes BODY_PARTS constant', () => {
 describe('injury system', () => {
   it('applies starvation damage and injuries', () => {
     const d = new Disciple({ id: 1 });
-    initializeDisciple(d);
+    initializeDisciple(d, { allowInjuries: false, generateQuirks: false });
     d.water = 0;
     sectSystem.disciples.push(d);
     sectState.discipleTasks[d.id] = 'Research';
@@ -52,7 +52,7 @@ describe('injury system', () => {
 
   it('resilience slows injury progress', () => {
     const d = new Disciple({ id: 1 });
-    initializeDisciple(d);
+    initializeDisciple(d, { allowInjuries: false, generateQuirks: false });
     applyInjury(d, 'head', 'bruise');
     d.injuries.head.rate = 0.5;
     tickInjuries(d, 1, 0.4, 'Idle');
@@ -61,7 +61,7 @@ describe('injury system', () => {
 
   it('base resilience persists with stage bonuses', async () => {
     const d = new Disciple({ id: 1 });
-    initializeDisciple(d);
+    initializeDisciple(d, { allowInjuries: false, generateQuirks: false });
     const { applyStageBonuses } = await import('../game/metamorphosisBonuses.js');
     sectState.discipleMetamorphosis[d.id] = { stage: 0 };
     applyStageBonuses(d);
