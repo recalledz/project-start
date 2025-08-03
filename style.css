@@ -870,38 +870,6 @@ body.darkenshift-mode .tabsContainer button.active {
 #battle-container {
     position: relative;
     overflow: hidden;
-    --reeds-offset: 0;
-    --water-offset: 0;
-    --lily-offset: 0;
-}
-#battle-container::before,
-#battle-container::after,
-#battle-container .mid {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-repeat: repeat-x;
-    background-position: 0 0;
-    will-change: background-position;
-    pointer-events: none;
-}
-#battle-container::before {
-    background-image: url('img/reeds-back.png');
-    z-index: 1;
-    background-position: var(--reeds-offset) 0;
-}
-#battle-container .mid {
-    background-image: url('img/water-mid.png');
-    z-index: 2;
-    background-position: var(--water-offset) 0;
-}
-#battle-container::after {
-    background-image: url('img/lily-pads.png');
-    z-index: 3;
-    background-position: var(--lily-offset) 0;
 }
 
 .work-content {
