@@ -53,10 +53,10 @@ export function ensureInjuryState(d) {
 export function calculateMaxHealth(d) {
   ensureInjuryState(d);
   const base = d.maxHp;
-  let hp = 0;
+  let hp = base;
   BODY_PARTS.forEach(p => {
     const state = d.injuries[p.key];
-    if (state.tier !== 'destroyed') hp += base * p.contribution;
+    if (state.tier === 'destroyed') hp -= base * p.contribution;
   });
   return Math.round(hp);
 }

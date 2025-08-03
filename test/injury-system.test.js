@@ -37,9 +37,16 @@ it('exposes BODY_PARTS constant', () => {
 });
 
 describe('injury system', () => {
+  it('starts with full health when no injuries', () => {
+    const d = new Disciple({ id: 1 });
+    initializeDisciple(d, { allowInjuries: false, generateQuirks: false });
+    expect(d.health).to.equal(d.maxHp);
+  });
+
   it('applies starvation damage and injuries', () => {
     const d = new Disciple({ id: 1 });
     initializeDisciple(d, { allowInjuries: false, generateQuirks: false });
+    d.resilience = 0;
     d.water = 0;
     sectSystem.disciples.push(d);
     sectState.discipleTasks[d.id] = 'Research';
@@ -47,7 +54,7 @@ describe('injury system', () => {
     Math.random = () => 0; // always hit head and apply bruise
     tickSect(1000);
     Math.random = prev;
-    expect(d.health).to.be.below(10);
+    expect(d.health).to.be.below(d.maxHp);
   });
 
   it('resilience slows injury progress', () => {
