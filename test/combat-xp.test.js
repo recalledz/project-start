@@ -59,6 +59,7 @@ describe('combat xp gain', () => {
     addSkillXp(d, 'Combat', 1);
     const endXp = sectState.discipleSkills[d.id].Combat || 0;
     expect(endXp).to.be.greaterThan(0);
+    expect(d.combatXp).to.be.greaterThan(0);
     endRaid(true);
   });
 });
