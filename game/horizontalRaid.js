@@ -3,27 +3,6 @@ import { showRaidDamageFloat } from './rendering.js';
 import { applyDamage } from './combat.js';
 import { runAnimation } from '../utils/animation.js';
 
-// Delay between waves in milliseconds
-const WAVE_DELAY = 5000;
-
-// Parallax layer configuration
-const PARALLAX_LAYERS = {
-  reeds: { speed: 10, cssVar: '--reeds-offset', img: 'img/reeds-back.png', width: 0 },
-  water: { speed: 30, cssVar: '--water-offset', img: 'img/water-mid.png', width: 0 },
-  lily: { speed: 60, cssVar: '--lily-offset', img: 'img/lily-pads.png', width: 0 }
-};
-
-// populate image widths without hard-coding values
-if (typeof Image !== 'undefined') {
-  Object.values(PARALLAX_LAYERS).forEach(layer => {
-    const img = new Image();
-    img.src = layer.img;
-    img.onload = () => {
-      layer.width = img.width;
-    };
-  });
-}
-
 export function createHorizontalRaid({
   orb,
   disciples = [],
@@ -49,8 +28,6 @@ export function createHorizontalRaid({
     waveIndex: 0,
     spawnIndex: 0,
     spawnTimer: 0,
-    waveTimer: 0,
-    waiting: false,
     active: false,
     onDamage,
     orbFill: null,
@@ -60,8 +37,7 @@ export function createHorizontalRaid({
     waveLifeFill: null,
     waveLifeLabel: null,
     waveLabel: null,
-    selectedBadge: null,
-    bgOffsets: Object.fromEntries(Object.keys(PARALLAX_LAYERS).map(k => [k, 0]))
+    selectedBadge: null
   };
 
   function buildUI() {
@@ -130,17 +106,6 @@ export function createHorizontalRaid({
     state.root = root;
   }
 
-  function updateBackground(dt) {
-    const offs = state.bgOffsets;
-    for (const [name, cfg] of Object.entries(PARALLAX_LAYERS)) {
-      offs[name] -= (dt * cfg.speed) / 1000;
-      if (cfg.width) offs[name] %= cfg.width;
-      if (state.container) {
-        state.container.style.setProperty(cfg.cssVar, `${offs[name]}px`);
-      }
-    }
-  }
-  
   function updateWaveLife() {
     if (!state.waveLifeFill) return;
     const pct = state.waveTotal > 0 ? (state.waveHp / state.waveTotal) * 100 : 0;
@@ -192,14 +157,12 @@ export function createHorizontalRaid({
   function spawnRaider(stats) {
     const el = document.createElement('div');
     el.className = 'raider-unit';
-    el.style.left = '100%';
+    el.style.left = '60%';
     state.root.appendChild(el);
     state.raiders.push({
       hp: stats.hp,
       damage: stats.damage,
       attackSpeed: stats.attackSpeed,
-      moveSpeed: stats.moveSpeed,
-      progress: 1,
       timer: 0,
       el
     });
@@ -212,23 +175,11 @@ export function createHorizontalRaid({
         s => !s.d.incapacitated && s.d.currentHp > 0
       );
 
-      // Determine the progress point the raider should move toward. If there
-      // are disciples alive we target the rightmost one; otherwise we head for
-      // the sect orb at progress 0.
-      const rootWidth = state.root?.offsetWidth || 1;
-      const target =
-        living.length > 0 ? living.sort((a, b) => b.startLeft - a.startLeft)[0] : null;
-      const targetProgress = target ? target.startLeft / rootWidth : 0;
-
-      if (r.progress > targetProgress) {
-        // Move toward the target and clamp so we don't pass through.
-        r.progress = Math.max(targetProgress, r.progress - r.moveSpeed * dt);
-        if (r.el) r.el.style.left = `${r.progress * 100}%`;
-      } else if (target) {
-        // At disciple – attack
-        r.timer += dt;
-        if (r.timer >= r.attackSpeed) {
-          r.timer -= r.attackSpeed;
+      r.timer += dt;
+      if (r.timer >= r.attackSpeed) {
+        r.timer -= r.attackSpeed;
+        if (living.length > 0) {
+          const target = living[Math.floor(Math.random() * living.length)];
           applyDamage(target.d, r.damage);
           state.onDamage({ amount: r.damage, source: 'raider' });
           showRaidDamageFloat(target.sprite, r.damage);
@@ -236,26 +187,15 @@ export function createHorizontalRaid({
           if (target.d.currentHp <= 0 || target.d.incapacitated) {
             removeDisciple(target);
           }
-        }
-      } else {
-        // No disciples remain; continue toward the orb
-        if (r.progress <= 0) {
+        } else {
           state.orb.current = Math.max(0, state.orb.current - r.damage);
           state.onDamage({ amount: r.damage, source: 'raider' });
           if (state.orbFill) {
             state.orbFill.style.height = `${(state.orb.current / state.orb.max) * 100}%`;
           }
           showRaidDamageFloat(state.orbEl, r.damage);
-          state.waveHp = Math.max(0, state.waveHp - r.hp);
           runAnimation(r.el, 'attack-flash');
-          r.el.remove();
-          const idx = state.raiders.indexOf(r);
-          if (idx >= 0) state.raiders.splice(idx, 1);
-          updateWaveLife();
           if (state.orb.current <= 0) end(false);
-        } else {
-          r.progress -= r.moveSpeed * dt;
-          if (r.el) r.el.style.left = `${r.progress * 100}%`;
         }
       }
     });
@@ -270,10 +210,7 @@ export function createHorizontalRaid({
       }
 
       if (!slot.target || slot.target.hp <= 0 || !livingRaiders.includes(slot.target)) {
-        slot.target = null;
-        if (livingRaiders.length > 0) {
-          slot.target = livingRaiders.slice().sort((a, b) => a.progress - b.progress)[0];
-        }
+        slot.target = livingRaiders[0] || null;
         if (!slot.target) {
           slot.timer = 0;
           slot.sprite?.classList.remove('attacking');
@@ -313,15 +250,7 @@ export function createHorizontalRaid({
   function spawnLoop(dt) {
     const wave = state.waves[state.waveIndex];
     if (!wave) return;
-    if (state.waiting) {
-      state.waveTimer += dt;
-      if (state.waveTimer >= WAVE_DELAY) {
-        state.waiting = false;
-        state.waveTimer = 0;
-        beginWave(state.waveIndex);
-      }
-      return;
-    }
+
     if (state.spawnIndex < wave.count) {
       state.spawnTimer += dt;
       if (state.spawnTimer >= wave.rate) {
@@ -339,7 +268,7 @@ export function createHorizontalRaid({
         end(true);
       } else {
         state.waveIndex = next;
-        state.waiting = true;
+        beginWave(state.waveIndex);
       }
     }
   }
@@ -364,7 +293,6 @@ export function createHorizontalRaid({
 
   function tick(dt) {
     if (!state.active) return;
-    updateBackground(dt);
     spawnLoop(dt);
     // dt is in milliseconds; use same unit for attack timers
     updateRaiders(dt);
@@ -376,8 +304,6 @@ export function createHorizontalRaid({
   return {
     start: () => {
       state.active = true;
-      state.waiting = false;
-      state.waveTimer = 0;
       beginWave(0);
     },
     tick,
