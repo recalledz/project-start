@@ -750,6 +750,33 @@ function updateDiscipleHealthDisplay() {
   }
 }
 
+function updateDiscipleCombatStatsDisplay() {
+  if (discipleOverlay && discipleOverlayActiveTab === 'combat') {
+    const d = discipleOverlayData.disciple;
+    if (!d) return;
+    const section = discipleOverlay.box.querySelector('.disciple-stats-combat');
+    if (!section) return;
+    const levelRow = section.querySelector('.combat-level');
+    if (levelRow) levelRow.textContent = `Level ${d.combatLevel}`;
+    const fill = section.querySelector('.disciple-progress-fill');
+    if (fill) {
+      const pct = Math.min(1, d.combatXp / d.xpForNextLevel());
+      fill.style.width = `${Math.floor(pct * 100)}%`;
+    }
+    const label = section.querySelector('.disciple-progress-label');
+    if (label) label.textContent = `${Math.floor(d.combatXp)}/${d.xpForNextLevel()}`;
+    const stats = section.querySelector('.combat-stats');
+    if (stats) {
+      const atkPerSec = (1000 / d.attackSpeed).toFixed(2);
+      const defense = Math.round(d.defense ?? 0);
+      stats.innerHTML =
+        `Damage ${Math.round(d.damage)}<br>` +
+        `Attack/s ${atkPerSec}<br>` +
+        `Defense ${defense}`;
+    }
+  }
+}
+
 function updateSectDisplay() {
   checkBuildingUnlock();
   if (sectNavBuildBtn) {
@@ -1003,10 +1030,12 @@ function startDiscipleMovement() {
 
 function buildDiscipleCombatStatsView(d) {
   const body = document.createElement('div');
+  body.className = 'disciple-combat';
   const atkPerSec = (1000 / d.attackSpeed).toFixed(2);
   const defense = Math.round(d.defense ?? 0);
 
   const levelRow = document.createElement('div');
+  levelRow.className = 'combat-level';
   levelRow.textContent = `Level ${d.combatLevel}`;
   body.appendChild(levelRow);
 
@@ -1023,6 +1052,7 @@ function buildDiscipleCombatStatsView(d) {
   body.appendChild(bar);
 
   const stats = document.createElement('div');
+  stats.className = 'combat-stats';
   stats.innerHTML =
     `Damage ${Math.round(d.damage)}<br>` +
     `Attack/s ${atkPerSec}<br>` +
@@ -2634,6 +2664,7 @@ function gameLoop(currentTime) {
   updateTaskProgressDisplay();
   updateDiscipleHealthDisplay();
   updateDiscipleWaterDisplay();
+  updateDiscipleCombatStatsDisplay();
   updateOrbGlow(deltaTime);
   requestAnimationFrame(gameLoop);
 }
