@@ -50,7 +50,7 @@ describe('combat xp gain', () => {
 
   it('awards combat xp to fighters during a raid', () => {
     const d = new Disciple({ id: 1 });
-    initializeDisciple(d);
+    initializeDisciple(d, { allowInjuries: false, generateQuirks: false });
     sectSystem.disciples.push(d);
     ensureDiscipleSkills(d.id);
     sectState.discipleTasks[d.id] = 'Gather Fruit';

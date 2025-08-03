@@ -1,10 +1,11 @@
 import Disciple from '../game/disciple.js';
 import { calculateMaxWater } from './water.js';
 import { sectState } from '../game/state.js';
-import { ensureInjuryState } from '../game/injury.js';
+import { ensureInjuryState, BODY_PARTS, calculateMaxHealth } from '../game/injury.js';
 import { applyStageBonuses } from '../game/metamorphosisBonuses.js';
+import { generateRandomQuirks } from '../game/quirks.js';
 
-export function initializeDisciple(d) {
+export function initializeDisciple(d, { allowInjuries = true, generateQuirks: genQuirks = true } = {}) {
   if (!d) return d;
   if (d.health === undefined) d.health = 10;
   if (d.stamina === undefined) d.stamina = 10;
@@ -38,6 +39,18 @@ export function initializeDisciple(d) {
   if (d.foundationXp === undefined) d.foundationXp = 0;
   if (d.lastTab === undefined) d.lastTab = 'general';
   ensureInjuryState(d);
+  if (genQuirks && !d.quirks) d.quirks = generateRandomQuirks();
+  if (allowInjuries) {
+    BODY_PARTS.forEach(p => {
+      if (!d.injuries[p.key].tier && Math.random() < 0.05) {
+        d.injuries[p.key].tier = 'destroyed';
+        d.injuries[p.key].progress = 200;
+        if (p.vital) d.incapacitated = true;
+      }
+    });
+    d.health = calculateMaxHealth(d);
+    d.currentHp = d.health;
+  }
   if (!sectState.discipleMetamorphosis[d.id]) {
     sectState.discipleMetamorphosis[d.id] = {
       xp: 0,

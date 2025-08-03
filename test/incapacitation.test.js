@@ -36,7 +36,7 @@ beforeEach(() => {
 describe('incapacitated disciples', () => {
   it('consume triple food and recover over time', () => {
     const d = new Disciple({ id: 1 });
-    initializeDisciple(d);
+    initializeDisciple(d, { allowInjuries: false, generateQuirks: false });
     d.incapacitated = true;
     d.health = 0;
     sectSystem.disciples.push(d);

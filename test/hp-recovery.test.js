@@ -35,7 +35,7 @@ beforeEach(() => {
 describe('disciple health regeneration', () => {
   it('updates currentHp when healing', () => {
     const d = new Disciple({ id: 1 });
-    initializeDisciple(d);
+    initializeDisciple(d, { allowInjuries: false, generateQuirks: false });
     d.health = 5;
     d.currentHp = 5;
     d.water = 10;

@@ -37,7 +37,7 @@ after(() => {
 describe('water shield', () => {
   it('absorbs damage before hp', () => {
     const d = new Disciple({ id: 1 });
-    initializeDisciple(d);
+    initializeDisciple(d, { allowInjuries: false, generateQuirks: false });
     d.water = 5;
     d.currentHp = d.maxHp;
 

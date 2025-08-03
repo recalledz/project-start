@@ -37,7 +37,7 @@ after(() => {
 describe('combat injuries', () => {
   it('applies an injury when taking damage without water', () => {
     const d = new Disciple({ id: 1 });
-    initializeDisciple(d);
+    initializeDisciple(d, { allowInjuries: false, generateQuirks: false });
     d.water = 0;
     const prev = Math.random;
     Math.random = () => 0;
