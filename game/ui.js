@@ -27,9 +27,14 @@ export function init(elements = {}) {
   explorationTabButton = elements.explorationTabButton;
 }
 
-export const handContainer = document.getElementsByClassName('handContainer')[0];
+export const handContainer =
+  typeof document !== 'undefined'
+    ? document.getElementsByClassName('handContainer')[0]
+    : null;
 export const dealerLifeDisplay =
-  document.getElementsByClassName('dealerLifeDisplay')[0] || null;
+  typeof document !== 'undefined'
+    ? document.getElementsByClassName('dealerLifeDisplay')[0] || null
+    : null;
 
 export function showPlayerAttackBar() {
   const bar = document.getElementById('playerAttackBar');
@@ -68,6 +73,21 @@ export function updateRaidLifeBar(enemy) {
 export function updateDiscipleStatsDisplay(d) {
   if (!d.statsElement) return;
   d.statsElement.innerHTML = '';
+}
+
+export function updatePlayerStatsUI(elems = {}, data = {}) {
+  if (elems.level) {
+    elems.level.textContent = String(data.level ?? '');
+  }
+  if (elems.xpFill) {
+    elems.xpFill.style.width = `${data.xpPercent ?? 0}%`;
+  }
+  if (elems.xpLabel) {
+    elems.xpLabel.textContent = data.xpLabel ?? '';
+  }
+  if (elems.stats) {
+    elems.stats.textContent = data.stats ?? '';
+  }
 }
 
 export function renderCombatDisciples() {}
