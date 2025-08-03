@@ -163,7 +163,6 @@ export function openWorkOverlay() {
 
     right.innerHTML = '';
     const tasks = ['Gather Fruit', 'Gather Softwood'];
-    if (systems.buildingUnlocked) tasks.push('Building');
     if (systems.researchUnlocked) tasks.push('Research');
     const selected = sectSystem.disciples.find(d => d.id === workOverlaySelected);
     tasks.forEach(t => {
@@ -448,35 +447,24 @@ export function openBuildOverlay() {
       const label = document.createElement('div');
       label.textContent = `${def.name} (Lv${built}/${def.max})`;
       row.appendChild(label);
-      if (sectState.currentBuild === key) {
-        const progress = document.createElement('div');
-        progress.className = 'build-progress';
-        const fill = document.createElement('div');
-        fill.className = 'build-progress-fill';
-        fill.style.width = `${Math.floor(sectState.buildProgress * 100)}%`;
-        progress.appendChild(fill);
-        row.appendChild(progress);
-      } else {
-        const cost = def.costFunc ? def.costFunc(built + 1) : def.cost;
-        const waterCost = def.costWaterFunc ? def.costWaterFunc(built + 1) : 0;
-        const nectarCost = def.costNectarFunc ? def.costNectarFunc(built + 1) : 0;
-        const btn = document.createElement('button');
-        const costParts = [`${cost}\u{1FAB5}`];
-        if (waterCost) costParts.push(`${waterCost}\u{1F4A7}`);
-        if (nectarCost) costParts.push(`${nectarCost}\u{1F480}`);
-        btn.textContent = `Build (${costParts.join(', ')})`;
-        btn.disabled =
-          sectState.softwood < cost ||
-          sectSystem.orbs.water.current < waterCost ||
-          sectState.undeadNectar < nectarCost ||
-          built >= def.max ||
-          sectState.currentBuild;
-        btn.addEventListener('click', () => {
-          startBuilding(key);
-          render();
-        });
-        row.appendChild(btn);
-      }
+      const cost = def.costFunc ? def.costFunc(built + 1) : def.cost;
+      const waterCost = def.costWaterFunc ? def.costWaterFunc(built + 1) : 0;
+      const nectarCost = def.costNectarFunc ? def.costNectarFunc(built + 1) : 0;
+      const btn = document.createElement('button');
+      const costParts = [`${cost}\u{1FAB5}`];
+      if (waterCost) costParts.push(`${waterCost}\u{1F4A7}`);
+      if (nectarCost) costParts.push(`${nectarCost}\u{1F480}`);
+      btn.textContent = `Build (${costParts.join(', ')})`;
+      btn.disabled =
+        sectState.softwood < cost ||
+        sectSystem.orbs.water.current < waterCost ||
+        sectState.undeadNectar < nectarCost ||
+        built >= def.max;
+      btn.addEventListener('click', () => {
+        startBuilding(key);
+        render();
+      });
+      row.appendChild(btn);
       list.appendChild(row);
     });
   }

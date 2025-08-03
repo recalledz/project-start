@@ -2,7 +2,7 @@
 
 This section covers all sect buildings and ornament structures, their costs, effects, and unlock requirements.
 
-Buildings become available once your sect has gathered **20 Softwood**. This unlocks the "Build" button in the sect navigation which opens an overlay listing all constructable buildings.
+Buildings become available once your sect has gathered **20 Softwood**. This unlocks the "Build" button in the sect navigation which opens an overlay listing all constructable buildings. Construction is instantaneous when purchased.
 
 Housing Buildings
 

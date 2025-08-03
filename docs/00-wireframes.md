@@ -137,7 +137,6 @@ Here’s the updated **Disciple Overlay UI wireframe** with the added `Cultivati
 │ **Proficiency Levels & XP Rates**                 │
 │ • Gathering     Lv 15   → 25 XP/s   (+3× affinity) │
 │ • Chanting      Lv 8    → 0.6 XP/s                 │
-│ • Building      Lv 6    → 0.8 XP/s                 │
 │ • Research      Lv 8    → 1.2 XP/s                 │
 │ • Exploration   Lv 4    → 0.4 XP/s                 │
 └────────────────────────────────────────────────────┘

@@ -9,7 +9,6 @@ export function ensureDiscipleSkills(id) {
       Gathering: 0,
       Logging: 0,
       Hunting: 0,
-      Building: 0,
       Researching: 0,
       Chanting: 0,
       Exploration: 0,

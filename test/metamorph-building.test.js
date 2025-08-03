@@ -2,7 +2,7 @@
 import { expect } from 'chai';
 import { sectState, systems } from '../game/state.js';
 
-let startBuilding, tickBuilding, checkBuildingUnlock, sectSystem;
+let startBuilding, checkBuildingUnlock;
 
 before(async () => {
   globalThis.document = {
@@ -11,8 +11,7 @@ before(async () => {
     addEventListener: () => {},
     removeEventListener: () => {}
   };
-  ({ startBuilding, tickBuilding, checkBuildingUnlock } = await import('../game/buildings.js'));
-  ({ sectSystem } = await import('../game/sect.js'));
+  ({ startBuilding, checkBuildingUnlock } = await import('../game/buildings.js'));
 });
 
 after(() => {
@@ -41,9 +40,6 @@ describe('Metamorph Room', () => {
     sectState.softwood = 100;
     sectState.undeadNectar = 1;
     startBuilding('metamorphRoom');
-    sectSystem.disciples.push({ id: 1, endurance: 0 });
-    sectState.discipleTasks[1] = 'Building';
-    tickBuilding(600);
     expect(sectState.buildings.metamorphRoom).to.equal(1);
     expect(sectState.metamorphRooms).to.equal(1);
   });

@@ -37,7 +37,7 @@ export const discoveredLocations = [];
 // previous implementation remain intact.
 // Water regeneration constant
 export const ORB_REGEN_PER_SEC = 0.1;
-// Time for one disciple assigned to Building to fully repair a cracked orb
+// Time required for a cracked orb to fully repair itself
 export const ORB_REPAIR_SECONDS = 150;
 
 // Seasonal cycle configuration
@@ -1178,6 +1178,18 @@ function updateMnemonicUI() {
 export function tickSectSystem(delta) {
   const hasUI = !!container;
   const dt = delta / 1000;
+  const orb = sectSystem.orbs.water;
+  if (orb.cracked) {
+    sectState.orbRepairProgress += dt / ORB_REPAIR_SECONDS;
+    if (sectState.orbRepairProgress >= 1) {
+      orb.cracked = false;
+      orb.max *= 2;
+      sectState.orbRepairProgress = 0;
+      if (hasUI && typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('orbs-changed'));
+      }
+    }
+  }
   if (sectSystem.intoneTimer > 0) {
     sectSystem.intoneTimer = Math.max(0, sectSystem.intoneTimer - dt);
     if (sectSystem.intoneTimer === 0) {
@@ -1207,9 +1219,11 @@ export function tickSectSystem(delta) {
       (sectSystem.scheduleIndex + 1) % SECT_SCHEDULE.length;
     const schedule = getCurrentSchedule();
     if (schedule.phase === 'Night') startRaid();
-    document.dispatchEvent(
-      new CustomEvent('schedule-phase', { detail: schedule })
-    );
+    if (typeof document !== 'undefined') {
+      document.dispatchEvent(
+        new CustomEvent('schedule-phase', { detail: schedule })
+      );
+    }
   }
   sectSystem.seasonTimer += dt;
   if (sectSystem.seasonTimer >= DAY_LENGTH_SECONDS) {
@@ -1218,9 +1232,11 @@ export function tickSectSystem(delta) {
     sectSystem.scheduleTimer = 0;
     const scheduleDayStart = getCurrentSchedule();
     if (scheduleDayStart.phase === 'Night') startRaid();
-    document.dispatchEvent(
-      new CustomEvent('schedule-phase', { detail: scheduleDayStart })
-    );
+    if (typeof document !== 'undefined') {
+      document.dispatchEvent(
+        new CustomEvent('schedule-phase', { detail: scheduleDayStart })
+      );
+    }
     sectSystem.seasonDay += 1;
     document.dispatchEvent(new CustomEvent('day-passed', {
       detail: { day: sectSystem.seasonDay, season: sectSystem.seasonIndex }
