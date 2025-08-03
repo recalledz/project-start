@@ -2,6 +2,7 @@ import { makeBar } from './ui.js';
 import { sectState } from './state.js';
 import { getMaxWater } from './metamorphosisBonuses.js';
 import { DISCIPLE_MAX_HEALTH } from './constants.js';
+import { getMoodEmoji } from './mood.js';
 
 export function createDiscipleBadge(d) {
   const badge = document.createElement('div');
@@ -18,7 +19,7 @@ export function createDiscipleBadge(d) {
 
   const mood = document.createElement('span');
   mood.className = 'mood-icon';
-  mood.textContent = d.mood || '🙂';
+  mood.textContent = getMoodEmoji(d.mood);
   content.appendChild(mood);
 
   const lifeBar = makeBar(d.health, DISCIPLE_MAX_HEALTH, '#a33');

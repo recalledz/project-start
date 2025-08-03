@@ -27,6 +27,10 @@ export default class Disciple {
     this.resilience = this.baseResilience;
     this.defense = 1;
     this.lastTab = 'general';
+    // mood system
+    this.mood = 100;
+    this.healedInjuryTimers = {};
+    this.incapTimer = 0;
     this.updateCombatStats();
   }
 
