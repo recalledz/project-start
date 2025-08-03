@@ -103,7 +103,8 @@ export const sectSystem = {
   gains: {
     water: 0,
     fruits: 0,
-    softwood: 0
+    softwood: 0,
+    undeadNectar: 0
   },
   skills: {
     mind: { xp: 0, level: 0 },
