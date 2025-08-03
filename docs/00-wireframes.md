@@ -51,7 +51,7 @@ This row appears above the sect map. The previous row of disciple cards beneath 
 
 Left panel (Resource / Items)
 
-Shows stackable resources (fruit, wood, stone, etc.).
+Shows stackable resources like fruit, wood, and undead nectar.
 Selecting the Resources nav opens an overlay showing daily gains and losses.
 Softwood production appears once a disciple is assigned to gather it.
 The numbers update automatically as tasks and production change.
