@@ -118,6 +118,7 @@ import {
   clearActiveDisciples
 } from "./game/disciples.js";
 import { raidState, tickRaid } from './game/raids.js';
+import { getMoodEmoji } from './game/mood.js';
 // developer debug tools
 import { init as initDebug } from "./game/debug.js";
 import { attachOrbGlow, enableOrbGlow, disableOrbGlow, updateOrbGlow, flashOrbGlow } from './game/orbGlow.js';
@@ -712,6 +713,32 @@ function updateDiscipleHealthDisplay() {
   }
 }
 
+function updateDiscipleMoodDisplay() {
+  sectSystem.disciples.forEach(d => {
+    document
+      .querySelectorAll(
+        `.disciple-badge[data-disciple-id="${d.id}"] .mood-icon`
+      )
+      .forEach(icon => {
+        icon.textContent = getMoodEmoji(d.mood);
+      });
+  });
+  if (discipleOverlay && discipleOverlayActiveTab === 'moodlets') {
+    const d = discipleOverlayData.disciple;
+    if (d) {
+      const row = discipleOverlay.box.querySelector('.mood-bar');
+      if (row) {
+        const icon = row.querySelector('.disciple-bar-icon');
+        if (icon) icon.textContent = getMoodEmoji(d.mood);
+        const fill = row.querySelector('.bar-fill');
+        if (fill) fill.style.width = `${Math.min(100, d.mood)}%`;
+        const text = row.querySelector('.disciple-bar-text');
+        if (text) text.textContent = `${Math.round(d.mood)}/100`;
+      }
+    }
+  }
+}
+
 function updateDiscipleCombatStatsDisplay() {
   if (discipleOverlay && discipleOverlayActiveTab === 'combat') {
     const d = discipleOverlayData.disciple;
@@ -1189,8 +1216,14 @@ function buildDiscipleProficiencyView(d) {
 
 function buildDiscipleMoodletsView(d) {
   const container = document.createElement('div');
+  container.className = 'disciple-moodlets-view';
+  const moodBar = createLabeledBar(getMoodEmoji(d.mood), d.mood, 100, '#ffcc4d');
+  moodBar.classList.add('mood-bar');
+  container.appendChild(moodBar);
   if (!d.quirks || d.quirks.length === 0) {
-    container.textContent = 'No active moodlets';
+    const none = document.createElement('div');
+    none.textContent = 'No active moodlets';
+    container.appendChild(none);
     return container;
   }
   const list = document.createElement('ul');
@@ -2606,6 +2639,7 @@ function gameLoop(currentTime) {
   updateTaskProgressDisplay();
   updateDiscipleHealthDisplay();
   updateDiscipleWaterDisplay();
+  updateDiscipleMoodDisplay();
   updateDiscipleCombatStatsDisplay();
   updateOrbGlow(deltaTime);
   requestAnimationFrame(gameLoop);

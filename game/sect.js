@@ -29,7 +29,7 @@ import {
 } from './constants.js';
 import { startRaid, raidState } from './raids.js';
 import { tickOrbSpells } from './orbSpells.js';
-import { applyStarvationHit, tickInjuries } from './injury.js';
+import { applyStarvationHit, tickInjuries, BODY_PARTS } from './injury.js';
 
 export { addDiscoveredLocation } from "./ui.js";
 export const discoveredLocations = [];
@@ -139,8 +139,11 @@ export const sectSystem = {
   attackSpeedMult: 1,
   murmurChain: 0,
   scheduleIndex: 0,
-  scheduleTimer: 0
+  scheduleTimer: 0,
+  deathMoodPenalty: 0
 };
+
+export let sectIntegrity = 1;
 
 export function getCurrentSchedule() {
   return SECT_SCHEDULE[sectSystem.scheduleIndex];
@@ -1458,6 +1461,68 @@ export function getDailyResourceDelta() {
 
 // placeholder colony functions
 
+function updateDiscipleMood(d, dt) {
+  if (d.healedInjuryTimers) {
+    for (const part in d.healedInjuryTimers) {
+      if (d.healedInjuryTimers[part] > 0) {
+        d.healedInjuryTimers[part] = Math.max(0, d.healedInjuryTimers[part] - dt);
+      }
+    }
+  }
+  if (!d.incapTimer) d.incapTimer = 0;
+  if (!d.healedInjuryTimers) d.healedInjuryTimers = {};
+
+  let mood = 100;
+  const bohio = sectState.buildings.bohio || 0;
+  const diff = sectSystem.disciples.length - bohio;
+  if (diff > 0) mood -= 25 * diff;
+  else if (diff < 0) mood += 10 * -diff;
+
+  const meta = sectState.discipleMetamorphosis[d.id];
+  if (meta?.stage) mood -= 50 * meta.stage;
+
+  let destroyedCount = 0;
+  BODY_PARTS.forEach(p => {
+    const state = d.injuries?.[p.key];
+    if (!state) return;
+    if (state.tier === 'destroyed') {
+      destroyedCount++;
+    } else if (state.tier) {
+      mood -= 20;
+      d.healedInjuryTimers[p.key] = 1200;
+    } else if (d.healedInjuryTimers[p.key] > 0) {
+      mood -= 20;
+    }
+  });
+  if (destroyedCount > 0) mood -= 20 + (destroyedCount - 1) * 10;
+
+  if (d.incapacitated) d.incapTimer = 1200;
+  if (d.incapTimer > 0) {
+    mood -= 20;
+    d.incapTimer = Math.max(0, d.incapTimer - dt);
+  }
+
+  if (sectSystem.deathMoodPenalty) mood -= sectSystem.deathMoodPenalty;
+
+  d.mood = Math.max(0, Math.min(100, mood));
+}
+
+function updateSectIntegrity() {
+  if (sectSystem.disciples.length === 0) {
+    sectIntegrity = 1;
+    return;
+  }
+  let total = 0;
+  sectSystem.disciples.forEach(d => {
+    total += d.mood || 0;
+  });
+  sectIntegrity = Math.max(0, Math.min(1, total / (sectSystem.disciples.length * 100)));
+}
+
+export function registerDiscipleDeath() {
+  sectSystem.deathMoodPenalty += 15;
+}
+
 export function tickSect(delta) {
   const dt = delta / 1000;
   let foodNeed = 0;
@@ -1475,6 +1540,8 @@ export function tickSect(delta) {
       sectSystem.orbs.water.current - deficit
     );
   }
+  sectSystem.disciples.forEach(d => updateDiscipleMood(d, dt));
+  updateSectIntegrity();
   sectSystem.disciples.forEach(d => {
     if (d.incapacitated) {
       tickInjuries(d, dt, d.resilience, 'Resting');
@@ -1516,6 +1583,7 @@ export function tickSect(delta) {
     let group = TASK_GROUPS[task];
     let xpRate = 0;
     let progress = sectState.discipleProgress[d.id] || 0;
+    const integrity = sectIntegrity;
 
     if (raidState.active) {
       return;
@@ -1524,13 +1592,13 @@ export function tickSect(delta) {
       const rate =
         (task === 'Gather Fruit' ? FRUIT_XP_PER_CYCLE : LOG_XP_PER_CYCLE) /
         GATHER_WORK_SECONDS;
-      xpRate = rate;
+      xpRate = rate * integrity;
 
       const groupAttr = ATTRIBUTE_FOR_GROUP[TASK_GROUPS[task]];
       const skillXp = sectState.discipleSkills[d.id]?.[TASK_GROUPS[task]] || 0;
       const lvl = getTaskSkillProgress(skillXp).level;
       const yieldMult = 1 + 0.05 * (d[groupAttr] || 0) + 0.02 * lvl;
-      const gatherRate = spot.baseYield * yieldMult;
+      const gatherRate = spot.baseYield * yieldMult * integrity;
 
       if (task === 'Gather Fruit') {
         sectState.fruits = Math.min(
@@ -1545,19 +1613,19 @@ export function tickSect(delta) {
       }
       if (typeof updateSectDisplay === 'function') updateSectDisplay();
     } else if (task === 'Research') {
-      sectState.researchProgress += 4 * dt;
+      sectState.researchProgress += 4 * dt * integrity;
       while (sectState.researchProgress >= 500) {
         sectState.researchProgress -= 500;
         sectState.researchPoints += 1;
       }
-      xpRate = RESEARCH_XP_PER_CYCLE / 125;
+      xpRate = (RESEARCH_XP_PER_CYCLE / 125) * integrity;
     } else if (task === 'Chant') {
-      xpRate = CHANT_XP_PER_CYCLE / 5;
+      xpRate = (CHANT_XP_PER_CYCLE / 5) * integrity;
     } else if (task === 'Hunt') {
-      progress = (progress + dt) % HUNT_CYCLE_SECONDS;
+      progress = (progress + dt * integrity) % HUNT_CYCLE_SECONDS;
       sectState.discipleProgress[d.id] = progress;
     } else if (task === 'Exploration') {
-      progress = (progress + dt) % EXPLORATION_CYCLE_SECONDS;
+      progress = (progress + dt * integrity) % EXPLORATION_CYCLE_SECONDS;
     }
     sectState.discipleProgress[d.id] = progress;
 

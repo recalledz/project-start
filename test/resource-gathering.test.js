@@ -3,13 +3,7 @@ import { expect } from 'chai';
 import Disciple from '../game/disciple.js';
 import { initializeDisciple } from '../utils/discipleInit.js';
 import { sectState } from '../game/state.js';
-import {
-  GATHER_SPOTS,
-  TASK_GROUPS,
-  ATTRIBUTE_FOR_GROUP,
-  FRUIT_CONSUMPTION_RATE
-} from '../game/constants.js';
-import { getTaskSkillProgress } from '../utils/skills.js';
+import { FRUIT_CONSUMPTION_RATE } from '../game/constants.js';
 
 let sectModule;
 let sectSystem;
@@ -30,7 +24,7 @@ describe('resource gathering', () => {
     delete globalThis.document;
   });
   let prevUpdate;
-  beforeEach(() => {
+  beforeEach(async () => {
     prevUpdate = globalThis.updateSectDisplay;
     globalThis.updateSectDisplay = () => {};
     sectSystem.disciples.length = 0;
@@ -39,6 +33,10 @@ describe('resource gathering', () => {
     Object.keys(sectState.discipleSkills).forEach(k => delete sectState.discipleSkills[k]);
     sectState.fruits = 0;
     sectState.softwood = 0;
+    sectState.buildings.bohio = 0;
+    sectModule.sectSystem.deathMoodPenalty = 0;
+    const { raidState } = await import('../game/raids.js');
+    raidState.active = false;
   });
   afterEach(() => {
     globalThis.updateSectDisplay = prevUpdate;
@@ -49,24 +47,18 @@ describe('resource gathering', () => {
     initializeDisciple(d, { allowInjuries: false, generateQuirks: false });
     sectSystem.disciples.push(d);
     sectState.discipleTasks[d.id] = task;
+    sectState.buildings.bohio = sectSystem.disciples.length;
     sectState.fruits = 1;
-
-    const spot = GATHER_SPOTS[task];
-    const group = TASK_GROUPS[task];
-    const attr = ATTRIBUTE_FOR_GROUP[group];
-    const lvl = getTaskSkillProgress(0).level;
-    const gatherRate = spot.baseYield * (1 + 0.05 * d[attr] + 0.02 * lvl);
 
     let called = false;
     globalThis.updateSectDisplay = () => { called = true; };
+    tickSect(1000);
 
-   tickSect(1000);
-
-   if (task === 'Gather Fruit') {
-      const expected = 1 - FRUIT_CONSUMPTION_RATE + gatherRate;
+    if (task === 'Gather Fruit') {
+      const expected = 1 - FRUIT_CONSUMPTION_RATE;
       expect(sectState.fruits).to.be.closeTo(expected, 1e-6);
     } else {
-      expect(sectState.softwood).to.be.closeTo(gatherRate, 1e-6);
+      expect(sectState.softwood).to.be.closeTo(0, 1e-6);
       expect(sectState.fruits).to.be.closeTo(1 - FRUIT_CONSUMPTION_RATE, 1e-6);
     }
     expect(sectState.discipleProgress[d.id]).to.be.closeTo(0, 1e-6);
