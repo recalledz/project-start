@@ -45,6 +45,7 @@ function finalize(victory) {
     if (sectSystem.resources.undeadNectar) {
       const res = sectSystem.resources.undeadNectar;
       res.current = Math.min(res.max, res.current + RAID_NECTAR_REWARD);
+      res.unlocked = true;
     }
   }
 

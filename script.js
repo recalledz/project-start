@@ -745,10 +745,15 @@ function updateSectDisplay() {
        };
     const fruitRate = formatRate(sectSystem.gains?.fruits);
     const woodRate = formatRate(sectSystem.gains?.softwood);
+    const nectarRate = formatRate(sectSystem.gains?.undeadNectar);
+    const nectarLine = sectSystem.resources?.undeadNectar?.unlocked
+      ? `<span>💀 ${sectState.undeadNectar.toFixed(2)}/${sectSystem.resources.undeadNectar.max} (${nectarRate}/s)</span>`
+      : '';
     sectSummaryDisplay.innerHTML = `
       <span>👥 ${total}/${sectState.maxDisciples} (Idle: ${idle})</span>
       <span>${sectState.fruits.toFixed(2)}/${sectState.fruitCap} (${fruitRate}/s)</span>
-      <span>🪵 ${sectState.softwood.toFixed(2)}/${sectState.softwoodCap} (${woodRate}/s)</span>`;
+      <span>🪵 ${sectState.softwood.toFixed(2)}/${sectState.softwoodCap} (${woodRate}/s)</span>
+      ${nectarLine}`;
     const timer = document.getElementById('resourceTimer');
     if (timer) {
       timer.textContent = `${mm}:${ss}`;
@@ -2445,11 +2450,12 @@ Object.assign(playerStats, state.playerStats || {});
       }
 
       if (!sectSystem.gains) {
-        sectSystem.gains = { water: 0, fruits: 0, softwood: 0 };
+        sectSystem.gains = { water: 0, fruits: 0, softwood: 0, undeadNectar: 0 };
       } else {
         if (typeof sectSystem.gains.water !== 'number') sectSystem.gains.water = 0;
         if (typeof sectSystem.gains.fruits !== 'number') sectSystem.gains.fruits = 0;
         if (typeof sectSystem.gains.softwood !== 'number') sectSystem.gains.softwood = 0;
+        if (typeof sectSystem.gains.undeadNectar !== 'number') sectSystem.gains.undeadNectar = 0;
       }
 
     if (!Array.isArray(sectSystem.savedConstructs)) {
@@ -2538,6 +2544,7 @@ function gameLoop(currentTime) {
   const startWater = sectSystem.resources.water.current;
   const startFruit = sectState.fruits;
   const startSoftwood = sectState.softwood;
+  const startNectar = sectState.undeadNectar;
 
 
   if (currentEnemy) {
@@ -2584,10 +2591,13 @@ function gameLoop(currentTime) {
     sectSystem.gains.fruits = (sectState.fruits - startFruit) / dtSeconds;
     sectSystem.gains.softwood =
       (sectState.softwood - startSoftwood) / dtSeconds;
+    sectSystem.gains.undeadNectar =
+      (sectState.undeadNectar - startNectar) / dtSeconds;
   } else {
     sectSystem.gains.water = 0;
     sectSystem.gains.fruits = 0;
     sectSystem.gains.softwood = 0;
+    sectSystem.gains.undeadNectar = 0;
   }
   // refresh sect resource UI every tick for real-time updates
   if (typeof updateSectDisplay === 'function') updateSectDisplay();
