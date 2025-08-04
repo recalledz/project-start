@@ -24,7 +24,8 @@ export function ensureMeta(id) {
       stage: 0,
       masteryXp: 0,
       masteryLevel: 0,
-      masteryPending: false
+      masteryPending: false,
+      upgrades: []
     };
   } else {
     const meta = sectState.discipleMetamorphosis[id];
@@ -32,6 +33,7 @@ export function ensureMeta(id) {
     if (meta.masteryLevel === undefined)
       meta.masteryLevel = getMasteryProgress(meta.masteryXp).level;
     if (meta.masteryPending === undefined) meta.masteryPending = false;
+    if (!Array.isArray(meta.upgrades)) meta.upgrades = [];
   }
 }
 

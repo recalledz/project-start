@@ -49,4 +49,4 @@ Integrate a Taino‑inspired frog glyph around the icon for ambient feedback.
 - Progress rings feature a lilac to teal gradient with a subtle glow.
 - Progress numbers appear on semi-transparent parchment panels.
 - Training rooms unlock after obtaining Undead Nectar, letting disciples be assigned from this panel.
-- When mastery levels are ready, a Level Up button appears beneath the rings to choose from three placeholder upgrades.
+- When mastery levels are ready, a Level Up button appears beneath the rings to choose from three random upgrades.
