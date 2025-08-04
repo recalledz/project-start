@@ -666,13 +666,24 @@ body.darkenshift-mode .tabsContainer button.active {
 }
 
 .raid-disciple-bars {
-    width: 32px;
+    width: 48px;
 }
 
 .raid-disciple-bars .bar {
     width: 100%;
-    height: 4px;
+    height: 6px;
     margin-top: 2px;
+    background: #444;
+    border: 1px solid #222;
+    position: relative;
+}
+
+.raid-disciple-bars .bar-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    z-index: 1;
 }
 
 .raid-orb {
