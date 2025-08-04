@@ -4366,6 +4366,12 @@ body.darkenshift-mode .tabsContainer button.active {
   background: #111;
 }
 
+.body-part-effect {
+  font-size: 0.8rem;
+  color: #ccc;
+  margin-top: 2px;
+}
+
 body.raid-active .player-sect-panel {
   display: none;
 }

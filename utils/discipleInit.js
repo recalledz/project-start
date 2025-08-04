@@ -1,7 +1,7 @@
 import Disciple from '../game/disciple.js';
 import { calculateMaxWater } from './water.js';
 import { sectState } from '../game/state.js';
-import { ensureInjuryState, BODY_PARTS, calculateMaxHealth } from '../game/injury.js';
+import { ensureInjuryState, BODY_PARTS, applyInjuryEffects } from '../game/injury.js';
 import { applyStageBonuses } from '../game/metamorphosisBonuses.js';
 import { generateRandomQuirks } from '../game/quirks.js';
 
@@ -48,8 +48,9 @@ export function initializeDisciple(d, { allowInjuries = true, generateQuirks: ge
         if (p.vital) d.incapacitated = true;
       }
     });
-    d.health = calculateMaxHealth(d);
+    d.health = d.maxHp;
     d.currentHp = d.health;
+    applyInjuryEffects(d);
   }
   if (!sectState.discipleMetamorphosis[d.id]) {
     sectState.discipleMetamorphosis[d.id] = {

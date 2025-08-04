@@ -2,7 +2,7 @@
 
 Disciples can possess **quirks** that influence their behavior and abilities. Each new disciple spawns with 1–3 random quirks drawn from the list below. Quirks persist and appear on the disciple overlay's **Moodlets** tab.
 
-Some disciples may also arrive with destroyed body parts, reducing their maximum health and potentially incapacitating them if vital areas are lost.
+Some disciples may also arrive with destroyed body parts, potentially incapacitating them if vital areas are lost.
 
 ## Quirk List
 
