@@ -561,15 +561,6 @@ body.darkenshift-mode .tabsContainer button.active {
     );
 }
 
-.fight-line {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 50%;
-    height: 2px;
-    background: rgba(255,255,255,0.2);
-}
-
 .raider-container {
     flex: 1;
     display: flex;
@@ -726,9 +717,9 @@ body.darkenshift-mode .tabsContainer button.active {
 
 .raid-orb {
     position: absolute;
-    bottom: 8px;
+    top: 50%;
     left: 50%;
-    transform: translateX(-50%);
+    transform: translate(-50%, -50%);
     width: 48px;
     height: 48px;
     overflow: hidden;
