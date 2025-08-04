@@ -1474,14 +1474,26 @@ function updateDiscipleMood(d, dt) {
   if (!d.incapTimer) d.incapTimer = 0;
   if (!d.healedInjuryTimers) d.healedInjuryTimers = {};
 
+  d.moodModifiers = [];
   let mood = 100;
   const bohio = sectState.buildings.bohio || 0;
   const diff = sectSystem.disciples.length - bohio;
-  if (diff > 0) mood -= 25 * diff;
-  else if (diff < 0) mood += 10 * -diff;
+  if (diff > 0) {
+    const amount = -25 * diff;
+    mood += amount;
+    d.moodModifiers.push({ label: 'Overcrowded housing', value: amount });
+  } else if (diff < 0) {
+    const amount = 10 * -diff;
+    mood += amount;
+    d.moodModifiers.push({ label: 'Spare housing', value: amount });
+  }
 
   const meta = sectState.discipleMetamorphosis[d.id];
-  if (meta?.stage) mood -= 50 * meta.stage;
+  if (meta?.stage) {
+    const amount = -50 * meta.stage;
+    mood += amount;
+    d.moodModifiers.push({ label: `Metamorphosis stage ${meta.stage}`, value: amount });
+  }
 
   let destroyedCount = 0;
   BODY_PARTS.forEach(p => {
@@ -1490,21 +1502,35 @@ function updateDiscipleMood(d, dt) {
     if (state.tier === 'destroyed') {
       destroyedCount++;
     } else if (state.tier) {
-      mood -= 20;
+      const amount = -20;
+      mood += amount;
+      d.moodModifiers.push({ label: `Injured ${p.label}`, value: amount });
       d.healedInjuryTimers[p.key] = 1200;
     } else if (d.healedInjuryTimers[p.key] > 0) {
-      mood -= 20;
+      const amount = -20;
+      mood += amount;
+      d.moodModifiers.push({ label: `Recently injured ${p.label}`, value: amount });
     }
   });
-  if (destroyedCount > 0) mood -= 20 + (destroyedCount - 1) * 10;
+  if (destroyedCount > 0) {
+    const amount = -(20 + (destroyedCount - 1) * 10);
+    mood += amount;
+    d.moodModifiers.push({ label: 'Destroyed limbs', value: amount });
+  }
 
   if (d.incapacitated) d.incapTimer = 1200;
   if (d.incapTimer > 0) {
-    mood -= 20;
+    const amount = -20;
+    mood += amount;
+    d.moodModifiers.push({ label: 'Incapacitated', value: amount });
     d.incapTimer = Math.max(0, d.incapTimer - dt);
   }
 
-  if (sectSystem.deathMoodPenalty) mood -= sectSystem.deathMoodPenalty;
+  if (sectSystem.deathMoodPenalty) {
+    const amount = -sectSystem.deathMoodPenalty;
+    mood += amount;
+    d.moodModifiers.push({ label: 'Fallen comrade', value: amount });
+  }
 
   d.mood = Math.max(0, Math.min(100, mood));
 }

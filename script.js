@@ -56,7 +56,6 @@ import {
   calculateStaminaRegen
 } from './utils/stamina.js';
 import { BODY_PARTS } from './game/injury.js';
-import { QUIRKS } from './game/quirks.js';
 import {
   calculateMaxWater,
   calculateWaterRegen
@@ -735,6 +734,22 @@ function updateDiscipleMoodDisplay() {
         const text = row.querySelector('.disciple-bar-text');
         if (text) text.textContent = `${Math.round(d.mood)}/100`;
       }
+      const list = discipleOverlay.box.querySelector('.mood-modifiers');
+      if (list) {
+        list.innerHTML = '';
+        if (d.moodModifiers && d.moodModifiers.length > 0) {
+          d.moodModifiers.forEach(m => {
+            const item = document.createElement('li');
+            const sign = m.value >= 0 ? '+' : '';
+            item.textContent = `${m.label} (${sign}${m.value})`;
+            list.appendChild(item);
+          });
+        } else {
+          const none = document.createElement('li');
+          none.textContent = 'No active mood modifiers';
+          list.appendChild(none);
+        }
+      }
     }
   }
 }
@@ -1220,19 +1235,20 @@ function buildDiscipleMoodletsView(d) {
   const moodBar = createLabeledBar(getMoodEmoji(d.mood), d.mood, 100, '#ffcc4d');
   moodBar.classList.add('mood-bar');
   container.appendChild(moodBar);
-  if (!d.quirks || d.quirks.length === 0) {
-    const none = document.createElement('div');
-    none.textContent = 'No active moodlets';
-    container.appendChild(none);
-    return container;
-  }
   const list = document.createElement('ul');
-  d.quirks.forEach(k => {
-    const item = document.createElement('li');
-    const info = QUIRKS[k];
-    item.textContent = info ? `${info.name} – ${info.description}` : k;
-    list.appendChild(item);
-  });
+  list.className = 'mood-modifiers';
+  if (d.moodModifiers && d.moodModifiers.length > 0) {
+    d.moodModifiers.forEach(m => {
+      const item = document.createElement('li');
+      const sign = m.value >= 0 ? '+' : '';
+      item.textContent = `${m.label} (${sign}${m.value})`;
+      list.appendChild(item);
+    });
+  } else {
+    const none = document.createElement('li');
+    none.textContent = 'No active mood modifiers';
+    list.appendChild(none);
+  }
   container.appendChild(list);
   return container;
 }
