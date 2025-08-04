@@ -51,9 +51,6 @@ export function addSkillXp(d, group, amount) {
   const newXp = prevXp + amount;
   sectState.discipleSkills[d.id][group] = newXp;
   const newLevel = getTaskSkillProgress(newXp).level;
-  if (group === 'Combat') {
-    d.gainCombatXp(amount);
-  }
   if (group === 'Combat') addMasteryXp(d.id, amount);
   else addMasteryXp(d.id, amount / 4);
   if (newLevel > oldLevel) {

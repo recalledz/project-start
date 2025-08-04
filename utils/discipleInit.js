@@ -20,7 +20,6 @@ export function initializeDisciple(d, { allowInjuries = true, generateQuirks: ge
   if (d.charisma === undefined) d.charisma = 1;
   if (d.potential === undefined) d.potential = 1;
   if (d.globalLevel === undefined) d.globalLevel = 0;
-  if (d.combatXp === undefined) d.combatXp = 0;
   if (d.baseStrength === undefined) d.baseStrength = d.strength;
   if (d.baseDexterity === undefined) d.baseDexterity = d.dexterity;
   if (d.baseEndurance === undefined) d.baseEndurance = d.endurance;
@@ -33,7 +32,6 @@ export function initializeDisciple(d, { allowInjuries = true, generateQuirks: ge
   if (!d.name) d.name = `Disciple ${d.id}`;
   if (d.inventorySlots === undefined) d.inventorySlots = 10;
   if (!d.inventory) d.inventory = {};
-  if (d.combatLevel === undefined) d.combatLevel = 1;
   if (d.maxHp === undefined) d.maxHp = 10;
   if (d.currentHp === undefined) d.currentHp = d.maxHp;
   if (d.foundationXp === undefined) d.foundationXp = 0;

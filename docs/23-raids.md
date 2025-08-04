@@ -13,7 +13,7 @@ A typical raid now consists of **five** waves. Each wave spawns a single raider 
 
 The module handles spawning raiders and resolving combat. If the orb's water reaches zero the raid fails immediately.
 
-Raiders randomly target living disciples from their positions. Disciples remain in place and always attack the first raider in line. Several disciples may assault the same target at once, each dealing damage whenever their personal attack timer completes. Each defender strikes once every 5 seconds, dealing a random amount between 50% and 150% of their base damage before any combat or metamorphosis bonuses are applied. Attacking disciples grow slightly larger and a dark overlay shrinks to indicate progress toward their next strike. Whenever a disciple or raider lands an attack, their sprite briefly flashes white twice.
+Raiders randomly target living disciples from their positions. Disciples remain in place and always attack the first raider in line. Several disciples may assault the same target at once, each dealing damage whenever their personal attack timer completes. Each defender strikes once every 5 seconds, dealing a random amount between 50% and 150% of their base damage before any metamorphosis bonuses are applied. Attacking disciples grow slightly larger and a dark overlay shrinks to indicate progress toward their next strike. Whenever a disciple or raider lands an attack, their sprite briefly flashes white twice.
 
 The raid ends when all waves are cleared or the orb is destroyed. Callbacks are fired at the start and end of each wave along with a final success or failure signal. When night falls the game automatically switches to a dedicated raid tab and begins a raid. Disciples temporarily switch to the "Idle" task so they remain visible in the interface.
 
@@ -37,5 +37,5 @@ immediately removed from the lineup and no longer fights in that raid.
 ### Rewards
 
 Successfully clearing all waves awards the sect **1 Undead Nectar** and each
-participating disciple gains **30 Combat XP**.
+participating disciple gains **30 Metamorph Mastery XP**.
 

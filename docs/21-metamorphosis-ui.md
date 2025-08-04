@@ -6,7 +6,7 @@ These notes outline the planned interface for visualizing a disciple's frog-like
 
 - **Segment-based frog icon** – an SVG divided into segments representing Egg, Tail, Limbs, Body and Crown. Each segment lights up as its threshold is met.
 - **Circular XP progress ring** – surrounds the frog icon showing % toward breakthrough.
-- **Inner mastery ring** – sits between the progress ring and frog icon, filling as disciples gain metamorph, combat and other experience.
+- **Inner mastery ring** – sits between the progress ring and frog icon, filling as disciples gain metamorph and other experience. Combat encounters feed mastery directly.
 - **Ambient aura/pond layer** – subtle ripples or glow in the background.
 - **Floating stat overlays** – displays XP, assigned disciple and cultivation method.
 

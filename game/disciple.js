@@ -2,19 +2,15 @@
 // class are created by systems across the game and store combat and
 // attribute information for a single coquí.
 import { generateDiscipleAttributes } from './discipleAttributes.js';
-import { xpRequirement } from '../utils/xp.js';
-import { runAnimation } from '../utils/animation.js';
 import { sectState } from './state.js';
 import { STAGE_BONUS } from './metamorphosisBonuses.js';
 
 export default class Disciple {
-  constructor({ id = 0, name = `Disciple ${id}`, maxHp = 10, combatLevel = 1, attributes = generateDiscipleAttributes() } = {}) {
+  constructor({ id = 0, name = `Disciple ${id}`, maxHp = 10, attributes = generateDiscipleAttributes() } = {}) {
     this.id = id;
     this.name = name;
     this.maxHp = maxHp;
     this.currentHp = maxHp;
-    this.combatLevel = combatLevel;
-    this.combatXp = 0;
     this.globalLevel = 0;
     this.strength = attributes.strength || 0;
     this.dexterity = attributes.dexterity || 0;
@@ -34,36 +30,17 @@ export default class Disciple {
     this.updateCombatStats();
   }
 
-  xpForNextLevel() {
-    return xpRequirement(50, this.combatLevel);
-  }
-
-  gainCombatXp(amount) {
-    const before = this.combatLevel;
-    this.combatXp += amount;
-    while (this.combatXp >= this.xpForNextLevel()) {
-      this.combatXp -= this.xpForNextLevel();
-      this.combatLevel += 1;
-      this.updateCombatStats();
-    }
-    if (this.combatLevel > before && this.cardElement) {
-      runAnimation(this.cardElement, 'levelup-animate');
-    }
-    if (typeof globalThis.updateDiscipleCombatStatsDisplay === 'function') {
-      globalThis.updateDiscipleCombatStatsDisplay();
-    }
-  }
-
   updateCombatStats() {
-    // Combat stats no longer scale with attributes.
-    // Damage and defense grow purely with combat level and metamorphosis bonuses.
+    // Combat stats no longer scale with attributes or combat levels.
+    // Damage and defense grow purely with metamorphosis bonuses.
     const stage = sectState.discipleMetamorphosis[this.id]?.stage || 0;
     const stageBonus = stage * STAGE_BONUS.attack;
-    this.damage = this.combatLevel + stageBonus;
+    const base = 1 + stageBonus;
+    this.damage = base;
     this.minDamage = Math.max(1, Math.floor(this.damage * 0.5));
     this.maxDamage = Math.ceil(this.damage * 1.5);
     this.attackSpeed = 5000;
-    this.defense = this.combatLevel;
+    this.defense = base;
   }
 
   takeDamage(amount) {

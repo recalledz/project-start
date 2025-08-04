@@ -2,10 +2,13 @@
 import { expect } from 'chai';
 import Disciple from '../game/disciple.js';
 import Enemy from '../game/enemy.js';
+import { sectState } from '../game/state.js';
 
 describe('damage range assignment', () => {
   it('assigns min and max damage to disciples', () => {
-    const d = new Disciple({ combatLevel: 4 });
+    const d = new Disciple({ id: 1 });
+    sectState.discipleMetamorphosis[d.id] = { stage: 1 };
+    d.updateCombatStats();
     const base = d.damage;
     expect(d.minDamage).to.equal(Math.floor(base * 0.5));
     expect(d.maxDamage).to.equal(Math.ceil(base * 1.5));
