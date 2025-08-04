@@ -13,8 +13,9 @@ export function calculateEnemyHp(stage, world, isBoss = false) {
 
 export function calculateEnemyBasicDamage(stage, world, opts = {}) {
   const { damage } = calculateRelativeEnemyStats(stage, world, opts);
-  const maxDamage = Math.max(damage, 1);
-  const minDamage = Math.floor(0.5 * maxDamage) + 1;
+  const base = Math.max(damage, 1);
+  const minDamage = Math.max(1, Math.floor(base * 0.5));
+  const maxDamage = Math.max(minDamage, Math.ceil(base * 1.5));
   return { minDamage, maxDamage };
 }
 

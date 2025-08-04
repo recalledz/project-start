@@ -60,6 +60,8 @@ export default class Disciple {
     const stage = sectState.discipleMetamorphosis[this.id]?.stage || 0;
     const stageBonus = stage * STAGE_BONUS.attack;
     this.damage = this.combatLevel + stageBonus;
+    this.minDamage = Math.max(1, Math.floor(this.damage * 0.5));
+    this.maxDamage = Math.ceil(this.damage * 1.5);
     this.attackSpeed = 5000;
     this.defense = this.combatLevel;
   }
