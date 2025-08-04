@@ -92,12 +92,31 @@ export function updatePlayerStatsUI(elems = {}, data = {}) {
 
 export function renderCombatDisciples() {}
 
+function shadeColor(color, percent) {
+  let col = color.startsWith('#') ? color.slice(1) : color;
+  if (col.length === 3) col = col.split('').map(c => c + c).join('');
+  const num = parseInt(col, 16);
+  const amt = Math.round(2.55 * percent);
+  const r = (num >> 16) + amt;
+  const g = ((num >> 8) & 0x00ff) + amt;
+  const b = (num & 0x00ff) + amt;
+  return `#${(
+    0x1000000 +
+    (r < 255 ? (r < 0 ? 0 : r) : 255) * 0x10000 +
+    (g < 255 ? (g < 0 ? 0 : g) : 255) * 0x100 +
+    (b < 255 ? (b < 0 ? 0 : b) : 255)
+  )
+    .toString(16)
+    .slice(1)}`;
+}
+
 export function makeBar(value, max, color) {
   const bar = document.createElement('div');
   bar.className = 'bar';
   const fill = document.createElement('div');
   fill.className = 'bar-fill';
-  fill.style.background = color;
+  const darker = shadeColor(color, -20);
+  fill.style.background = `linear-gradient(to bottom, ${color}, ${darker})`;
   fill.style.width = `${Math.min(100, (value / max) * 100)}%`;
   bar.appendChild(fill);
   return bar;
