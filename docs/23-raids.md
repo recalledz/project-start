@@ -17,7 +17,8 @@ Raiders randomly target living disciples from their positions. Disciples remain 
 
 The raid ends when all waves are cleared or the orb is destroyed. Callbacks are fired at the start and end of each wave along with a final success or failure signal. When night falls the game automatically opens a dedicated raid overlay and begins a raid. Disciples temporarily switch to the "Idle" task so they remain visible in the interface.
 
-The overlay fills the entire screen. Raiders occupy a dedicated top container with the current wave life bar. Disciples stand in a row across the bottom container and show their HP, Water and attack progress bars underneath each sprite. Damage numbers briefly float above disciples, raiders and the orb whenever they are hit.
+
+The overlay fills the entire screen. Raiders occupy a dedicated top container with the current wave life bar. Disciples stand in a row across the bottom container and show their HP, Water and attack progress bars underneath each sprite. A subtle vertical gradient brightens toward the fight line to draw focus while damage numbers briefly float above disciples, raiders and the orb whenever they are hit.
 Faint horizontal bands behind each row make the raider and disciple lines easier to see against the dark field.
 Bars beneath disciples have been thickened and outlined so their colors remain visible even against busy backgrounds.
 
