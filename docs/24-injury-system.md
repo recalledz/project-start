@@ -1,6 +1,6 @@
 # 24 – Injury System and Health Tab
 
-This module introduces a granular injury system for disciples. Each body part contributes a portion of the disciple's maximum health. Injuries progress from **Bruise** → **Wound** → **Destroyed** and reduce available HP.
+This module introduces a granular injury system for disciples. Injuries progress from **Bruise** → **Wound** → **Destroyed**. Destroyed parts impose penalties but no longer reduce maximum health.
 
 When a disciple's Water reaches 0 they start taking damage each second. Any damage suffered while Water is depleted also targets a random body part. Every hit randomly chooses among the following chances:
 
@@ -18,20 +18,6 @@ When a disciple's Water reaches 0 they start taking damage each second. Any dama
 | Inner Meridians | 10% |
 | General | 26% |
 
-## Body Part Contributions
-
-| Body Part     | HP % | Vital |
-|---------------|------|-------|
-| Head          | 20%  | ✅ |
-| Eye (×2)      | 5% (2.5% each) |  |
-| Vocal Sac     | 5%   | |
-| Hands (×2)    | 10% (5% each) | |
-| Legs (×2)     | 10% (5% each) | |
-| Belly         | 10%  | |
-| Inner Meridians | 10% | |
-
-The sum of healthy parts determines current maximum HP.
-
 ## Injury Progression
 
 | Tier      | Effect                          | Progress Speed |
@@ -45,8 +31,6 @@ Resting halves the injury rate. Each disciple has a **Resilience** stat (startin
 ## Stacking and Death
 
 Only one injury per body part is tracked. Incoming injuries upgrade severity. Destroying any vital part immediately incapacitates the disciple.
-
-When all non-vital parts are destroyed the disciple is effectively crippled with only 1 HP remaining.
 
 Head (Vital)	Instant death. Disciple collapses and dies.
 Left Eye	-50% hit accuracy, -25% workspeed.	Stacks with right eye loss.
@@ -62,4 +46,4 @@ General Damage	Reduces current HP only. No specific function loss.	Represents mi
 
 ## Health Tab
 
-The disciple overlay now contains a **Health** tab. Each body part displays an injury bar indicating current severity. Bruises fill the bar with a brown tint, wounds with red and destroyed parts appear dark.
+The disciple overlay now contains a **Health** tab. Each body part displays an injury bar indicating current severity and any active effects. Bruises fill the bar with a brown tint, wounds with red and destroyed parts appear dark.

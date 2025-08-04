@@ -1286,6 +1286,13 @@ function buildDiscipleHealthView(d) {
     bar.appendChild(fill);
     row.append(label);
     row.appendChild(bar);
+    const effect = d.injuryEffects?.[p.key];
+    if (effect) {
+      const eff = document.createElement('div');
+      eff.className = 'body-part-effect';
+      eff.textContent = effect;
+      row.appendChild(eff);
+    }
     container.appendChild(row);
   });
   return container;
