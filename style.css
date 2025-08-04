@@ -568,6 +568,7 @@ body.darkenshift-mode .tabsContainer button.active {
     justify-content: center;
     align-items: flex-end;
     gap: 8px;
+    padding-bottom: 16px;
 }
 
 .disciple-container {
@@ -575,7 +576,8 @@ body.darkenshift-mode .tabsContainer button.active {
     display: flex;
     justify-content: center;
     align-items: flex-start;
-    gap: 16px;
+    gap: 24px;
+    padding-top: 16px;
 }
 
 .wave-info {
