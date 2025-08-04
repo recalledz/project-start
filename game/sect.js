@@ -1035,6 +1035,7 @@ function renderSeasonBanner() {
   if (!banner) return;
   const textEl = banner.querySelector('.season-text');
   const weatherEl = banner.querySelector('.weather-icon');
+  const integrityEl = document.getElementById('sectIntegrityDisplay');
   const idx = sectSystem.seasonIndex;
   const season = seasons[idx];
   setSeasonBackdrop(season.name);
@@ -1043,6 +1044,7 @@ function renderSeasonBanner() {
   const temp = seasonTemps[idx];
   if (textEl) textEl.textContent = `${season.name} Day ${day} (${daysLeft}d) ${temp}°C`;
   if (weatherEl) weatherEl.textContent = sectSystem.weather ? sectSystem.weather.icon : '';
+  if (integrityEl) integrityEl.textContent = `Integrity ${Math.round(sectIntegrity * 100)}%`;
   banner.className = `season-banner ${seasonClasses[idx]}`;
   if (container) {
     seasonClasses.forEach(cls => container.classList.remove(cls));
