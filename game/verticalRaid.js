@@ -198,9 +198,14 @@ export function createVerticalRaid({
     const el = document.createElement('div');
     el.className = 'raider-unit';
     state.raiderBox.appendChild(el);
+    const base = stats.damage;
+    const minDamage = Math.max(1, Math.floor(base * 0.5));
+    const maxDamage = Math.max(minDamage, Math.ceil(base * 1.5));
     state.raiders.push({
       hp: stats.hp,
-      damage: stats.damage,
+      damage: base,
+      minDamage,
+      maxDamage,
       attackSpeed: stats.attackSpeed,
       timer: 0,
       el
@@ -218,9 +223,10 @@ export function createVerticalRaid({
         r.timer -= r.attackSpeed;
         if (living.length > 0) {
           const target = living[Math.floor(Math.random() * living.length)];
-          applyDamage(target.d, r.damage);
-          state.onDamage({ amount: r.damage, source: 'raider' });
-          showRaidDamageFloat(target.sprite, r.damage);
+          const dmg = Math.floor(Math.random() * (r.maxDamage - r.minDamage + 1)) + r.minDamage;
+          applyDamage(target.d, dmg);
+          state.onDamage({ amount: dmg, source: 'raider' });
+          showRaidDamageFloat(target.sprite, dmg);
           if (target.hpFill) {
             const ratio = target.d.currentHp / target.d.maxHp;
             target.hpFill.style.width = `${Math.max(0, ratio) * 100}%`;
@@ -230,12 +236,13 @@ export function createVerticalRaid({
             removeDisciple(target);
           }
         } else {
-          state.orb.current = Math.max(0, state.orb.current - r.damage);
-          state.onDamage({ amount: r.damage, source: 'raider' });
+          const dmg = Math.floor(Math.random() * (r.maxDamage - r.minDamage + 1)) + r.minDamage;
+          state.orb.current = Math.max(0, state.orb.current - dmg);
+          state.onDamage({ amount: dmg, source: 'raider' });
           if (state.orbFill) {
             state.orbFill.style.height = `${(state.orb.current / state.orb.max) * 100}%`;
           }
-          showRaidDamageFloat(state.orbEl, r.damage);
+          showRaidDamageFloat(state.orbEl, dmg);
           runAnimation(r.el, 'attack-flash');
           if (state.orb.current <= 0) end(false);
         }
@@ -268,12 +275,13 @@ export function createVerticalRaid({
       if (slot.timer >= slot.d.attackSpeed) {
         slot.timer -= slot.d.attackSpeed;
         const r = slot.target;
+        const dmg = Math.floor(Math.random() * (slot.d.maxDamage - slot.d.minDamage + 1)) + slot.d.minDamage;
         const before = r.hp;
-        r.hp = Math.max(0, r.hp - slot.d.damage);
+        r.hp = Math.max(0, r.hp - dmg);
         const dealt = before - r.hp;
         state.waveHp = Math.max(0, state.waveHp - dealt);
-        state.onDamage({ amount: slot.d.damage, source: 'disciple' });
-        showRaidDamageFloat(r.el, slot.d.damage, true);
+        state.onDamage({ amount: dealt, source: 'disciple' });
+        showRaidDamageFloat(r.el, dealt, true);
         runAnimation(slot.sprite, 'attack-flash');
         if (slot.attackFill) slot.attackFill.style.width = '0%';
         if (r.hp === 0) {

@@ -10,7 +10,10 @@ class Enemy  {
     // We expect the caller to supply these values
     this.maxHp = config.maxHp;
     this.currentHp = this.maxHp;
-    this.damage = config.damage;
+    this.damage = config.damage || 1;
+    // establish a damage range around the base amount
+    this.minDamage = config.minDamage ?? Math.max(1, Math.floor(this.damage * 0.5));
+    this.maxDamage = config.maxDamage ?? Math.ceil(this.damage * 1.5);
     this.xp = config.xp;
     this.attackInterval = config.attackInterval || 10000;
     this.abilities = config.abilities || [];
