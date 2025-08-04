@@ -32,5 +32,5 @@
 - Injuries: every injured limb gives –20 mood while injured and for 20 minutes after healing (stacks). Destroyed limbs give –20 mood for the first and –10 for each additional.
 - Incapacitation: –20 mood while incapacitated and for 20 minutes after recovery (stacks).
 - Disciple death: –15 mood to all remaining disciples.
-- Sect integrity is the average mood percentage of all disciples and directly multiplies work speed and metamorph XP.
+- Sect integrity is the average mood percentage of all disciples and directly multiplies work speed and metamorph XP. It is displayed beneath the season banner.
 - Mood is shown as a bar in each disciple's Moodlets tab and an emoji on their badge: 😄 above 100, 🙂 at 75–100, 😐 at 50–74, 🙁 at 25–49, and 😭 below 25.
