@@ -4,8 +4,7 @@
 import { generateDiscipleAttributes } from './discipleAttributes.js';
 import { xpRequirement } from '../utils/xp.js';
 import { runAnimation } from '../utils/animation.js';
-import { sectState } from './state.js';
-import { STAGE_BONUS } from './metamorphosisBonuses.js';
+import { createDefaultCombatStats } from './combatStats.js';
 
 export default class Disciple {
   constructor({ id = 0, name = `Disciple ${id}`, maxHp = 10, combatLevel = 1, attributes = generateDiscipleAttributes() } = {}) {
@@ -25,12 +24,12 @@ export default class Disciple {
     // base resilience percentage per second for healing injuries and HP
     this.baseResilience = 1;
     this.resilience = this.baseResilience;
-    this.defense = 1;
     this.lastTab = 'general';
     // mood system
     this.mood = 100;
     this.healedInjuryTimers = {};
     this.incapTimer = 0;
+    this.combatStats = createDefaultCombatStats(combatLevel);
     this.updateCombatStats();
   }
 
@@ -55,15 +54,40 @@ export default class Disciple {
   }
 
   updateCombatStats() {
-    // Combat stats no longer scale with attributes.
-    // Damage and defense grow purely with combat level and metamorphosis bonuses.
-    const stage = sectState.discipleMetamorphosis[this.id]?.stage || 0;
-    const stageBonus = stage * STAGE_BONUS.attack;
-    this.damage = this.combatLevel + stageBonus;
+    this.damage = this.combatStats.meleeDamage.value;
     this.minDamage = Math.max(1, Math.floor(this.damage * 0.5));
     this.maxDamage = Math.ceil(this.damage * 1.5);
     this.attackSpeed = 5000;
-    this.defense = this.combatLevel;
+    this.defense = this.combatStats.defense.value;
+    this.magicDefense = this.combatStats.magicDefense.value;
+  }
+
+  gainStatXp(key, amount) {
+    const stat = this.combatStats[key];
+    if (!stat) return;
+    const leveled = stat.gainXp(amount);
+    if (leveled) {
+      this.updateCombatStats();
+    }
+    if (typeof globalThis.updateDiscipleCombatStatsDisplay === 'function') {
+      globalThis.updateDiscipleCombatStatsDisplay();
+    }
+  }
+
+  gainMeleeDamageXp(amount) {
+    this.gainStatXp('meleeDamage', amount);
+  }
+
+  gainSpellDamageXp(amount) {
+    this.gainStatXp('spellDamage', amount);
+  }
+
+  gainDefenseXp(amount) {
+    this.gainStatXp('defense', amount);
+  }
+
+  gainMagicDefenseXp(amount) {
+    this.gainStatXp('magicDefense', amount);
   }
 
   takeDamage(amount) {

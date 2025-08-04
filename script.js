@@ -34,6 +34,7 @@ import {
   addDiscoveredLocation,
   discoveredLocations
 } from "./game/sect.js";
+import { COMBAT_STAT_DEFS } from './game/combatStats.js';
 import { checkBuildingUnlock } from './game/buildings.js';
 import { formatNumber } from "./utils/numberFormat.js";
 import { runAnimation } from "./utils/animation.js";
@@ -774,24 +775,34 @@ function updateDiscipleCombatStatsDisplay() {
     if (!section) return;
     const levelRow = section.querySelector('.combat-level');
     if (levelRow) levelRow.textContent = `Level ${d.combatLevel}`;
-    const fill = section.querySelector('.disciple-progress-fill');
-    if (fill) {
+    const xpFill = section.querySelector('.combat-xp .disciple-progress-fill');
+    if (xpFill) {
       const pct = Math.min(1, d.combatXp / d.xpForNextLevel());
-      fill.style.width = `${Math.floor(pct * 100)}%`;
+      xpFill.style.width = `${Math.floor(pct * 100)}%`;
     }
-    const label = section.querySelector('.disciple-progress-label');
-    if (label) label.textContent = `${Math.floor(d.combatXp)}/${d.xpForNextLevel()}`;
-    const stats = section.querySelector('.combat-stats');
-    if (stats) {
-      const atkInterval = (d.attackSpeed / 1000).toFixed(1);
-      const defense = Math.round(d.defense ?? 0);
-      stats.innerHTML =
-        `Damage ${Math.round(d.damage)}<br>` +
-        `Attack every ${atkInterval}s<br>` +
-        `Defense ${defense}`;
-    }
+    const xpLabel = section.querySelector('.combat-xp .disciple-progress-label');
+    if (xpLabel) xpLabel.textContent = `${Math.floor(d.combatXp)}/${d.xpForNextLevel()}`;
+    COMBAT_STAT_DEFS.forEach(def => {
+      const stat = d.combatStats[def.key];
+      const row = section.querySelector(`.stat-${def.key}`);
+      if (!row || !stat) return;
+      const lbl = row.querySelector('.combat-stat-label');
+      if (lbl) {
+        const valueStr = def.isPercent ? `${stat.value}%` : `${Math.round(stat.value)}`;
+        lbl.textContent = `${def.label} ${valueStr}`;
+      }
+      const fill = row.querySelector('.disciple-progress-fill');
+      if (fill) {
+        const pct = Math.min(1, stat.xp / stat.xpForNextLevel());
+        fill.style.width = `${Math.floor(pct * 100)}%`;
+      }
+      const lab = row.querySelector('.disciple-progress-label');
+      if (lab) lab.textContent = `${Math.floor(stat.xp)}/${stat.xpForNextLevel()}`;
+    });
   }
 }
+
+export { updateDiscipleCombatStatsDisplay };
 
 function updateSectDisplay() {
   checkBuildingUnlock();
@@ -1014,16 +1025,13 @@ function startDiscipleMovement() {
 function buildDiscipleCombatStatsView(d) {
   const body = document.createElement('div');
   body.className = 'disciple-combat';
-  const atkInterval = (d.attackSpeed / 1000).toFixed(1);
-  const defense = Math.round(d.defense ?? 0);
-
   const levelRow = document.createElement('div');
   levelRow.className = 'combat-level';
   levelRow.textContent = `Level ${d.combatLevel}`;
   body.appendChild(levelRow);
 
   const bar = document.createElement('div');
-  bar.className = 'disciple-progress';
+  bar.className = 'disciple-progress combat-xp';
   const fill = document.createElement('div');
   fill.className = 'disciple-progress-fill';
   const pct = Math.min(1, d.combatXp / d.xpForNextLevel());
@@ -1034,13 +1042,27 @@ function buildDiscipleCombatStatsView(d) {
   bar.append(fill, label);
   body.appendChild(bar);
 
-  const stats = document.createElement('div');
-  stats.className = 'combat-stats';
-  stats.innerHTML =
-    `Damage ${Math.round(d.damage)}<br>` +
-    `Attack every ${atkInterval}s<br>` +
-    `Defense ${defense}`;
-  body.appendChild(stats);
+  COMBAT_STAT_DEFS.forEach(def => {
+    const stat = d.combatStats[def.key];
+    const row = document.createElement('div');
+    row.className = `combat-stat stat-${def.key}`;
+    const statLabel = document.createElement('div');
+    statLabel.className = 'combat-stat-label';
+    const valueStr = def.isPercent ? `${stat.value}%` : `${Math.round(stat.value)}`;
+    statLabel.textContent = `${def.label} ${valueStr}`;
+    const prog = document.createElement('div');
+    prog.className = 'disciple-progress';
+    const progFill = document.createElement('div');
+    progFill.className = 'disciple-progress-fill';
+    const progPct = Math.min(1, stat.xp / stat.xpForNextLevel());
+    progFill.style.width = `${Math.floor(progPct * 100)}%`;
+    const progLabel = document.createElement('div');
+    progLabel.className = 'disciple-progress-label';
+    progLabel.textContent = `${Math.floor(stat.xp)}/${stat.xpForNextLevel()}`;
+    prog.append(progFill, progLabel);
+    row.append(statLabel, prog);
+    body.appendChild(row);
+  });
 
   return body;
 }
