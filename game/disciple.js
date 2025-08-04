@@ -49,6 +49,9 @@ export default class Disciple {
     if (this.combatLevel > before && this.cardElement) {
       runAnimation(this.cardElement, 'levelup-animate');
     }
+    if (typeof globalThis.updateDiscipleCombatStatsDisplay === 'function') {
+      globalThis.updateDiscipleCombatStatsDisplay();
+    }
   }
 
   updateCombatStats() {
