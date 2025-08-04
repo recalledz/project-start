@@ -5,6 +5,7 @@ import { METAMORPHOSIS_STAGE_REQ, TRAINING_NECTAR_RATE } from './constants.js';
 import { showPathOverlay } from './pathOverlay.js';
 import { applyStageBonuses } from './metamorphosisBonuses.js';
 import { ensureMeta, addMasteryXp, getMasteryProgress } from './metamorphMastery.js';
+import { getRandomUpgrades, applyUpgradeById } from './metamorphMasteryUpgrades.js';
 
 export const metamorphosisState = {
   requirement: METAMORPHOSIS_STAGE_REQ
@@ -305,12 +306,19 @@ export function tickMetamorphosis(dt) {
 }
 
 function handleMasteryLevelUp(id) {
-  window.prompt(
-    'Choose upgrade:\n1) Placeholder Upgrade 1\n2) Placeholder Upgrade 2\n3) Placeholder Upgrade 3',
-    '1'
-  );
+  const d = sectSystem.disciples.find(x => x.id === id);
   const meta = sectState.discipleMetamorphosis[id];
-  if (meta) meta.masteryPending = false;
+  if (!d || !meta) return;
+  const options = getRandomUpgrades(3);
+  const text = options
+    .map((u, i) => `${i + 1}) ${u.name}`)
+    .join('\n');
+  const choice = window.prompt(`Choose upgrade:\n${text}`, '1');
+  const idx = Number(choice) - 1;
+  if (options[idx]) {
+    applyUpgradeById(d, meta, options[idx].id);
+  }
+  meta.masteryPending = false;
   renderMetamorphosis();
 }
 
@@ -322,7 +330,7 @@ function getRoomMultiplier() { return 1; }
 function getPathMatchMultiplier() { return 1; }
 function getStabilityFactor() { return 1; }
 function getCultivationSpeed(d) {
-  return d.potential * d.potential;
+  return d.potential * d.potential * (d.metamorphSpeedMult || 1);
 }
 function getSeasonMultiplier() { return 1; }
 
