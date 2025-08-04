@@ -566,8 +566,9 @@ body.darkenshift-mode .tabsContainer button.active {
     flex: 1;
     display: flex;
     justify-content: center;
-    align-items: flex-end;
+    align-items: center;
     gap: 8px;
+    padding-bottom: 16px;
 }
 
 .disciple-container {
@@ -575,7 +576,8 @@ body.darkenshift-mode .tabsContainer button.active {
     display: flex;
     justify-content: center;
     align-items: flex-start;
-    gap: 16px;
+    gap: 24px;
+    padding-top: 16px;
 }
 
 .wave-info {
@@ -628,13 +630,33 @@ body.darkenshift-mode .tabsContainer button.active {
 }
 
 .raider-unit {
-    width: 16px;
-    height: 16px;
+    width: 32px;
+    height: 32px;
     background: purple;
-    border-radius: 4px;
+    border-radius: 50%;
     border: 1px solid #000;
     pointer-events: none;
     overflow: hidden;
+    position: relative;
+}
+
+.raider-unit::before,
+.raider-unit::after {
+    content: '';
+    position: absolute;
+    top: 10px;
+    width: 6px;
+    height: 6px;
+    background: red;
+    border-radius: 50%;
+}
+
+.raider-unit::before {
+    left: 8px;
+}
+
+.raider-unit::after {
+    right: 8px;
 }
 
 .raid-disciple {
