@@ -1,6 +1,6 @@
 # 23 – Raids
 
-Night raids play out as a vertical autobattler. Raiders gather above the fight line and strike from above while disciples line up below to defend the Water Orb.
+Night raids play out as a vertical autobattler. Raiders gather above a soft gradient band marking the fight boundary while disciples line up below to defend the Water Orb.
 
 Raid behaviour is entirely data‑driven. A raid is started by calling `startRaid(config)` where `config` provides:
 
@@ -18,8 +18,7 @@ Raiders randomly target living disciples from their positions. Disciples remain 
 The raid ends when all waves are cleared or the orb is destroyed. Callbacks are fired at the start and end of each wave along with a final success or failure signal. When night falls the game automatically opens a dedicated raid overlay and begins a raid. Disciples temporarily switch to the "Idle" task so they remain visible in the interface.
 
 
-The overlay fills the entire screen. Raiders occupy a dedicated top container with the current wave life bar. Disciples stand in a row across the bottom container and show their HP, Water and attack progress bars underneath each sprite. A subtle vertical gradient brightens toward the fight line to draw focus while damage numbers briefly float above disciples, raiders and the orb whenever they are hit.
-Faint horizontal bands behind each row make the raider and disciple lines easier to see against the dark field.
+The overlay fills the entire screen. Raiders occupy a dedicated top container with the current wave life bar. Disciples stand in a row across the bottom container and show their HP, Water and attack progress bars underneath each sprite. The battlefield uses a deep water tint from the theme with a faint vignette and ripple texture. A translucent gradient band replaces the old divider, and pale green and blue zone tints sit behind the raider and orb areas to keep units readable while damage numbers briefly float above disciples, raiders and the orb whenever they are hit.
 Bars beneath disciples have been thickened and outlined so their colors remain visible even against busy backgrounds.
 These bars now feature rounded corners, subtle inset shadows and dual-tone fills for added depth.
 

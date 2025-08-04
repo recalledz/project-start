@@ -64,10 +64,6 @@ export function createVerticalRaid({
     discipleBox.className = 'disciple-container';
     root.appendChild(discipleBox);
 
-    const line = document.createElement('div');
-    line.className = 'fight-line';
-    root.appendChild(line);
-
     const info = document.createElement('div');
     info.className = 'wave-info';
     const waveLabel = document.createElement('div');

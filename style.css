@@ -34,6 +34,15 @@ body {
     --core-accent: #7fafff;
     --core-text: #e0e0f0;
     --core-glow: rgba(127, 175, 255, 0.2);
+    --raid-pond-bg: color-mix(in srgb, var(--core-bg) 80%, var(--core-accent) 20%);
+    --raid-band-color: color-mix(in srgb, var(--core-accent) 40%, transparent);
+    --raid-zone-orb: color-mix(in srgb, var(--core-accent) 20%, transparent);
+    --raid-zone-fight: color-mix(in srgb, var(--verdantia-jade) 20%, transparent);
+    --raid-panel-tint: color-mix(in srgb, var(--core-bg) 70%, transparent);
+    --raid-texture: url('/img/water-mid.png');
+    --raid-texture-opacity: 0.08;
+    --raid-band-height: 12px;
+    --raid-vignette-blur: 80px;
     --season-start: rgba(80,160,80,0.9);
     --season-end: rgba(30,70,30,1.0);
     --verdantia-base: #293a2c;
@@ -528,17 +537,17 @@ body.darkenshift-mode .tabsContainer button.active {
     right: 4px;
     bottom: 2px;
     height: 4px;
-    background: #333;
-    border: 1px solid #e74c3c;
+    background: var(--core-bg);
+    border: 1px solid var(--core-accent);
     border-radius: 8px;
     overflow: hidden;
-    box-shadow: inset 0 0 2px rgba(0,0,0,0.6);
+    box-shadow: inset 0 0 2px var(--core-bg);
 }
 
 .raid-life-fill {
     height: 100%;
     width: 100%;
-    background: linear-gradient(to bottom, #e74c3c, #b33224);
+    background: linear-gradient(to bottom, var(--core-accent), var(--core-border));
     transition: width 0.3s;
     border-radius: 8px 0 0 8px;
 }
@@ -553,21 +562,30 @@ body.darkenshift-mode .tabsContainer button.active {
     pointer-events: none;
     display: flex;
     flex-direction: column;
-    background: linear-gradient(
-        to bottom,
-        rgba(0, 0, 0, 0.5) 0%,
-        rgba(255, 255, 255, 0.1) 50%,
-        rgba(0, 0, 0, 0.5) 100%
-    );
+    background: var(--raid-pond-bg);
+    box-shadow: inset 0 0 var(--raid-vignette-blur) var(--core-bg);
+    position: relative;
 }
 
-.fight-line {
+.raid-container::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--raid-texture) center/cover no-repeat;
+    opacity: var(--raid-texture-opacity);
+    pointer-events: none;
+}
+
+.raid-container::after {
+    content: '';
     position: absolute;
     left: 0;
     right: 0;
     top: 50%;
-    height: 2px;
-    background: rgba(255,255,255,0.2);
+    height: var(--raid-band-height);
+    transform: translateY(-50%);
+    background: linear-gradient(to bottom, transparent, var(--raid-band-color), transparent);
+    pointer-events: none;
 }
 
 .raider-container {
@@ -577,7 +595,7 @@ body.darkenshift-mode .tabsContainer button.active {
     align-items: center;
     gap: 8px;
     padding-bottom: 16px;
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--raid-zone-fight);
 }
 
 .disciple-container {
@@ -587,7 +605,7 @@ body.darkenshift-mode .tabsContainer button.active {
     align-items: flex-start;
     gap: 24px;
     padding-top: 16px;
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--raid-zone-orb);
 }
 
 .wave-info {
@@ -599,9 +617,12 @@ body.darkenshift-mode .tabsContainer button.active {
     gap: 6px;
     align-items: center;
     pointer-events: none;
-    color: #fff;
+    color: var(--core-text);
     font-size: 0.8rem;
-    text-shadow: 0 0 2px #000;
+    text-shadow: 0 0 2px var(--core-bg);
+    background: var(--raid-panel-tint);
+    border-radius: 8px;
+    padding: 2px 6px;
 }
 
 .wave-count {
@@ -612,11 +633,11 @@ body.darkenshift-mode .tabsContainer button.active {
     position: relative;
     width: 160px;
     height: 10px;
-    background: #333;
-    border: 1px solid #e74c3c;
+    background: var(--core-bg);
+    border: 1px solid var(--core-accent);
     border-radius: 8px;
     overflow: hidden;
-    box-shadow: inset 0 0 2px rgba(0,0,0,0.6);
+    box-shadow: inset 0 0 2px var(--core-bg);
 }
 
 .wave-life-fill {
@@ -625,7 +646,7 @@ body.darkenshift-mode .tabsContainer button.active {
     left: 0;
     height: 100%;
     width: 100%;
-    background: linear-gradient(to bottom, #e74c3c, #b33224);
+    background: linear-gradient(to bottom, var(--core-accent), var(--core-border));
     transition: width 0.3s;
     border-radius: 8px 0 0 8px;
 }
@@ -912,8 +933,8 @@ body.darkenshift-mode .tabsContainer button.active {
     display: flex;
     flex-direction: column;
     padding: 0;
-    background: none;
-    border: none;
+    background: var(--raid-panel-tint);
+    border: 1px solid var(--core-border);
 }
 
 .raid-battle-area {
@@ -927,6 +948,9 @@ body.darkenshift-mode .tabsContainer button.active {
     gap: 8px;
     justify-content: center;
     margin-top: 8px;
+    background: var(--raid-panel-tint);
+    border-radius: 8px;
+    padding: 4px 8px;
 }
 
 #battle-container {
