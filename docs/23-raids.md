@@ -21,6 +21,7 @@ The raid ends when all waves are cleared or the orb is destroyed. Callbacks are 
 The overlay fills the entire screen. Raiders occupy a dedicated top container with the current wave life bar. Disciples stand in a row across the bottom container and show their HP, Water and attack progress bars underneath each sprite. A subtle vertical gradient brightens toward the fight line to draw focus while damage numbers briefly float above disciples, raiders and the orb whenever they are hit.
 Faint horizontal bands behind each row make the raider and disciple lines easier to see against the dark field.
 Bars beneath disciples have been thickened and outlined so their colors remain visible even against busy backgrounds.
+These bars now feature rounded corners, subtle inset shadows and dual-tone fills for added depth.
 
 
 Damage floats use red text when disciples take damage and white when raiders are struck. Raiders appear as round purple orbs with menacing red eyes and a thin black border so each unit is clearly visible.
