@@ -48,6 +48,18 @@ Only one injury per body part is tracked. Incoming injuries upgrade severity. De
 
 When all non-vital parts are destroyed the disciple is effectively crippled with only 1 HP remaining.
 
+Head (Vital)	Instant death. Disciple collapses and dies.
+Left Eye	-50% hit accuracy, -25% workspeed.	Stacks with right eye loss.
+Right Eye	-50% hit accuracy, -25% workspeed.	Losing both eyes = auto 0% hit accuracy; ranged attacks impossible.
+Vocal Sac	Cannot chant or cast spells.	Path-specific heavy penalty for Speakers of the Mist.
+Left Hand	-50% attack speed, -25% workspeed.	Losing both hands = cannot perform melee attacks or crafting.
+Right Hand	Same as left. Stacks with left hand loss.	
+Left Leg	-50% mobility, -50% workspeed.	Losing both legs = cannot move; must be carried or remain in place.
+Right Leg	Same as left. Stacks with left leg loss.	
+Belly	-25% workspeed. May reduce effectiveness of prolonged tasks (e.g., gathering, long chants).	Non-lethal but significantly slows economy-based actions.
+Inner Meridians	Halves water regen and metamorphosis speed.	Very dangerous for water-based defense paths.
+General Damage	Reduces current HP only. No specific function loss.	Represents minor or superficial injury.
+
 ## Health Tab
 
 The disciple overlay now contains a **Health** tab. Each body part displays an injury bar indicating current severity. Bruises fill the bar with a brown tint, wounds with red and destroyed parts appear dark.
