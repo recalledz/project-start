@@ -41,13 +41,17 @@ export function initializeDisciple(d, { allowInjuries = true, generateQuirks: ge
   ensureInjuryState(d);
   if (genQuirks && !d.quirks) d.quirks = generateRandomQuirks();
   if (allowInjuries) {
-    BODY_PARTS.forEach(p => {
+    let destroyed = 0;
+    for (const p of BODY_PARTS) {
+      if (destroyed >= 2) break;
+      if (p.key === 'head') continue;
       if (!d.injuries[p.key].tier && Math.random() < 0.05) {
         d.injuries[p.key].tier = 'destroyed';
         d.injuries[p.key].progress = 200;
+        destroyed++;
         if (p.vital) d.incapacitated = true;
       }
-    });
+    }
     d.health = calculateMaxHealth(d);
     d.currentHp = d.health;
   }

@@ -4371,7 +4371,12 @@ body.darkenshift-mode .tabsContainer button.active {
 }
 
 .injury-bar-fill.destroyed {
-  background: #111;
+  background: #a00;
+}
+
+.body-part-effect {
+  margin-left: 4px;
+  font-size: 0.85em;
 }
 
 body.raid-active .player-sect-panel {

@@ -36,9 +36,9 @@ export function randomBodyPart() {
 }
 
 export const INJURY_TIERS = [
-  { key: 'bruise', rateRange: [0.25, 0.5], heals: true },
-  { key: 'wound', rateRange: [0.5, 1.0], heals: true },
-  { key: 'destroyed', rateRange: [0, 0], heals: false }
+  { key: 'bruise', rateRange: [0.25, 0.5], heals: true, effect: 'Minor penalty' },
+  { key: 'wound', rateRange: [0.5, 1.0], heals: true, effect: 'HP drain and severe penalty' },
+  { key: 'destroyed', rateRange: [0, 0], heals: false, effect: 'Part nonfunctional' }
 ];
 
 export function ensureInjuryState(d) {

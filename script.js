@@ -55,7 +55,7 @@ import {
   calculateMaxStamina,
   calculateStaminaRegen
 } from './utils/stamina.js';
-import { BODY_PARTS } from './game/injury.js';
+import { BODY_PARTS, INJURY_TIERS } from './game/injury.js';
 import {
   calculateMaxWater,
   calculateWaterRegen
@@ -1286,6 +1286,15 @@ function buildDiscipleHealthView(d) {
     bar.appendChild(fill);
     row.append(label);
     row.appendChild(bar);
+    if (state?.tier) {
+      const info = INJURY_TIERS.find(t => t.key === state.tier);
+      if (info) {
+        const effect = document.createElement('span');
+        effect.className = 'body-part-effect';
+        effect.textContent = `${state.tier.charAt(0).toUpperCase() + state.tier.slice(1)} - ${info.effect}`;
+        row.appendChild(effect);
+      }
+    }
     container.appendChild(row);
   });
   return container;

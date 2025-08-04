@@ -46,8 +46,8 @@ Resting halves the injury rate. Each disciple has a **Resilience** stat (startin
 
 Only one injury per body part is tracked. Incoming injuries upgrade severity. Destroying any vital part immediately incapacitates the disciple.
 
-When all non-vital parts are destroyed the disciple is effectively crippled with only 1 HP remaining.
+When all non-vital parts are destroyed the disciple is effectively crippled with only 1 HP remaining. New disciples never spawn with a destroyed head and arrive with at most two destroyed limbs.
 
 ## Health Tab
 
-The disciple overlay now contains a **Health** tab. Each body part displays an injury bar indicating current severity. Bruises fill the bar with a brown tint, wounds with red and destroyed parts appear dark.
+The disciple overlay now contains a **Health** tab. Each body part displays an injury bar indicating current severity and lists the effect of any injury. Bruises fill the bar with a brown tint, wounds with red and destroyed parts show a solid red bar.

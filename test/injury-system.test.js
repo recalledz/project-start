@@ -77,4 +77,14 @@ describe('injury system', () => {
     applyStageBonuses(d);
     expect(d.resilience).to.be.closeTo(1 + 2 * 0.002, 1e-6);
   });
+
+  it('limits destroyed limbs and avoids destroyed heads on spawn', () => {
+    for (let i = 0; i < 50; i++) {
+      const d = new Disciple({ id: i + 1 });
+      initializeDisciple(d, { allowInjuries: true, generateQuirks: false });
+      const destroyed = BODY_PARTS.filter(p => d.injuries[p.key].tier === 'destroyed');
+      expect(d.injuries.head.tier).to.not.equal('destroyed');
+      expect(destroyed.length).to.be.at.most(2);
+    }
+  });
 });
