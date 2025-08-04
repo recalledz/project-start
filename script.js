@@ -300,6 +300,7 @@ let worldSubTabButton;
 export let explorationTabButton;
 export let locationTabButton;
 let logTabButton;
+let raidTabButton;
 export let mainTab;
 export let starChartTab;
 export let playerStatsTab;
@@ -309,6 +310,7 @@ export let sectTab;
 export let explorationTab;
 export let locationTab;
 export let logTab;
+export let raidTab;
 let activeEffectsContainer;
 let playerMetamorphosisTabButton;
 let playerLexiconTabButton;
@@ -346,6 +348,7 @@ let sectNavResearchBtn;
 let sectNavOrbBtn;
 let sectNavCultivationBtn;
 let sectNavScheduleBtn;
+let activeTab = 'sect';
 
 // Track current brightness applied to the sect map
 let currentMapBrightness = 1;
@@ -406,6 +409,7 @@ function initTabs() {
   explorationTabButton = document.querySelector('.explorationTabButton');
   locationTabButton = document.querySelector('.locationTabButton');
   logTabButton = document.querySelector('.logTabButton');
+  raidTabButton = document.querySelector('.raidTabButton');
   mainTab = document.querySelector('.mainTab');
   starChartTab = document.querySelector('.starChartTab');
   playerStatsTab = document.querySelector('.playerStatsTab');
@@ -415,6 +419,7 @@ function initTabs() {
   explorationTab = document.querySelector('.explorationTab');
   locationTab = document.querySelector('.locationTab');
   logTab = document.querySelector('.logTab');
+  raidTab = document.getElementById('raidTab');
 
   activeEffectsContainer = document.querySelector('.active-effects');
   initTooltip();
@@ -522,12 +527,19 @@ function initTabs() {
       showTab(lexiconTab);
       setActiveTabButton(playerLexiconTabButton);
     });
+  if (raidTabButton)
+    raidTabButton.addEventListener('click', () => {
+      showTab(raidTab);
+      setActiveTabButton(raidTabButton);
+      activeTab = 'raid';
+    });
   if (playerSectTabButton)
     playerSectTabButton.addEventListener("click", () => {
       showTab(sectTab);
       setActiveTabButton(playerSectTabButton);
       startDiscipleMovement();
       playerSectTabButton.classList.remove('glow-notify');
+      activeTab = 'sect';
     });
   if (statsOverviewSubTabButton)
     statsOverviewSubTabButton.addEventListener('click', () => {
@@ -1468,7 +1480,9 @@ function init() {
     locationTab,
     logTab,
     locationTabButton,
-    explorationTabButton
+    explorationTabButton,
+    raidTab,
+    raidTabButton
   });
   initDisciples();
   initDebug();
@@ -1543,6 +1557,9 @@ function init() {
     updateSectDisplay();
   });
   document.addEventListener('raid-start', e => {
+    showTab(raidTab);
+    setActiveTabButton(raidTabButton);
+    activeTab = 'raid';
     setInCombat(true);
     removeDealerLifeBar();
     const detail = e.detail || {};
@@ -1562,6 +1579,9 @@ function init() {
     hidePlayerAttackBar(enemyAttackFill);
     removeDealerLifeBar();
     if (dom.raidCardContainer) dom.raidCardContainer.innerHTML = '';
+    showTab(sectTab);
+    setActiveTabButton(playerSectTabButton);
+    activeTab = 'sect';
 
   });
   updatePlayerStats(stats);
@@ -2631,8 +2651,10 @@ function gameLoop(currentTime) {
       processedDelta += pendingSectTime;
       pendingSectTime = 0;
     }
-    tickSectSystem(processedDelta);
-    tickSect(processedDelta);
+    if (activeTab === 'sect') {
+      tickSectSystem(processedDelta);
+      tickSect(processedDelta);
+    }
   }
   lastRaidState = raidState.active;
   const dtSeconds = processedDelta / 1000;
@@ -2651,12 +2673,14 @@ function gameLoop(currentTime) {
     sectSystem.gains.undeadNectar = 0;
   }
   // refresh sect resource UI every tick for real-time updates
-  if (typeof updateSectDisplay === 'function') updateSectDisplay();
-  updateTaskProgressDisplay();
-  updateDiscipleHealthDisplay();
-  updateDiscipleWaterDisplay();
-  updateDiscipleMoodDisplay();
-  updateDiscipleCombatStatsDisplay();
+  if (activeTab === 'sect') {
+    if (typeof updateSectDisplay === 'function') updateSectDisplay();
+    updateTaskProgressDisplay();
+    updateDiscipleHealthDisplay();
+    updateDiscipleWaterDisplay();
+    updateDiscipleMoodDisplay();
+    updateDiscipleCombatStatsDisplay();
+  }
   updateOrbGlow(deltaTime);
   requestAnimationFrame(gameLoop);
 }
