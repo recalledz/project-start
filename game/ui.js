@@ -9,6 +9,8 @@ let sectTab;
 let explorationTab;
 let locationTab;
 let logTab;
+let raidTab;
+export let raidTabButton;
 let locationTabButton;
 let explorationTabButton;
 
@@ -23,6 +25,8 @@ export function init(elements = {}) {
   explorationTab = elements.explorationTab;
   locationTab = elements.locationTab;
   logTab = elements.logTab;
+  raidTab = elements.raidTab;
+  raidTabButton = elements.raidTabButton;
   locationTabButton = elements.locationTabButton;
   explorationTabButton = elements.explorationTabButton;
 }
@@ -145,6 +149,7 @@ export function hideTab() {
   if (explorationTab) explorationTab.style.display = 'none';
   if (locationTab) locationTab.style.display = 'none';
   if (logTab) logTab.style.display = 'none';
+  if (raidTab) raidTab.style.display = 'none';
 }
 
 export function showTab(tab) {
