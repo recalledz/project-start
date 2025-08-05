@@ -1,4 +1,4 @@
-/* global describe, it, before, after */
+/* global describe, it, before, after, beforeEach */
 import { expect } from 'chai';
 import Disciple from '../game/disciple.js';
 import { initializeDisciple } from '../utils/discipleInit.js';
