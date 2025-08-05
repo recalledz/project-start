@@ -2,6 +2,7 @@
 import { expect } from 'chai';
 import Disciple from '../game/disciple.js';
 import { initializeDisciple } from '../utils/discipleInit.js';
+import { sectState } from '../game/state.js';
 
 let combatModule;
 let applyDamage;
@@ -35,9 +36,15 @@ after(() => {
 });
 
 describe('water shield', () => {
+  beforeEach(() => {
+    sectState.discipleCombatStats = {};
+    sectState.discipleSkills = {};
+  });
+
   it('absorbs damage before hp', () => {
     const d = new Disciple({ id: 1 });
     initializeDisciple(d, { allowInjuries: false, generateQuirks: false });
+    d.defense = 0;
     d.water = 5;
     d.currentHp = d.maxHp;
 

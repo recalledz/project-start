@@ -1,9 +1,19 @@
 // Generic damage helper used by raid modules.
 import { randomBodyPart, applyInjury } from './injury.js';
 import { addCombatStatXp } from './combatStats.js';
+import { getMaxWater } from './metamorphosisBonuses.js';
+import { sectState } from './state.js';
 
 export function applyDamage(target, amount, type = 'physical') {
   let remaining = Math.round(amount);
+  const reduction =
+    type === 'physical'
+      ? target.defense || 0
+      : type === 'spell'
+      ? target.magicDefense || 0
+      : 0;
+  remaining = Math.max(0, remaining - reduction);
+
   if (target.water > 0) {
     const absorbed = Math.min(target.water, remaining);
     target.water -= absorbed;
@@ -16,15 +26,21 @@ export function applyDamage(target, amount, type = 'physical') {
       applyInjury(target, part, tier);
     }
   }
-  target.currentHp = Math.max(0, target.currentHp - remaining);
+  const damageToHp = remaining;
+  target.currentHp = Math.max(0, target.currentHp - damageToHp);
   if (Object.hasOwn(target, 'health')) {
     target.health = target.currentHp;
   }
   if (target && Object.hasOwn(target, 'id')) {
-    if (type === 'physical') addCombatStatXp(target, 'defense', 1);
-    if (type === 'spell') addCombatStatXp(target, 'magicDefense', 1);
+    const waterSense = sectState.discipleSkills[target.id]?.WaterSense || 0;
+    const maxWater = getMaxWater(target, waterSense) || 1;
+    const xp = (damageToHp / maxWater) * 10;
+    if (xp > 0) {
+      if (type === 'physical') addCombatStatXp(target, 'defense', xp);
+      if (type === 'spell') addCombatStatXp(target, 'magicDefense', xp);
+    }
   }
-  return remaining;
+  return damageToHp;
 }
 
 export function init() {}

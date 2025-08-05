@@ -47,10 +47,12 @@ export default class Disciple {
     this.attackSpeed = 5000;
 
     const defLevel = getCombatStatProgress(this, 'defense').level;
-    this.defense = COMBAT_STAT_DEFS.defense.base + defLevel + stageBonus;
+    this.defense =
+      COMBAT_STAT_DEFS.defense.base + defLevel * 0.5 + stageBonus;
 
     const mdefLevel = getCombatStatProgress(this, 'magicDefense').level;
-    this.magicDefense = COMBAT_STAT_DEFS.magicDefense.base + mdefLevel + stageBonus;
+    this.magicDefense =
+      COMBAT_STAT_DEFS.magicDefense.base + mdefLevel * 0.5 + stageBonus;
 
     const spellLevel = getCombatStatProgress(this, 'spellDamage').level;
     this.spellDamage = COMBAT_STAT_DEFS.spellDamage.base + spellLevel;

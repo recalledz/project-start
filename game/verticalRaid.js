@@ -160,12 +160,14 @@ export function createVerticalRaid({
   }
 
   function waterBurst(damage) {
+    let xp = 0;
     state.raiders.slice().forEach(r => {
       const before = r.hp;
       r.hp = Math.max(0, r.hp - damage);
       const dealt = before - r.hp;
       state.waveHp = Math.max(0, state.waveHp - dealt);
       showRaidDamageFloat(r.el, dealt, true);
+      xp += (dealt / r.maxHp) * 10;
       if (r.hp === 0) {
         r.el.remove();
         const idx = state.raiders.indexOf(r);
@@ -176,6 +178,7 @@ export function createVerticalRaid({
       }
     });
     updateWaveLife();
+    return xp;
   }
 
   function beginWave(index) {
@@ -200,6 +203,7 @@ export function createVerticalRaid({
     const maxDamage = Math.max(minDamage, Math.ceil(base * 1.5));
     state.raiders.push({
       hp: stats.hp,
+      maxHp: stats.hp,
       damage: base,
       minDamage,
       maxDamage,
@@ -278,7 +282,8 @@ export function createVerticalRaid({
         const dealt = before - r.hp;
         state.waveHp = Math.max(0, state.waveHp - dealt);
         state.onDamage({ amount: dealt, source: 'disciple' });
-        addCombatStatXp(slot.d, 'meleeDamage', 1);
+        const xp = (dealt / r.maxHp) * 10;
+        addCombatStatXp(slot.d, 'meleeDamage', xp);
         showRaidDamageFloat(r.el, dealt, true);
         runAnimation(slot.sprite, 'attack-flash');
         if (slot.attackFill) slot.attackFill.style.width = '0%';

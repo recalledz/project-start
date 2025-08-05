@@ -2,12 +2,27 @@
 
 Disciples track four combat statistics that improve through battle:
 
-| Stat | Base Value | Growth Method |
+| Stat | Base Value | XP from Combat |
 | --- | --- | --- |
-| **Melee Damage** | 1 flat damage | +1 XP per hit landed |
-| **Spell Damage** | 0% additive | +1 XP per damaging spell |
-| **Defense** | 2 flat damage reduced | +1 XP per physical hit taken |
-| **Magic Defense** | 2 flat damage reduced | +1 XP per spell hit taken |
+| **Melee Damage** | 1 flat damage | \(\frac{\text{Damage Dealt}}{\text{Target Max HP}}\) × 10 |
+| **Spell Damage** | 0% additive | \(\frac{\text{Damage Dealt}}{\text{Target Max HP}}\) × 10 |
+| **Defense** | 2 flat damage reduced | \(\frac{\text{Damage Taken}}{\text{Max Water}}\) × 10 |
+| **Magic Defense** | 2 flat damage reduced | \(\frac{\text{Damage Taken}}{\text{Max Water}}\) × 10 |
 
 Each stat has an experience bar shown in the disciple combat view. When the
 bar fills, the stat level increases, raising the displayed value.
+
+## XP Requirement per Level
+
+XP required to advance a level is calculated as:
+
+`XPRequired(level) = ceil(30 × (level ^ 1.5))`
+
+## Gains per Level
+
+| Stat | Gain per Level |
+| --- | --- |
+| Melee Damage | +1 base melee attack power |
+| Spell Damage | +1 base spell attack power |
+| Defense | +0.5 flat physical damage reduction |
+| Magic Defense | +0.5 flat magic damage reduction |
