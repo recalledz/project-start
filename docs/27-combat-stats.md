@@ -10,7 +10,9 @@ Disciples track four combat statistics that improve through battle:
 | **Magic Defense** | 2 flat damage reduced | \(\frac{\text{Damage Taken}}{\text{Max Water}}\) × 10 |
 
 Each stat has an experience bar shown in the disciple combat view. When the
-bar fills, the stat level increases, raising the displayed value.
+bar fills, the stat level increases, raising the displayed value. A '+ Stat'
+floating text and brief golden glow highlight the disciple when a level is
+gained.
 
 ## XP Requirement per Level
 

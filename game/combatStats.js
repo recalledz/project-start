@@ -1,4 +1,5 @@
 import { sectState } from './state.js';
+import { showCombatLevelUp } from './rendering.js';
 
 export const COMBAT_STAT_DEFS = {
   meleeDamage: { base: 1, unit: '', label: 'Melee Damage' },
@@ -38,9 +39,13 @@ export function ensureCombatStats(id) {
 export function addCombatStatXp(d, stat, amount = 1) {
   ensureCombatStats(d.id);
   const prev = sectState.discipleCombatStats[d.id][stat] || 0;
+  const prevLevel = getProgressFromXp(prev).level;
   const newXp = prev + amount;
   sectState.discipleCombatStats[d.id][stat] = newXp;
   const { level } = getProgressFromXp(newXp);
+  if (level > prevLevel) {
+    showCombatLevelUp(d, COMBAT_STAT_DEFS[stat].label);
+  }
   switch (stat) {
     case 'meleeDamage': {
       d.meleeDamage = COMBAT_STAT_DEFS.meleeDamage.base + level;
