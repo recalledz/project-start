@@ -1,5 +1,4 @@
 import { sectState } from './state.js';
-import { getTaskSkillProgress } from '../utils/skills.js';
 
 export const COMBAT_STAT_DEFS = {
   meleeDamage: { base: 1, unit: '', label: 'Melee Damage' },
@@ -7,6 +6,23 @@ export const COMBAT_STAT_DEFS = {
   defense: { base: 2, unit: '', label: 'Defense' },
   magicDefense: { base: 2, unit: '', label: 'Magic Defense' }
 };
+
+export function combatStatXpRequired(level) {
+  return Math.ceil(30 * Math.pow(level, 1.5));
+}
+
+function getProgressFromXp(xp) {
+  let lvl = 0;
+  let next = combatStatXpRequired(lvl + 1);
+  let remaining = xp;
+  while (remaining >= next) {
+    remaining -= next;
+    lvl += 1;
+    next = combatStatXpRequired(lvl + 1);
+  }
+  const progress = next > 0 ? remaining / next : 0;
+  return { level: lvl, progress, next };
+}
 
 export function ensureCombatStats(id) {
   if (!sectState.discipleCombatStats[id]) {
@@ -24,7 +40,7 @@ export function addCombatStatXp(d, stat, amount = 1) {
   const prev = sectState.discipleCombatStats[d.id][stat] || 0;
   const newXp = prev + amount;
   sectState.discipleCombatStats[d.id][stat] = newXp;
-  const { level } = getTaskSkillProgress(newXp);
+  const { level } = getProgressFromXp(newXp);
   switch (stat) {
     case 'meleeDamage': {
       d.meleeDamage = COMBAT_STAT_DEFS.meleeDamage.base + level;
@@ -38,11 +54,11 @@ export function addCombatStatXp(d, stat, amount = 1) {
       break;
     }
     case 'defense': {
-      d.defense = COMBAT_STAT_DEFS.defense.base + level;
+      d.defense = COMBAT_STAT_DEFS.defense.base + level * 0.5;
       break;
     }
     case 'magicDefense': {
-      d.magicDefense = COMBAT_STAT_DEFS.magicDefense.base + level;
+      d.magicDefense = COMBAT_STAT_DEFS.magicDefense.base + level * 0.5;
       break;
     }
     default:
@@ -53,5 +69,5 @@ export function addCombatStatXp(d, stat, amount = 1) {
 export function getCombatStatProgress(d, stat) {
   ensureCombatStats(d.id);
   const xp = sectState.discipleCombatStats[d.id][stat] || 0;
-  return getTaskSkillProgress(xp);
+  return getProgressFromXp(xp);
 }

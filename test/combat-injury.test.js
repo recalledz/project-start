@@ -41,7 +41,7 @@ describe('combat injuries', () => {
     d.water = 0;
     const prev = Math.random;
     Math.random = () => 0;
-    applyDamage(d, 1);
+    applyDamage(d, 5);
     Math.random = prev;
     expect(d.injuries.head.tier).to.equal('bruise');
   });

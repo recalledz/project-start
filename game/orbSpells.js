@@ -35,8 +35,8 @@ export function castWaterBurst() {
   if (sectSystem.orbs.water.current < cost) return;
   sectSystem.orbs.water.current -= cost;
   const damage = 20 * orbDamageMultiplier();
-  raidState.raid.castWaterBurst(damage);
-  sectSystem.disciples.forEach(d => addCombatStatXp(d, 'spellDamage', 1));
+  const xp = raidState.raid.castWaterBurst(damage);
+  sectSystem.disciples.forEach(d => addCombatStatXp(d, 'spellDamage', xp));
   addLog('Water Burst unleashed!', 'info');
 }
 
