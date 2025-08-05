@@ -1,4 +1,4 @@
-/* global describe, it, before, after */
+/* global describe, it, before, after, beforeEach */
 import { expect } from 'chai';
 import Disciple from '../game/disciple.js';
 import { initializeDisciple } from '../utils/discipleInit.js';
@@ -52,6 +52,7 @@ describe('water shield', () => {
     expect(d.water).to.equal(2);
     expect(d.currentHp).to.equal(d.maxHp);
 
+    d.defense = 0;
     applyDamage(d, 3);
     expect(d.water).to.equal(0);
     expect(d.currentHp).to.equal(d.maxHp - 1);
