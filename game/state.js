@@ -73,7 +73,6 @@ export function setCurrentEnemy(val) {
 
 export const stats = {
   combatSlots: 3,
-  avgCombatLevel: 0,
   avgProficiencyLevel: 0
 
 };

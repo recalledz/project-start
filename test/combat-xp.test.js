@@ -55,11 +55,13 @@ describe('combat xp gain', () => {
     ensureDiscipleSkills(d.id);
     sectState.discipleTasks[d.id] = 'Gather Fruit';
 
+    const startMastery = sectState.discipleMetamorphosis[d.id].masteryXp || 0;
     startRaid();
     addSkillXp(d, 'Combat', 1);
     const endXp = sectState.discipleSkills[d.id].Combat || 0;
+    const endMastery = sectState.discipleMetamorphosis[d.id].masteryXp || 0;
     expect(endXp).to.be.greaterThan(0);
-    expect(d.combatXp).to.be.greaterThan(0);
+    expect(endMastery).to.be.greaterThan(startMastery);
     endRaid(true);
   });
 });

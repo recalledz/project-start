@@ -42,6 +42,7 @@ import {
   refreshMetamorphosis,
   destroyMetamorphosis
 } from './game/metamorphosis.js';
+import { addMasteryXp } from './game/metamorphMastery.js';
 import { intelligenceXpMultiplier } from './game/attributes.js';
 import { createOverlay } from './ui/overlay.js';
 import { showLoadErrorOverlay } from './ui/loadErrorOverlay.js';
@@ -772,15 +773,6 @@ function updateDiscipleCombatStatsDisplay() {
     if (!d) return;
     const section = discipleOverlay.box.querySelector('.disciple-stats-combat');
     if (!section) return;
-    const levelRow = section.querySelector('.combat-level');
-    if (levelRow) levelRow.textContent = `Level ${d.combatLevel}`;
-    const fill = section.querySelector('.disciple-progress-fill');
-    if (fill) {
-      const pct = Math.min(1, d.combatXp / d.xpForNextLevel());
-      fill.style.width = `${Math.floor(pct * 100)}%`;
-    }
-    const label = section.querySelector('.disciple-progress-label');
-    if (label) label.textContent = `${Math.floor(d.combatXp)}/${d.xpForNextLevel()}`;
     const stats = section.querySelector('.combat-stats');
     if (stats) {
       const atkInterval = (d.attackSpeed / 1000).toFixed(1);
@@ -1016,23 +1008,6 @@ function buildDiscipleCombatStatsView(d) {
   body.className = 'disciple-combat';
   const atkInterval = (d.attackSpeed / 1000).toFixed(1);
   const defense = Math.round(d.defense ?? 0);
-
-  const levelRow = document.createElement('div');
-  levelRow.className = 'combat-level';
-  levelRow.textContent = `Level ${d.combatLevel}`;
-  body.appendChild(levelRow);
-
-  const bar = document.createElement('div');
-  bar.className = 'disciple-progress';
-  const fill = document.createElement('div');
-  fill.className = 'disciple-progress-fill';
-  const pct = Math.min(1, d.combatXp / d.xpForNextLevel());
-  fill.style.width = `${Math.floor(pct * 100)}%`;
-  const label = document.createElement('div');
-  label.className = 'disciple-progress-label';
-  label.textContent = `${Math.floor(d.combatXp)}/${d.xpForNextLevel()}`;
-  bar.append(fill, label);
-  body.appendChild(bar);
 
   const stats = document.createElement('div');
   stats.className = 'combat-stats';
@@ -1651,12 +1626,7 @@ export function renderStageInfo() {
 }
 
 export function renderPlayerStats(stats) {
-  const combatLevelDisplay = document.getElementById("combatLevelDisplay");
   const avgProfDisplay = document.getElementById("avgProfDisplay");
-
-  if (combatLevelDisplay) {
-    combatLevelDisplay.textContent = `Avg Combat Lv: ${stats.avgCombatLevel.toFixed(1)}`;
-  }
   if (avgProfDisplay) {
     avgProfDisplay.textContent = `Avg Skill Lv: ${stats.avgProficiencyLevel.toFixed(1)}`;
   }
@@ -2198,7 +2168,7 @@ function dealerBarDeathAnimation(callback) {
 function combatXp(xpAmount) {
   activeDisciples.forEach(d => {
     if (!d) return;
-    d.gainCombatXp(xpAmount);
+    addMasteryXp(d.id, xpAmount);
   });
   updatePlayerStats();
   updateHandDisplay();
@@ -2209,15 +2179,8 @@ function updateHandDisplay() {
   activeDisciples.forEach(d => {
     if (!d || !d.hpDisplay) return;
     d.hpDisplay.textContent = `HP: ${Math.round(d.currentHp)}/${Math.round(d.maxHp)}`;
-    if (d.xpLabel) {
-      d.xpLabel.textContent = `LV: ${d.combatLevel}`;
-    }
     if (d.gLevelLabel) {
       d.gLevelLabel.textContent = `Skill ${d.globalLevel}`;
-    }
-    if (d.xpBarFill) {
-      const pct = (d.combatXp / d.xpForNextLevel()) * 100;
-      d.xpBarFill.style.width = `${Math.min(pct, 100)}%`;
     }
     updateDiscipleStatsDisplay(d);
     updateBloodSplat(d);
@@ -2272,7 +2235,6 @@ function openCamp(onCloseCallback = null) {
   const statsRow = document.createElement('div');
   statsRow.classList.add('overlay-stats');
   statsRow.innerHTML = `
-    <div>Avg Combat Lv: ${stats.avgCombatLevel.toFixed(1)}</div>
     <div>Avg Skill Lv: ${stats.avgProficiencyLevel.toFixed(1)}</div>
   `;
   box.appendChild(statsRow);
@@ -2436,18 +2398,14 @@ export function startNewGame() {
 
 // Recalculate combat stats based on active disciples
 function updatePlayerStats() {
-  stats.avgCombatLevel = 0;
   stats.avgProficiencyLevel = 0;
 
   if (sectSystem && Array.isArray(sectSystem.disciples) && sectSystem.disciples.length > 0) {
-    let combatTotal = 0;
     let profTotal = 0;
     sectSystem.disciples.forEach(d => {
-      combatTotal += d.combatLevel || 0;
       profTotal += d.globalLevel || 0;
     });
     const count = sectSystem.disciples.length;
-    stats.avgCombatLevel = combatTotal / count;
     stats.avgProficiencyLevel = profTotal / count;
   }
 

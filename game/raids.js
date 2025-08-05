@@ -1,10 +1,7 @@
 import { sectSystem } from './sect.js';
 import { sectState } from './state.js';
-import {
-  ensureDiscipleSkills,
-  getTaskSkillProgress,
-  addSkillXp
-} from '../utils/skills.js';
+import { ensureDiscipleSkills, addSkillXp } from '../utils/skills.js';
+import { ensureMeta, getMasteryProgress } from './metamorphMastery.js';
 import { showRaidAlert } from './alerts.js';
 import { showRaidSummaryOverlay } from '../ui/raidSummaryOverlay.js';
 import { openRaidBattleOverlay } from '../ui/raidBattleOverlay.js';
@@ -62,15 +59,15 @@ function finalize(victory) {
 
   const fighters = Object.keys(xpStart).map(id => {
     const start = xpStart[id];
-    const xp = sectState.discipleSkills[id]?.Combat || 0;
-    const diff = xp - start.xp;
-    const prog = getTaskSkillProgress(xp);
+    const meta = sectState.discipleMetamorphosis[id] || {};
+    const diff = (meta.masteryXp || 0) - start.masteryXp;
+    const prog = getMasteryProgress(meta.masteryXp || 0);
     return {
       name: start.name,
-      xp: diff,
-      level: prog.level,
-      progress: prog.progress,
-      leveled: prog.level > start.level
+      masteryXp: diff,
+      masteryLevel: prog.level,
+      masteryProgress: prog.progress,
+      leveled: prog.level > start.masteryLevel
     };
   });
 
@@ -99,9 +96,11 @@ export function startRaid(config = buildDefaultConfig()) {
   sectSystem.disciples.forEach(d => {
     if (!d.incapacitated) {
       ensureDiscipleSkills(d.id);
+      ensureMeta(d.id);
+      const meta = sectState.discipleMetamorphosis[d.id];
       raidState.xpStart[d.id] = {
-        xp: sectState.discipleSkills[d.id].Combat || 0,
-        level: getTaskSkillProgress(sectState.discipleSkills[d.id].Combat || 0).level,
+        masteryXp: meta.masteryXp || 0,
+        masteryLevel: getMasteryProgress(meta.masteryXp || 0).level,
         name: d.name
       };
     }

@@ -9,7 +9,7 @@ Some disciples may also arrive with destroyed body parts, potentially incapacita
 - **Hard Worker** – +5 to gathering and woodcutting. Mood improves while performing those tasks.
 - **Lazy** – Occasionally stops working without reason.
 - **Multitasker** – –5 Water Sense and switches tasks every day.
-- **Scrawny** – –20% combat XP.
+- **Scrawny** – –20% mastery XP from combat.
 - **Hedonistic** – 1.3× work speed if mood ≥ 50%, otherwise 0.5×.
 - **Condemned** – 1.5× work speed but 0.3× metamorph XP gain.
 - **Strong** – 1.3× melee damage.

@@ -30,16 +30,16 @@ export function showRaidSummaryOverlay({
     const list = document.createElement('ul');
     fighters.forEach(f => {
       const li = document.createElement('li');
-      li.textContent = `${f.name}: +${Math.round(f.xp)} XP` +
+      li.textContent = `${f.name}: +${Math.round(f.masteryXp)} Mastery XP` +
         (f.leveled ? ' (Level Up!)' : '');
       const bar = document.createElement('div');
       bar.className = 'disciple-progress';
       const fill = document.createElement('div');
       fill.className = 'disciple-progress-fill';
-      fill.style.width = `${Math.floor(f.progress * 100)}%`;
+      fill.style.width = `${Math.floor(f.masteryProgress * 100)}%`;
       const label = document.createElement('div');
       label.className = 'disciple-progress-label';
-      label.textContent = `LV ${f.level}`;
+      label.textContent = `Mastery LV ${f.masteryLevel}`;
       bar.append(fill, label);
       li.appendChild(bar);
       list.appendChild(li);
