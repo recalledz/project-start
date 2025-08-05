@@ -2,6 +2,7 @@ import { sectSystem } from './sect.js';
 import { sectState } from './state.js';
 import { raidState } from './raids.js';
 import addLog from './log.js';
+import { addCombatStatXp } from './combatStats.js';
 
 export function orbDamageMultiplier() {
   return 1 + 0.2 * (sectState.buildings.orbSpellStrength || 0);
@@ -35,6 +36,7 @@ export function castWaterBurst() {
   sectSystem.orbs.water.current -= cost;
   const damage = 20 * orbDamageMultiplier();
   raidState.raid.castWaterBurst(damage);
+  sectSystem.disciples.forEach(d => addCombatStatXp(d, 'spellDamage', 1));
   addLog('Water Burst unleashed!', 'info');
 }
 

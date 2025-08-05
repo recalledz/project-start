@@ -31,6 +31,7 @@ describe('resource gathering', () => {
     Object.keys(sectState.discipleTasks).forEach(k => delete sectState.discipleTasks[k]);
     Object.keys(sectState.discipleProgress).forEach(k => delete sectState.discipleProgress[k]);
     Object.keys(sectState.discipleSkills).forEach(k => delete sectState.discipleSkills[k]);
+    Object.keys(sectState.discipleCombatStats).forEach(k => delete sectState.discipleCombatStats[k]);
     sectState.fruits = 0;
     sectState.softwood = 0;
     sectState.buildings.bohio = 0;

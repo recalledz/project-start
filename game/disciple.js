@@ -4,6 +4,7 @@
 import { generateDiscipleAttributes } from './discipleAttributes.js';
 import { sectState } from './state.js';
 import { STAGE_BONUS } from './metamorphosisBonuses.js';
+import { COMBAT_STAT_DEFS, ensureCombatStats, getCombatStatProgress } from './combatStats.js';
 
 export default class Disciple {
   constructor({ id = 0, name = `Disciple ${id}`, maxHp = 10, attributes = generateDiscipleAttributes() } = {}) {
@@ -21,7 +22,8 @@ export default class Disciple {
     // base resilience percentage per second for healing injuries and HP
     this.baseResilience = 1;
     this.resilience = this.baseResilience;
-    this.defense = 1;
+    this.defense = COMBAT_STAT_DEFS.defense.base;
+    this.magicDefense = COMBAT_STAT_DEFS.magicDefense.base;
     this.lastTab = 'general';
     // mood system
     this.mood = 100;
@@ -31,16 +33,27 @@ export default class Disciple {
   }
 
   updateCombatStats() {
+    ensureCombatStats(this.id);
     // Combat stats no longer scale with attributes or combat levels.
-    // Damage and defense grow purely with metamorphosis bonuses.
+    // Damage and defense grow with metamorphosis bonuses and stat XP.
     const stage = sectState.discipleMetamorphosis[this.id]?.stage || 0;
     const stageBonus = stage * STAGE_BONUS.attack;
-    const base = 1 + stageBonus;
-    this.damage = base;
-    this.minDamage = Math.max(1, Math.floor(this.damage * 0.5));
-    this.maxDamage = Math.ceil(this.damage * 1.5);
+
+    const meleeLevel = getCombatStatProgress(this, 'meleeDamage').level;
+    this.meleeDamage = COMBAT_STAT_DEFS.meleeDamage.base + meleeLevel + stageBonus;
+    this.damage = this.meleeDamage;
+    this.minDamage = Math.max(1, Math.floor(this.meleeDamage * 0.5));
+    this.maxDamage = Math.ceil(this.meleeDamage * 1.5);
     this.attackSpeed = 5000;
-    this.defense = base;
+
+    const defLevel = getCombatStatProgress(this, 'defense').level;
+    this.defense = COMBAT_STAT_DEFS.defense.base + defLevel + stageBonus;
+
+    const mdefLevel = getCombatStatProgress(this, 'magicDefense').level;
+    this.magicDefense = COMBAT_STAT_DEFS.magicDefense.base + mdefLevel + stageBonus;
+
+    const spellLevel = getCombatStatProgress(this, 'spellDamage').level;
+    this.spellDamage = COMBAT_STAT_DEFS.spellDamage.base + spellLevel;
   }
 
   takeDamage(amount) {

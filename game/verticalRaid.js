@@ -1,5 +1,6 @@
 import { showRaidDamageFloat } from './rendering.js';
 import { applyDamage } from './combat.js';
+import { addCombatStatXp } from './combatStats.js';
 import { runAnimation } from '../utils/animation.js';
 import { makeBar } from './ui.js';
 import { sectState } from './state.js';
@@ -220,7 +221,7 @@ export function createVerticalRaid({
         if (living.length > 0) {
           const target = living[Math.floor(Math.random() * living.length)];
           const dmg = Math.floor(Math.random() * (r.maxDamage - r.minDamage + 1)) + r.minDamage;
-          applyDamage(target.d, dmg);
+          applyDamage(target.d, dmg, 'physical');
           state.onDamage({ amount: dmg, source: 'raider' });
           showRaidDamageFloat(target.sprite, dmg);
           if (target.hpFill) {
@@ -277,6 +278,7 @@ export function createVerticalRaid({
         const dealt = before - r.hp;
         state.waveHp = Math.max(0, state.waveHp - dealt);
         state.onDamage({ amount: dealt, source: 'disciple' });
+        addCombatStatXp(slot.d, 'meleeDamage', 1);
         showRaidDamageFloat(r.el, dealt, true);
         runAnimation(slot.sprite, 'attack-flash');
         if (slot.attackFill) slot.attackFill.style.width = '0%';
