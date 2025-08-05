@@ -27,6 +27,8 @@
 
 ### Mood (0–100)
 - Starts at 100 and reflects overall disciple happiness.
+- Verdantia's spring climate adds +25 mood for its comfortable temperature.
+- A "Humble beginnings" moodlet grants +50 mood for the first 30 days.
 - Housing: each disciple beyond available bohios gives –25 mood to all; each unused bohio grants +10 mood.
 - Metamorphosis stages apply –50 mood per stage.
 - Injuries: every injured limb gives –20 mood while injured and for 20 minutes after healing (stacks). Destroyed limbs give –20 mood for the first and –10 for each additional.

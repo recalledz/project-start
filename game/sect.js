@@ -114,6 +114,7 @@ export const sectSystem = {
   memorySlots: 2,
   seasonIndex: 0,
   seasonDay: 0,
+  totalDays: 0,
   seasonTimer: 0,
   weather: null,
   waterRegenBase: 0,
@@ -1244,6 +1245,7 @@ export function tickSectSystem(delta) {
       );
     }
     sectSystem.seasonDay += 1;
+    sectSystem.totalDays += 1;
     document.dispatchEvent(new CustomEvent('day-passed', {
       detail: { day: sectSystem.seasonDay, season: sectSystem.seasonIndex }
     }));
@@ -1476,6 +1478,17 @@ function updateDiscipleMood(d, dt) {
 
   d.moodModifiers = [];
   let mood = 100;
+  const seasonClass = seasonClasses[sectSystem.seasonIndex];
+  if (seasonClass === 'spring') {
+    const amount = 25;
+    mood += amount;
+    d.moodModifiers.push({ label: 'Comfortable temperature', value: amount });
+  }
+  if (sectSystem.totalDays < 30) {
+    const amount = 50;
+    mood += amount;
+    d.moodModifiers.push({ label: 'Humble beginnings', value: amount });
+  }
   const bohio = sectState.buildings.bohio || 0;
   const diff = sectSystem.disciples.length - bohio;
   if (diff > 0) {
@@ -1685,6 +1698,7 @@ export function skipToNextNight() {
   const nightStart = NIGHT_START_SECONDS;
   if (sectSystem.scheduleIndex >= nightIndex) {
     sectSystem.seasonDay += 1;
+    sectSystem.totalDays += 1;
     document.dispatchEvent(
       new CustomEvent('day-passed', {
         detail: { day: sectSystem.seasonDay, season: sectSystem.seasonIndex }
