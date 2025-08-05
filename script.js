@@ -119,6 +119,7 @@ import {
 } from "./game/disciples.js";
 import { raidState, tickRaid } from './game/raids.js';
 import { getMoodEmoji } from './game/mood.js';
+import { getCombatStatProgress } from './game/combatStats.js';
 // developer debug tools
 import { init as initDebug } from "./game/debug.js";
 import { attachOrbGlow, enableOrbGlow, disableOrbGlow, updateOrbGlow, flashOrbGlow } from './game/orbGlow.js';
@@ -767,6 +768,21 @@ function updateDiscipleMoodDisplay() {
   }
 }
 
+function formatCombatStat(key, value) {
+  switch (key) {
+    case 'meleeDamage':
+      return `Melee Damage ${Math.round(value)}`;
+    case 'spellDamage':
+      return `Spell Damage ${Math.round(value)}%`;
+    case 'defense':
+      return `Defense ${Math.round(value)}`;
+    case 'magicDefense':
+      return `Magic Defense ${Math.round(value)}`;
+    default:
+      return `${key} ${Math.round(value)}`;
+  }
+}
+
 function updateDiscipleCombatStatsDisplay() {
   if (discipleOverlay && discipleOverlayActiveTab === 'combat') {
     const d = discipleOverlayData.disciple;
@@ -775,12 +791,17 @@ function updateDiscipleCombatStatsDisplay() {
     if (!section) return;
     const stats = section.querySelector('.combat-stats');
     if (stats) {
-      const atkInterval = (d.attackSpeed / 1000).toFixed(1);
-      const defense = Math.round(d.defense ?? 0);
-      stats.innerHTML =
-        `Damage ${Math.round(d.damage)}<br>` +
-        `Attack every ${atkInterval}s<br>` +
-        `Defense ${defense}`;
+      ['meleeDamage', 'spellDamage', 'defense', 'magicDefense'].forEach(key => {
+        const row = stats.querySelector(`.combat-stat[data-stat="${key}"]`);
+        if (!row) return;
+        const label = row.querySelector('.combat-stat-label');
+        if (label) label.textContent = formatCombatStat(key, d[key] ?? 0);
+        const fill = row.querySelector('.disciple-skill-progress-fill');
+        if (fill) {
+          const prog = getCombatStatProgress(d, key);
+          fill.style.width = `${Math.floor(prog.progress * 100)}%`;
+        }
+      });
     }
   }
 }
@@ -1006,15 +1027,26 @@ function startDiscipleMovement() {
 function buildDiscipleCombatStatsView(d) {
   const body = document.createElement('div');
   body.className = 'disciple-combat';
-  const atkInterval = (d.attackSpeed / 1000).toFixed(1);
-  const defense = Math.round(d.defense ?? 0);
-
   const stats = document.createElement('div');
   stats.className = 'combat-stats';
-  stats.innerHTML =
-    `Damage ${Math.round(d.damage)}<br>` +
-    `Attack every ${atkInterval}s<br>` +
-    `Defense ${defense}`;
+  ['meleeDamage', 'spellDamage', 'defense', 'magicDefense'].forEach(key => {
+    const row = document.createElement('div');
+    row.className = 'combat-stat';
+    row.dataset.stat = key;
+    const label = document.createElement('div');
+    label.className = 'combat-stat-label';
+    label.textContent = formatCombatStat(key, d[key] ?? 0);
+    const bar = document.createElement('div');
+    bar.className = 'disciple-skill-progress';
+    const fill = document.createElement('div');
+    fill.className = 'disciple-skill-progress-fill';
+    const prog = getCombatStatProgress(d, key);
+    fill.style.width = `${Math.floor(prog.progress * 100)}%`;
+    bar.appendChild(fill);
+    row.appendChild(label);
+    row.appendChild(bar);
+    stats.appendChild(row);
+  });
   body.appendChild(stats);
 
   return body;

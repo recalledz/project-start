@@ -110,6 +110,7 @@ export const sectState = {
   taskTimers: { gatherFruits: 0 },
   discipleProgress: {},
   discipleSkills: {},
+  discipleCombatStats: {},
   discipleConstructXp: {},
   discipleMetamorphosis: {},
   disciplePaths: {},

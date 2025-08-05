@@ -848,6 +848,16 @@ body.darkenshift-mode .tabsContainer button.active {
     font-size: 0.8rem;
 }
 
+.combat-stat {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 4px;
+}
+.combat-stat-label {
+    width: 140px;
+}
+
 .water-regen-overlay {
     flex-direction: column;
     gap: 8px;

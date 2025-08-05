@@ -1,7 +1,8 @@
 // Generic damage helper used by raid modules.
 import { randomBodyPart, applyInjury } from './injury.js';
+import { addCombatStatXp } from './combatStats.js';
 
-export function applyDamage(target, amount) {
+export function applyDamage(target, amount, type = 'physical') {
   let remaining = Math.round(amount);
   if (target.water > 0) {
     const absorbed = Math.min(target.water, remaining);
@@ -18,6 +19,10 @@ export function applyDamage(target, amount) {
   target.currentHp = Math.max(0, target.currentHp - remaining);
   if (Object.hasOwn(target, 'health')) {
     target.health = target.currentHp;
+  }
+  if (target && Object.hasOwn(target, 'id')) {
+    if (type === 'physical') addCombatStatXp(target, 'defense', 1);
+    if (type === 'spell') addCombatStatXp(target, 'magicDefense', 1);
   }
   return remaining;
 }
