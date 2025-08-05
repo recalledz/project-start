@@ -11,6 +11,7 @@ Each disciple evolves through frog-like spiritual metamorphosis. Accessible via 
 - **Current Metamorphosis Stage** label above the metamorphosis orb
 - **Glowing orb** with animated fill toward next breakthrough
 - **Progress bar** showing XP and % toward next phase
+- **Active Mastery Upgrades** listed beneath the assignment showing cumulative effects
 - **metamorphosis Stats**: method modifiers, room/building multipliers, season, humidity, and training bonuses
 - **Left panel disciple list** for selecting which coquí's progress to view
 
