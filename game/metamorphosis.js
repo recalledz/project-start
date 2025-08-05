@@ -5,7 +5,7 @@ import { METAMORPHOSIS_STAGE_REQ, TRAINING_NECTAR_RATE } from './constants.js';
 import { showPathOverlay } from './pathOverlay.js';
 import { applyStageBonuses } from './metamorphosisBonuses.js';
 import { ensureMeta, addMasteryXp, getMasteryProgress } from './metamorphMastery.js';
-import { getRandomUpgrades, applyUpgradeById } from './metamorphMasteryUpgrades.js';
+import { getRandomUpgrades, applyUpgradeById, UPGRADES } from './metamorphMasteryUpgrades.js';
 
 export const metamorphosisState = {
   requirement: METAMORPHOSIS_STAGE_REQ
@@ -23,6 +23,7 @@ let masteryBtn;
 let statsContainer;
 let statsPanel;
 let statsToggle;
+let upgradesContainer;
 let selectedDiscipleId = null;
 let breakthroughHandler;
 let masteryBtnHandler;
@@ -79,6 +80,7 @@ export function initMetamorphosis() {
       <button id="masteryLevelUpBtn" class="levelup-btn" style="display:none;">Level Up</button>
       <button id="breakthroughBtn" class="breakthrough-btn" style="display:none;">Breakthrough</button>
       <div class="assigned-disciple">Assigned to <span id="assignedDisciple">disciple 1</span></div>
+      <div id="metamorphosisUpgrades" class="meta-upgrades"></div>
     </div>
   `;
   progressFill = container.querySelector('#metamorphosisBarFill');
@@ -88,6 +90,7 @@ export function initMetamorphosis() {
   ringWrapper = container.querySelector('.metamorphosis-progress');
   breakthroughBtn = container.querySelector('#breakthroughBtn');
   masteryBtn = container.querySelector('#masteryLevelUpBtn');
+  upgradesContainer = container.querySelector('#metamorphosisUpgrades');
   if (breakthroughBtn) {
     breakthroughHandler = () => {
       if (selectedDiscipleId) breakthrough(selectedDiscipleId);
@@ -235,6 +238,7 @@ function renderMetamorphosis() {
   const label = container.querySelector('#assignedDisciple');
   if (label && d) label.textContent = d.name || `Disciple ${d.id}`;
 
+  renderUpgrades(meta);
   updateStats();
 }
 
@@ -333,6 +337,21 @@ function getCultivationSpeed(d) {
   return d.potential * d.potential * (d.metamorphSpeedMult || 1);
 }
 function getSeasonMultiplier() { return 1; }
+
+function renderUpgrades(meta) {
+  if (!upgradesContainer) return;
+  const list = meta?.upgrades || [];
+  if (list.length === 0) {
+    upgradesContainer.textContent = 'No upgrades';
+    return;
+  }
+  upgradesContainer.innerHTML = list
+    .map(id => {
+      const u = UPGRADES.find(x => x.id === id);
+      return `<div class="meta-upgrade">${u ? u.name : id}</div>`;
+    })
+    .join('');
+}
 
 function updateStats() {
   if (!statsContainer || !selectedDiscipleId) return;

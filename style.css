@@ -2485,11 +2485,20 @@ body.darkenshift-mode .tabsContainer button.active {
 }
 .metamorphosis-room .progress-area,
 .metamorphosis-room .assigned-disciple,
+.metamorphosis-room .meta-upgrades,
 .metamorphosis-room .metamorphosis-stage {
     background: rgba(252, 236, 194, 0.5);
     padding: 4px 8px;
     border-radius: 6px;
     margin-bottom: 8px;
+}
+.metamorphosis-room .meta-upgrades {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.meta-upgrades .meta-upgrade {
+    font-size: 0.9em;
 }
 .metamorphosis-progress {
     width: 200px;
