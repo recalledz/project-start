@@ -2496,6 +2496,11 @@ body.darkenshift-mode .tabsContainer button.active {
     height: 200px;
     overflow: visible;
 }
+#metamorphosisTabContent .metamorphosis-progress .progress-ring {
+    left: 50%;
+    top: 50%;
+    transform: translate(-96px, -96px) rotate(-90deg) scale(1.2);
+}
 #metamorphosisRing {
     filter: drop-shadow(0 0 8px rgba(188,164,255,0.7));
     stroke: url(#metaRingGradient);

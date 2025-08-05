@@ -14,6 +14,7 @@ export const metamorphosisState = {
 let container;
 let progressFill;
 let progressText;
+let masteryText;
 let ringFill;
 let masteryRing;
 let ringWrapper;
@@ -64,16 +65,17 @@ export function initMetamorphosis() {
         <div class="metamorphosis-figure">
           <svg id="metamorphosisDiagram" viewBox="0 0 400 400" width="100%" height="100%">
             <defs>
-              <clipPath id="bodyShapeClip"><circle cx="200" cy="180" r="60" /></clipPath>
+              <clipPath id="bodyShapeClip"><circle cx="200" cy="200" r="60" /></clipPath>
             </defs>
-            <circle cx="200" cy="180" r="60" fill="rgba(0,0,0,0.3)" stroke="#888" stroke-width="2" />
-            <circle id="metamorphosisHalo" cx="200" cy="180" r="70" fill="none" stroke="gold" stroke-width="4" opacity="0" />
-            <rect id="bodyFill" x="140" y="240" width="120" height="0" fill="rgba(255,255,255,0.4)" clip-path="url(#bodyShapeClip)" />
+            <circle cx="200" cy="200" r="60" fill="rgba(0,0,0,0.3)" stroke="#888" stroke-width="2" />
+            <circle id="metamorphosisHalo" cx="200" cy="200" r="70" fill="none" stroke="gold" stroke-width="4" opacity="0" />
+            <rect id="bodyFill" x="140" y="260" width="120" height="0" fill="rgba(255,255,255,0.4)" clip-path="url(#bodyShapeClip)" />
           </svg>
         </div>
       </div>
       <div class="progress-area">
         <div id="metamorphosisProgressText" class="progress-text"></div>
+        <div id="masteryProgressText" class="progress-text"></div>
         <div class="progress-bar"><div id="metamorphosisBarFill" class="progress-fill"></div></div>
       </div>
       <button id="masteryLevelUpBtn" class="levelup-btn" style="display:none;">Level Up</button>
@@ -83,6 +85,7 @@ export function initMetamorphosis() {
   `;
   progressFill = container.querySelector('#metamorphosisBarFill');
   progressText = container.querySelector('#metamorphosisProgressText');
+  masteryText = container.querySelector('#masteryProgressText');
   ringFill = container.querySelector('#metamorphosisRing');
   masteryRing = container.querySelector('#metamorphMasteryRing');
   ringWrapper = container.querySelector('.metamorphosis-progress');
@@ -200,7 +203,7 @@ function renderMetamorphosis() {
     rect.setAttribute('height', h);
   };
 
-  updateRect('#bodyFill', 200, 180, 60, coreFill);
+  updateRect('#bodyFill', 200, 200, 60, coreFill);
 
   if (ringFill) {
     ringFill.style.strokeDasharray = RING_CIRCUMFERENCE;
@@ -218,6 +221,8 @@ function renderMetamorphosis() {
   }
 
   if (progressText) progressText.textContent = `${Math.floor(meta.xp)}/${metamorphosisState.requirement}`;
+  if (masteryText)
+    masteryText.textContent = `${Math.floor(masteryProg.progress * masteryProg.next)}/${masteryProg.next}`;
   if (progressFill) progressFill.style.width = `${coreFill * 100}%`;
   const stageLabel = container.querySelector('#metamorphosisStageLabel');
   if (stageLabel) stageLabel.textContent = STAGE_NAMES[meta.stage] || 'Unknown';
