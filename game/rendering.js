@@ -29,3 +29,18 @@ export function showRaidDamageFloat(el, amount, isRaider = false) {
   );
   setTimeout(() => dmg.remove(), 3000);
 }
+
+// Display a floating '+ X' text and glow when a disciple levels a combat stat.
+export function showCombatLevelUp(d, text, amount = 1) {
+  if (typeof document === 'undefined') return;
+  const el = document.querySelector(`.sect-disciple[data-disciple-id="${d.id}"]`);
+  if (!el) return;
+  const gain = document.createElement('div');
+  gain.classList.add('levelup-float');
+  gain.textContent = `+${amount} ${text}`;
+  el.appendChild(gain);
+  gain.addEventListener('animationend', () => gain.remove(), { once: true });
+  setTimeout(() => gain.remove(), 5000);
+  el.classList.add('glow-notify');
+  setTimeout(() => el.classList.remove('glow-notify'), 5000);
+}

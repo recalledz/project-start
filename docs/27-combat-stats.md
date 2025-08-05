@@ -6,11 +6,14 @@ Disciples track four combat statistics that improve through battle:
 | --- | --- | --- |
 | **Melee Damage** | 1 flat damage | \(\frac{\text{Damage Dealt}}{\text{Target Max HP}}\) × 10 |
 | **Spell Damage** | 0% additive | \(\frac{\text{Damage Dealt}}{\text{Target Max HP}}\) × 10 |
-| **Defense** | 2 flat damage reduced | \(\frac{\text{Damage Taken}}{\text{Max Water}}\) × 10 |
-| **Magic Defense** | 2 flat damage reduced | \(\frac{\text{Damage Taken}}{\text{Max Water}}\) × 10 |
+| **Defense** | 2 flat damage reduced | \(\frac{\text{Damage Received}}{\text{Max Water}}\) × 10 |
+| **Magic Defense** | 2 flat damage reduced | \(\frac{\text{Damage Received}}{\text{Max Water}}\) × 10 |
 
 Each stat has an experience bar shown in the disciple combat view. When the
-bar fills, the stat level increases, raising the displayed value.
+bar fills, the stat level increases, raising the displayed value. A '+1 Stat'
+floating text and golden glow highlight the disciple for five seconds when a
+level is gained. Even blocked or absorbed hits contribute Defense XP based on
+the incoming damage.
 
 ## XP Requirement per Level
 

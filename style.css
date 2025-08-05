@@ -1877,6 +1877,20 @@ body.darkenshift-mode .tabsContainer button.active {
     color: white;
 }
 
+.levelup-float {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: gold;
+    font-weight: bold;
+    pointer-events: none;
+    z-index: 1;
+    text-shadow: 0 0 2px #000;
+    font-size: 1.4em;
+    animation: damage-float 5s ease-out forwards;
+}
+
 @keyframes damage-float {
     from {
         opacity: 1;
@@ -2087,7 +2101,7 @@ body.darkenshift-mode .tabsContainer button.active {
 }
 
 .glow-notify {
-    animation: glow-pulse 1s infinite alternate;
+    animation: glow-pulse 1s ease-in-out 0s 5 alternate;
 }
 
 /* Distinct look for the Worlds menu container */
